@@ -1,0 +1,564 @@
+import 'package:flutter/material.dart';
+import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/models/devices/device_implementation.dart';
+import 'package:the_solar_app/screens/configuration/battery_soc_screen.dart';
+import 'package:the_solar_app/screens/configuration/power_limit_screen.dart';
+import 'package:the_solar_app/screens/configuration/power_screen.dart';
+import 'package:the_solar_app/utils/globals.dart';
+import 'package:the_solar_app/utils/map_utils.dart';
+import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/widgets/zendure_battery_pack_list_widget.dart';
+import '../../../generic_rendering/device_control_item.dart';
+import '../../../generic_rendering/device_custom_section.dart';
+import '../../../generic_rendering/device_data_field.dart';
+import '../../../generic_rendering/device_menu_item.dart';
+
+/// Shared implementation for all Zendure devices (Bluetooth and WiFi)
+///
+/// Contains menu items, data fields, control items, and command handling
+/// that is common between Bluetooth and WiFi variants.
+class ZendureDeviceImplementation extends DeviceImplementation {
+  @override
+  List<DeviceMenuItem> getMenuItems() {
+    return [
+      DeviceMenuItem(
+        name: 'Leistungseinstellungen',
+        subtitle: 'Aktuelle Leistungsabgabe/aufnahme einstellen',
+        icon: Icons.power_settings_new,
+        iconColor: Colors.blue,
+        onTap: (context, device) async {
+          try {
+            // Fetch current properties from device
+            final properties = device.data["data"]?["properties"] ?? {};
+
+            // Extract limits from properties
+            final inputLimit = properties['inputLimit'] as int? ?? 0;
+            final outputLimit = properties['outputLimit'] as int? ?? 0;
+
+            // Define max limits (can be adjusted based on device specs)
+            const maxInputLimit = 1200; // Example: 1200W max
+            const maxOutputLimit = 1200; // Example: 1200W max
+
+            // Navigate to PowerLimitScreen
+            if (!context.mounted) return;
+
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PowerScreen(
+                    device: device,
+                    currentInputLimit: inputLimit,
+                    currentOutputLimit: outputLimit,
+                    maxInputLimit: maxInputLimit,
+                    maxOutputLimit: maxOutputLimit,
+                    currentLimitMode: properties['acMode'] == 1
+                        ? LimitMode.input
+                        : LimitMode.output),
+              ),
+            );
+
+            if (result == true && context.mounted) {
+              MessageUtils.showSuccess(
+                  context, 'Leistungslimit erfolgreich aktualisiert');
+            }
+          } catch (e) {
+            MessageUtils.showError(
+                context, 'Konnte Gerätedaten nicht abrufen: $e');
+          }
+        },
+      ),
+      DeviceMenuItem(
+        name: 'Batterie-Limits',
+        subtitle: 'Min/Max SOC einstellen',
+        icon: Icons.battery_std,
+        iconColor: Colors.orange,
+        onTap: (context, device) async {
+          try {
+            // Fetch current properties from device
+            final properties = device.data["data"]?["properties"] ?? {};
+
+            // Extract SOC values from properties (convert from 0.1% to %)
+            final minSoc =
+                (properties['minSoc'] as int? ?? 200) ~/ 10; // Default 20%
+            final socSet =
+                (properties['socSet'] as int? ?? 900) ~/ 10; // Default 90%
+
+            // Define ranges for SOC sliders
+            const minSocRangeMin = 5; // Minimum SOC can be 5-40%
+            const minSocRangeMax = 40;
+            const maxSocRangeMin = 80; // Maximum SOC can be 80-95%
+            const maxSocRangeMax = 95;
+
+            // Navigate to BatterySocScreen
+            if (!context.mounted) return;
+
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BatterySocScreen(
+                  device: device,
+                  currentMinSoc: minSoc,
+                  currentMaxSoc: socSet,
+                  minSocRangeMin: minSocRangeMin,
+                  minSocRangeMax: minSocRangeMax,
+                  maxSocRangeMin: maxSocRangeMin,
+                  maxSocRangeMax: maxSocRangeMax,
+                ),
+              ),
+            );
+
+            if (result == true && context.mounted) {
+              MessageUtils.showSuccess(
+                  context, 'Batterie-Limits erfolgreich aktualisiert');
+            }
+          } catch (e) {
+            MessageUtils.showError(
+                context, 'Konnte Gerätedaten nicht abrufen: $e');
+          }
+        },
+      ),
+      DeviceMenuItem(
+        name: 'Erweiterte Leistungseinstellungen',
+        subtitle: 'Wechselrichter, Netzeinspeisung & Standard',
+        icon: Icons.settings_suggest,
+        iconColor: Colors.purple,
+        onTap: (context, device) async {
+          try {
+            // Fetch current properties from device
+            final properties = device.data["data"]?["properties"] ?? {};
+
+            // Extract configuration values from properties
+            final inverseMaxPower = properties['inverseMaxPower'] as int? ?? 800;
+            final gridReverse = properties['gridReverse'] as int? ?? 1;
+            final gridStandard = properties['gridStandard'] as int? ?? 0;
+
+            // Define max limit for inverse max power
+            const maxInverseMaxPower = 1200; // Example: 1200W max
+
+            // Navigate to PowerLimitScreen
+            if (!context.mounted) return;
+
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PowerLimitScreen(
+                  device: device,
+                  currentInverseMaxPower: inverseMaxPower,
+                  maxInverseMaxPower: maxInverseMaxPower,
+                  currentGridReverse: gridReverse,
+                  currentGridStandard: gridStandard,
+                ),
+              ),
+            );
+
+            if (result == true && context.mounted) {
+              MessageUtils.showSuccess(
+                  context, 'Leistungseinstellungen erfolgreich aktualisiert');
+            }
+          } catch (e) {
+            MessageUtils.showError(
+                context, 'Konnte Gerätedaten nicht abrufen: $e');
+          }
+        },
+      ),
+    ];
+  }
+
+  @override
+  List<DeviceControlItem> getControlItems() {
+    return [/*
+      //TODO check  if working
+      // Power on/off control
+      DeviceControlItem(
+        name: 'Wechselrichter',
+        type: ControlType.switchToggle,
+        icon: Icons.power_settings_new,
+        valueExtractor: (data) {
+          final status = MapUtils.OM(data, ['data', 'limit_status']);
+          if (status == null) return false;
+          final statusValue = int.tryParse(status.toString());
+          return statusValue == 1; // 1 = on, 2 = off
+        },
+        onChanged: (context, device, newValue) async {
+          // Show confirmation dialog only when turning OFF
+          if (newValue == false) {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                title: const Text('Wechselrichter ausschalten'),
+                content: const Text(
+                    'Sind Sie sicher, dass Sie den Wechselrichter ausschalten möchten?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                    child: const Text('Abbrechen'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                    child: const Text('Ausschalten'),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirmed != true) return;
+          }
+
+          await DialogUtils.executeWithLoading(
+            context,
+            loadingMessage: newValue
+                ? 'Schalte Wechselrichter ein...'
+                : 'Schalte Wechselrichter aus...',
+            operation: () async {
+              await device.sendCommand(COMMAND_SET_MAIN_POWER, {
+                'on': newValue,
+              });
+
+              // Update local data after successful toggle
+              if (device.data.containsKey('data')) {
+                device.data['data']!['limit_status'] = newValue ? 1 : 2;
+                device.emitData(device.data['data']!);
+              }
+            },
+            showErrorDialog: true,
+          );
+        },
+      ),
+   */ ];
+  }
+
+  @override
+  List<DeviceDataField> getDataFields() {
+    return [
+      DeviceDataField(
+        name: 'Solar Input',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarInputPower']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'AC Mode',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state = MapUtils.OM(data, ['data', 'properties', 'acMode']);
+          if (state == 1) return 'from Grid';
+          if (state == 2) return 'to Grid';
+          return 'Deaktivated';
+        },
+        icon: Icons.power,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Output Home',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'outputHomePower']),
+        icon: Icons.home,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Batteriestand',
+        type: DataFieldType.percentage,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'electricLevel']),
+        icon: Icons.battery_charging_full,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Output Limit',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'outputLimit']),
+        icon: Icons.power,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Pack Input',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'packInputPower']),
+        icon: Icons.arrow_downward,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Output Pack',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'outputPackPower']),
+        icon: Icons.arrow_upward,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Pack State',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state = MapUtils.OM(data, ['data', 'properties', 'packState']);
+          if (state == 0) return 'Idle';
+          if (state == 1) return 'Charging';
+          if (state == 2) return 'Discharging';
+          return state?.toString() ?? '-';
+        },
+        icon: Icons.info_outline,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Pack Anzahl',
+        type: DataFieldType.none,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'packNum']),
+        icon: Icons.battery_std,
+        expertMode: false,
+      ),
+      // Additional properties from device
+      DeviceDataField(
+        name: 'Input Limit',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'inputLimit']),
+        icon: Icons.input,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'SOC Set',
+        type: DataFieldType.percentage,
+        valueExtractor: (data) {
+          final socSet = MapUtils.OM(data, ['data', 'properties', 'socSet']);
+          return socSet != null
+              ? (socSet as num) / 10.0
+              : null; // Convert from 0.1% to %
+        },
+        icon: Icons.battery_charging_full,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Min SOC',
+        type: DataFieldType.percentage,
+        valueExtractor: (data) {
+          final minSoc = MapUtils.OM(data, ['data', 'properties', 'minSoc']);
+          return minSoc != null
+              ? (minSoc as num) / 10.0
+              : null; // Convert from 0.1% to %
+        },
+        icon: Icons.battery_alert,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Grid Reverse',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state =
+              MapUtils.OM(data, ['data', 'properties', 'gridReverse']);
+          return state == 1 ? 'Enabled' : 'Disabled';
+        },
+        icon: Icons.sync_alt,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Max Inverter Power',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'inverseMaxPower']),
+        icon: Icons.power_settings_new,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Lamp Switch',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state = MapUtils.OM(data, ['data', 'properties', 'lampSwitch']);
+          return state == 1 ? 'On' : 'Off';
+        },
+        icon: Icons.lightbulb,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Grid Off Mode',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state =
+              MapUtils.OM(data, ['data', 'properties', 'gridOffMode']);
+          return state == 1 ? 'Enabled' : 'Disabled';
+        },
+        icon: Icons.power_off,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'IOT State',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state = MapUtils.OM(data, ['data', 'properties', 'IOTState']);
+          if (state == 0) return 'Disconnected';
+          if (state == 1) return 'Connecting';
+          if (state == 2) return 'Connected';
+          return state?.toString() ?? '-';
+        },
+        icon: Icons.cloud,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Fan Mode',
+        type: DataFieldType.none,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'Fanmode']),
+        icon: Icons.air,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Fan Speed',
+        type: DataFieldType.none,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'Fanspeed']),
+        icon: Icons.speed,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Smart Mode',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final state = MapUtils.OM(data, ['data', 'properties', 'smartMode']);
+          return state == 1 ? 'Enabled' : 'Disabled';
+        },
+        icon: Icons.smart_toy,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Charge Max Limit',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'chargeMaxLimit']),
+        icon: Icons.battery_charging_full,
+        expertMode: false,
+      ),
+      DeviceDataField(
+        name: 'Timestamp',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final ts = MapUtils.OM(data, ['data', 'properties', 'ts']);
+          if (ts != null) {
+            final date =
+                DateTime.fromMillisecondsSinceEpoch((ts as int) * 1000);
+            return '${date.day}.${date.month}.${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+          }
+          return null;
+        },
+        icon: Icons.access_time,
+        expertMode: true,
+      ),
+      DeviceDataField(
+        name: 'Timezone',
+        type: DataFieldType.none,
+        valueExtractor: (data) {
+          final zone = MapUtils.OM(data, ['data', 'properties', 'tsZone']);
+          return zone != null ? 'GMT+$zone' : null;
+        },
+        icon: Icons.public,
+        expertMode: true,
+      ),
+    ];
+  }
+
+  @override
+  List<DeviceCustomSection> getCustomSections() {
+    return [
+      DeviceCustomSection(
+        title: 'Batteriepacks',
+        position: CustomSectionPosition.afterLiveData,
+        requiresConnection: true,
+        builder: (context, device, data) {
+          // Read expert mode directly from Globals instead of data map
+          return ZendureBatteryPackListWidget(
+            data: data,
+            expertMode: Globals.expertMode,
+          );
+        },
+      ),
+    ];
+  }
+
+  @override
+  IconData getDeviceIcon() {
+    return Icons.battery_charging_full;
+  }
+
+  @override
+  String getFetchCommand() {
+    return 'getData'; // Zendure devices don't use named commands
+  }
+
+  @override
+  Future<Map<String, dynamic>?> sendCommand(
+    dynamic connectionService,
+    String command,
+    Map<String, dynamic> params,
+  ) async {
+    // Common command handling for both Bluetooth and WiFi
+    if (command == COMMAND_SET_LIMIT) {
+      var props = <String, dynamic>{};
+      //i know is same but if i rename variable and command interface it will change
+      if (params["inputLimit"] != null) {
+        props["inputLimit"] = params["inputLimit"];
+      }
+      if (params["outputLimit"] != null) {
+        props["outputLimit"] = params["outputLimit"];
+      }
+      if (params["acMode"] != null) {
+        props["acMode"] = params["acMode"];
+      }
+
+      if (props.isEmpty) {
+        throw Exception("props to send are empty no limit set");
+      }
+
+      // Delegate to service (works for both Bluetooth and WiFi)
+      await (connectionService as dynamic).sendPropertiesCommand(params);
+    } else if (command == COMMAND_BATTERY_LIMITS) {
+      var props = <String, dynamic>{};
+
+      // Extract battery limit parameters
+      if (params["minSoc"] != null) {
+        props["minSoc"] = params["minSoc"] * 10;
+      }
+      if (params["maxSoc"] != null) {
+        props["socSet"] = params["maxSoc"] * 10;
+      }
+
+      if (props.isEmpty) {
+        throw Exception("props to send are empty, no battery limits set");
+      }
+
+      await (connectionService as dynamic).sendPropertiesCommand(props);
+    } else if (command == COMMAND_SET_POWER_CONFIG) {
+      var props = <String, dynamic>{};
+
+      // Extract power configuration parameters
+      if (params["inverseMaxPower"] != null) {
+        props["inverseMaxPower"] = params["inverseMaxPower"];
+      }
+      if (params["gridReverse"] != null) {
+        props["gridReverse"] = params["gridReverse"];
+      }
+      if (params["gridStandard"] != null) {
+        props["gridStandard"] = params["gridStandard"];
+      }
+
+      if (props.isEmpty) {
+        throw Exception("props to send are empty, no power config set");
+      }
+
+      await connectionService.sendPropertiesCommand(props);
+    } /*else if (command == COMMAND_SET_MAIN_POWER) { //TODO check if working
+      var props = <String, dynamic>{};
+
+      props["hubState"] = (params["on"] as bool?) == true ? 1 : 0;
+
+      await (connectionService as dynamic).sendCommand(props);
+    } */else {
+      throw UnimplementedError(
+        'Command type not yet implemented: $command',
+      );
+    }
+    return null; //TODO get response
+  }
+}

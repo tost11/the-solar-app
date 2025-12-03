@@ -1,0 +1,110 @@
+import 'dart:io' show Platform, NetworkInterface, InternetAddressType;
+import 'package:flutter/foundation.dart';
+
+/// Network utility functions for interface detection and validation
+class NetUtils {
+  /// Check if an IP address is in a private network range (RFC1918)
+  ///
+  /// Returns true if IP is in one of these ranges:
+  /// - 10.0.0.0/8 (10.0.0.0 - 10.255.255.255)
+  /// - 172.16.0.0/12 (172.16.0.0 - 172.31.255.255)
+  /// - 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)
+  static bool isPrivateIP(String ipAddress) {
+    final parts = ipAddress.split('.');
+    if (parts.length != 4) return false;
+
+    try {
+      final octet1 = int.parse(parts[0]);
+      final octet2 = int.parse(parts[1]);
+
+      // Check 10.0.0.0/8 range
+      if (octet1 == 10) {
+        return true;
+      }
+
+      // Check 172.16.0.0/12 range (172.16.0.0 - 172.31.255.255)
+      if (octet1 == 172 && octet2 >= 16 && octet2 <= 31) {
+        return true;
+      }
+
+      // Check 192.168.0.0/16 range
+      if (octet1 == 192 && octet2 == 168) {
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      return false; // Invalid IP format
+    }
+  }
+
+  /// Get all local IP addresses from WiFi and Ethernet interfaces
+  ///
+  /// Returns list of IP addresses from active WiFi/Ethernet interfaces
+  /// Excludes loopback, mobile, VPN, and other interface types
+  ///
+  /// Returns empty list if only mobile data is available
+  static Future<List<String>> getLocalNetworkIPs() async {
+    final List<String> localIPs = [];
+
+    try {
+
+      // Get all network interfaces
+      final interfaces = await NetworkInterface.list(
+        includeLoopback: false,
+        type: InternetAddressType.IPv4,
+      );
+
+      for (final interface in interfaces) {
+        // Filter by interface name patterns (platform-specific)
+        final name = interface.name.toLowerCase();
+
+        // Common WiFi interface names: wlan, wifi, en0 (macOS), wlp (Linux)
+        // Common Ethernet names: eth, en1, enp (Linux), em (BSD)
+        final isWiFi = name.contains('wlan') ||
+                       name.contains('wifi') ||
+                       (Platform.isMacOS && name == 'en0') ||
+                       name.startsWith('wlp');
+
+        final isEthernet = name.contains('eth') ||
+                           name.startsWith('enp') ||
+                           name.startsWith('em') ||
+                           (Platform.isMacOS && name == 'en1') ||
+                           name.contains('eno');
+
+        // Only include WiFi or Ethernet interfaces
+        if (isWiFi || isEthernet) {
+          for (final addr in interface.addresses) {
+            if (addr.type == InternetAddressType.IPv4) {
+              debugPrint('Found ${isWiFi ? "WiFi" : "Ethernet"} IP: ${addr.address} on ${interface.name}');
+              localIPs.add(addr.address);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getting local network IPs: $e');
+    }
+
+    return localIPs;
+  }
+
+  /// Extract unique C-class subnets from list of IP addresses
+  ///
+  /// Returns list of subnet prefixes (e.g., ["192.168.1", "192.168.50"])
+  /// Only returns private IP subnets
+  ///
+  /// Requires ipToCSubnet function from lan_scanner package
+  static List<String> extractUniqueSubnets(List<String> ipAddresses, String Function(String) ipToCSubnet) {
+    final Set<String> subnets = {};
+
+    for (final ip in ipAddresses) {
+      if (isPrivateIP(ip)) {
+        final subnet = ipToCSubnet(ip);
+        subnets.add(subnet);
+      }
+    }
+
+    return subnets.toList();
+  }
+}

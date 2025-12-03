@@ -1,0 +1,26 @@
+const String COMMAND_FETCH_DATA = "fetch-data";
+const String COMMAND_FETCH_DEVICE_INFO = "fetch-device-info";
+const String COMMAND_SET_LIMIT = "set-limit";
+const String COMMAND_SET_WIFI = "set-wifi";
+const String COMMAND_SET_AP_CONFIG = "set-ap-config";
+const String COMMAND_FETCH_AP_CONFIG = "fetch-ap-config";
+const String COMMAND_BATTERY_LIMITS = "set-battery-limits";
+const String COMMAND_SET_POWER_CONFIG = "set-power-config";
+const String COMMAND_FETCH_WIFI_CONFIG = "fetch-wifi-config";
+const String COMMAND_FETCH_SYS_CONFIG = "fetch-sys-config";
+const String COMMAND_CONFIG_PORT = "config-port";
+const String COMMAND_RESTART = "restart";
+const String COMMAND_SET_ONLINE_MONITORING = "set-online-monitoring";
+const String COMMAND_FETCH_ONLINE_MONITORING = "fetch-online-monitoring";
+const String COMMAND_SET_MAIN_POWER = "set-main-power";
+const String COMMAND_SET_GENERAL_SETTING = "set-general-setting";
+const String COMMAND_SET_AUTH = "set-auth";
+const String COMMAND_FETCH_AUTH = "fetch-auth";
+const String COMMAND_SET_MQTT = "set-mqtt";
+const String COMMAND_SET_WIFI_MQTT = "set-wifi-mqtt";
+const String COMMAND_FETCH_MQTT = "fetch-mqtt";
+
+const String GENERAL_SETTGINS_ECO_MODE = "eco";
+const String GENERAL_SETTINGS_DISCOVERABLE = "discoverable";
+const String GENERAL_SETTINGS_DEBUG_MQTT = "debug_mqtt";
+const String GENERAL_SETTINGS_DEBUG_WEBSOCKET = "debug_websocket";
