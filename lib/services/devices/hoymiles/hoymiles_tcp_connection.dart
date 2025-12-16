@@ -207,10 +207,15 @@ class HoymilesTcpConnection {
       debugPrint('[HoymilesTcp] Received response for sequence: $sequence');
 
       // Find matching pending request
-      final pending = _pendingRequests[sequence];
+      var pending = _pendingRequests[sequence];
       if (pending == null) {
-        debugPrint('[HoymilesTcp] No pending request for sequence $sequence (may have timed out)');
-        return;
+        // Find matching pending request
+        _pendingRequests[sequence] = _pendingRequests[sequence-1]!;
+        pending = _pendingRequests[sequence];
+        if (pending == null) {
+          debugPrint('[HoymilesTcp] No pending request for sequence $sequence (may have timed out)');
+          return;
+        }
       }
 
       // Complete the completer with parsed data

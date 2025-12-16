@@ -17,6 +17,7 @@ class NetUtils {
       final octet1 = int.parse(parts[0]);
       final octet2 = int.parse(parts[1]);
 
+      //TODO add ui to enable this is more likely to be docker net or something else
       // Check 10.0.0.0/8 range
       if (octet1 == 10) {
         return true;
@@ -59,6 +60,8 @@ class NetUtils {
         // Filter by interface name patterns (platform-specific)
         final name = interface.name.toLowerCase();
 
+        debugPrint("Found network interfaces: $name");
+
         // Common WiFi interface names: wlan, wifi, en0 (macOS), wlp (Linux)
         // Common Ethernet names: eth, en1, enp (Linux), em (BSD)
         final isWiFi = name.contains('wlan') ||
@@ -72,8 +75,17 @@ class NetUtils {
                            (Platform.isMacOS && name == 'en1') ||
                            name.contains('eno');
 
+        bool isUnknownButLocal = false;
+        for (final addr in interface.addresses) {
+          if (addr.type == InternetAddressType.IPv4) {
+            if(NetUtils.isPrivateIP(addr.address)){
+              isUnknownButLocal = true;
+            }
+          }
+        }
+
         // Only include WiFi or Ethernet interfaces
-        if (isWiFi || isEthernet) {
+        if (isWiFi || isEthernet || isUnknownButLocal) {
           for (final addr in interface.addresses) {
             if (addr.type == InternetAddressType.IPv4) {
               debugPrint('Found ${isWiFi ? "WiFi" : "Ethernet"} IP: ${addr.address} on ${interface.name}');

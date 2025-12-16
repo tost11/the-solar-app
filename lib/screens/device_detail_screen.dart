@@ -6,17 +6,26 @@ import '../models/devices/generic_rendering/device_category_config.dart';
 import '../models/devices/generic_rendering/device_control_item.dart';
 import '../models/devices/generic_rendering/device_custom_section.dart';
 import '../models/devices/generic_rendering/device_data_field.dart';
+import '../models/devices/generic_rendering/device_menu_item_context.dart';
 import '../services/device_storage_service.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
 import '../utils/globals.dart';
 import '../utils/message_utils.dart';
 import 'device_settings_screen.dart';
+import 'device_graph_screen.dart';
 
 class DeviceDetailScreen extends StatefulWidget {
   final Device device;
+  final bool skipAutoConnect;
+  final String? systemId;
 
-  const DeviceDetailScreen({super.key, required this.device});
+  const DeviceDetailScreen({
+    super.key,
+    required this.device,
+    this.skipAutoConnect = false,
+    this.systemId,
+  });
 
   @override
   State<DeviceDetailScreen> createState() => _DeviceDetailScreenState();
@@ -38,7 +47,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   void initState() {
     super.initState();
     _setupServiceListeners();
-    _tryAutoConnect();
+
+    // Only auto-connect if not skipped (e.g., when coming from system view with existing connection)
+    if (!widget.skipAutoConnect) {
+      _tryAutoConnect();
+    }
 
     // Add listener for expert mode changes
     Globals.expertModeNotifier.addListener(_onExpertModeChanged);
@@ -61,7 +74,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     _statusSubscription?.cancel();
     _dataSubscription?.cancel();
     _errorSubscription?.cancel();
-    widget.device.getServiceConnection()?.dispose();
+
+    // Only disconnect if we initiated the connection
+    // If skipAutoConnect was true, the parent screen owns the connection
+    if (!widget.skipAutoConnect) {
+      widget.device.getServiceConnection()?.dispose();
+    }
+
     super.dispose();
   }
 
@@ -107,7 +126,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         for (var result in results) {
           //debugPrint("compare: ${widget.device.deviceSn} found: ${result.device.remoteId.toString()}");
           if (result.device.remoteId.toString() == widget.device.deviceSn) {
-            debugPrint("id found");
             foundDevice = result.device;
             break;
           }
@@ -187,7 +205,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                           enabled: !isDisabled,
                           onTap: isDisabled ? null : () {
                             Navigator.pop(context);
-                            menuItem.onTap(screenContext, widget.device);
+                            menuItem.onTap(
+                              DeviceMenuItemContext(
+                                context: screenContext,
+                                device: widget.device,
+                                extraParameters: {'systemId': widget.systemId},
+                              ),
+                            );
                           },
                         );
                       }),
@@ -724,6 +748,24 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         appBar: AppBarWidget(
           title: "Geräteansicht",
           actions: [
+            // Graph icon button (visible when connected and has time series fields)
+            if (widget.device.timeSeriesFields.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.show_chart),
+                onPressed: isConnected
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DeviceGraphScreen(
+                              device: widget.device,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+                tooltip: 'Live-Diagramme',
+              ),
             // Functions menu icon (always visible, disabled when not connected)
             IconButton(
               icon: const Icon(Icons.app_registration),

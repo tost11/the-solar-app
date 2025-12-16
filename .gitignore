@@ -43,6 +43,29 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android temporary and build files
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/.cxx/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/gradle/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Linux temporary and build files
+/linux/.cxx/
+/linux/build/
+/linux/flutter/ephemeral/
+/linux/cmake-build-*/
+*.so
+*.a
+
 # iOS/XCode related
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
@@ -84,7 +107,5 @@ lib/generated_plugin_registrant.dart
 
 windows
 macos
-linux
 ios
-android
 web

@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
 
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/models/shelly_script.dart';
 import 'package:the_solar_app/screens/configuration/authentication_screen.dart';
 import 'package:the_solar_app/screens/configuration/general_settings_screen.dart';
 import 'package:the_solar_app/screens/configuration/port_configuration_screen.dart';
+import 'package:the_solar_app/screens/configuration/shelly_scripts/shelly_scripts_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_ap_configuration_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_service.dart';
+import 'package:the_solar_app/services/devices/shelly/shelly_bluetooth_service.dart';
+import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
@@ -19,6 +23,9 @@ import '../../../generic_rendering/general_setting_item.dart';
 
 class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
+  static const int CODE_CHUNK_LENGTH = 1000;
+  static const int CODE_CHUNK_LENGTH_WIFI = 4000;
+
   @override
   List<DeviceMenuItem> getMenuItems(){
     return [
@@ -27,7 +34,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         subtitle: 'Grundlegende Geräteeinstellungen verwalten',
         icon: Icons.settings,
         iconColor: Colors.purple,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final resp = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade Gerätedaten...',
@@ -57,7 +67,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         subtitle: 'Netzwerkverbindung einrichten',
         icon: Icons.wifi,
         iconColor: Colors.green,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final resp = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade aktuelle Konfiguration...',
@@ -95,7 +108,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         subtitle: 'WiFi Access Point einrichten',
         icon: Icons.router,
         iconColor: Colors.blue,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final resp = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade Gerätedaten...',
@@ -131,7 +147,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         subtitle: 'RPC UDP Port konfigurieren',
         icon: Icons.settings_ethernet,
         iconColor: Colors.purple,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final resp = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade Systemkonfiguration...',
@@ -167,7 +186,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         subtitle: 'Startet das Gerät neu',
         icon: Icons.restart_alt,
         iconColor: Colors.orange,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           // Show confirmation dialog
           final confirmed = await showDialog<bool>(
             context: context,
@@ -208,7 +230,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         subtitle: 'Benutzername und Passwort einrichten',
         icon: Icons.lock,
         iconColor: Colors.orange,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade Gerätedaten...',
@@ -227,6 +252,49 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
                 currentPassword: null,
                 currentEnabled: MapUtils.OMas(device.data,["config","auth_en"],false),
                 usernameEditable: false,
+              ),
+            ),
+          );
+        },
+      ),
+      DeviceMenuItem(
+        name: 'Automatisierung konfigurieren',
+        subtitle: 'Scripts und Automationen verwalten',
+        icon: Icons.auto_awesome,
+        iconColor: Colors.teal,
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+          final systemId = ctx.systemId;
+
+          final resp = await DialogUtils.executeWithLoading(
+            context,
+            loadingMessage: 'Lade Scripts...',
+            operation: () => device.sendCommand(COMMAND_FETCH_SCRIPTS, {}),
+            onError: (e) => MessageUtils.showError(context, 'Konnte Scripts nicht laden: $e'),
+          );
+
+          if (resp == null || !context.mounted) return;
+
+          // Parse scripts array from response
+          final scriptsData = resp['scripts'] as List<dynamic>?;
+          if (scriptsData == null || scriptsData.isEmpty) {
+            MessageUtils.showWarning(context, 'Keine Scripts gefunden');
+            return;
+          }
+
+          final scripts = scriptsData
+              .map((s) => ShellyScript.fromJson(s as Map<String, dynamic>))
+              .toList();
+
+          // Navigate to scripts screen with systemId
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ShellyScriptsScreen(
+                device: device,
+                scripts: scripts,
+                systemId: systemId,  // Pass systemId for device filtering
               ),
             ),
           );
@@ -370,10 +438,153 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       // This command requires access to device fields (authPassword, authUsername, deviceScr, data)
       // We need the device instance here
       throw UnimplementedError("COMMAND_SET_AUTH must be handled in device class due to required state access");
+    }else if(command == COMMAND_FETCH_SCRIPTS) {
+      ret = await service.sendCommand('Script.List', {});
+    }else if(command == COMMAND_GET_SCRIPT_STATUS) {
+      int? scriptId = params["id"];
+      if(scriptId == null) throw Exception("Script ID missing");
+      ret = await service.sendCommand('Script.GetStatus', {"id": scriptId});
+    }else if(command == COMMAND_SET_SCRIPT_ENABLE) {
+      int? scriptId = params["id"];
+      bool? enable = params["enable"];
+      if(scriptId == null || enable == null) throw Exception("Script ID or enable value missing");
+      ret = await service.sendCommand('Script.SetConfig', {"id": scriptId, "config": {"enable": enable}});
+    }else if(command == COMMAND_START_SCRIPT) {
+      int? scriptId = params["id"];
+      if(scriptId == null) throw Exception("Script ID missing");
+      ret = await service.sendCommand('Script.Start', {"id": scriptId});
+    }else if(command == COMMAND_STOP_SCRIPT) {
+      int? scriptId = params["id"];
+      if(scriptId == null) throw Exception("Script ID missing");
+      ret = await service.sendCommand('Script.Stop', {"id": scriptId});
+    }else if(command == COMMAND_DELETE_SCRIPT) {
+      int? scriptId = params["id"];
+      if(scriptId == null) throw Exception("Script ID missing");
+      ret = await service.sendCommand('Script.Delete', {"id": scriptId});
+    }else if(command == COMMAND_CREATE_SCRIPT) {
+      String? name = params["name"];
+      if(name == null) throw Exception("Script name missing");
+      ret = await service.sendCommand('Script.Create', {"name": name});
+      // Returns: {"id": 0}  (new script ID)
+    }else if(command == COMMAND_RENAME_SCRIPT) {
+      int? scriptId = params["id"];
+      String? newName = params["name"];
+      if(scriptId == null || newName == null) throw Exception("Script ID or name missing");
+      ret = await service.sendCommand('Script.SetConfig', {
+        "id": scriptId,
+        "config": {"name": newName}
+      });
+    }else if(command == COMMAND_PUT_SCRIPT_CODE) {
+      int? scriptId = params["id"];
+      String? code = params["code"];
+      bool? append = params["append"];  // default false
+      if(scriptId == null || code == null) throw Exception("Script ID or code missing");
+
+      // Check if we need to chunk (Bluetooth service + code > CODE_CHUNK_LENGTH chars)
+      if ((service is ShellyBluetoothService && code.length > CODE_CHUNK_LENGTH) ||
+          (code.length > CODE_CHUNK_LENGTH_WIFI)) {
+        // Chunk the code into pieces of max CODE_CHUNK_LENGTH characters
+        List<String> chunks = _chunkStringUtf8Safe(code,service is ShellyBluetoothService ? CODE_CHUNK_LENGTH : CODE_CHUNK_LENGTH_WIFI);
+
+        // Send chunks sequentially
+        // First chunk: append=false, subsequent chunks: append=true
+        for (int i = 0; i < chunks.length; i++) {
+          bool shouldAppend = i > 0;
+          await service.sendCommand('Script.PutCode', {
+            "id": scriptId,
+            "code": chunks[i],
+            "append": shouldAppend,
+          });
+          // If any chunk fails, the exception will propagate and stop the loop
+        }
+
+        ret = {"success": true, "chunks": chunks.length};
+      } else {
+        // Send as single chunk (WiFi service or code <= CODE_CHUNK_LENGTH chars)
+        ret = await service.sendCommand('Script.PutCode', {
+          "id": scriptId,
+          "code": code,
+          "append": append ?? false,
+        });
+      }
+    }else if(command == COMMAND_GET_SCRIPT_CODE) {
+      int? scriptId = params["id"];
+      if(scriptId == null) throw Exception("Script ID missing");
+
+      // Shelly Script.GetCode returns code in chunks
+      // We need to call multiple times with offset until all code is retrieved
+      String fullCode = "";
+      int offset = 0;
+
+      while (true) {
+        // Build parameters based on service type
+        Map<String, dynamic> getCodeParams = {
+          "id": scriptId,
+          "offset": offset,
+        };
+
+        // For Bluetooth, limit chunk size to CODE_CHUNK_LENGTH characters to match write chunk size
+        if (service is ShellyBluetoothService) {
+          getCodeParams["len"] = CODE_CHUNK_LENGTH;
+        }else{
+          getCodeParams["len"] = CODE_CHUNK_LENGTH_WIFI;
+        }
+
+        final response = await service.sendCommand('Script.GetCode', getCodeParams);
+
+        if (response == null || response['data'] == null) break;
+
+        final chunk = response['data'] as String;
+        if (chunk.isEmpty) break;
+
+        fullCode += chunk;
+        offset += chunk.length;
+
+        // Check if we've reached the end
+        final left = response['left'] as int? ?? 0;
+        if (left == 0) break;
+      }
+
+      ret = {"code": fullCode};
     }else{
       throw UnimplementedError('Command not implemented: $command');
     }
 
     return ret;
+  }
+
+  /// Splits a string into chunks with a maximum size, respecting UTF-8 character boundaries
+  ///
+  /// This method ensures that multi-byte Unicode characters are never split across chunks.
+  /// It uses Dart's runes (Unicode code points) to properly handle all characters.
+  ///
+  /// @param text - The string to split into chunks
+  /// @param maxChunkSize - Maximum number of characters per chunk (default CODE_CHUNK_LENGTH)
+  /// @return List of string chunks, each with at most maxChunkSize characters
+  List<String> _chunkStringUtf8Safe(String text, int maxChunkSize) {
+    if (text.length <= maxChunkSize) {
+      return [text];
+    }
+
+    List<String> chunks = [];
+    List<int> runes = text.runes.toList();
+    int currentIndex = 0;
+
+    while (currentIndex < runes.length) {
+      // Calculate end index for this chunk
+      int endIndex = currentIndex + maxChunkSize;
+      if (endIndex > runes.length) {
+        endIndex = runes.length;
+      }
+
+      // Extract chunk and convert back to string
+      List<int> chunkRunes = runes.sublist(currentIndex, endIndex);
+      String chunk = String.fromCharCodes(chunkRunes);
+      chunks.add(chunk);
+
+      currentIndex = endIndex;
+    }
+
+    return chunks;
   }
 }

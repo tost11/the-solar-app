@@ -83,6 +83,7 @@ abstract class GenericWiFiDevice<TService extends BaseDeviceService, TImpl exten
     dataFields: deviceImpl.getDataFields(),
     customSections: deviceImpl.getCustomSections(),
     categoryConfigs: deviceImpl.getCategoryConfigs(),
+    timeSeriesFields: deviceImpl.getTimeSeriesFields(),
   ) {
     netIpAddress = ipAddress;
     netHostname = hostname;

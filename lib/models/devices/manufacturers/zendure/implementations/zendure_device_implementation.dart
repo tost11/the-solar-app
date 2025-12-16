@@ -12,6 +12,7 @@ import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
+import '../../../time_series_field_config.dart';
 
 /// Shared implementation for all Zendure devices (Bluetooth and WiFi)
 ///
@@ -26,7 +27,10 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         subtitle: 'Aktuelle Leistungsabgabe/aufnahme einstellen',
         icon: Icons.power_settings_new,
         iconColor: Colors.blue,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           try {
             // Fetch current properties from device
             final properties = device.data["data"]?["properties"] ?? {};
@@ -72,7 +76,10 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         subtitle: 'Min/Max SOC einstellen',
         icon: Icons.battery_std,
         iconColor: Colors.orange,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           try {
             // Fetch current properties from device
             final properties = device.data["data"]?["properties"] ?? {};
@@ -122,7 +129,10 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         subtitle: 'Wechselrichter, Netzeinspeisung & Standard',
         icon: Icons.settings_suggest,
         iconColor: Colors.purple,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           try {
             // Fetch current properties from device
             final properties = device.data["data"]?["properties"] ?? {};
@@ -485,6 +495,33 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   @override
   String getFetchCommand() {
     return 'getData'; // Zendure devices don't use named commands
+  }
+
+  @override
+  List<TimeSeriesFieldConfig> getTimeSeriesFields() {
+    return [
+      TimeSeriesFieldConfig(
+        name: 'Solar-Eingang',
+        type: DataFieldType.watt,
+        mapping: ['properties', 'solarInputPower'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Batterie',
+        type: DataFieldType.percentage,
+        mapping: ['properties', 'electricLevel'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Ausgabeleistung',
+        type: DataFieldType.watt,
+        mapping: ['properties', 'outputHomePower'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Eingangsspannung',
+        type: DataFieldType.voltage,
+        mapping: ['properties', 'inputVolt'],
+        formatter: (value) => value / 10, // Convert from 0.1V to V
+      ),
+    ];
   }
 
   @override

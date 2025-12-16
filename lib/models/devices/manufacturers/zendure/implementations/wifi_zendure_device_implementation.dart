@@ -26,7 +26,10 @@ class WifiZendureDeviceImplementation extends ZendureDeviceImplementation {
       subtitle: 'MQTT-Broker Verbindung einrichten',
       icon: Icons.storage,
       iconColor: Colors.green,
-      onTap: (context, device) async {
+      onTap: (ctx) async {
+        final context = ctx.context;
+        final device = ctx.device;
+
         // Fetch current MQTT configuration
         final mqttConfig = await DialogUtils.executeWithLoading(
           context,

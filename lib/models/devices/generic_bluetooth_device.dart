@@ -71,6 +71,7 @@ abstract class GenericBluetoothDevice<TService extends BaseDeviceService, TImpl 
     dataFields: deviceImpl.getDataFields(),
     customSections: deviceImpl.getCustomSections(),
     categoryConfigs: deviceImpl.getCategoryConfigs(),
+    timeSeriesFields: deviceImpl.getTimeSeriesFields(),
   );
 
   /// Protected named constructor for JSON deserialization

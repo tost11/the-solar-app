@@ -1,0 +1,154 @@
+{
+  "id": "zendure-power-control-mac",
+  "name": "Zendure Power Control (MAC/AP)",
+  "version": "1.0.0",
+  "description": "Steuert eine Zendure Powerstation über MAC-Adresse basierend auf Shelly EM3 Messung (für Shelly WiFi AP Modus)",
+  "compatibleDevices": ["SPEM"],
+  "requiredDevices": ["zendure"],
+  "author": "TheSolarApp",
+  "tags": ["power-management", "nulleinspeisung", "zendure"],
+  "parameters": [
+    {
+      "name": "MAC",
+      "label": "MAC-Adresse",
+      "description": "MAC-Adresse der Zendure Powerstation",
+      "type": "string",
+      "required": true,
+      "placeholder": "AA:BB:CC:DD:EE:FF",
+      "validationPattern": "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
+      "validationErrorMessage": "Ungültiges MAC-Adressformat"
+    },
+    {
+      "name": "SERIAL",
+      "label": "Seriennummer",
+      "description": "Seriennummer der Zendure Powerstation",
+      "type": "string",
+      "required": true,
+      "placeholder": "ABCD1234"
+    },
+    {
+      "name": "MAX_POWER",
+      "label": "Maximale Ausgangsleistung (W)",
+      "description": "Maximale Ausgangsleistung in Watt",
+      "type": "number",
+      "required": true,
+      "defaultValue": 800,
+      "minValue": 0,
+      "maxValue": 800
+    },
+    {
+      "name": "MAX_POWER_REVERSE",
+      "label": "Maximale Eingangsleistung (W)",
+      "description": "Maximale Eingangsleistung (Laden) in Watt (negativ)",
+      "type": "number",
+      "required": true,
+      "defaultValue": 1000,
+      "minValue": 0,
+      "maxValue": 2400
+    },
+    {
+      "name": "REVERSE",
+      "label": "Lademodus aktivieren",
+      "description": "Aktiviere Lademodus bei Überschuss",
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true
+    },
+    {
+      "name": "REVERSE_STARTUP_POWER",
+      "label": "Lademodus Startleistung (W)",
+      "description": "Mindestleistung zum Starten des Lademodus",
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "name": "REVERSE_STOP_POWER",
+      "label": "Lademodus Stoppleistung (W)",
+      "description": "Mindestleistung zum Stoppen des Lademodus",
+      "type": "number",
+      "required": true,
+      "defaultValue": 10,
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "name": "STARTUP_POWER",
+      "label": "Entlademodus Startleistung (W)",
+      "description": "Mindestleistung zum Starten des Entlademodus",
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "name": "STOP_POWER",
+      "label": "Entlademodus Stoppleistung (W)",
+      "description": "Mindestleistung zum Stoppen des Entlademodus",
+      "type": "number",
+      "required": true,
+      "defaultValue": 10,
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "name": "DEBUG",
+      "label": "Debug-Modus",
+      "description": "Aktiviere erweiterte Debug-Ausgaben",
+      "type": "boolean",
+      "required": true,
+      "defaultValue": false,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_RUN_MAIN_SCRIPT",
+      "label": "Hauptschleife Intervall (s)",
+      "description": "Hauptschleife Intervall in Sekunden",
+      "type": "number",
+      "required": true,
+      "defaultValue": 5,
+      "minValue": 1,
+      "maxValue": 60,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_RESOLVE_MAC",
+      "label": "MAC-Auflösung Intervall (s)",
+      "description": "MAC-Auflösung Intervall in Sekunden",
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 10,
+      "maxValue": 300,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_CHECK_ZENDURE_STATUS",
+      "label": "Status-Check Intervall (s)",
+      "description": "Status-Check Intervall in Sekunden",
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 10,
+      "maxValue": 300,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_DEVICE_OFFLINE",
+      "label": "Offline Timeout (s)",
+      "description": "Offline-Erkennung Timeout in Sekunden",
+      "type": "number",
+      "required": true,
+      "defaultValue": 60,
+      "minValue": 30,
+      "maxValue": 600,
+      "advancedOption": true
+    }
+  ],
+  "sourceCode": "let HOST = \"\";\nlet currentZendurePower = null;\nlet lastRunTime = null;\nlet lastShellyPower = null;\nlet isRunning = false;\nlet lastRunningStarted = 0;\nlet bypass = false;\nlet soc = 50;\nlet maxSoc = 100;\nlet minSoc = 0;\n\nfunction log(message,debug){\n    if(!debug || DEBUG){\n        print(\"[\" + Shelly.getUptimeMs() + \" Zendure Power Script]: \"+message);\n    }\n}\n\nif(REVERSE_STOP_POWER > REVERSE_STARTUP_POWER){\n    log(\"REVERSE_STOP_POWER larger then REVERSE_STARTUP_POWER set both to: \"+REVERSE_STARTUP_POWER);\n    REVERSE_STOP_POWER = REVERSE_STARTUP_POWER;\n}\nif(STOP_POWER > STARTUP_POWER){\n    log(\"STOP_POWER larger then STARTUP_POWER set both to: \"+STARTUP_POWER);\n    STOP_POWER = STARTUP_POWER;\n}\n\nfunction getTimeDiff(){\n    let localLastRunTime = lastRunTime;\n    if(localLastRunTime == null){\n        return null;\n    }\n    let now = Shelly.getUptimeMs();\n    let dif = now - localLastRunTime;\n    return dif;\n}\n\nfunction setCurrentPower(power){\n    currentZendurePower = power;\n    if(power != null) {\n        lastRunTime = Shelly.getUptimeMs();\n    }else{\n        lastRunTime = null;\n    }\n}\n\nfunction setLimit(shellyPower,currentDevicePower){\n    log(\"Current Zendure power is: \" + currentDevicePower + \"W\", true);\n\n    let acMode = 2;\n    let inputLimit = 0;\n    let outputLimit = 0;\n\n    let combinedLimit = shellyPower + currentDevicePower;\n\n    if(REVERSE && currentDevicePower >= 0 && combinedLimit > (REVERSE_STARTUP_POWER * -1) && combinedLimit < 0){\n        combinedLimit = 0;\n    }\n\n    if(currentDevicePower <= 0 && combinedLimit > STARTUP_POWER && combinedLimit > 0){\n        combinedLimit = 0;\n    }\n\n    if(bypass === true){\n        log(\"Do not set real limit bypass is enabled\",true);\n        combinedLimit = shellyPower;\n    }\n\n    if(currentDevicePower === 0 && combinedLimit > 0 && combinedLimit <= STARTUP_POWER){\n        combinedLimit = 0;\n    }\n\n    if(REVERSE && currentDevicePower === 0 && combinedLimit <0 && combinedLimit >= (REVERSE_STARTUP_POWER * -1)){\n        combinedLimit = 0;\n    }\n\n    if(!REVERSE || combinedLimit >= 0){\n        outputLimit = Math.max(combinedLimit,0);\n        outputLimit = Math.min(outputLimit,MAX_POWER);\n        if(outputLimit >= 0 && outputLimit <= STOP_POWER){\n            outputLimit = 0;\n        }\n    }else{\n        acMode = 1;\n        inputLimit = Math.max(combinedLimit,MAX_POWER_REVERSE * -1);\n        inputLimit *= -1;\n        if(inputLimit >= 0 && inputLimit <= REVERSE_STOP_POWER){\n            inputLimit = 0;\n        }\n    }\n    combinedLimit = (inputLimit * -1) + outputLimit;\n    log(\"new Zendure power is: \" + combinedLimit + \"W\",false);\n\n    let payload = {\n        sn: SERIAL,\n        properties: {\n            acMode: acMode,\n            outputLimit: outputLimit,\n            inputLimit: inputLimit,\n        }\n    };\n\n    log(\"Send POST data:\" + JSON.stringify(payload),false);\n    Shelly.call(\"HTTP.POST\", {\n        url: \"http://\" + HOST + \"/properties/write\",\n        headers: {\n            \"Content-Type\": \"application/json\"\n        },\n        body: JSON.stringify(payload)\n    }, function(postResult, err_code, err_msg) {\n        if (err_code === 0) {\n            log(\"POST erfolgreich:\" + postResult.body,true);\n            setCurrentPower(combinedLimit);\n            log(\"Set power of Zendure device to: \" + combinedLimit,false);\n        } else {\n            log(\"Fehler beim POST:\" + err_code + \" \" + err_msg,false);\n        }\n    });\n}\n\nfunction runScript() {\n    if(typeof HOST !== 'string' || HOST === \"\"){\n        log(\"Timed Check Zendure -> Hostname or ip not set\",false);\n        return;\n    }\n\n    if(isRunning && Shelly.getUptimeMs() - lastRunningStarted < 60 * 1000){\n        log(\"Skipped execution still one running: \" + (Shelly.getUptimeMs() - lastRunningStarted),false);\n        return;\n    }\n\n    lastRunningStarted = Shelly.getUptimeMs();\n    isRunning = true;\n\n    let shellyPower = lastShellyPower;\n    if(shellyPower == null){\n        isRunning = false;\n        return;\n    }\n\n    log(\"Current Shelly power:\" + shellyPower + \"W\",true);\n\n    let diff = getTimeDiff();\n    if(diff != null && diff < 2 * 1000){\n        log(\"Skipped execution last set power to new: \" + diff,true);\n        isRunning = false;\n        return\n    }\n\n    if(Math.abs(shellyPower) < 5 ||\n        (currentZendurePower >= 0 && shellyPower < 0 && shellyPower > (REVERSE_STARTUP_POWER * -1)) ||\n        (currentZendurePower <= 0 && shellyPower > 0 && shellyPower > STARTUP_POWER)\n    ){\n        log(\"current power is fine\",true);\n\n        if(diff == null || diff > 20 * 1000){\n            log(\"Limit not set int a wile -> do anyway\",true);\n        }else{\n            isRunning = false;\n            return;\n        }\n    }\n\n    let localZendurePower = currentZendurePower;\n    if(localZendurePower == null || soc-2 < minSoc || soc+2 > maxSoc){\n        if(localZendurePower == null){\n            log(\"Current Zendure power unknown -> get it\",false);\n        }else{\n            log(\"Fetch current zendure power because near min or max level (bypass status needed)\",true);\n        }\n        Shelly.call(\"HTTP.GET\", { url: \"http://\" + HOST + \"/properties/report\" },\n            function(result, err_code, err_msg) {\n                if (err_code !== 0) {\n                    log(\"Fehler beim GET von Zendure – Abbruch, kein POST:\" + err_code + \" \" + err_msg,false);\n                    isRunning = false;\n                    return;\n                }\n                let response = JSON.parse(result.body || \"{}\");\n                if (response.properties) {\n                    let gotLimit = 0;\n                    if(response.properties.acMode === 2){\n                        gotLimit = response.properties.outputLimit;\n                    }else{\n                        gotLimit = response.properties.inputLimit * -1;\n                    }\n                    bypass = response.properties.packState === 0;\n                    soc = response.properties.electricLevel;\n                    maxSoc = response.properties.socSet / 10;\n                    minSoc = response.properties.minSoc / 10;\n                    log(\"Got from response: \" + gotLimit,true);\n                    setLimit(shellyPower,gotLimit);\n                } else {\n                    log(\"Could not get value from request response\",false);\n                }\n                isRunning = false;\n            });\n    }else{\n        setLimit(shellyPower,localZendurePower);\n        isRunning = false;\n    }\n}\n\nShelly.addStatusHandler(function (event) {\n    if (event.name === \"em\" && event.delta && typeof event.delta.total_act_power === \"number\") {\n        lastShellyPower = event.delta.total_act_power;\n    }\n});\n\nTimer.set(INTERVAL_RUN_MAIN_SCRIPT * 1000, true, runScript, null);\n\nTimer.set(5000, true, function (){\n    let dif = getTimeDiff();\n    if(dif == null){\n        return;\n    }\n    if(dif > INTERVAL_DEVICE_OFFLINE * 1000){\n        log(\"Zendure limit to old -> reset (maybe offline)\",false);\n        setCurrentPower(null);\n    }\n}, null);\n\nTimer.set(INTERVAL_CHECK_ZENDURE_STATUS * 1000, true, function (){\n    log(\"Timed Check Zendure -> check status\",false);\n    if(typeof HOST !== 'string' || HOST === \"\"){\n        log(\"Timed Check Zendure -> Hostname or ip not set\",false);\n        return;\n    }\n    Shelly.call(\"HTTP.GET\", { url: \"http://\" + HOST + \"/properties/report\" },\n        function(result, err_code, err_msg) {\n            if (err_code === 0) {\n                let response = JSON.parse(result.body || \"{}\");\n                if (response.properties) {\n                    bypass = response.properties.packState === 0;\n                    soc = response.properties.electricLevel;\n                    maxSoc = response.properties.socSet / 10;\n                    minSoc = response.properties.minSoc / 10;\n                    log(\"Timed Check Zendure -> bypass is: \" + bypass,true);\n                }else{\n                    log(\"Timed Check Zendure -> could not parse json response: \" + bypass,false);\n                }\n            } else {\n                log(\"Timed Check Zendure -> error: \" + err_code + \" \" + err_msg,false);\n            }\n        }\n    );\n}, null);\n\nfunction resolveMacToIp() {\n    Shelly.call(\"WiFi.ListAPClients\", {}, function(res, err) {\n        if (err !== 0) {\n            log(\"Mac Resolving -> Fehler bei WiFi.ListAPClients: Fehlercode \" + err,false);\n            return;\n        }\n        if (!res || !res.ap_clients) {\n            log(\"Mac Resolving -> No clients available\",true);\n            return;\n        }\n        for (let c of res.ap_clients) {\n            let mac = (c.mac || \"\").toUpperCase();\n            log(\"Mac Resolving -> Check‑Device with mac: \" + mac + \" IP: \" + c.ip,true);\n            if (mac === MAC.toUpperCase()) {\n                print(\"Mac Resolving -> Device‑MAC found: \" + mac + \" IP: \" + c.ip);\n                HOST = c.ip;\n                return;\n            }\n        }\n        log(\"Mac Resolving -> MAC-Adress: \" + MAC + \"could not be resolved\",true);\n    });\n}\n\nif(typeof MAC == 'string' && MAC !== \"\"){\n    log(\"Timed Check Zendure -> Hostname or ip not set\",false);\n    Timer.set(INTERVAL_RESOLVE_MAC * 1000, true, resolveMacToIp);\n}",
+  "createdAt": "2025-01-11T00:00:00Z",
+  "updatedAt": "2025-01-11T00:00:00Z"
+}

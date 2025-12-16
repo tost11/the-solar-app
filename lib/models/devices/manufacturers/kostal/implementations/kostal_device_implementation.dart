@@ -7,6 +7,7 @@ import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
+import '../../../time_series_field_config.dart';
 
 /// Implementation for Kostal solar inverter devices
 ///
@@ -35,6 +36,32 @@ class KostalDeviceImplementation extends DeviceImplementation {
     return [
       // Future: Add power on/off, limit control, etc.
       // when write operations are supported
+    ];
+  }
+
+  @override
+  List<TimeSeriesFieldConfig> getTimeSeriesFields() {
+    return [
+      TimeSeriesFieldConfig(
+        name: 'Leistung Solar',
+        type: DataFieldType.watt,
+        mapping: ['dc_power_total'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Verbrauch',
+        type: DataFieldType.watt,
+        mapping: ['ac_power_total'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Bezug Netz',
+        type: DataFieldType.watt,
+        mapping: ['consumption_grid'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Battery Lade/Entladeleistung',
+        type: DataFieldType.watt,
+        mapping: ['battery_charge_discharge_power'],
+      ),
     ];
   }
 

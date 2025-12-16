@@ -35,7 +35,10 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         subtitle: 'Netzwerkverbindung einrichten',
         icon: Icons.wifi,
         iconColor: Colors.green,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final wifiConfig = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade aktuelle Konfiguration...',
@@ -68,7 +71,10 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         subtitle: 'Server für Datenübertragung einrichten',
         icon: Icons.cloud_upload,
         iconColor: Colors.blue,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final monitoringConfig = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade aktuelle Konfiguration...',
@@ -131,7 +137,10 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         subtitle: 'Startet das Gerät neu',
         icon: Icons.restart_alt,
         iconColor: Colors.orange,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           // Show confirmation dialog
           final confirmed = await showDialog<bool>(
             context: context,
@@ -171,7 +180,10 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         subtitle: 'WiFi Access Point einrichten',
         icon: Icons.router,
         iconColor: Colors.blue,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final apConfig = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade aktuelle Konfiguration...',
@@ -217,7 +229,10 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         subtitle: 'Ausgangsleistung begrenzen',
         icon: Icons.speed,
         iconColor: Colors.orange,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           try {
             var powerRating = MapUtils.OM(device.data, ['config', 'power_rating']) as int?;
             if (powerRating == null || powerRating <= 0) {

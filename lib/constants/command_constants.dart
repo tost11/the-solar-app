@@ -19,6 +19,16 @@ const String COMMAND_FETCH_AUTH = "fetch-auth";
 const String COMMAND_SET_MQTT = "set-mqtt";
 const String COMMAND_SET_WIFI_MQTT = "set-wifi-mqtt";
 const String COMMAND_FETCH_MQTT = "fetch-mqtt";
+const String COMMAND_FETCH_SCRIPTS = "fetch-scripts";
+const String COMMAND_GET_SCRIPT_STATUS = "get-script-status";
+const String COMMAND_SET_SCRIPT_ENABLE = "set-script-enable";
+const String COMMAND_START_SCRIPT = "start-script";
+const String COMMAND_STOP_SCRIPT = "stop-script";
+const String COMMAND_DELETE_SCRIPT = "delete-script";
+const String COMMAND_CREATE_SCRIPT = "create-script";
+const String COMMAND_PUT_SCRIPT_CODE = "put-script-code";
+const String COMMAND_GET_SCRIPT_CODE = "get-script-code";
+const String COMMAND_RENAME_SCRIPT = "rename-script";
 
 const String GENERAL_SETTGINS_ECO_MODE = "eco";
 const String GENERAL_SETTINGS_DISCOVERABLE = "discoverable";

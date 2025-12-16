@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
 import 'package:the_solar_app/screens/configuration/authentication_screen.dart';
+import 'package:the_solar_app/screens/configuration/opendtu_online_monitoring_screen.dart';
 import 'package:the_solar_app/screens/configuration/percentage_power_limit_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/services/devices/opendtu/opendtu_wifi_service.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
+import 'package:the_solar_app/utils/exception_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import 'package:the_solar_app/widgets/opendtu_inverter_list_widget.dart';
@@ -28,7 +30,10 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
         subtitle: 'Passwort konfigurieren',
         icon: Icons.lock,
         iconColor: Colors.blue,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final config = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade Authentifizierungs-Konfiguration...',
@@ -67,7 +72,10 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
         subtitle: 'WLAN-Verbindung einrichten',
         icon: Icons.wifi,
         iconColor: Colors.green,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final config = await DialogUtils.executeWithLoading(
             context,
             loadingMessage: 'Lade aktuelle Konfiguration...',
@@ -94,11 +102,98 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
+        name: 'Online-Monitoring konfigurieren',
+        subtitle: 'Daten an externe Server senden',
+        icon: Icons.cloud_upload,
+        iconColor: Colors.blue,
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
+          final config = await DialogUtils.executeWithLoading(
+            context,
+            loadingMessage: 'Lade aktuelle Konfiguration...',
+            operation: () => device.sendCommand(COMMAND_FETCH_ONLINE_MONITORING, {}),
+            onError: (e) async {
+              if(e is ApiException){
+                if(e.statusCode == 404){
+                  MessageUtils.showError(context, 'Setting online Monitoring not supported, change OpenDTU Firmware');
+                  return;
+                }
+              }
+              MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e');
+            });
+
+          if (config == null || !context.mounted) return;
+
+          // Parse URLs to extract protocol and host
+          // Primary URL
+          String? primaryProtocol;
+          String? primaryHost;
+          final primaryUrl = config['tost_url'] as String?;
+          if (primaryUrl != null && primaryUrl.isNotEmpty) {
+            if (primaryUrl.startsWith('https://')) {
+              primaryProtocol = 'https';
+              primaryHost = primaryUrl.substring(8);
+            } else if (primaryUrl.startsWith('http://')) {
+              primaryProtocol = 'http';
+              primaryHost = primaryUrl.substring(7);
+            } else {
+              // Fallback: assume it's just the host
+              primaryProtocol = 'https';
+              primaryHost = primaryUrl;
+            }
+          }
+
+          // Secondary URL (handle missing for old versions)
+          String? secondaryProtocol;
+          String? secondaryHost;
+          final secondaryUrl = config['tost_second_url'] as String?;
+          if (secondaryUrl != null && secondaryUrl.isNotEmpty) {
+            if (secondaryUrl.startsWith('https://')) {
+              secondaryProtocol = 'https';
+              secondaryHost = secondaryUrl.substring(8);
+            } else if (secondaryUrl.startsWith('http://')) {
+              secondaryProtocol = 'http';
+              secondaryHost = secondaryUrl.substring(7);
+            } else {
+              secondaryProtocol = 'https';
+              secondaryHost = secondaryUrl;
+            }
+          }
+
+          // Navigate to configuration screen
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OpenDTUOnlineMonitoringScreen(
+                device: device,
+                currentEnabled: config['tost_enabled'] as bool?,
+                currentPrimaryProtocol: primaryProtocol,
+                currentPrimaryHost: primaryHost,
+                currentSecondaryProtocol: secondaryProtocol,
+                currentSecondaryHost: secondaryHost,
+                currentSystemId: config['tost_system_id'] as String?,
+                currentToken: config['tost_token'] as String?,
+                currentDuration: config['tost_duration'] as int?,
+              ),
+            ),
+          );
+
+          if (result == true && context.mounted) {
+            MessageUtils.showSuccess(context, 'Online-Monitoring erfolgreich konfiguriert');
+          }
+        },
+      ),
+      DeviceMenuItem(
         name: 'Leistungslimit (Prozent)',
         subtitle: 'Wechselrichterleistung begrenzen',
         icon: Icons.bolt,
         iconColor: Colors.orange,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -112,7 +207,10 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
         subtitle: 'Schaltet alle Wechselrichter',
         icon: Icons.power_settings_new,
         iconColor: Colors.red,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final invertersData = device.data['data']?['inverters'] as List?;
           if (invertersData == null || invertersData.isEmpty) {
             MessageUtils.showWarning(
@@ -175,7 +273,10 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
         subtitle: 'OpenDTU neu starten',
         icon: Icons.restart_alt,
         iconColor: Colors.purple,
-        onTap: (context, device) async {
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (dialogContext) => AlertDialog(
@@ -426,6 +527,36 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
     } else if (command == COMMAND_RESTART) {
       final success = await service.restartDevice();
       return {'success': success};
+    } else if (command == COMMAND_FETCH_ONLINE_MONITORING) {
+      return await service.sendGetCommand('/api/tost/config');
+    } else if (command == COMMAND_SET_ONLINE_MONITORING) {
+      // Extract parameters
+      final enabled = params['enabled'] as bool? ?? false;
+
+      // Build full URLs from protocol + host
+      final primaryProtocol = params['primary_protocol'] as String? ?? 'https';
+      final primaryHost = params['primary_host'] as String? ?? '';
+      final primaryUrl = primaryHost.isNotEmpty ? '$primaryProtocol://$primaryHost' : '';
+
+      final secondaryProtocol = params['secondary_protocol'] as String? ?? 'https';
+      final secondaryHost = params['secondary_host'] as String? ?? '';
+      final secondaryUrl = secondaryHost.isNotEmpty ? '$secondaryProtocol://$secondaryHost' : '';
+
+      final systemId = params['system_id'] as String? ?? '';
+      final token = params['token'] as String? ?? '';
+      final duration = params['duration'] as int? ?? 30;
+
+      // Build payload matching OpenDTU API
+      final payload = {
+        'tost_enabled': enabled,
+        'tost_url': primaryUrl,
+        'tost_second_url': secondaryUrl,
+        'tost_system_id': systemId,
+        'tost_token': token,
+        'tost_duration': duration,
+      };
+
+      return await service.sendCommand('/api/tost/config', payload);
     } else {
       throw UnimplementedError('Command not yet implemented: $command');
     }

@@ -240,30 +240,16 @@ class ShellyBluetoothService extends ShellyService {
         // Write request length (4 bytes, big-endian per Shelly spec)
         Uint8List lengthBytes = Uint8List(4);
         ByteData.view(lengthBytes.buffer).setUint32(0, requestBytes.length, Endian.big);
-        await _write(writeCharacteristic!, lengthBytes);
+        await _writeWithChunking(writeCharacteristic!, lengthBytes);
+
+        debugPrint("length ok");
 
         // Wait per Shelly spec
         await Future.delayed(const Duration(milliseconds: 300));
 
         // Write request data (chunked if necessary due to MTU)
-        int mtu = await connectedDevice!.mtu.first;
-        int maxChunkSize = mtu - 3; // BLE overhead
-
-        if (requestBytes.length <= maxChunkSize) {
-          await _write(rwCharacteristic!, requestBytes);
-        } else {
-          // Split into chunks
-          for (int i = 0; i < requestBytes.length; i += maxChunkSize) {
-            int end = (i + maxChunkSize < requestBytes.length)
-                ? i + maxChunkSize
-                : requestBytes.length;
-            List<int> chunk = requestBytes.sublist(i, end);
-            await _write(rwCharacteristic!, chunk);
-            if (end < requestBytes.length) {
-              await Future.delayed(const Duration(milliseconds: 300));
-            }
-          }
-        }
+        debugPrint("Writing request data...");
+        await _writeWithChunking(rwCharacteristic!, requestBytes, addPreWriteDelay: false);
 
         // Read response length (4 bytes, big-endian)
         List<int> responseLengthBytes = await readNotifyCharacteristic!.read(timeout: 1500);
@@ -472,28 +458,12 @@ class ShellyBluetoothService extends ShellyService {
       // Write request length
       Uint8List lengthBytes = Uint8List(4);
       ByteData.view(lengthBytes.buffer).setUint32(0, requestBytes.length, Endian.big);
-      await _write(writeCharacteristic!, lengthBytes);
+      await _writeWithChunking(writeCharacteristic!, lengthBytes);
 
       await Future.delayed(const Duration(milliseconds: 300));
 
       // Write request data
-      int mtu = await connectedDevice!.mtu.first;
-      int maxChunkSize = mtu - 3;
-
-      if (requestBytes.length <= maxChunkSize) {
-        await _write(rwCharacteristic!, requestBytes);
-      } else {
-        for (int i = 0; i < requestBytes.length; i += maxChunkSize) {
-          int end = (i + maxChunkSize < requestBytes.length)
-              ? i + maxChunkSize
-              : requestBytes.length;
-          List<int> chunk = requestBytes.sublist(i, end);
-          await _write(rwCharacteristic!, chunk);
-          if (end < requestBytes.length) {
-            await Future.delayed(const Duration(milliseconds: 300));
-          }
-        }
-      }
+      await _writeWithChunking(rwCharacteristic!, requestBytes, addPreWriteDelay: false);
 
       // Read response length
       List<int> responseLengthBytes = await readNotifyCharacteristic!.read(timeout: 1500);
@@ -567,6 +537,46 @@ class ShellyBluetoothService extends ShellyService {
     List<int> data,
   ) async {
     await characteristic.write(data, withoutResponse: false);
+  }
+
+  /// Unified helper to write data with chunking and proper delays
+  ///
+  /// Handles BLE resource management by:
+  /// - Adding pre-write delay to ensure previous operations completed
+  /// - Chunking data based on MTU
+  /// - Adding delays between chunks
+  Future<void> _writeWithChunking(
+    BluetoothCharacteristic characteristic,
+    List<int> data, {
+    bool addPreWriteDelay = true,
+  }) async {
+    // Add pre-write delay to avoid resource exhaustion
+    if (addPreWriteDelay) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    // Get MTU and calculate max chunk size
+    int mtu = await connectedDevice!.mtu.first;
+    int maxChunkSize = mtu - 3; // BLE overhead
+
+    // Write data (chunked if necessary)
+    if (data.length <= maxChunkSize) {
+      await _write(characteristic, data);
+    } else {
+      // Split into chunks
+      for (int i = 0; i < data.length; i += maxChunkSize) {
+        int end = (i + maxChunkSize < data.length)
+            ? i + maxChunkSize
+            : data.length;
+        List<int> chunk = data.sublist(i, end);
+        await _write(characteristic, chunk);
+
+        // Add delay between chunks (except after last chunk)
+        if (end < data.length) {
+          await Future.delayed(const Duration(milliseconds: 300));
+        }
+      }
+    }
   }
 
   @override

@@ -9,6 +9,7 @@ import 'package:the_solar_app/services/devices/base_device_service.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../models/devices/manufacturers/opendtu/wifi_opendtu_device.dart';
+import '../../../utils/exception_utils.dart';
 import 'opendtu_websocket_connection.dart';
 
 class OpenDTUWifiService extends BaseDeviceService {
@@ -20,16 +21,18 @@ class OpenDTUWifiService extends BaseDeviceService {
   /// Returns a NetworkDevice if the response is from an OpenDTU device, null otherwise
   static Future<NetworkDevice?> isResponseFromManufacturer(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) async {
+    port ??= 80;
     try {
       // Check if initial response indicates we should probe further
       // (e.g., 404 means root endpoint doesn't exist, which is expected for OpenDTU devices)
       if (initialResponse != null && (initialResponse.statusCode == 404 || initialResponse.statusCode == 200)) {
         // Make request to OpenDTU-specific endpoint
         final response = await http.get(
-          Uri.parse('http://$ipAddress/api/system/status'),
+          Uri.parse('http://$ipAddress:$port/api/system/status'),
           headers: {'Accept': 'application/json'},
         ).timeout(connectionInfo.timeout);
 
@@ -58,7 +61,7 @@ class OpenDTUWifiService extends BaseDeviceService {
               manufacturer: DEVICE_MANUFACTURER_OPENDTU,
               deviceModel: chipModel ?? 'Unknown',
               serialNumber: fakeSerial,
-              port: 80
+              port: port
             );
           }
         }
@@ -301,6 +304,9 @@ class OpenDTUWifiService extends BaseDeviceService {
       ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
+        if(response.body.startsWith("<!DOCTYPE html>")){
+          throw ApiException(404,"Endpoint ${getBaseUri()}$endpoint");
+        }
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         debugPrint('OpenDTU GET $endpoint successful: $data');
         return data;

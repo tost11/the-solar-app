@@ -47,6 +47,7 @@ class ManufacturerDetectorInfo {
   /// Returns NetworkDevice if device is identified as this manufacturer, null otherwise
   final Future<NetworkDevice?> Function(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) detector;

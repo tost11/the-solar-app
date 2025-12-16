@@ -26,9 +26,11 @@ class ShellyWifiService extends ShellyService {
   /// Returns a NetworkDevice if the response is from a Shelly device, null otherwise
   static Future<NetworkDevice?> isResponseFromManufacturer(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) async {
+    port ??= 80;
     try {
       // First, check if initialResponse contains Shelly Web Admin HTML
       if (initialResponse != null) {
@@ -38,11 +40,11 @@ class ShellyWifiService extends ShellyService {
             responseBody.contains('data-theme="dark"') &&
             responseBody.contains('<title>Shelly Web Admin</title>')) {
 
-          debugPrint('[$ipAddress] Shelly Web Admin HTML detected, fetching device info...');
+          debugPrint('[$ipAddress:$port] Shelly Web Admin HTML detected, fetching device info...');
 
           // Confirmed Shelly device - now get device details via JSON-RPC API
           final response = await http.get(
-            Uri.parse('http://$ipAddress/rpc/Shelly.GetDeviceInfo'),
+            Uri.parse('http://$ipAddress:$port/rpc/Shelly.GetDeviceInfo'),
             headers: {
               'Accept': 'application/json',
             },
@@ -59,24 +61,24 @@ class ShellyWifiService extends ShellyService {
               final deviceModel = responseData['model'] as String?;
 
               if (mac != null) {
-                debugPrint('[$ipAddress] Shelly device verified: Model=$deviceModel, ID=$mac');
+                debugPrint('[$ipAddress:$port] Shelly device verified: Model=$deviceModel, ID=$mac');
                 return NetworkDevice(
                   ipAddress: ipAddress,
                   hostname: null,
                   manufacturer: DEVICE_MANUFACTURER_SHELLY,
                   deviceModel: deviceModel ?? 'Unknown',
                   serialNumber: mac,
-                  port: 80
+                  port: port
                 );
               }
             }
           }else{
-            debugPrint('Error detecting Shelly device $ipAddress status code: ${response.statusCode} body: ${response.body}');
+            debugPrint('Error detecting Shelly device $ipAddress:$port status code: ${response.statusCode} body: ${response.body}');
           }
         }
       }
     } catch (e) {
-      debugPrint('Error detecting Shelly device $ipAddress: $e');
+      debugPrint('Error detecting Shelly device $ipAddress:$port: $e');
     }
 
     return null;
@@ -217,9 +219,9 @@ class ShellyWifiService extends ShellyService {
         // Return the result
         if (data.containsKey('result')) {
           _handleResponse(method,data["result"] as Map<String,dynamic>);
+          return data["result"];
         }
-
-        return data;
+        return Map<String,dynamic>();
       } else {
         throw Exception('HTTP Error: ${response.statusCode}');
       }

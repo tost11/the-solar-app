@@ -11,6 +11,7 @@ class HoymilesProtocol {
   // Command bytes (from Python reference)
   static const List<int> CMD_REAL_RES_DTO = [0xa3, 0x11];
   static const List<int> CMD_GET_CONFIG = [0xa3, 0x09];
+  static const List<int> CMD_SET_CONFIG = [0xa3, 0x10];
   static const List<int> CMD_NETWORK_INFO_RES = [0xa3, 0x14];
   static const List<int> CMD_HB_RES_DTO = [0xa3, 0x02];
   static const List<int> CMD_APP_INFO_DATA_RES_DTO = [0xa3, 0x01];
@@ -23,7 +24,8 @@ class HoymilesProtocol {
 
   /// Get next sequence number
   int getNextSequence() {
-    _sequence = (_sequence + 1) & 0xFFFF;
+    //increased by two because some times response is one number above to find an handle that increse by +1
+    _sequence = (_sequence + 2) & 0xFFFF;
     return _sequence;
   }
 

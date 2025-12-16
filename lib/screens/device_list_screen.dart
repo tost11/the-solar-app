@@ -5,6 +5,7 @@ import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
 import 'scan_for_device_screen.dart';
 import 'device_detail_screen.dart';
+import 'system_list_screen.dart';
 
 class DeviceListScreen extends StatefulWidget {
   const DeviceListScreen({super.key});
@@ -13,7 +14,9 @@ class DeviceListScreen extends StatefulWidget {
   State<DeviceListScreen> createState() => _DeviceListScreenState();
 }
 
-class _DeviceListScreenState extends State<DeviceListScreen> {
+class _DeviceListScreenState extends State<DeviceListScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final DeviceStorageService _storageService = DeviceStorageService();
   List<Device> _devices = [];
   bool _isLoading = true;
@@ -21,7 +24,14 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadDevices();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDevices() async {
@@ -104,24 +114,36 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     debugPrint("size of list is: ${_devices}");
 
     return AppScaffold(
       appBar: AppBarWidget(
-        title: 'Meine Geräte',
+        title: _tabController.index == 0 ? 'Meine Geräte' : 'Systeme',
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _navigateToDevice(null),
-            tooltip: 'Gerät hinzufügen',
-          ),
+          if (_tabController.index == 0)
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _navigateToDevice(null),
+              tooltip: 'Gerät hinzufügen',
+            ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          onTap: (_) => setState(() {}), // Rebuild to update title and actions
+          tabs: const [
+            Tab(icon: Icon(Icons.devices), text: 'Geräte'),
+            Tab(icon: Icon(Icons.dashboard), text: 'Systeme'),
+          ],
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _devices.isEmpty
-              ? Center(
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Devices tab
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _devices.isEmpty
+                  ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -228,6 +250,11 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                     );
                   },
                 ),
+
+          // System tab
+          const SystemListScreen(),
+        ],
+      ),
     );
   }
 }

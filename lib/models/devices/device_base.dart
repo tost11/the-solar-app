@@ -9,6 +9,7 @@ import 'generic_rendering/device_data_field.dart';
 import 'generic_rendering/device_menu_item.dart';
 import 'generic_rendering/device_control_item.dart';
 import 'generic_rendering/device_custom_section.dart';
+import 'time_series_field_config.dart';
 
 enum ConnectionType {
   bluetooth,
@@ -48,9 +49,13 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   late final List<DeviceControlItem> controlItems;
   late final List<DeviceCustomSection> customSections;
   late final List<DeviceCategoryConfig> categoryConfigs;
+  late final List<TimeSeriesFieldConfig> timeSeriesFields;
   Map<String,Map<String,dynamic>> data = {};
   ServiceType ? connectionService;
 
+  String? getDeviceModelGroup(){
+    return deviceModel;
+  }
 
   // Stream controllers for state management
   final _connectionStatusController = StreamController<String>.broadcast();
@@ -70,10 +75,35 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
 
   void emitData(Map<String,dynamic> data){
     _dataController.add(data);
+    _trackTimeSeriesData(data);
   }
 
   void emitError(String status){
     _errorController.add(status);
+  }
+
+  /// Track time series data for graphing
+  /// Extracts values from received data and stores them in time series fields
+  void _trackTimeSeriesData(Map<String, dynamic> receivedData) {
+    final now = DateTime.now();
+
+    for (var field in timeSeriesFields) {
+      try {
+        // Extract value using the field's built-in extraction method
+        final numValue = field.extractValue(receivedData);
+
+        if (numValue != null) {
+          // Add to time series
+          field.addValue(now, numValue);
+
+          // Prune old data (>5 minutes)
+          field.pruneOldData();
+        }
+      } catch (e) {
+        // Silently skip if field extraction fails
+        debugPrint('Failed to track field ${field.name}: $e');
+      }
+    }
   }
 
   void emitDeviceInfo(Map<String,dynamic> data){
@@ -95,6 +125,7 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     this.controlItems = const [],
     this.customSections = const [],
     this.categoryConfigs = const [],
+    this.timeSeriesFields = const [],
     this.deviceModel,
   });
 

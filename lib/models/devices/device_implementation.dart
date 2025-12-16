@@ -4,6 +4,7 @@ import 'generic_rendering/device_control_item.dart';
 import 'generic_rendering/device_custom_section.dart';
 import 'generic_rendering/device_data_field.dart';
 import 'generic_rendering/device_menu_item.dart';
+import 'time_series_field_config.dart';
 
 /// Base interface for device-specific implementations
 /// Following Shelly's successful strategy pattern
@@ -54,6 +55,10 @@ abstract class DeviceImplementation {
   /// Returns the list of category configurations for grouping data fields
   /// Default implementation returns empty list
   List<DeviceCategoryConfig> getCategoryConfigs() => [];
+
+  /// Returns the list of time series fields to track for graphing
+  /// Default implementation returns empty list (no tracking)
+  List<TimeSeriesFieldConfig> getTimeSeriesFields() => [];
 
   /// Returns the icon to display for this device type
   IconData getDeviceIcon();

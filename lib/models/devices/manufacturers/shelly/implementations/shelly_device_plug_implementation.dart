@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_data_field.dart';
+import '../../../time_series_field_config.dart';
 import 'shelly_device_base_implementation.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_service.dart';
@@ -133,7 +134,23 @@ class ShellyDevicePlugImplementation extends ShellyDeviceBaseImplementation {
   String getFetchCommand() {
     return  "Switch.GetStatus";
   }
-  
+
+  @override
+  List<TimeSeriesFieldConfig> getTimeSeriesFields() {
+    return [
+      TimeSeriesFieldConfig(
+        name: 'Leistung',
+        type: DataFieldType.watt,
+        mapping: ['apower'],
+      ),
+      TimeSeriesFieldConfig(
+        name: 'Spannung',
+        type: DataFieldType.voltage,
+        mapping: ['voltage'],
+      ),
+    ];
+  }
+
   @override
   IconData getDeviceIcon() {
     return Icons.power;

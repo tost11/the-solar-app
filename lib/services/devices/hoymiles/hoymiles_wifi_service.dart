@@ -12,6 +12,7 @@ import 'package:the_solar_app/services/devices/base_device_service.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/hoymiles_device.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/RealDataNew.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/GetConfig.pb.dart';
+import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/SetConfig.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/NetworkInfo.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/CommandPB.pb.dart';
 import 'hoymiles_protocol.dart';
@@ -222,16 +223,18 @@ class HoymilesWifiService extends BaseDeviceService {
   /// Since Hoymiles uses TCP on port 10081, not HTTP, we need to probe the port directly
   static Future<NetworkDevice?> isResponseFromManufacturer(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) async {
+    port ??= HoymilesProtocol.DTU_PORT;
     try {
       debugPrint('[Hoymiles] Probing $ipAddress:${HoymilesProtocol.DTU_PORT}');
 
       // Attempt to connect to Hoymiles port
       final socket = await Socket.connect(
         ipAddress,
-        HoymilesProtocol.DTU_PORT,
+        port,
         timeout: connectionInfo.timeout,
       );
 
@@ -568,6 +571,7 @@ class HoymilesWifiService extends BaseDeviceService {
         var inv = inverters[sn];
         if (!inv.containsKey("pv")) {
           inv["pv"] = <String, dynamic>{};
+          inv["pv"]["power"]=0;
         }
         var pvRes = inv["pv"] as Map<String, dynamic>;
         String portNumber = pv.portNumber.toString();
@@ -579,6 +583,8 @@ class HoymilesWifiService extends BaseDeviceService {
             'energy_daily': pv.energyDaily / 1000.0, // Wh → kWh
             'error_code': pv.errorCode,
           };
+
+        inv["pv"]["power"] +=  pvRes[portNumber]["power"];
       }
 
       result["inverters"] = inverters;
@@ -619,128 +625,493 @@ class HoymilesWifiService extends BaseDeviceService {
   Future<Map<String, dynamic>?> getConfig() async {
     if (_connection == null || !_connection!.isConnected) {
       debugPrint('[Hoymiles] Not connected');
-      return null;
+      throw Exception("Gerät nicht verbunden");
     }
 
-    try {
-      final request = GetConfigResDTO()
-        ..offset = HoymilesProtocol.OFFSET
-        ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor() - 60;
+    final request = GetConfigResDTO()
+      ..offset = HoymilesProtocol.OFFSET
+      ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor() - 60;
 
-      final parsed = await _connection!.sendRequest(
-        request,
-        HoymilesProtocol.CMD_GET_CONFIG,
+    final parsed = await _connection!.sendRequest(
+      request,
+      HoymilesProtocol.CMD_GET_CONFIG,
+    );
+
+    if (parsed == null) {
+      debugPrint('[Hoymiles] No response from device');
+      throw Exception("Kein Antwort vom Gerät");
+    }
+
+    final response = GetConfigReqDTO.fromBuffer(parsed['data'] as List<int>);
+
+    // Extract power limit (divide by 10 to get percentage)
+    final limitPowerMypower = response.limitPowerMypower;
+    final powerLimitPercent = limitPowerMypower != 0
+        ? (limitPowerMypower / 10).round()
+        : null;
+
+    // Convert to Map with power limit
+    final configMap = response.toProto3Json() as Map<String, dynamic>;
+    configMap['power_limit_percent'] = powerLimitPercent;
+
+    return configMap;
+  }
+
+  /// Helper to format IP address from individual octets
+  String _formatIpAddress(int a, int b, int c, int d) {
+    return '$a.$b.$c.$d';
+  }
+
+  /// Helper to format MAC address from individual bytes
+  String _formatMacAddress(int m0, int m1, int m2, int m3, int m4, int m5) {
+    return '${m0.toRadixString(16).padLeft(2, '0').toUpperCase()}:'
+        '${m1.toRadixString(16).padLeft(2, '0').toUpperCase()}:'
+        '${m2.toRadixString(16).padLeft(2, '0').toUpperCase()}:'
+        '${m3.toRadixString(16).padLeft(2, '0').toUpperCase()}:'
+        '${m4.toRadixString(16).padLeft(2, '0').toUpperCase()}:'
+        '${m5.toRadixString(16).padLeft(2, '0').toUpperCase()}';
+  }
+
+  /// Helper to format network mode
+  String _formatNetmodeSelect(int mode) {
+    switch (mode) {
+      case 1:
+        return 'WiFi';
+      case 2:
+        return 'SIM';
+      case 3:
+        return 'LAN';
+      default:
+        return 'Unbekannt ($mode)';
+    }
+  }
+
+  /// Helper to format boolean values
+  String _formatBoolean(int value) {
+    return value != 0 ? 'Ja' : 'Nein';
+  }
+
+  /// Get device information (formatted config data as flat map)
+  Future<Map<String, dynamic>> getDeviceInformation() async {
+    // Get raw config
+    final config = await getConfig();
+    if (config == null) {
+      throw Exception("Konnte Konfiguration nicht laden");
+    }
+
+    // Return flat map with formatted fields
+    final result = <String, dynamic>{};
+
+    // Network fields
+    if (config.containsKey('ipAddr0') && config.containsKey('ipAddr1') &&
+        config.containsKey('ipAddr2') && config.containsKey('ipAddr3')) {
+      result['ip_address'] = _formatIpAddress(
+        config['ipAddr0'] as int,
+        config['ipAddr1'] as int,
+        config['ipAddr2'] as int,
+        config['ipAddr3'] as int,
       );
-
-      if (parsed == null) {
-        debugPrint('[Hoymiles] No response from device');
-        return null;
-      }
-
-      final response = GetConfigReqDTO.fromBuffer(parsed['data'] as List<int>);
-
-      // Extract power limit (divide by 10 to get percentage)
-      final limitPowerMypower = response.limitPowerMypower;
-      final powerLimitPercent = limitPowerMypower != 0
-          ? (limitPowerMypower / 10).round()
-          : null;
-
-      // Convert to Map with power limit
-      final configMap = response.toProto3Json() as Map<String, dynamic>;
-      configMap['power_limit_percent'] = powerLimitPercent;
-
-      return configMap;
-    } catch (e) {
-      debugPrint('[Hoymiles] Error in getConfig: $e');
-      return null;
     }
+    if (config.containsKey('mac0') && config.containsKey('mac1') &&
+        config.containsKey('mac2') && config.containsKey('mac3') &&
+        config.containsKey('mac4') && config.containsKey('mac5')) {
+      result['mac_address'] = _formatMacAddress(
+        config['mac0'] as int,
+        config['mac1'] as int,
+        config['mac2'] as int,
+        config['mac3'] as int,
+        config['mac4'] as int,
+        config['mac5'] as int,
+      );
+    }
+    if (config.containsKey('defaultGateway0') && config.containsKey('defaultGateway1') &&
+        config.containsKey('defaultGateway2') && config.containsKey('defaultGateway3')) {
+      result['gateway'] = _formatIpAddress(
+        config['defaultGateway0'] as int,
+        config['defaultGateway1'] as int,
+        config['defaultGateway2'] as int,
+        config['defaultGateway3'] as int,
+      );
+    }
+    if (config.containsKey('subnetMask0') && config.containsKey('subnetMask1') &&
+        config.containsKey('subnetMask2') && config.containsKey('subnetMask3')) {
+      result['subnet_mask'] = _formatIpAddress(
+        config['subnetMask0'] as int,
+        config['subnetMask1'] as int,
+        config['subnetMask2'] as int,
+        config['subnetMask3'] as int,
+      );
+    }
+    if (config.containsKey('cableDns0') && config.containsKey('cableDns1') &&
+        config.containsKey('cableDns2') && config.containsKey('cableDns3')) {
+      result['dns_server'] = _formatIpAddress(
+        config['cableDns0'] as int,
+        config['cableDns1'] as int,
+        config['cableDns2'] as int,
+        config['cableDns3'] as int,
+      );
+    }
+    if (config.containsKey('dhcpSwitch')) {
+      result['dhcp_enabled'] = (config['dhcpSwitch'] as int) != 0;
+    }
+
+    // WiFi fields
+    if (config.containsKey('wifiSsid')) {
+      result['wifi_ssid'] = config['wifiSsid'];
+    }
+    if (config.containsKey('netmodeSelect')) {
+      result['network_mode'] = _formatNetmodeSelect(config['netmodeSelect'] as int);
+    }
+    if (config.containsKey('dtuApSsid')) {
+      result['ap_ssid'] = config['dtuApSsid'];
+    }
+    if (config.containsKey('dtuApPass')) {
+      result['ap_password'] = config['dtuApPass'] as String;
+    }
+
+    // Device fields
+    if (config.containsKey('dtuSn')) {
+      result['dtu_serial'] = config['dtuSn'];
+    }
+    if (config.containsKey('accessModel')) {
+      result['access_model'] = config['accessModel'];
+    }
+    if (config.containsKey('invType')) {
+      result['inverter_type'] = config['invType'];
+    }
+
+    // Server fields
+    if (config.containsKey('serverDomainName')) {
+      result['server_domain'] = config['serverDomainName'];
+    }
+    if (config.containsKey('serverport')) {
+      result['server_port'] = config['serverport'];
+    }
+    if (config.containsKey('serverSendTime')) {
+      result['send_interval'] = config['serverSendTime'];
+    }
+
+    // Settings fields
+    if (config.containsKey('power_limit_percent')) {
+      result['power_limit_percent'] = config['power_limit_percent'];
+    }
+    if (config.containsKey('lockPassword')) {
+      result['lock_password_set'] = (config['lockPassword'] as int) != 0;
+    }
+    if (config.containsKey('lockTime')) {
+      result['lock_time_minutes'] = config['lockTime'];
+    }
+    if (config.containsKey('zeroExportEnable')) {
+      result['zero_export_enabled'] = (config['zeroExportEnable'] as int) != 0;
+    }
+    if (config.containsKey('zeroExport433Addr')) {
+      result['zero_export_address'] = config['zeroExport433Addr'];
+    }
+    if (config.containsKey('channelSelect')) {
+      result['channel'] = config['channelSelect'];
+    }
+    if (config.containsKey('meterKind')) {
+      result['meter_kind'] = config['meterKind'];
+    }
+    if (config.containsKey('meterInterface')) {
+      result['meter_interface'] = config['meterInterface'];
+    }
+
+    // APN fields (for SIM mode)
+    if (config.containsKey('apnSet')) {
+      result['apn_set'] = config['apnSet'];
+    }
+    if (config.containsKey('apnName')) {
+      result['apn_name'] = config['apnName'];
+    }
+    if (config.containsKey('apnPassword')) {
+      result['apn_password'] = config['apnPassword'] as String;
+    }
+
+    // Sub1G fields
+    if (config.containsKey('sub1gSweepSwitch')) {
+      result['sub1g_sweep_switch'] = (config['sub1gSweepSwitch'] as int) != 0;
+    }
+    if (config.containsKey('sub1gWorkChannel')) {
+      result['sub1g_work_channel'] = config['sub1gWorkChannel'];
+    }
+
+    return result;
   }
 
   /// Get network information
   Future<Map<String, dynamic>?> getNetworkInfo() async {
     if (_connection == null || !_connection!.isConnected) {
       debugPrint('[Hoymiles] Not connected');
-      return null;
+      throw Exception("Gerät nicht verbunden");
     }
 
-    try {
-      final request = NetworkInfoResDTO()
-        ..offset = HoymilesProtocol.OFFSET
-        ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+    final request = NetworkInfoResDTO()
+      ..offset = HoymilesProtocol.OFFSET
+      ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
 
-      final parsed = await _connection!.sendRequest(
-        request,
-        HoymilesProtocol.CMD_NETWORK_INFO_RES,
-      );
+    final parsed = await _connection!.sendRequest(
+      request,
+      HoymilesProtocol.CMD_NETWORK_INFO_RES,
+    );
 
-      if (parsed == null) {
-        debugPrint('[Hoymiles] No response from device');
-        return null;
-      }
-
-      final response = NetworkInfoReqDTO.fromBuffer(parsed['data'] as List<int>);
-
-      // Convert to Map
-      return response.toProto3Json() as Map<String, dynamic>;
-    } catch (e) {
-      debugPrint('[Hoymiles] Error in getNetworkInfo: $e');
-      return null;
+    if (parsed == null) {
+      debugPrint('[Hoymiles] No response from device');
+      throw Exception("Kein Antwort vom Gerät");
     }
+
+    final response = NetworkInfoReqDTO.fromBuffer(parsed['data'] as List<int>);
+
+    // Convert to Map
+    return response.toProto3Json() as Map<String, dynamic>;
   }
 
+
   /// Set power limit (percentage 0-100)
-  Future<bool> setPowerLimit(int limitPercent) async {
+  Future<void> setPowerLimit(int limitPercent) async {
     if (_connection == null || !_connection!.isConnected) {
       debugPrint('[Hoymiles] Not connected');
-      return false;
+      throw Exception("Gerät nicht verbunden");
     }
 
     // Validate input (0-100%)
     if (limitPercent < 0 || limitPercent > 100) {
       debugPrint('[Hoymiles] Invalid limit: $limitPercent% (must be 0-100)');
-      return false;
+      throw Exception("Invalid limit: $limitPercent% (must be 0-100)");
     }
 
-    try {
-      // Convert percentage to protocol format (multiply by 10)
-      final limitLevel = limitPercent * 10;
+    // Convert percentage to protocol format (multiply by 10)
+    final limitLevel = limitPercent * 10;
 
-      // Build data string: "A:{limitLevel},B:0,C:0\r"
-      final dataString = 'A:$limitLevel,B:0,C:0\r';
+    // Build data string: "A:{limitLevel},B:0,C:0\r"
+    final dataString = 'A:$limitLevel,B:0,C:0\r';
 
-      // Create CommandResDTO request
-      final timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
-      final request = CommandResDTO()
-        ..time = timestamp
-        ..action = 8  // CMD_ACTION_LIMIT_POWER
-        ..packageNub = 1
-        ..packageNow = 0
-        ..tid = Int64(timestamp)
-        ..data = dataString;
+    // Create CommandResDTO request
+    final timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+    final request = CommandResDTO()
+      ..time = timestamp
+      ..action = 8  // CMD_ACTION_LIMIT_POWER
+      ..packageNub = 1
+      ..packageNow = 0
+      ..tid = Int64(timestamp)
+      ..data = dataString;
 
-      final parsed = await _connection!.sendRequest(
-        request,
-        HoymilesProtocol.CMD_COMMAND_RES_DTO,
-      );
+    final parsed = await _connection!.sendRequest(
+      request,
+      HoymilesProtocol.CMD_COMMAND_RES_DTO,
+    );
 
-      if (parsed == null) {
-        debugPrint('[Hoymiles] No response from setPowerLimit');
-        return false;
-      }
-
-      // Parse response
-      final response = CommandReqDTO.fromBuffer(parsed['data'] as List<int>);
-
-      if (response.errCode == 0) {
-        debugPrint('[Hoymiles] Power limit set successfully to $limitPercent%');
-        return true;
-      } else {
-        debugPrint('[Hoymiles] Power limit failed with error code: ${response.errCode}');
-        return false;
-      }
-    } catch (e) {
-      debugPrint('[Hoymiles] Error in setPowerLimit: $e');
-      return false;
+    if (parsed == null) {
+      debugPrint('[Hoymiles] No response from setPowerLimit');
+      throw Exception("Kein Antwort vom Gerät erhalten");
     }
+
+    // Parse response
+    final response = CommandReqDTO.fromBuffer(parsed['data'] as List<int>);
+
+    if (response.errCode == 0) {
+      debugPrint('[Hoymiles] Power limit set successfully to $limitPercent%');
+      return;
+    }
+    throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errCode}");
+  }
+
+  /// Set WiFi configuration (SSID and password)
+  Future<void> setWifiConfig(String ssid, String password) async {
+    if (_connection == null || !_connection!.isConnected) {
+      debugPrint('[Hoymiles] Not connected');
+      throw Exception("Gerät nicht verbunden");
+    }
+
+    // 1. Get current configuration first
+    final currentConfigParsed = await _connection!.sendRequest(
+      GetConfigResDTO()
+        ..offset = HoymilesProtocol.OFFSET
+        ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor() - 60,
+      HoymilesProtocol.CMD_GET_CONFIG,
+    );
+
+    if (currentConfigParsed == null) {
+      debugPrint('[Hoymiles] Failed to get current config');
+      throw Exception("Error while sending command");
+    }
+
+    final getConfigProto = GetConfigReqDTO.fromBuffer(
+      currentConfigParsed['data'] as List<int>
+    );
+
+    // 2. Create SetConfig request by copying ALL fields from GetConfig
+    // This is required by the protocol - all fields must be present
+    final request = SetConfigResDTO()
+      ..offset = HoymilesProtocol.OFFSET
+      ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor()
+      ..appPage = 1  // CRITICAL: Required by protocol
+      ..netmodeSelect = 1  // CRITICAL: 1 = WiFi mode
+      ..lockPassword = getConfigProto.lockPassword
+      ..lockTime = getConfigProto.lockTime
+      ..limitPowerMypower = getConfigProto.limitPowerMypower
+      ..zeroExport433Addr = getConfigProto.zeroExport433Addr
+      ..zeroExportEnable = getConfigProto.zeroExportEnable
+      ..channelSelect = getConfigProto.channelSelect
+      ..serverSendTime = getConfigProto.serverSendTime
+      ..serverport = getConfigProto.serverport
+      ..apnSet = getConfigProto.apnSet
+      ..meterKind = getConfigProto.meterKind
+      ..meterInterface = getConfigProto.meterInterface
+      ..wifiSsid = ssid  // Update SSID
+      ..wifiPassword = password  // Update password
+      ..serverDomainName = getConfigProto.serverDomainName
+      ..invType = getConfigProto.invType
+      ..dtuSn = getConfigProto.dtuSn
+      ..accessModel = getConfigProto.accessModel
+      ..mac0 = getConfigProto.mac0
+      ..mac1 = getConfigProto.mac1
+      ..mac2 = getConfigProto.mac2
+      ..mac3 = getConfigProto.mac3
+      ..dhcpSwitch = getConfigProto.dhcpSwitch
+      ..ipAddr0 = getConfigProto.ipAddr0
+      ..ipAddr1 = getConfigProto.ipAddr1
+      ..ipAddr2 = getConfigProto.ipAddr2
+      ..ipAddr3 = getConfigProto.ipAddr3
+      ..subnetMask0 = getConfigProto.subnetMask0
+      ..subnetMask1 = getConfigProto.subnetMask1
+      ..subnetMask2 = getConfigProto.subnetMask2
+      ..subnetMask3 = getConfigProto.subnetMask3
+      ..defaultGateway0 = getConfigProto.defaultGateway0
+      ..defaultGateway1 = getConfigProto.defaultGateway1
+      ..defaultGateway2 = getConfigProto.defaultGateway2
+      ..defaultGateway3 = getConfigProto.defaultGateway3
+      ..apnName = getConfigProto.apnName
+      ..apnPassword = getConfigProto.apnPassword
+      ..sub1gSweepSwitch = getConfigProto.sub1gSweepSwitch
+      ..sub1gWorkChannel = getConfigProto.sub1gWorkChannel
+      ..cableDns0 = getConfigProto.cableDns0
+      ..cableDns1 = getConfigProto.cableDns1
+      ..cableDns2 = getConfigProto.cableDns2
+      ..cableDns3 = getConfigProto.cableDns3
+      ..mac4 = getConfigProto.mac4
+      ..mac5 = getConfigProto.mac5
+      ..dtuApSsid = getConfigProto.dtuApSsid
+      ..dtuApPass = getConfigProto.dtuApPass;
+
+    // 3. Send SET_CONFIG command
+    final parsed = await _connection!.sendRequest(
+      request,
+      HoymilesProtocol.CMD_SET_CONFIG,
+    );
+
+    if (parsed == null) {
+      debugPrint('[Hoymiles] No response from setWifiConfig');
+      throw Exception("Informationen gesendet aber keine Antwort erhalten");
+    }
+
+    // 4. Parse response
+    final response = SetConfigReqDTO.fromBuffer(parsed['data'] as List<int>);
+
+    if (response.errorCode == 0) {
+      debugPrint("[Hoymiles] Wifi config set successful");
+      return;
+    }
+    throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errorCode}");
+  }
+
+  /// Set AP WiFi configuration (Access Point SSID and password)
+  Future<void> setApWifiConfig(String ssid, String password) async {
+    if (_connection == null || !_connection!.isConnected) {
+      debugPrint('[Hoymiles] Not connected');
+      throw Exception("Gerät nicht verbunden");
+    }
+
+    // 1. Get current configuration first
+    final currentConfigParsed = await _connection!.sendRequest(
+      GetConfigResDTO()
+        ..offset = HoymilesProtocol.OFFSET
+        ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor() - 60,
+      HoymilesProtocol.CMD_GET_CONFIG,
+    );
+
+    if (currentConfigParsed == null) {
+      debugPrint('[Hoymiles] Failed to get current config');
+      throw Exception("Error while sending command");
+    }
+
+    final getConfigProto = GetConfigReqDTO.fromBuffer(
+      currentConfigParsed['data'] as List<int>
+    );
+
+    // 2. Create SetConfig request by copying ALL fields from GetConfig
+    // IMPORTANT: Unlike setWifiConfig, we preserve netmodeSelect instead of forcing it to 1
+    // because AP can run in any mode (WiFi/SIM/LAN)
+    final request = SetConfigResDTO()
+      ..offset = HoymilesProtocol.OFFSET
+      ..time = (DateTime.now().millisecondsSinceEpoch / 1000).floor()
+      ..appPage = 1  // CRITICAL: Required by protocol
+      ..netmodeSelect = getConfigProto.netmodeSelect  // Preserve current mode (AP works in all modes)
+      ..lockPassword = getConfigProto.lockPassword
+      ..lockTime = getConfigProto.lockTime
+      ..limitPowerMypower = getConfigProto.limitPowerMypower
+      ..zeroExport433Addr = getConfigProto.zeroExport433Addr
+      ..zeroExportEnable = getConfigProto.zeroExportEnable
+      ..channelSelect = getConfigProto.channelSelect
+      ..serverSendTime = getConfigProto.serverSendTime
+      ..serverport = getConfigProto.serverport
+      ..apnSet = getConfigProto.apnSet
+      ..meterKind = getConfigProto.meterKind
+      ..meterInterface = getConfigProto.meterInterface
+      ..wifiSsid = getConfigProto.wifiSsid
+      ..wifiPassword = getConfigProto.wifiPassword
+      ..serverDomainName = getConfigProto.serverDomainName
+      ..invType = getConfigProto.invType
+      ..dtuSn = getConfigProto.dtuSn
+      ..accessModel = getConfigProto.accessModel
+      ..mac0 = getConfigProto.mac0
+      ..mac1 = getConfigProto.mac1
+      ..mac2 = getConfigProto.mac2
+      ..mac3 = getConfigProto.mac3
+      ..dhcpSwitch = getConfigProto.dhcpSwitch
+      ..ipAddr0 = getConfigProto.ipAddr0
+      ..ipAddr1 = getConfigProto.ipAddr1
+      ..ipAddr2 = getConfigProto.ipAddr2
+      ..ipAddr3 = getConfigProto.ipAddr3
+      ..subnetMask0 = getConfigProto.subnetMask0
+      ..subnetMask1 = getConfigProto.subnetMask1
+      ..subnetMask2 = getConfigProto.subnetMask2
+      ..subnetMask3 = getConfigProto.subnetMask3
+      ..defaultGateway0 = getConfigProto.defaultGateway0
+      ..defaultGateway1 = getConfigProto.defaultGateway1
+      ..defaultGateway2 = getConfigProto.defaultGateway2
+      ..defaultGateway3 = getConfigProto.defaultGateway3
+      ..apnName = getConfigProto.apnName
+      ..apnPassword = getConfigProto.apnPassword
+      ..sub1gSweepSwitch = getConfigProto.sub1gSweepSwitch
+      ..sub1gWorkChannel = getConfigProto.sub1gWorkChannel
+      ..cableDns0 = getConfigProto.cableDns0
+      ..cableDns1 = getConfigProto.cableDns1
+      ..cableDns2 = getConfigProto.cableDns2
+      ..cableDns3 = getConfigProto.cableDns3
+      ..mac4 = getConfigProto.mac4
+      ..mac5 = getConfigProto.mac5
+      ..dtuApSsid = ssid        // Update AP SSID
+      ..dtuApPass = password;   // Update AP password
+
+    // 3. Send SET_CONFIG command
+    final parsed = await _connection!.sendRequest(
+      request,
+      HoymilesProtocol.CMD_SET_CONFIG,
+    );
+
+    if (parsed == null) {
+      debugPrint('[Hoymiles] No response from setApWifiConfig');
+      throw Exception("Informationen gesendet aber keine Antwort erhalten");
+    }
+
+    // 4. Parse response
+    final response = SetConfigReqDTO.fromBuffer(parsed['data'] as List<int>);
+
+    if (response.errorCode == 0) {
+      debugPrint("[Hoymiles] AP WiFi config set successful");
+      return;
+    }
+    throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errorCode}");
   }
 }

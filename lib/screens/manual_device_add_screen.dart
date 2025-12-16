@@ -274,7 +274,10 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
         timeout: const Duration(seconds: 5),
       );
 
+      debugPrint("Probing manually created device complete");
+
       if (device != null && mounted) {
+        //TODO check what this here is for and if it even is working
         // If input was IP, try to resolve back to hostname
         if (isIp && hostnameForDevice == null) {
           hostnameForDevice = await _resolveIpToHostname(ipAddressToProbe);

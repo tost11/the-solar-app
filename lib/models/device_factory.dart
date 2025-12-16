@@ -34,7 +34,7 @@ class DeviceFactory {
           final modelLower = deviceModel?.toLowerCase() ?? '';
           if (modelLower.startsWith('spem')) {
             return ShellyDeviceEm3Bluetooth.fromJson(json);
-          } else if (modelLower.startsWith('snpl')) {
+          } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
             return ShellyDevicePlugBluetooth.fromJson(json);
           } else {
             // Generic Shelly device for other models
@@ -56,7 +56,7 @@ class DeviceFactory {
           final modelLower = deviceModel?.toLowerCase() ?? '';
           if (modelLower.startsWith('spem')) {
             return ShellyDeviceEm3Wifi.fromJson(json);
-          } else if (modelLower.startsWith('snpl')) {
+          } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
             return ShellyDevicePlugWifi.fromJson(json);
           } else {
             // Generic Shelly device for other models
@@ -103,7 +103,7 @@ class DeviceFactory {
           deviceSn: deviceSn,
           deviceModel: deviceModel,
         );
-      } else if (modelLower.startsWith('snpl')) {
+      } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
         return ShellyDevicePlugBluetooth(
           id: id,
           name: name,
@@ -208,7 +208,7 @@ class DeviceFactory {
           hostname: hostname,
           port: port,
         );
-      } else if (modelLower.startsWith('snpl')) {
+      } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
         return ShellyDevicePlugWifi(
           id: id,
           name: name,

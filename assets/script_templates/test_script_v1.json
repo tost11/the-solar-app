@@ -1,0 +1,32 @@
+{
+  "id": "test-script",
+  "name": "Test script for debug purpose",
+  "version": "2.0.0",
+  "description": "Just prints defined variables on scheduled",
+  "compatibleDevices": [],
+  "requiredDevices": [],
+  "author": "TheSolarApp",
+  "tags": ["test"],
+  "parameters": [
+    {
+      "name": "PRINT_TEXT",
+      "label": "Text to print",
+      "description": "This text is prited to console on script",
+      "type": "string",
+      "required": true,
+      "defaultValue": "Hello World"
+    },
+    {
+      "name": "PRINT_TIMER",
+      "label": "Measurement Topic",
+      "description": "Time script is sheduled",
+      "type": "duraction",
+      "required": true,
+      "defaultValue": 10000,
+      "advancedOption": true
+    }
+  ],
+  "sourceCode": "function runFunction() {\n  print(PRINT_TEXT)\n}\n\n// Timer: alle 5 Sekunden\nTimer.set(PRINT_TIMER, true, runFunction);\n\nrunFunction()",
+  "createdAt": "2025-01-09T00:00:00Z",
+  "updatedAt": "2025-01-09T00:00:00Z"
+}

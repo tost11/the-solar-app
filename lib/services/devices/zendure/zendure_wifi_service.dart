@@ -19,16 +19,18 @@ class ZendureWifiService extends BaseDeviceService {
   /// Returns a NetworkDevice if the response is from a Zendure device, null otherwise
   static Future<NetworkDevice?> isResponseFromManufacturer(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) async {
+    port ??= 80;
     try {
       // Check if initial response indicates we should probe further
       // (e.g., 404 means root endpoint doesn't exist, which is expected for Zendure devices)
       if (initialResponse == null || initialResponse.statusCode == 404) {
         // Make request to Zendure-specific endpoint
         final response = await http.get(
-          Uri.parse('http://$ipAddress/properties/report'),
+          Uri.parse('http://$ipAddress:$port/properties/report'),
           headers: {'Accept': 'application/json'},
         ).timeout(connectionInfo.timeout);
 
@@ -51,7 +53,7 @@ class ZendureWifiService extends BaseDeviceService {
                 manufacturer: DEVICE_MANUFACTURER_ZENDURE,
                 deviceModel: deviceModel ?? 'Unknown',
                 serialNumber: serialNumber,
-                port: 80
+                port: port
               );
             }
           }
@@ -161,7 +163,11 @@ class ZendureWifiService extends BaseDeviceService {
 
     try {
       var obj = jsonDecode(response.body);
-      return MapUtils.OM(obj,["properties"]) as Map<String,dynamic>;
+      var res = MapUtils.OM(obj,["properties"]);
+      if(res == null){
+        return {};
+      }
+      return res as Map<String,dynamic>;
     }catch(e){
       print(e.toString());
       throw Exception("could not parse");

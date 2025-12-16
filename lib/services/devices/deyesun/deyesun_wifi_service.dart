@@ -40,9 +40,11 @@ class DeyeSunWifiService extends BaseDeviceService {
   /// Returns a NetworkDevice if the response is from a DeyeSun device, null otherwise
   static Future<NetworkDevice?> isResponseFromManufacturer(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) async {
+    port ??= 80;
     try {
       if(initialResponse != null){
         final serverHeader = initialResponse.headers['server']?.toLowerCase();
@@ -55,19 +57,19 @@ class DeyeSunWifiService extends BaseDeviceService {
       if ((initialResponse.statusCode == 401 && serverHeader == 'httpd' && wwwAuthHeader != null && wwwAuthHeader.contains('Basic realm="USER LOGIN"')) || //not authenticated
           (initialResponse.statusCode == 200 && serverHeader != null &&  serverHeader.startsWith("microsoft-iis/"))){//already authenticated (device stores ip and status of authentication)
 
-          debugPrint('[$ipAddress] DeyeSun device detected, authenticating...');
+          debugPrint('[$ipAddress:$port] DeyeSun device detected, authenticating...');
 
           // Authenticate and fetch device info from status page
           // Use provided credentials or defaults
           final response = await _fetchWithAuth(
-            'http://$ipAddress/status.html',
+            'http://$ipAddress:$port/status.html',
             timeoutSeconds: connectionInfo.timeout.inSeconds,
             username: connectionInfo.username ?? 'admin',
             password: connectionInfo.password ?? 'admin',
           );
           final statusCode = response.statusCode;
 
-          debugPrint('[$ipAddress] Response status: $statusCode');
+          debugPrint('[$ipAddress:$port] Response status: $statusCode');
 
           if (statusCode == 200) {
             // Read response body
@@ -75,7 +77,7 @@ class DeyeSunWifiService extends BaseDeviceService {
 
             // Parse JavaScript variables from HTML
             final jsVars = _parseJavaScriptVariables(body);
-            debugPrint('[$ipAddress] Parsed ${jsVars.length} variables');
+            debugPrint('[$ipAddress:$port] Parsed ${jsVars.length} variables');
 
             final serialNumber = jsVars['cover_mid'];
             //final firmwareVersion = jsVars['cover_ver'];
@@ -83,23 +85,23 @@ class DeyeSunWifiService extends BaseDeviceService {
             final model = getModelFromSerial(serialNumber) ?? "Unknown";
 
             if (serialNumber != null && serialNumber.isNotEmpty) {
-              debugPrint('[$ipAddress] DeyeSun device verified: SN=$serialNumber');
+              debugPrint('[$ipAddress:$port] DeyeSun device verified: SN=$serialNumber');
               return NetworkDevice(
                 ipAddress: ipAddress,
                 hostname: null,
                 manufacturer: DEVICE_MANUFACTURER_DEYE_SUN,
                 deviceModel: model,
                 serialNumber: serialNumber,
-                port: 80
+                port: port
               );
             } else {
-              debugPrint('[$ipAddress] DeyeSun device found but no serial number');
-              debugPrint('[$ipAddress] Available variables: ${jsVars.keys.join(", ")}');
+              debugPrint('[$ipAddress:$port] DeyeSun device found but no serial number');
+              debugPrint('[$ipAddress:$port] Available variables: ${jsVars.keys.join(", ")}');
             }
           } else {
             final body = await response.transform(utf8.decoder).join();
-            debugPrint('[$ipAddress] DeyeSun authentication failed: $statusCode');
-            debugPrint('[$ipAddress] Response body preview: ${body.substring(0, body.length > 200 ? 200 : body.length)}');
+            debugPrint('[$ipAddress:$port] DeyeSun authentication failed: $statusCode');
+            debugPrint('[$ipAddress:$port] Response body preview: ${body.substring(0, body.length > 200 ? 200 : body.length)}');
           }
         }
       }

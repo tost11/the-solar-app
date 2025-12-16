@@ -1,4 +1,7 @@
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
+import 'package:the_solar_app/models/devices/capabilities/inverter_capability.dart';
+import '../../../../utils/map_utils.dart';
+import '../../capabilities/device_role_config.dart';
 import '../../mixins/additional_port_mixin.dart';
 import '../../mixins/fetch_data_timeout_mixin.dart';
 import 'implementations/deyesun_device_implementation.dart';
@@ -8,7 +11,7 @@ import 'package:the_solar_app/services/devices/deyesun/deyesun_wifi_service.dart
 import '../../../../constants/command_constants.dart';
 
 /// DeyeSun device connected via WiFi/Network
-class WiFiDeyeSunDevice extends GenericWiFiAuthDevice<DeyeSunWifiService, DeyeSunDeviceImplementation> with AdditionalPortMixin, FetchDataTimeoutMixin {
+class WiFiDeyeSunDevice extends GenericWiFiAuthDevice<DeyeSunWifiService, DeyeSunDeviceImplementation> with AdditionalPortMixin, FetchDataTimeoutMixin, InverterCapability, DeviceRoleConfig {
 
   static const Duration DEFAULT_FETCH_INTERVAL = Duration(seconds: 20);
 
@@ -224,6 +227,25 @@ class WiFiDeyeSunDevice extends GenericWiFiAuthDevice<DeyeSunWifiService, DeyeSu
     json.addAll(additionalPortToJson());
     json.addAll(fetchDataIntervalToJson());
     return json;
+  }
+
+  @override
+  List<DeviceRole> getFixedRoles() => [
+    DeviceRole.inverter
+  ];
+
+  @override
+  double? getSolarPVPower(Map<String, dynamic> data) {
+    final value = MapUtils.OM(data, ['config', 'webdata_now_p']);
+    if (value == null) return null;
+    return (value as num).toDouble();
+  }
+
+  @override
+  double? getSolarGridPower(Map<String, dynamic> data) {
+    final value = MapUtils.OM(data, ['data', 'dc_total_power']);//this is not correct but other value is always more so it looks good (maby naming from soruce lib wrong)
+    if (value == null) return null;
+    return (value as num).toDouble();
   }
 
 }

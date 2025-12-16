@@ -36,6 +36,14 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
     fetchDataInterval = DEFAULT_FETCH_INTERVAL;
   }
 
+  @override
+  String? getDeviceModelGroup(){
+    if(deviceModel != null){
+      return deviceModel?.split("-").elementAt(0);
+    }
+    return deviceModel;
+  }
+
   /// Named constructor for JSON deserialization
   ShellyBluetoothDeviceTemplate.fromJsonFields({
     required Map<String, dynamic> json,

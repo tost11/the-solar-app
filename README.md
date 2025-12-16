@@ -26,6 +26,8 @@ Also support for OpenDTU for easier managing of device.
 - **Real-Time Monitoring**: Track power production, consumption, and battery levels
 - **Device Configuration**: WiFi setup, power limits, access point configuration
 - **Cross-Platform**: Built with Flutter for mobile (Android) and desktop support
+- **System View**: Combine multiple devices into unified solar systems with aggregated metrics
+- **Shelly Script Automation**: Deploy JavaScript automation templates for zero-export control and monitoring
 
 ## Currently Supported
 
@@ -80,8 +82,7 @@ Also support for OpenDTU for easier managing of device.
   - Expandable inverter list UI
 
 #### Hoymiles (WiFi/Network)
-- **HMS Inverters**: Standalone micro inverters with built-in WiFi (HMS-400W, HMS-800W-2T, HMS-2000DW-4T)
-- **DTU Devices**: Gateway managing multiple inverters (DTU-WLite, DTU-Pro, DTU-Lite-S)
+- **HMS Inverters**: Standalone micro inverters with built-in WiFi (HMS-400W, HMS-800W-2T, etc.)
 - **Connection Types**: WiFi/Network (TCP + Protobuf on port 10081)
 - **Features**:
   - Real-time power production monitoring
@@ -106,14 +107,40 @@ Also support for OpenDTU for easier managing of device.
 - **Modbus TCP**: Advanced protocol support for DeyeSun and Kostal devices
 - **Protobuf over TCP**: Binary protocol for Hoymiles devices (port 10081)
 
+## System View
+
+Combine multiple devices into logical solar systems for unified monitoring. Assign roles to devices (inverter, battery, smart meter, load) and view aggregated metrics:
+- Total solar production from all inverters
+- Battery charge/discharge power and average SOC
+- Grid import/export from smart meters
+- Total consumption from load devices
+
+Access via the Systems menu. Each system automatically connects all assigned devices (WiFi + Bluetooth).
+
+## Shelly Script Automation
+
+Deploy JavaScript automation templates directly to Shelly devices for advanced control without cloud dependency. Scripts run autonomously on the device.
+
+**Available Templates:**
+- **Zendure Power Control**: Zero-export automation that automatically balances Zendure power stations based on Shelly EM3 grid measurements (bidirectional: discharge to home, charge from excess)
+
+**Usage:** Open Shelly device → Menu → "Scripts" → "From Template"
+
+For detailed documentation on creating and configuring scripts, see [SHELLY_SCRIPT_AUTOMATION.md](doc/SHELLY_SCRIPT_AUTOMATION.md).
+
 ## Roadmap
+
+### Completed ✅
+
+- **System View**: Combine multiple devices with role-based aggregation
+- **Shelly Script Automation**: Template-based JavaScript automation
+- **Zero-Export Control**: Automatic power balancing with Zendure + Shelly EM3
 
 ### Coming Soon 🚀
 
-- **Full Home System**: Combine multiple devices into integrated solar systems
-- **Persistent Configuration**: Save system setups locally or via Shelly storage
+- **Additional Script Templates**: More automation scenarios
+- **Local Backup & Restore**: Save/restore system configurations locally
 - **Additional Device Brands**: Expand support for more manufacturers
-- **Automatic power limitation**: Easy set up Shelly scripts to control power of inverters from shelly power measurement devices
 
 ## Getting Started
 
@@ -140,6 +167,13 @@ Also support for OpenDTU for easier managing of device.
 3. **Check Flutter setup**
    ```bash
    flutter doctor
+   ```
+   
+4**Prepare build platforms**
+   ```bash
+   flutter create --platforms=android .
+   #flutter create --platforms=linux .
+   #flutter create --platforms=windows .
    ```
    Ensure all required components are installed.
 
@@ -206,6 +240,18 @@ Permissions are requested at runtime when needed.
 - **WiFi Configuration**: Set up device network connection
 - **Power Limits**: Configure output power limits
 - **Remove Device**: Long-press device in list and select delete
+
+### System Management
+
+- **Create System**: Tap "Systems" → "Add" to create a new system
+- **Add Devices to System**: Select devices and assign roles (inverter, battery, meter, load)
+- **View System Metrics**: System detail screen shows aggregated data from all devices
+
+### Shelly Script Automation
+
+- **Browse Templates**: Open Shelly device → Menu → "Scripts" → "From Template"
+- **Configure & Deploy**: Fill in parameters (auto-populated when possible), preview or install directly
+- **Manage Scripts**: Update parameters, upgrade to newer versions, enable/disable, or delete
 
 ### Network Discovery
 
@@ -319,11 +365,6 @@ protoc \
   NetworkInfo.proto
 ```
 
-This generates the following files in `lib/models/devices/hoymiles/protobuf/`:
-- `RealDataNew.pb.dart`, `RealDataNew.pbenum.dart`, `RealDataNew.pbjson.dart`
-- `GetConfig.pb.dart`, `GetConfig.pbenum.dart`, `GetConfig.pbjson.dart`
-- `NetworkInfo.pb.dart`, `NetworkInfo.pbenum.dart`, `NetworkInfo.pbjson.dart`
-
 #### When to Regenerate
 
 Regenerate the protobuf files when:
@@ -336,7 +377,6 @@ Regenerate the protobuf files when:
 ### Code Style
 
 - Use `DialogUtils.executeWithLoading()` for async operations
-- Use arrow functions `(e) => ...` for one-line callbacks
 - Use `MessageUtils` for user feedback (errors, success, warnings)
 - Follow Flutter/Dart style guidelines
 

@@ -286,7 +286,7 @@ class NetworkScanService {
         );
 
         try {
-          final device = await detectorInfo.detector(ipAddress, response, connectionInfo);
+          final device = await detectorInfo.detector(ipAddress, null, response, connectionInfo);
           if (device != null) {
             return device;
           }
@@ -341,7 +341,9 @@ class NetworkScanService {
         ).timeout(timeout);
       }
 
-      return await detectorInfo.detector(ipAddress, response, connectionInfo);
+      debugPrint("Give http repose: ${response?.statusCode.toString()} and url: $ipAddress:$port to detector");
+
+      return await detectorInfo.detector(ipAddress, port, response, connectionInfo);
     } catch (e) {
       debugPrint('Manual probe error for $manufacturerKey at $ipAddress: $e');
       rethrow;

@@ -1,16 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
+import 'package:the_solar_app/models/devices/capabilities/battery_capability.dart';
+import 'package:the_solar_app/models/devices/capabilities/device_role_config.dart';
+import 'package:the_solar_app/models/devices/capabilities/inverter_capability.dart';
+import 'package:the_solar_app/models/devices/capabilities/load_capability.dart';
 import 'package:the_solar_app/models/devices/generic_wifi_device.dart';
 import 'package:the_solar_app/models/devices/manufacturers/zendure/implementations/zendure_device_implementation.dart';
 import 'package:the_solar_app/models/devices/mixins/fetch_data_timeout_mixin.dart';
 import 'package:the_solar_app/services/devices/zendure/zendure_wifi_service.dart';
+import 'package:the_solar_app/utils/map_utils.dart';
 import '../../../../constants/command_constants.dart';
 import 'implementations/wifi_zendure_device_implementation.dart';
 
 /// Zendure device connected via WiFi/Network
+///
+/// Fixed roles: Inverter + Battery
+/// Zendure devices always act as both solar inverter and battery storage.
 class WiFiZendureDevice extends GenericWiFiDevice<
     ZendureWifiService,
-    ZendureDeviceImplementation> with FetchDataTimeoutMixin {
+    ZendureDeviceImplementation>
+    with FetchDataTimeoutMixin, InverterCapability, BatteryCapability, DeviceRoleConfig, LoadCapability {
 
   static const Duration DEFAULT_FETCH_INTERVAL = Duration(seconds: 5);
   WiFiZendureDevice({
@@ -121,6 +130,7 @@ class WiFiZendureDevice extends GenericWiFiDevice<
     );
     device.deserializeWiFi(json);
     device.fetchDataIntervalFromJson(json, DEFAULT_FETCH_INTERVAL);
+    device.roleConfigFromJson(json);
     return device;
   }
 
@@ -129,6 +139,59 @@ class WiFiZendureDevice extends GenericWiFiDevice<
     return {
       ...super.toJson(),
       ...fetchDataIntervalToJson(),
+      ...roleConfigToJson(),
     };
+  }
+
+  // ===== DeviceRoleConfig implementation =====
+
+  @override
+  List<DeviceRole> getFixedRoles() => [
+        DeviceRole.inverter,
+        DeviceRole.battery,
+        DeviceRole.load,
+      ];
+
+  // ===== InverterCapability implementation =====
+
+  @override
+  double? getSolarPVPower(Map<String, dynamic> data) {
+    final value = MapUtils.OM(data, ['data', 'properties', 'solarInputPower']);
+    if (value == null) return null;
+    return (value as num).toDouble();
+  }
+
+  @override
+  double? getSolarGridPower(Map<String, dynamic> data) {
+    final value = MapUtils.OM(data, ['data', 'properties', 'outputHomePower']);
+    if (value == null) return null;
+    return (value as num).toDouble();
+  }
+
+  @override
+  double? getLoadPower(Map<String, dynamic> data) {
+    final value = MapUtils.OM(data, ['data', 'properties', 'gridInputPower']);
+    if (value == null) return null;
+    return (value as num).toDouble();
+  }
+
+  // ===== BatteryCapability implementation =====
+
+  @override
+  double? getBatteryPower(Map<String, dynamic> data) {
+    final input = MapUtils.OM(data, ['data', 'properties', 'outputPackPower']);//needs to be swapped because zendure handle data other way around
+    final output = MapUtils.OM(data, ['data', 'properties', 'packInputPower']);//needs to be swapped because zendure handle data other way around
+    if (input != null && output != null) {
+      // Positive = charging, negative = discharging
+      return ((input as num) - (output as num)).toDouble();
+    }
+    return null;
+  }
+
+  @override
+  double? getBatterySOC(Map<String, dynamic> data) {
+    final value = MapUtils.OM(data, ['data', 'properties', 'electricLevel']);
+    if (value == null) return null;
+    return (value as num).toDouble();
   }
 }

@@ -25,7 +25,10 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
       subtitle: 'Netzwerkverbindung einrichten',
       icon: Icons.wifi,
       iconColor: Colors.green,
-      onTap: (context, device) async {
+      onTap: (ctx) async {
+        final context = ctx.context;
+        final device = ctx.device;
+
         int? firmware = MapUtils.OM(device.data, ["firmwares", "MASTER"]) as int?;
         if (firmware == null) {
           MessageUtils.showInfo(context,"Nicht möglich da die aktuelle Firmware unbekannt ist, in einem moment noch mal versuchen (warte noch auf daten)");
@@ -70,7 +73,10 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
       },
       icon: Icons.storage,
       iconColor: Colors.green,
-      onTap: (context, device) async {
+      onTap: (ctx) async {
+        final context = ctx.context;
+        final device = ctx.device;
+
         int? firmware = MapUtils.OM(device.data, ["firmwares", "MASTER"]) as int?;
         if (firmware == null) {
           MessageUtils.showInfo(context,"Nicht möglich da die aktuelle Firmware unbekannt ist, in einem moment noch mal versuchen (warte noch auf daten)");

@@ -34,9 +34,11 @@ class KostalWifiService extends BaseDeviceService {
   /// Returns a NetworkDevice if Kostal device detected, null otherwise
   static Future<NetworkDevice?> isResponseFromManufacturer(
     String ipAddress,
+    int ? port,
     http.Response? initialResponse,
     AdditionalConnectionInfo connectionInfo,
   ) async {
+    port ??= 80;
     try {
       // ===== STAGE 1: HTTP Detection =====
 
@@ -60,7 +62,7 @@ class KostalWifiService extends BaseDeviceService {
         return null; // Not a Kostal device
       }
 
-      debugPrint('[$ipAddress] Potential Kostal device detected via HTTP (SCB=$hasScbTitle, branding=$hasBrandingXml)');
+      debugPrint('[$ipAddress:$port] Potential Kostal device detected via HTTP (SCB=$hasScbTitle, branding=$hasBrandingXml)');
 
       // ===== STAGE 2: TCP Verification =====
 
@@ -73,7 +75,7 @@ class KostalWifiService extends BaseDeviceService {
           timeout: const Duration(seconds: 2),
         );
 
-        debugPrint('[$ipAddress] TCP connection to port 1502 successful - Kostal device confirmed');
+        debugPrint('[$ipAddress:$port] TCP connection to port 1502 successful - Kostal device confirmed');
 
         // Close socket immediately
         await socket.close();
@@ -85,10 +87,10 @@ class KostalWifiService extends BaseDeviceService {
           manufacturer: DEVICE_MANUFACTURER_KOSTAL,
           deviceModel: 'Kostal Plenticore', // Generic model (branding.xml needs auth)
           serialNumber: 'kostal_$ipAddress', // Use IP-based serial
-          port: 80, // HTTP port for web interface
+          port: port, // HTTP port for web interface
         );
       } catch (e) {
-        debugPrint('[$ipAddress] TCP connection to port 1502 failed: $e');
+        debugPrint('[$ipAddress:$port] TCP connection to port 1502 failed: $e');
         // HTML looked like Kostal but Modbus port not accessible - likely false positive
         return null;
       } finally {
@@ -97,7 +99,7 @@ class KostalWifiService extends BaseDeviceService {
         } catch (_) {}
       }
     } catch (e) {
-      debugPrint('[$ipAddress] Error detecting Kostal device: $e');
+      debugPrint('[$ipAddress:$port] Error detecting Kostal device: $e');
     }
 
     return null;
