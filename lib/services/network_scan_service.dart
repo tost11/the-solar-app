@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:lan_scanner/lan_scanner.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:mutex/mutex.dart';
+import 'package:dart_ping/dart_ping.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/services/devices/kostal/kostal_modbus_connection.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 import '../models/network_device.dart';
 import '../models/manufacturer_detector_info.dart';
 import '../models/additional_connection_info.dart';
+import '../models/network_scan_progress.dart';
 import 'devices/zendure/zendure_wifi_service.dart';
 import 'devices/deyesun/deyesun_wifi_service.dart';
 import 'devices/deyesun/deyesun_modbus_connection.dart';
@@ -144,16 +147,18 @@ class NetworkScanService {
   /// [timeout] - Timeout for each ping (default: 10 second)
   /// [firstIP] - First IP address in range to scan (default: 1)
   /// [lastIP] - Last IP address in range to scan (default: 255)
-  /// [onProgress] - Callback for progress updates with (totalHosts, checkedCount, foundDevice)
+  /// [onProgress] - Callback for progress updates with NetworkScanProgress model
   /// [maxConcurrentProbes] - Maximum number of concurrent device probes (default: 10)
+  /// [maxConcurrentPings] - Maximum number of concurrent ping operations (default: 20)
   /// [probeTimeout] - Timeout for HTTP probing each device (default: 2 seconds for fast scanning)
   Future<List<NetworkDevice>> scanNetwork({
     Duration timeout = const Duration(seconds: 10),
     int firstIP = 1,
     int lastIP = 255,
     List<String>? subnets, // NEW: Accept list of subnets instead of getting WiFi IP
-    void Function(int totalHosts, int checkedCount, NetworkDevice? foundDevice)? onProgress,
+    void Function(NetworkScanProgress progress)? onProgress,
     int maxConcurrentProbes = 10,
+    int maxConcurrentPings = 40,
     Duration probeTimeout = const Duration(seconds: 2),
   }) async {
     print('\n═══════════════════════════════════════════════════════════════');
@@ -169,61 +174,102 @@ class NetworkScanService {
       }
 
       print('Subnets to scan: ${subnets.join(", ")}');
-      print('Timeout per host: ${timeout.inMilliseconds}ms');
+      print('Timeout per ping: ${timeout.inMilliseconds}ms');
 
-      // Scan all subnets in parallel
-      final List<Future<List<Host>>> scanFutures = [];
-
+      // Generate list of all IPs to scan
+      final List<String> ipList = [];
       for (final subnet in subnets) {
-        print('Queuing scan for subnet: $subnet.1 - $subnet.$lastIP');
-        final scanFuture = _scanner.quickIcmpScanAsync(
-          subnet,
-          firstIP: firstIP,
-          lastIP: lastIP,
-          timeout: timeout,
-        );
-        scanFutures.add(scanFuture);
+        for (int i = firstIP; i <= lastIP; i++) {
+          ipList.add('$subnet.$i');
+        }
       }
 
-      // Wait for all subnet scans to complete
-      final allSubnetResults = await Future.wait(scanFutures);
+      print('Generated ${ipList.length} IP addresses to scan across ${subnets.length} subnet(s)');
+      print('Using $maxConcurrentPings parallel ping workers');
 
-      // Combine all hosts from all subnets
-      final List<Host> hosts = [];
-      for (int i = 0; i < allSubnetResults.length; i++) {
-        final subnetHosts = allSubnetResults[i];
-        hosts.addAll(subnetHosts);
-        print('Subnet ${subnets[i]}: Found ${subnetHosts.length} reachable hosts');
+      // Ping all IPs using worker pool pattern
+      final List<String> reachableIPs = [];
+      int nextPingIndex = 0;
+      int checkedPingCount = 0;
+      final totalIPs = ipList.length;
+
+      // Progress tracking
+      int foundHostsCount = 0;
+      int knownDevicesCount = 0;
+      int testedDevicesCount = 0;
+
+      // Notify about total IPs to scan
+      onProgress?.call(NetworkScanProgress(
+        totalIPs: totalIPs,
+        checkedIPs: 0,
+        foundHosts: 0,
+        knownDevices: 0,
+        testedDevices: 0,
+      ));
+
+      Future<void> pingNext() async {
+        while (true) {
+          String? ip;
+          await _progressMutex.protect(() async {
+            if (nextPingIndex < ipList.length) {
+              ip = ipList[nextPingIndex];
+              nextPingIndex++;
+            }
+          });
+
+          if (ip == null) break;
+
+          final isReachable = await _pingHost(ip!, timeout);
+
+          await _progressMutex.protect(() async {
+            checkedPingCount++;
+            if (isReachable) {
+              reachableIPs.add(ip!);
+              foundHostsCount++;
+            }
+            // Progress update DURING ping sweep
+            onProgress?.call(NetworkScanProgress(
+              totalIPs: totalIPs,
+              checkedIPs: checkedPingCount,
+              foundHosts: foundHostsCount,
+              knownDevices: knownDevicesCount,
+              testedDevices: testedDevicesCount,
+            ));
+          });
+        }
       }
 
-      print('Ping sweep completed. Found ${hosts.length} total reachable hosts across ${subnets.length} subnet(s)');
-      print('\nProbing devices for manufacturer identification...');
+      // Start ping workers
+      final pingWorkers = List.generate(
+        maxConcurrentPings.clamp(1, totalIPs),
+        (_) => pingNext(),
+      );
+      await Future.wait(pingWorkers);
+
+      print('Ping sweep completed. Found ${reachableIPs.length} reachable hosts out of ${totalIPs} IPs');
+      print('\nProbing ${reachableIPs.length} devices for manufacturer identification...');
       print('Using continuous parallel probing with max $maxConcurrentProbes concurrent probes');
 
-      // Notify about total hosts found
-      final totalHosts = hosts.length;
+      // Notify about transition to probing phase
       _checkedCount = 0;
-      onProgress?.call(totalHosts, 0, null);
 
       // Worker pool pattern: continuous parallelism
-      final hostList = hosts.toList();
       int nextIndex = 0;
 
       Future<void> probeNext() async {
         while (true) {
-          // Get next host index atomically
+          // Get next IP index atomically
           int? index;
           await _progressMutex.protect(() async {
-            if (nextIndex < hostList.length) {
+            if (nextIndex < reachableIPs.length) {
               index = nextIndex;
               nextIndex++;
             }
           });
 
-          if (index == null) break; // No more hosts
+          if (index == null) break; // No more IPs
 
-          final host = hostList[index!];
-          final ipAddress = host.internetAddress.address;
+          final ipAddress = reachableIPs[index!];
           final device = await _probeDevice(ipAddress, probeTimeout);
 
           // Mutex-protected callback and counter update
@@ -231,16 +277,27 @@ class NetworkScanService {
             _checkedCount++;
             if (device != null) {
               _discoveredDevices.add(device);
+              knownDevicesCount++;
               print('  ✓ ${device.manufacturer} device found: ${device.serialNumber}');
+            } else {
+              testedDevicesCount++;
             }
-            onProgress?.call(totalHosts, _checkedCount, device);
+
+            onProgress?.call(NetworkScanProgress(
+              totalIPs: totalIPs,
+              checkedIPs: checkedPingCount,
+              foundHosts: foundHostsCount,
+              knownDevices: knownDevicesCount,
+              testedDevices: testedDevicesCount,
+              device: device,
+            ));
           });
         }
       }
 
       // Start worker pool
       final workers = List.generate(
-        maxConcurrentProbes.clamp(1, totalHosts),
+        maxConcurrentProbes.clamp(1, reachableIPs.length),
         (_) => probeNext(),
       );
 
@@ -248,7 +305,7 @@ class NetworkScanService {
 
       print('\n═══════════════════════════════════════════════════════════════');
       print('Network scan completed.');
-      print('Total hosts found: ${hosts.length}');
+      print('Total reachable hosts: ${reachableIPs.length}');
       print('Supported devices found: ${_discoveredDevices.length}');
       print('═══════════════════════════════════════════════════════════════\n');
 
@@ -301,6 +358,55 @@ class NetworkScanService {
     }
 
     return null;
+  }
+
+  /// Pings a single IP address with timeout protection
+  ///
+  /// Returns true if host responds to ICMP ping within timeout
+  Future<bool> _pingHost(String ipAddress, Duration timeout) async {
+    try {
+
+      // Language-agnostic ping parser that works across English, German, Portuguese, etc.
+      // Matches numeric patterns (time in ms with float support, TTL) instead of language-specific keywords
+      // Uses lookahead assertions to match time and TTL in any order
+      final parser = PingParser(
+        // Match: IP address + time (integer or float with . or ,) + TTL (in any order)
+        // Time supports: "34ms", "34.5ms", "34,5ms" (European format)
+        // Works with: "time=34ms", "time= 34ms", "time = 43.5 ms"
+        // Order-independent: "time=45ms TTL=64" or "TTL=64 time=45ms" both work
+        // Example EN: "Reply from 192.168.1.1: bytes=32 time=45ms TTL=64"
+        // Example DE: "Antwort von 192.168.1.1: Bytes=32 Zeit=45.5ms TTL=64"
+        // Example PT: "Resposta de 192.168.1.1: bytes=32 tempo=45,5ms TTL=64"
+        responseRgx: RegExp(
+          r'(?<ip>\d+\.\d+\.\d+\.\d+)(?=.*?[=:]?\s*(?<time>\d+[.,]?\d*)\s*ms)(?=.*?TTL[=:]?\s*(?<ttl>\d+)).*',
+          caseSensitive: false,
+        ),
+        // Summary pattern - simplified numeric extraction (optional, not critical)
+        summaryRgx: RegExp(r'(?<tx>\d+).*?(?<rx>\d+)'),
+        // Error detection: check if "host" appears in output (unreachable/unknown)
+        timeoutRgx: RegExp(r'host', caseSensitive: false),
+        timeToLiveRgx: RegExp(r'(?!)'),//this never matches no good solution for different languages
+        unknownHostStr: RegExp(r' host ', caseSensitive: false),
+      );
+
+      final ping = Ping(ipAddress, count: 1, parser: parser, encoding: Utf8Codec(allowMalformed: true));
+      //final ping = Ping(ipAddress, count: 1, parser: parser, encoding: systemEncoding);
+      //final ping = Ping(ipAddress, count: 1);
+
+      // Wait for first response with timeout
+      await for (final response in ping.stream.timeout(timeout)) {
+        if (response.error == null && response.response?.time != null) {
+          // Successful ping response
+          return true;
+        }
+      }
+
+      // No successful response received
+      return false;
+    } catch (e) {
+      // Timeout or error occurred
+      return false;
+    }
   }
 
   /// Manually probe a specific manufacturer's device at given IP

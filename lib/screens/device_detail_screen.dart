@@ -10,8 +10,16 @@ import '../models/devices/generic_rendering/device_menu_item_context.dart';
 import '../services/device_storage_service.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/cards/device_data_card.dart';
+import '../widgets/cards/device_info_card.dart';
+import '../widgets/charts/time_series_chart_card.dart';
+import '../widgets/controls/device_control_widget.dart';
+import '../widgets/device_menu_bottom_sheet.dart';
+import '../widgets/headers/connection_status_header.dart';
+import '../widgets/layouts/responsive_data_grid.dart';
 import '../utils/globals.dart';
 import '../utils/message_utils.dart';
+import '../utils/responsive_breakpoints.dart';
 import 'device_settings_screen.dart';
 import 'device_graph_screen.dart';
 
@@ -19,12 +27,14 @@ class DeviceDetailScreen extends StatefulWidget {
   final Device device;
   final bool skipAutoConnect;
   final String? systemId;
+  final bool showAppBar;
 
   const DeviceDetailScreen({
     super.key,
     required this.device,
     this.skipAutoConnect = false,
     this.systemId,
+    this.showAppBar = true,
   });
 
   @override
@@ -168,282 +178,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   void _showMoreFunctions(BuildContext screenContext) {
-    showModalBottomSheet(
+    DeviceMenuBottomSheet.show(
       context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.only(top: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(
-                  'Weitere Funktionen',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-              const Divider(),
-              // Wrap menu items in scrollable area
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Dynamically build menu items from device configuration
-                      ...widget.device.menuItems.map((menuItem) {
-                        final isDisabled = menuItem.disabled?.call(widget.device) ?? false;
-                        return ListTile(
-                          leading: Icon(
-                            menuItem.icon,
-                            color: menuItem.iconColor,
-                          ),
-                          title: Text(menuItem.name),
-                          subtitle: menuItem.subtitle != null ? Text(menuItem.subtitle!) : null,
-                          enabled: !isDisabled,
-                          onTap: isDisabled ? null : () {
-                            Navigator.pop(context);
-                            menuItem.onTap(
-                              DeviceMenuItemContext(
-                                context: screenContext,
-                                device: widget.device,
-                                extraParameters: {'systemId': widget.systemId},
-                              ),
-                            );
-                          },
-                        );
-                      }),
-                      // Bottom padding for safe area
-                      SizedBox(height: MediaQuery.of(context).padding.bottom),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      device: widget.device,
+      extraParameters: {'systemId': widget.systemId},
     );
   }
 
-  String _formatLastSeen(DateTime lastSeen) {
-    final now = DateTime.now();
-    final difference = now.difference(lastSeen);
+  // Removed: _formatLastSeen - now using TimeFormatUtils.formatLastSeen()
+  // Removed: _buildInfoCard - now using DeviceInfoCard widget
+  // Removed: _buildDataCard - now using DeviceDataCard widget
 
-    if (difference.inMinutes < 1) {
-      return 'Gerade eben';
-    } else if (difference.inHours < 1) {
-      return 'Vor ${difference.inMinutes} Minuten';
-    } else if (difference.inDays < 1) {
-      return 'Vor ${difference.inHours} Stunden';
-    } else if (difference.inDays < 7) {
-      return 'Vor ${difference.inDays} Tagen';
-    } else {
-      return '${lastSeen.day}.${lastSeen.month}.${lastSeen.year}';
-    }
-  }
-
-  Widget _buildInfoCard(String title, String value, IconData icon) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDataCard(String title, String value, String unit, {IconData? icon, bool showDetailButton = false}) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (icon != null) ...[
-                  Icon(
-                    icon,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 6),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (showDetailButton) ...[
-                  const SizedBox(width: 4),
-                  InkWell(
-                    onTap: () => _showFieldDetailDialog(title, value, unit),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Icon(
-                        Icons.visibility,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (unit.isNotEmpty) ...[
-                  const SizedBox(width: 4),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: Text(
-                      unit,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildControlWidget(DeviceControlItem controlItem, dynamic currentValue, bool isEnabled) {
-    switch (controlItem.type) {
-      case ControlType.switchToggle:
-        return Switch(
-          value: currentValue is bool ? currentValue : false,
-          onChanged: isEnabled
-              ? (newValue) async {
-                  try {
-                    await controlItem.onChanged(context, widget.device, newValue);
-                  } catch (e) {
-                    if (mounted) {
-                      MessageUtils.showError(context, 'Fehler beim Umschalten: $e');
-                    }
-                  }
-                }
-              : null,
-        );
-
-      case ControlType.textField:
-        return SizedBox(
-          width: 150,
-          child: TextField(
-            controller: TextEditingController(text: currentValue?.toString() ?? ''),
-            enabled: isEnabled,
-            textAlign: TextAlign.right,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            ),
-            onSubmitted: (newValue) async {
-              try {
-                await controlItem.onChanged(context, widget.device, newValue);
-              } catch (e) {
-                if (mounted) {
-                  MessageUtils.showError(context, 'Fehler beim Speichern: $e');
-                }
-              }
-            },
-          ),
-        );
-
-      case ControlType.slider:
-        return SizedBox(
-          width: 150,
-          child: Slider(
-            value: (currentValue is num ? currentValue.toDouble() : 0.0)
-                .clamp(controlItem.min ?? 0.0, controlItem.max ?? 100.0),
-            min: controlItem.min ?? 0.0,
-            max: controlItem.max ?? 100.0,
-            divisions: controlItem.divisions,
-            onChanged: isEnabled
-                ? (newValue) async {
-                    try {
-                      await controlItem.onChanged(context, widget.device, newValue);
-                    } catch (e) {
-                      if (mounted) {
-                        MessageUtils.showError(context, 'Fehler beim Anpassen: $e');
-                      }
-                    }
-                  }
-                : null,
-          ),
-        );
-
-      case ControlType.button:
-        return ElevatedButton(
-          onPressed: isEnabled
-              ? () async {
-                  try {
-                    await controlItem.onChanged(context, widget.device, null);
-                  } catch (e) {
-                    if (mounted) {
-                      MessageUtils.showError(context, 'Fehler beim Ausführen: $e');
-                    }
-                  }
-                }
-              : null,
-          child: const Text('Ausführen'),
-        );
-
-      default:
-        return const SizedBox.shrink();
-    }
-  }
+  // Removed: _buildControlWidget - now using DeviceControlWidget widget
 
   /// Shows a dialog with the full field name and value
   void _showFieldDetailDialog(String fieldName, String value, String unit) {
@@ -551,27 +297,22 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     }
   }
 
-  /// Standard 2-column grid (existing implementation)
+  /// Responsive grid with adaptive columns (mobile: 2, tablet: 3, desktop: 4)
   Widget _buildStandardGrid(List<DeviceDataField> fields) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.5,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
+    return ResponsiveDataGrid(
       itemCount: fields.length,
       itemBuilder: (context, index) {
         final field = fields[index];
         final value = field.valueExtractor(_receivedData);
-        return _buildDataCard(
-          field.name,
-          field.formatValue(value),
-          field.unit,
+        return DeviceDataCard(
+          title: field.name,
+          value: field.formatValue(value),
+          unit: field.unit,
           icon: field.icon,
           showDetailButton: field.showDetailButton,
+          onDetailTap: field.showDetailButton
+              ? () => _showFieldDetailDialog(field.name, field.formatValue(value), field.unit)
+              : null,
         );
       },
     );
@@ -730,73 +471,314 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isConnected = widget.device.getServiceConnection()?.isConnected() == true;
-
-    debugPrint("is Connected $isConnected");
-
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (bool didPop, dynamic result) async {
-        if (didPop && isConnected) {
-          // Disconnect when leaving the screen
-          await _disconnectDevice();
-        }
-      },
-      child: AppScaffold(
-        appBar: AppBarWidget(
-          title: "Geräteansicht",
-          actions: [
-            // Graph icon button (visible when connected and has time series fields)
-            if (widget.device.timeSeriesFields.isNotEmpty)
-              IconButton(
-                icon: const Icon(Icons.show_chart),
-                onPressed: isConnected
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DeviceGraphScreen(
-                              device: widget.device,
-                            ),
-                          ),
-                        );
-                      }
-                    : null,
-                tooltip: 'Live-Diagramme',
+  /// Build controls section only
+  Widget _buildControlsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Steuerung',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-            // Functions menu icon (always visible, disabled when not connected)
-            IconButton(
-              icon: const Icon(Icons.app_registration),
-              onPressed: isConnected ? () => _showMoreFunctions(context) : null,
-              tooltip: 'Weitere Funktionen',
-            ),
-            // Settings icon for device configuration
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DeviceSettingsScreen(
-                      device: widget.device,
-                    ),
-                  ),
-                );
-
-                // Refresh if settings were changed
-                if (result == true) {
-                  setState(() {
-                    // Trigger rebuild with updated device name
-                  });
-                }
-              },
-              tooltip: 'Geräteeinstellungen',
-            ),
-          ],
         ),
-        body: SingleChildScrollView(
+        const SizedBox(height: 12),
+
+        // Build control items
+        ...widget.device.controlItems.map((controlItem) {
+          final currentValue = controlItem.valueExtractor(_receivedData);
+          // Disable if valueExtractor returns null
+          final isEnabled = currentValue != null;
+
+          return Card(
+            child: Opacity(
+              opacity: isEnabled ? 1.0 : 0.5,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    // Icon (if provided)
+                    if (controlItem.icon != null) ...[
+                      Icon(
+                        controlItem.icon,
+                        size: 24,
+                        color: isEnabled
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey,
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+
+                    // Control name (left side)
+                    Expanded(
+                      child: Text(
+                        controlItem.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isEnabled ? null : Colors.grey,
+                        ),
+                      ),
+                    ),
+
+                    // Control widget (right side)
+                    DeviceControlWidget(
+                      controlItem: controlItem,
+                      device: widget.device,
+                      currentValue: currentValue,
+                      isEnabled: isEnabled,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Build data fields section only
+  Widget _buildDataFieldsSection() {
+    // Filter data fields based on expert mode
+    final visibleFields = widget.device.dataFields
+        .where((field) => !field.expertMode || Globals.expertMode)
+        .toList();
+
+    // Group fields by category
+    final Map<String?, List<DeviceDataField>> groupedFields = {};
+    for (final field in visibleFields) {
+      groupedFields.putIfAbsent(field.category, () => []).add(field);
+    }
+
+    // Get sorted list of categories
+    final sortedCategories = _getSortedCategories(
+      groupedFields.keys,
+      widget.device.categoryConfigs,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Uncategorized fields first (no heading)
+        if (groupedFields.containsKey(null) &&
+            _hasNonEmptyFields(groupedFields[null]!))
+          _buildCategoryGrid(
+            groupedFields[null]!,
+            null,
+            CategoryLayout.standard,
+          ),
+
+        // Categorized fields
+        ...sortedCategories.where((cat) => cat != null).map((category) {
+          final fields = groupedFields[category]!;
+
+          // Skip category if all fields are empty
+          if (!_hasNonEmptyFields(fields)) {
+            return const SizedBox.shrink();
+          }
+
+          final config = _getCategoryConfig(
+            category!,
+            widget.device.categoryConfigs,
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 24),
+              _buildCategoryHeader(
+                config?.displayName ?? category,
+              ),
+              const SizedBox(height: 12),
+              _buildCategoryGrid(
+                fields,
+                category,
+                config?.layout ?? CategoryLayout.standard,
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Build controls and data on left, graphs on right (tablet/desktop WITH graphs)
+  Widget _buildControlsDataAndGraphsLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // LEFT COLUMN: Controls + Data (60% width)
+        Expanded(
+          flex: 6,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Controls section (if any exist)
+              if (widget.device.controlItems.isNotEmpty) ...[
+                _buildControlsSection(),
+                const SizedBox(height: 24),
+              ],
+
+              // Data fields below controls
+              _buildDataFieldsSection(),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 16),
+
+        // RIGHT COLUMN: Graphs (40% width)
+        Expanded(
+          flex: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Section header
+              Text(
+                'Live-Diagramme',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Letzte 5 Min | alle 5 Sek',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Graphs vertically stacked
+              ...widget.device.timeSeriesFields.map((field) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: TimeSeriesChartCard(field: field),
+                );
+              }),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build data on left, controls on right (tablet/desktop WITHOUT graphs)
+  Widget _buildDataAndControlsLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // LEFT COLUMN: Data fields (70% width)
+        Expanded(
+          flex: 7,
+          child: _buildDataFieldsSection(),
+        ),
+
+        const SizedBox(width: 16),
+
+        // RIGHT COLUMN: Controls (30% width)
+        Expanded(
+          flex: 3,
+          child: widget.device.controlItems.isNotEmpty
+              ? _buildControlsSection()
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  /// Build graphs section (mobile fallback - not currently used)
+  Widget _buildGraphsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Section header
+        Text(
+          'Live-Diagramme',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Datenbereich: Letzte 5 Minuten | Aktualisierung: alle 5 Sekunden',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Responsive graph grid (tablet: 2 cols, desktop: 3 cols)
+        ResponsiveGraphGrid(
+          itemCount: widget.device.timeSeriesFields.length,
+          itemBuilder: (context, index) {
+            return TimeSeriesChartCard(
+              field: widget.device.timeSeriesFields[index],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  /// Build AppBar actions for device detail screen
+  List<Widget> _buildAppBarActions(BuildContext context, bool isConnected) {
+    return [
+      // Graph icon button (visible when connected and has time series fields)
+      if (widget.device.timeSeriesFields.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.show_chart),
+          onPressed: isConnected
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DeviceGraphScreen(
+                        device: widget.device,
+                      ),
+                    ),
+                  );
+                }
+              : null,
+          tooltip: 'Live-Diagramme',
+        ),
+      // Functions menu icon (always visible, disabled when not connected)
+      IconButton(
+        icon: const Icon(Icons.app_registration),
+        onPressed: isConnected ? () => _showMoreFunctions(context) : null,
+        tooltip: 'Weitere Funktionen',
+      ),
+      // Settings icon for device configuration
+      IconButton(
+        icon: const Icon(Icons.settings),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DeviceSettingsScreen(
+                device: widget.device,
+              ),
+            ),
+          );
+
+          // Refresh if settings were changed
+          if (result == true) {
+            setState(() {
+              // Trigger rebuild with updated device name
+            });
+          }
+        },
+        tooltip: 'Geräteeinstellungen',
+      ),
+    ];
+  }
+
+  /// Build body content for device detail screen
+  Widget _buildBody(BuildContext context, bool isConnected) {
+    return SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -805,52 +787,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             ..._buildCustomSections(CustomSectionPosition.beforeDeviceInfo, isConnected),
 
             // Compressed Device Header
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    // Status Icon
-                    Icon(
-                      isConnected
-                          ? (widget.device.connectionType == ConnectionType.bluetooth
-                              ? Icons.bluetooth_connected
-                              : Icons.wifi)
-                          : (widget.device.connectionType == ConnectionType.bluetooth
-                              ? Icons.bluetooth_disabled
-                              : Icons.wifi_off),
-                      size: 40,
-                      color: isConnected
-                          ? Colors.green
-                          : Colors.grey,
-                    ),
-                    const SizedBox(width: 16),
-                    // Device Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.device.name.isEmpty ? 'Gerät' : widget.device.name,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _connectionStatus,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            ConnectionStatusHeader(
+              deviceName: widget.device.name,
+              connectionStatus: _connectionStatus,
+              connectionType: widget.device.connectionType,
+              isConnected: isConnected,
             ),
 
             // Custom sections after device info
@@ -885,67 +826,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               // Custom sections after connection controls
               ..._buildCustomSections(CustomSectionPosition.afterConnectionControls, isConnected),
 
-              // Controls Section
-              if (widget.device.controlItems.isNotEmpty) ...[
-                Text(
-                  'Steuerung',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 12),
-
-                // Build control items
-                ...widget.device.controlItems.map((controlItem) {
-                  final currentValue = controlItem.valueExtractor(_receivedData);
-                  // Disable if valueExtractor returns null
-                  final isEnabled = currentValue != null;
-
-                  return Card(
-                    child: Opacity(
-                      opacity: isEnabled ? 1.0 : 0.5,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: Row(
-                          children: [
-                            // Icon (if provided)
-                            if (controlItem.icon != null) ...[
-                              Icon(
-                                controlItem.icon,
-                                size: 24,
-                                color: isEnabled
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.grey,
-                              ),
-                              const SizedBox(width: 12),
-                            ],
-
-                            // Control name (left side)
-                            Expanded(
-                              child: Text(
-                                controlItem.name,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: isEnabled ? null : Colors.grey,
-                                ),
-                              ),
-                            ),
-
-                            // Control widget (right side)
-                            _buildControlWidget(controlItem, currentValue, isEnabled),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
-
-              // Custom sections after controls
+              // Custom sections after controls (moved before Live Data section)
               ..._buildCustomSections(CustomSectionPosition.afterControls, isConnected),
 
-              // Live Data Section
+              // Live Data Section Header
               Text(
                 'Live-Daten',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -955,71 +839,21 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               const SizedBox(height: 12),
 
               if (_receivedData.isNotEmpty) ...[
-                Builder(
-                  builder: (context) {
-                    // Filter data fields based on expert mode
-                    final visibleFields = widget.device.dataFields
-                        .where((field) => !field.expertMode || Globals.expertMode)
-                        .toList();
-
-                    // Group fields by category
-                    final Map<String?, List<DeviceDataField>> groupedFields = {};
-                    for (final field in visibleFields) {
-                      groupedFields.putIfAbsent(field.category, () => []).add(field);
-                    }
-
-                    // Get sorted list of categories
-                    final sortedCategories = _getSortedCategories(
-                      groupedFields.keys,
-                      widget.device.categoryConfigs,
-                    );
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Uncategorized fields first (no heading)
-                        if (groupedFields.containsKey(null) &&
-                            _hasNonEmptyFields(groupedFields[null]!))
-                          _buildCategoryGrid(
-                            groupedFields[null]!,
-                            null,
-                            CategoryLayout.standard,
-                          ),
-
-                        // Categorized fields
-                        ...sortedCategories.where((cat) => cat != null).map((category) {
-                          final fields = groupedFields[category]!;
-
-                          // Skip category if all fields are empty
-                          if (!_hasNonEmptyFields(fields)) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final config = _getCategoryConfig(
-                            category!,
-                            widget.device.categoryConfigs,
-                          );
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 24),
-                              _buildCategoryHeader(
-                                config?.displayName ?? category,
-                              ),
-                              const SizedBox(height: 12),
-                              _buildCategoryGrid(
-                                fields,
-                                category,
-                                config?.layout ?? CategoryLayout.standard,
-                              ),
-                            ],
-                          );
-                        }),
-                      ],
-                    );
-                  },
-                ),
+                // Responsive layout logic
+                if (ResponsiveBreakpoints.isMobile(context)) ...[
+                  // MOBILE: Vertical stacking (controls -> data)
+                  if (widget.device.controlItems.isNotEmpty) ...[
+                    _buildControlsSection(),
+                    const SizedBox(height: 24),
+                  ],
+                  _buildDataFieldsSection(),
+                ] else if (widget.device.timeSeriesFields.isNotEmpty) ...[
+                  // TABLET/DESKTOP WITH GRAPHS: (controls+data) | graphs
+                  _buildControlsDataAndGraphsLayout(),
+                ] else ...[
+                  // TABLET/DESKTOP WITHOUT GRAPHS: data | controls
+                  _buildDataAndControlsLayout(),
+                ],
               ] else
                 const Center(
                   child: Padding(
@@ -1033,8 +867,30 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             ],
           ],
         ),
-      ),
-      ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isConnected = widget.device.getServiceConnection()?.isConnected() == true;
+
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop && isConnected) {
+          // Disconnect when leaving the screen
+          await _disconnectDevice();
+        }
+      },
+      child: widget.showAppBar
+          ? AppScaffold(
+              appBar: AppBarWidget(
+                title: "Geräteansicht",
+                actions: _buildAppBarActions(context, isConnected),
+              ),
+              body: _buildBody(context, isConnected),
+            )
+          : _buildBody(context, isConnected),
     );
   }
 }

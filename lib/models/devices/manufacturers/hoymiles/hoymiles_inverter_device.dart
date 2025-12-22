@@ -8,6 +8,7 @@ import 'package:the_solar_app/screens/device_info_screen.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 import '../../../../services/devices/hoymiles/hoymiles_protocol.dart';
 import '../../capabilities/device_role_config.dart';
 import '../../device_base.dart';
@@ -222,13 +223,11 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
           // Parse current SSID
           final currentSsid = wifiConfig['wifiSsid'] as String?;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiConfigurationScreen(
-                device: device,
-                currentSsid: currentSsid,
-              ),
+            WiFiConfigurationScreen(
+              device: device,
+              currentSsid: currentSsid,
             ),
           );
 
@@ -304,14 +303,12 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
           var powerRating = MapUtils.OM(device.data, ['data', 'inverter', 'sgs', 'power_rating']) as int?;
 
           // Navigate to percentage power limit screen
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => PercentagePowerLimitScreen(
-                device: device,
-                currentLimit: currentLimit,
-                totalPower: powerRating,
-              ),
+            PercentagePowerLimitScreen(
+              device: device,
+              currentLimit: currentLimit,
+              totalPower: powerRating,
             ),
           );
 

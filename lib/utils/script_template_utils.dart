@@ -7,7 +7,7 @@ import '../models/shelly_script_parameter.dart';
 class ScriptTemplateUtils {
   /// Substitute parameters in source code
   ///
-  /// Replaces {{PARAMETER_NAME}} placeholders with values.
+  /// add variables as define on start of scirpt
   /// Also replaces metadata placeholders like {{VERSION}} and {{DESCRIPTION}}.
   ///
   /// Example:

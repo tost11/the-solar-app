@@ -10,6 +10,7 @@ import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/exception_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 import 'package:the_solar_app/widgets/opendtu_inverter_list_widget.dart';
 import '../../../generic_rendering/device_category_config.dart';
 import '../../../generic_rendering/device_control_item.dart';
@@ -48,16 +49,14 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
           var authDev = device as DeviceAuthenticationMixin;
           authDev.authPassword = config['password'] as String?;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => AuthenticationScreen(
-                device: device,
-                currentUsername: 'admin',
-                currentPassword: authDev.authPassword,
-                currentEnabled: allowReadonly,
-                usernameEditable: false,
-              ),
+            AuthenticationScreen(
+              device: device,
+              currentUsername: 'admin',
+              currentPassword: authDev.authPassword,
+              currentEnabled: allowReadonly,
+              usernameEditable: false,
             ),
           );
 
@@ -88,12 +87,9 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
 
           String? currentSsid = config['ssid'] as String?;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  WiFiConfigurationScreen(device: device, currentSsid: currentSsid),
-            ),
+            WiFiConfigurationScreen(device: device, currentSsid: currentSsid),
           );
 
           if (result == true && context.mounted) {
@@ -163,20 +159,18 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
           }
 
           // Navigate to configuration screen
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => OpenDTUOnlineMonitoringScreen(
-                device: device,
-                currentEnabled: config['tost_enabled'] as bool?,
-                currentPrimaryProtocol: primaryProtocol,
-                currentPrimaryHost: primaryHost,
-                currentSecondaryProtocol: secondaryProtocol,
-                currentSecondaryHost: secondaryHost,
-                currentSystemId: config['tost_system_id'] as String?,
-                currentToken: config['tost_token'] as String?,
-                currentDuration: config['tost_duration'] as int?,
-              ),
+            OpenDTUOnlineMonitoringScreen(
+              device: device,
+              currentEnabled: config['tost_enabled'] as bool?,
+              currentPrimaryProtocol: primaryProtocol,
+              currentPrimaryHost: primaryHost,
+              currentSecondaryProtocol: secondaryProtocol,
+              currentSecondaryHost: secondaryHost,
+              currentSystemId: config['tost_system_id'] as String?,
+              currentToken: config['tost_token'] as String?,
+              currentDuration: config['tost_duration'] as int?,
             ),
           );
 
@@ -194,11 +188,9 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
           final context = ctx.context;
           final device = ctx.device;
 
-          await Navigator.push(
+          await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => PercentagePowerLimitScreen(device: device),
-            ),
+            PercentagePowerLimitScreen(device: device),
           );
         },
       ),

@@ -10,7 +10,12 @@ import 'package:uuid/uuid.dart';
 /// Replaces the current SystemHomeScreen in the "System" tab.
 /// Shows a list of all systems with FAB to create new system.
 class SystemListScreen extends StatefulWidget {
-  const SystemListScreen({super.key});
+  final bool isExpanded;
+
+  const SystemListScreen({
+    super.key,
+    this.isExpanded = true,
+  });
 
   @override
   State<SystemListScreen> createState() => _SystemListScreenState();
@@ -96,7 +101,13 @@ class _SystemListScreenState extends State<SystemListScreen> {
     }
 
     if (_systems.isEmpty) {
-      return _buildEmptyState();
+      // Show empty state only when expanded
+      if (widget.isExpanded) {
+        return _buildEmptyState();
+      } else {
+        // When collapsed and empty, show nothing
+        return const SizedBox.shrink();
+      }
     }
 
     return Scaffold(
@@ -125,10 +136,6 @@ class _SystemListScreenState extends State<SystemListScreen> {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createNewSystem,
-        child: const Icon(Icons.add),
       ),
     );
   }

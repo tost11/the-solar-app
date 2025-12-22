@@ -20,7 +20,7 @@ class MessageUtils {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title ?? 'Fehler'),
-        content: Text(message),
+        content: SelectableText(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -213,7 +213,7 @@ class MessageUtils {
       barrierDismissible: cancelable,
       builder: (BuildContext dialogContext) => AlertDialog(
         title: Text(title),
-        content: Text(message),
+        content: SelectableText(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),

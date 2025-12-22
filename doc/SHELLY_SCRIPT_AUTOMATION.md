@@ -188,7 +188,7 @@ Create a new file in `assets/script_templates/` with this structure:
       "placeholder": "Example value"
     }
   ],
-  "sourceCode": "JavaScript code with {{PARAM_NAME}} placeholders",
+  "sourceCode": "JavaScript code",
   "createdAt": "2025-01-15T00:00:00Z",
   "updatedAt": "2025-01-15T00:00:00Z"
 }

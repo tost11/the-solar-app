@@ -28,7 +28,6 @@ class ShellyScriptTemplate {
   final List<String> requiredDevices;
 
   /// Script source code with parameter placeholders
-  /// Placeholders format: {{PARAMETER_NAME}}
   final String sourceCode;
 
   /// List of configurable parameters

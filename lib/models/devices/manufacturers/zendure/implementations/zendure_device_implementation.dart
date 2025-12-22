@@ -7,6 +7,7 @@ import 'package:the_solar_app/screens/configuration/power_screen.dart';
 import 'package:the_solar_app/utils/globals.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 import 'package:the_solar_app/widgets/zendure_battery_pack_list_widget.dart';
 import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
@@ -46,19 +47,17 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             // Navigate to PowerLimitScreen
             if (!context.mounted) return;
 
-            final result = await Navigator.push(
+            final result = await NavigationUtils.pushConfigurationScreen(
               context,
-              MaterialPageRoute(
-                builder: (context) => PowerScreen(
-                    device: device,
-                    currentInputLimit: inputLimit,
-                    currentOutputLimit: outputLimit,
-                    maxInputLimit: maxInputLimit,
-                    maxOutputLimit: maxOutputLimit,
-                    currentLimitMode: properties['acMode'] == 1
-                        ? LimitMode.input
-                        : LimitMode.output),
-              ),
+              PowerScreen(
+                  device: device,
+                  currentInputLimit: inputLimit,
+                  currentOutputLimit: outputLimit,
+                  maxInputLimit: maxInputLimit,
+                  maxOutputLimit: maxOutputLimit,
+                  currentLimitMode: properties['acMode'] == 1
+                      ? LimitMode.input
+                      : LimitMode.output),
             );
 
             if (result == true && context.mounted) {
@@ -93,24 +92,22 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             // Define ranges for SOC sliders
             const minSocRangeMin = 5; // Minimum SOC can be 5-40%
             const minSocRangeMax = 40;
-            const maxSocRangeMin = 80; // Maximum SOC can be 80-95%
-            const maxSocRangeMax = 95;
+            const maxSocRangeMin = 80; // Maximum SOC can be 80-100%
+            const maxSocRangeMax = 100;
 
             // Navigate to BatterySocScreen
             if (!context.mounted) return;
 
-            final result = await Navigator.push(
+            final result = await NavigationUtils.pushConfigurationScreen(
               context,
-              MaterialPageRoute(
-                builder: (context) => BatterySocScreen(
-                  device: device,
-                  currentMinSoc: minSoc,
-                  currentMaxSoc: socSet,
-                  minSocRangeMin: minSocRangeMin,
-                  minSocRangeMax: minSocRangeMax,
-                  maxSocRangeMin: maxSocRangeMin,
-                  maxSocRangeMax: maxSocRangeMax,
-                ),
+              BatterySocScreen(
+                device: device,
+                currentMinSoc: minSoc,
+                currentMaxSoc: socSet,
+                minSocRangeMin: minSocRangeMin,
+                minSocRangeMax: minSocRangeMax,
+                maxSocRangeMin: maxSocRangeMin,
+                maxSocRangeMax: maxSocRangeMax,
               ),
             );
 
@@ -148,16 +145,14 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             // Navigate to PowerLimitScreen
             if (!context.mounted) return;
 
-            final result = await Navigator.push(
+            final result = await NavigationUtils.pushConfigurationScreen(
               context,
-              MaterialPageRoute(
-                builder: (context) => PowerLimitScreen(
-                  device: device,
-                  currentInverseMaxPower: inverseMaxPower,
-                  maxInverseMaxPower: maxInverseMaxPower,
-                  currentGridReverse: gridReverse,
-                  currentGridStandard: gridStandard,
-                ),
+              PowerLimitScreen(
+                device: device,
+                currentInverseMaxPower: inverseMaxPower,
+                maxInverseMaxPower: maxInverseMaxPower,
+                currentGridReverse: gridReverse,
+                currentGridStandard: gridStandard,
               ),
             );
 

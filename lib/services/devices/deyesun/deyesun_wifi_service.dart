@@ -12,6 +12,7 @@ import 'package:the_solar_app/services/devices/base_device_service.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../models/devices/manufacturers/deyesun/wifi_deyesun_device.dart';
+import '../../../utils/number_utils.dart';
 import 'deyesun_modbus_connection.dart';
 
 class DeyeSunWifiService extends BaseDeviceService {
@@ -387,6 +388,11 @@ class DeyeSunWifiService extends BaseDeviceService {
         }
 
         // Store all parsed variables in config (HTTP is for configuration)
+
+        jsVars["webdata_now_p"] = NumberUtils.parseToDouble(jsVars["webdata_now_p"]);
+        jsVars["webdata_today_e"] = NumberUtils.parseToDouble(jsVars["webdata_today_e"]);
+        jsVars["webdata_total_e"] = NumberUtils.parseToDouble(jsVars["webdata_total_e"]);
+
         device.data["config"] = jsVars;
 
         //debugPrint("jsVars extracted deye sun: ${jsVars.toString()}");

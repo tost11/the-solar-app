@@ -13,6 +13,7 @@ import 'package:the_solar_app/services/devices/shelly/shelly_service.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_bluetooth_service.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import '../../../generic_rendering/device_control_item.dart';
@@ -51,13 +52,11 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           final settings = getGeneralSettings(resp);
 
           // Navigate to general settings screen
-          await Navigator.push(
+          await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => GeneralSettingsScreen(
-                device: device,
-                settings: settings,
-              ),
+            GeneralSettingsScreen(
+              device: device,
+              settings: settings,
             ),
           );
         },
@@ -83,13 +82,11 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           // Extract current SSID from sta attribute
           String? currentSsid = MapUtils.OMas<String?>(resp, ["sta", "ssid"], null);
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiConfigurationScreen(
-                device: device,
-                currentSsid: currentSsid,
-              ),
+            WiFiConfigurationScreen(
+              device: device,
+              currentSsid: currentSsid,
             ),
           );
 
@@ -121,19 +118,17 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           if (resp == null || !context.mounted) return;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiApConfigurationScreen(
-                device: device,
-                currentIsOpen: MapUtils.OMas(resp,["ap","is_open"],true),
-                currentRangeExtender: MapUtils.OMas(resp,["ap","range_extender","enable"],true),
-                currentEnabled: MapUtils.OMas(resp,["ap","enable"],true),
-                showSsidOption: false,
-                showEnabledOption: true,
+            WiFiApConfigurationScreen(
+              device: device,
+              currentIsOpen: MapUtils.OMas(resp,["ap","is_open"],true),
+              currentRangeExtender: MapUtils.OMas(resp,["ap","range_extender","enable"],true),
+              currentEnabled: MapUtils.OMas(resp,["ap","enable"],true),
+              showSsidOption: false,
+              showEnabledOption: true,
                 showOpenOption: true,
                 showRangeExtenderOption: true,
-              ),
             ),
           );
 
@@ -163,16 +158,14 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           // Extract current port from rpc_udp.listen_port
           int? currentPort = MapUtils.OMas<int?>(resp, ["rpc_udp", "listen_port"], null);
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => PortConfigurationScreen(
-                device: device,
-                portName: 'RPC UDP Port',
-                portDescription: 'Konfigurieren Sie den UDP Port für RPC Kommunikation, nach der Konfiguration muss das Gerät neugestartet werden um die Änderrungen zu übernehmen.',
-                currentPort: currentPort,
-                commandParameterName: 'port',
-              ),
+            PortConfigurationScreen(
+              device: device,
+              portName: 'RPC UDP Port',
+              portDescription: 'Konfigurieren Sie den UDP Port für RPC Kommunikation, nach der Konfiguration muss das Gerät neugestartet werden um die Änderrungen zu übernehmen.',
+              currentPort: currentPort,
+              commandParameterName: 'port',
             ),
           );
 
@@ -243,16 +236,14 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           if (!context.mounted) return;
 
-          await Navigator.push(
+          await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => AuthenticationScreen(
-                device: device,
-                currentUsername: 'admin',
-                currentPassword: null,
-                currentEnabled: MapUtils.OMas(device.data,["config","auth_en"],false),
-                usernameEditable: false,
-              ),
+            AuthenticationScreen(
+              device: device,
+              currentUsername: 'admin',
+              currentPassword: null,
+              currentEnabled: MapUtils.OMas(device.data,["config","auth_en"],false),
+              usernameEditable: false,
             ),
           );
         },
@@ -288,14 +279,12 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
               .toList();
 
           // Navigate to scripts screen with systemId
-          await Navigator.push(
+          await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => ShellyScriptsScreen(
-                device: device,
-                scripts: scripts,
-                systemId: systemId,  // Pass systemId for device filtering
-              ),
+            ShellyScriptsScreen(
+              device: device,
+              scripts: scripts,
+              systemId: systemId,  // Pass systemId for device filtering
             ),
           );
         },

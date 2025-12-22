@@ -5,6 +5,7 @@ import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.da
 import 'package:the_solar_app/screens/configuration/zendure_wifi_mqtt_configuration_screen.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 
 const int ZENDURE_FIRMWARE_OLD_VERSION = 4367;
 
@@ -36,21 +37,17 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
         }
         bool result;
         if(firmware <= ZENDURE_FIRMWARE_OLD_VERSION){
-          result = await Navigator.push(
+          result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => ZendureWifiMqttConfigurationScreen(
-                device: device,
-                currentMqtt: firmware < ZENDURE_FIRMWARE_OLD_VERSION ? "mq.zen-iot.com":"mqtteu.zen-iot.com"
-              ),
+            ZendureWifiMqttConfigurationScreen(
+              device: device,
+              currentMqtt: firmware < ZENDURE_FIRMWARE_OLD_VERSION ? "mq.zen-iot.com":"mqtteu.zen-iot.com"
             ),
           );
         }else{
-          result = await Navigator.push(
+          result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiConfigurationScreen(device: device),
-            ),
+            WiFiConfigurationScreen(device: device),
           );
         }
 
@@ -84,13 +81,11 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
         }
         bool result;
         if(firmware <= ZENDURE_FIRMWARE_OLD_VERSION){
-          result = await Navigator.push(
+          result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => ZendureWifiMqttConfigurationScreen(
-                  device: device,
-                  currentMqtt: firmware < ZENDURE_FIRMWARE_OLD_VERSION ? "mq.zen-iot.com":"mqtteu.zen-iot.com"
-              ),
+            ZendureWifiMqttConfigurationScreen(
+                device: device,
+                currentMqtt: firmware < ZENDURE_FIRMWARE_OLD_VERSION ? "mq.zen-iot.com":"mqtteu.zen-iot.com"
             ),
           );
         }else{

@@ -7,6 +7,7 @@ import 'package:the_solar_app/services/devices/hoymiles/hoymiles_protocol.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 import '../../../../widgets/hoymiles_inverter_list_widget.dart';
 import '../../device_base.dart';
 import '../../generic_rendering/device_custom_section.dart';
@@ -138,13 +139,11 @@ class HoymilesDTUDevice extends HoymilesDevice {
           // Parse current SSID
           final currentSsid = wifiConfig['wifiSsid'] as String?;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiConfigurationScreen(
-                device: device,
-                currentSsid: currentSsid,
-              ),
+            WiFiConfigurationScreen(
+              device: device,
+              currentSsid: currentSsid,
             ),
           );
 
@@ -174,17 +173,15 @@ class HoymilesDTUDevice extends HoymilesDevice {
           // Parse current AP SSID
           final currentApSsid = apConfig['dtuApSsid'] as String?;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiApConfigurationScreen(
-                device: device,
-                currentSsid: currentApSsid,
-                showSsidOption: true,
-                showEnabledOption: false,
-                showOpenOption: false,
-                showRangeExtenderOption: false,
-              ),
+            WiFiApConfigurationScreen(
+              device: device,
+              currentSsid: currentApSsid,
+              showSsidOption: true,
+              showEnabledOption: false,
+              showOpenOption: false,
+              showRangeExtenderOption: false,
             ),
           );
 

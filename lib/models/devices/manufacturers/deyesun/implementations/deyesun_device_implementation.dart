@@ -9,6 +9,7 @@ import 'package:the_solar_app/services/devices/deyesun/deyesun_wifi_service.dart
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 import '../../../generic_rendering/device_category_config.dart';
 import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
@@ -51,13 +52,11 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
           // Parse current SSID
           final currentSsid = wifiConfig['sta_setting_ssid'] as String?;
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiConfigurationScreen(
-                device: device,
-                currentSsid: currentSsid,
-              ),
+            WiFiConfigurationScreen(
+              device: device,
+              currentSsid: currentSsid,
             ),
           );
 
@@ -110,20 +109,18 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
             currentProtocolB = serverB['protocol'] as String?;
           }
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => OnlineMonitoringConfigurationScreen(
-                device: device,
-                currentIpA: currentIpA,
-                currentDomainA: currentDomainA,
-                currentPortA: currentPortA,
-                currentProtocolA: currentProtocolA,
-                currentIpB: currentIpB,
-                currentDomainB: currentDomainB,
-                currentPortB: currentPortB,
-                currentProtocolB: currentProtocolB,
-              ),
+            OnlineMonitoringConfigurationScreen(
+              device: device,
+              currentIpA: currentIpA,
+              currentDomainA: currentDomainA,
+              currentPortA: currentPortA,
+              currentProtocolA: currentProtocolA,
+              currentIpB: currentIpB,
+              currentDomainB: currentDomainB,
+              currentPortB: currentPortB,
+              currentProtocolB: currentProtocolB,
             ),
           );
 
@@ -202,20 +199,18 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
           final auth = apConfig['ap_setting_auth'] as String?;
           bool currentIsOpen = auth?.toUpperCase() == 'OPEN';
 
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => WiFiApConfigurationScreen(
-                device: device,
-                showSsidOption: true,
-                showEnabledOption: true,
-                showOpenOption: true,
-                showRangeExtenderOption: false,
-                currentSsid: currentSsid,
-                currentPassword: currentPassword,
-                currentIsOpen: currentIsOpen,
-                currentEnabled: currentEnabled,
-              ),
+            WiFiApConfigurationScreen(
+              device: device,
+              showSsidOption: true,
+              showEnabledOption: true,
+              showOpenOption: true,
+              showRangeExtenderOption: false,
+              currentSsid: currentSsid,
+              currentPassword: currentPassword,
+              currentIsOpen: currentIsOpen,
+              currentEnabled: currentEnabled,
             ),
           );
 
@@ -249,14 +244,12 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
             debugPrint("Current limit is: $currentLimit");
 
             if (context.mounted) {
-              final result = await Navigator.push(
+              final result = await NavigationUtils.pushConfigurationScreen(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => PercentagePowerLimitScreen(
-                    device: device,
-                    currentLimit: currentLimit,
-                    totalPower: powerRating,
-                  ),
+                PercentagePowerLimitScreen(
+                  device: device,
+                  currentLimit: currentLimit,
+                  totalPower: powerRating,
                 ),
               );
 

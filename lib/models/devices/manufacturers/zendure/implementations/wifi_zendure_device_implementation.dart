@@ -4,6 +4,7 @@ import 'package:the_solar_app/models/devices/manufacturers/zendure/implementatio
 import 'package:the_solar_app/screens/configuration/mqtt_configuration_screen.dart';
 import 'package:the_solar_app/services/devices/zendure/zendure_wifi_service.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/navigation_utils.dart';
 
 import '../../../../../constants/command_constants.dart';
 import '../../../../../utils/dialog_utils.dart';
@@ -56,15 +57,13 @@ class WifiZendureDeviceImplementation extends ZendureDeviceImplementation {
         }
 
         // Navigate to MQTT configuration screen
-        final result = await Navigator.push(
+        final result = await NavigationUtils.pushConfigurationScreen(
           context,
-          MaterialPageRoute(
-            builder: (context) => MqttConfigurationScreen(
-              device: device,
-              currentEnabled: mqttConfig['enable'] == true,
-              currentServer: server,
-              currentPort: port,
-            ),
+          MqttConfigurationScreen(
+            device: device,
+            currentEnabled: mqttConfig['enable'] == true,
+            currentServer: server,
+            currentPort: port,
           ),
         );
 

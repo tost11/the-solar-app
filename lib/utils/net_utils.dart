@@ -9,7 +9,7 @@ class NetUtils {
   /// - 10.0.0.0/8 (10.0.0.0 - 10.255.255.255)
   /// - 172.16.0.0/12 (172.16.0.0 - 172.31.255.255)
   /// - 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)
-  static bool isPrivateIP(String ipAddress) {
+  static bool isPrivateIP(String ipAddress,bool onlyRealLocal) {
     final parts = ipAddress.split('.');
     if (parts.length != 4) return false;
 
@@ -19,12 +19,12 @@ class NetUtils {
 
       //TODO add ui to enable this is more likely to be docker net or something else
       // Check 10.0.0.0/8 range
-      if (octet1 == 10) {
+      if (onlyRealLocal == false && octet1 == 10) {
         return true;
       }
 
       // Check 172.16.0.0/12 range (172.16.0.0 - 172.31.255.255)
-      if (octet1 == 172 && octet2 >= 16 && octet2 <= 31) {
+      if (onlyRealLocal && octet1 == 172 && octet2 >= 16 && octet2 <= 31) {
         return true;
       }
 
@@ -78,7 +78,7 @@ class NetUtils {
         bool isUnknownButLocal = false;
         for (final addr in interface.addresses) {
           if (addr.type == InternetAddressType.IPv4) {
-            if(NetUtils.isPrivateIP(addr.address)){
+            if(NetUtils.isPrivateIP(addr.address, true)){
               isUnknownButLocal = true;
             }
           }
@@ -111,7 +111,7 @@ class NetUtils {
     final Set<String> subnets = {};
 
     for (final ip in ipAddresses) {
-      if (isPrivateIP(ip)) {
+      if (isPrivateIP(ip,false)) {
         final subnet = ipToCSubnet(ip);
         subnets.add(subnet);
       }

@@ -16,13 +16,13 @@ import '../services/network_scan_service.dart';
 import '../services/bluetooth_scan_service.dart';
 import '../models/device.dart';
 import '../models/network_device.dart';
+import '../models/network_scan_progress.dart';
 import '../utils/map_utils.dart';
 import '../utils/net_utils.dart';
 import '../widgets/device_list_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
 import '../utils/permission_utils.dart';
-import 'device_detail_screen.dart';
 import 'manual_device_add_screen.dart';
 
 class ScanForDeviceScreen extends StatefulWidget {
@@ -49,9 +49,8 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   List<NetworkDevice> _networkDevices = [];
   bool _isScanningNetwork = false;
 
-  // Network scanning progress
-  int _totalHostsFound = 0;
-  int _hostsChecked = 0;
+  // Network scanning progress - unified view
+  NetworkScanProgress? _scanProgress;
   bool _fastScanning = true; // Fast scanning enabled by default
 
   // Tabs
@@ -246,8 +245,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
     setState(() {
       _networkDevices.clear();
-      _totalHostsFound = 0;
-      _hostsChecked = 0;
+      _scanProgress = null;
       _isScanningNetwork = true;
     });
 
@@ -256,16 +254,16 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
       await _networkScanService.scanNetwork(
         subnets: subnets, // Pass list of subnets to scan
         timeout: const Duration(seconds: 5), // Timeout per ping
+        maxConcurrentPings: 20, // 20 parallel ping workers
         probeTimeout: _fastScanning
             ? const Duration(seconds: 2)
             : const Duration(seconds: 5),
-        onProgress: (totalHosts, checkedCount, foundDevice) {
+        onProgress: (progress) {
           if (mounted) {
             setState(() {
-              _totalHostsFound = totalHosts;
-              _hostsChecked = checkedCount;
-              if (foundDevice != null) {
-                _networkDevices.add(foundDevice);
+              _scanProgress = progress;
+              if (progress.device != null) {
+                _networkDevices.add(progress.device!);
               }
             });
           }
@@ -334,13 +332,8 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     );
 
     if (device != null && mounted) {
-      // Navigate to device detail screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DeviceDetailScreen(device: device),
-        ),
-      );
+      // Return device to parent DeviceListScreen
+      Navigator.pop(context, device);
     }
   }
 
@@ -367,18 +360,17 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   }
 
   Widget _buildScanProgressInfo() {
-    final knownDevices = _networkDevices.length;
-    final remaining = _totalHostsFound - _hostsChecked;
+    if (_scanProgress == null) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Progress bar
+          // Progress bar (overall combined progress)
           LinearProgressIndicator(
-            value: _totalHostsFound > 0
-                ? _hostsChecked / _totalHostsFound
-                : null,
+            value: _scanProgress!.overallProgress,
           ),
           const SizedBox(height: 16),
 
@@ -387,14 +379,14 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
             children: [
               Expanded(child: _buildInfoCard(
                 'Gefunden',
-                '$_totalHostsFound',
+                '${_scanProgress!.foundHosts}',
                 Icons.router,
                 Colors.blue,
               )),
               const SizedBox(width: 8),
               Expanded(child: _buildInfoCard(
                 'Bekannte Geräte',
-                '$knownDevices',
+                '${_scanProgress!.knownDevices}',
                 Icons.check_circle,
                 Colors.green,
               )),
@@ -405,14 +397,14 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
             children: [
               Expanded(child: _buildInfoCard(
                 'Geprüft',
-                '$_hostsChecked',
+                '${_scanProgress!.testedDevices}',
                 Icons.done,
                 Colors.orange,
               )),
               const SizedBox(width: 8),
               Expanded(child: _buildInfoCard(
                 'Verbleibend',
-                '$remaining',
+                '${_scanProgress!.remainingDevices}',
                 Icons.pending,
                 Colors.grey,
               )),
@@ -452,8 +444,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   }
 
   Widget _buildCompactScanStatus() {
-    final knownDevices = _networkDevices.length;
-    final remaining = _totalHostsFound - _hostsChecked;
+    if (_scanProgress == null) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -467,23 +460,21 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Progress bar
+          // Progress bar (overall combined progress)
           LinearProgressIndicator(
-            value: _totalHostsFound > 0
-                ? _hostsChecked / _totalHostsFound
-                : null,
+            value: _scanProgress!.overallProgress,
             backgroundColor: Colors.green.shade100,
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
           ),
           const SizedBox(height: 12),
-          // Status text - compact list style
+          // Unified status text
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatusText('Gefunden', _totalHostsFound, Icons.router),
-              _buildStatusText('Bekannt', knownDevices, Icons.check_circle),
-              _buildStatusText('Geprüft', _hostsChecked, Icons.done),
-              _buildStatusText('Übrig', remaining, Icons.pending),
+              _buildStatusText('Gefunden', _scanProgress!.foundHosts, Icons.router),
+              _buildStatusText('Bekannt', _scanProgress!.knownDevices, Icons.check_circle),
+              _buildStatusText('Geprüft', _scanProgress!.testedDevices, Icons.done),
+              _buildStatusText('Übrig', _scanProgress!.remainingDevices, Icons.pending),
             ],
           ),
         ],
@@ -573,13 +564,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
               },
               showErrorDialog: true
           );
-          // Navigate to device detail screen
+          // Return device to parent DeviceListScreen
           if (mounted && knownDevice != null) {
-            Navigator.pushReplacement(context, MaterialPageRoute(
-              builder: (context) =>
-                  DeviceDetailScreen(device: knownDevice),
-              ),
-            );
+            Navigator.pop(context, knownDevice);
           }
         }
       ),
@@ -696,13 +683,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                         },
                         showErrorDialog: true
                     );
-                    // Navigate to device detail screen
+                    // Return device to parent DeviceListScreen
                     if (mounted && knownDevice != null) {
-                      Navigator.pushReplacement(context, MaterialPageRoute(
-                        builder: (context) =>
-                            DeviceDetailScreen(device: knownDevice),
-                        ),
-                      );
+                      Navigator.pop(context, knownDevice);
                     }
                   }
                 ),
