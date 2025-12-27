@@ -6,6 +6,8 @@ class NetworkDevice {
   final String serialNumber;
   final int port;
   final int? additionalPort;
+  final String ? username;
+  final String ? password;
 
   NetworkDevice({
     required this.ipAddress,
@@ -15,10 +17,12 @@ class NetworkDevice {
     required this.serialNumber,
     required this.port,
     this.additionalPort,
+    this.username,
+    this.password,
   });
 
   @override
   String toString() {
-    return 'NetworkDevice(ip: $ipAddress, hostname: $hostname, manufacturer: $manufacturer, model: $deviceModel, sn: $serialNumber, port: $port, additionalPort: $additionalPort)';
+    return 'NetworkDevice(ip: $ipAddress, hostname: $hostname, manufacturer: $manufacturer, model: $deviceModel, sn: $serialNumber, port: $port, additionalPort: $additionalPort,username: $username,$additionalPort,password: $password)';
   }
 }

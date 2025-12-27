@@ -419,9 +419,8 @@ class HoymilesWifiService extends BaseDeviceService {
 
   @override
   Future<void> disconnect() async {
-    fetchDataEnabled = false;
+    //fetchDataEnabled = false;
     await _connection?.disconnect();
-    device.emitStatus("Getrennt");
   }
 
   @override
@@ -445,21 +444,32 @@ class HoymilesWifiService extends BaseDeviceService {
   void fetchData() async {
     if (!fetchDataEnabled) return;
 
-    try {
-      // Fetch real-time data
-      final realData = await getRealDataNew();
-      if (realData != null) {
-        device.data["data"] = realData;
-        device.emitData(realData);
-        lastSeen = DateTime.now().millisecondsSinceEpoch;
-        device.emitStatus("Verbunden");
-      } else {
-        device.emitStatus("Keine Daten");
+    const maxRetries = 2;
+
+    for (int attempt = 1; attempt < maxRetries; attempt++) {
+      try {
+        // Fetch real-time data
+        final realData = await getRealDataNew();
+        if (realData != null) {
+          // SUCCESS - update and return
+          device.data["data"] = realData;
+          device.emitData(realData);
+          lastSeen = DateTime.now().millisecondsSinceEpoch;
+          device.emitStatus("Verbunden");
+          return; // Exit on success
+        }
+
+        // Log null response
+        debugPrint('[Hoymiles] Attempt $attempt/$maxRetries: No data received');
+
+      } catch (e) {
+        debugPrint('[Hoymiles] Attempt $attempt/$maxRetries: Error fetching data: $e');
       }
-    } catch (e) {
-      debugPrint('[Hoymiles] Error fetching data: $e');
-      device.emitStatus("Fehler beim Abrufen der Daten");
     }
+
+    // All retries failed - disconnect
+    debugPrint('[Hoymiles] All $maxRetries fetch attempts failed, disconnecting...');
+    await disconnect(); // This will emit "Getrennt" status and close connection
   }
 
   /// Get real-time data from device (RealDataNew command)

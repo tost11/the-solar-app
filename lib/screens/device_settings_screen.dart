@@ -675,11 +675,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _usernameController,
-                        decoration: const InputDecoration(
+                        enabled: !(widget.device as DeviceAuthenticationMixin).fixedUserName,
+                        decoration: InputDecoration(
                           labelText: 'Benutzername',
                           hintText: 'admin',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.person),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.person),
+                          helperText: (widget.device as DeviceAuthenticationMixin).fixedUserName
+                              ? 'Benutzername kann nicht geändert werden'
+                              : null,
                         ),
                       ),
                       const SizedBox(height: 12),

@@ -34,6 +34,8 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
   }) {
     fetchDataCommand = deviceImpl.getFetchCommand();
     fetchDataInterval = DEFAULT_FETCH_INTERVAL;
+    fixedUserName = true;
+    authUsername = 'admin';
   }
 
   @override

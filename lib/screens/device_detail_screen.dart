@@ -307,11 +307,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         return DeviceDataCard(
           title: field.name,
           value: field.formatValue(value),
-          unit: field.unit,
+          unit: field.getUnit(value),
           icon: field.icon,
           showDetailButton: field.showDetailButton,
           onDetailTap: field.showDetailButton
-              ? () => _showFieldDetailDialog(field.name, field.formatValue(value), field.unit)
+              ? () => _showFieldDetailDialog(field.name, field.formatValue(value), field.getUnit(value))
               : null,
         );
       },
@@ -372,10 +372,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                             textAlign: TextAlign.right,
                           ),
                         ),
-                        if (field.unit.isNotEmpty) ...[
+                        if (field.getUnit(value).isNotEmpty) ...[
                           const SizedBox(width: 4),
                           Text(
-                            field.unit,
+                            field.getUnit(value),
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
@@ -389,7 +389,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                             onTap: () => _showFieldDetailDialog(
                               field.name,
                               formattedValue,
-                              field.unit,
+                              field.getUnit(value),
                             ),
                             borderRadius: BorderRadius.circular(12),
                             child: Padding(
@@ -420,15 +420,49 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     return _buildStandardGrid(fields); // Fallback to standard for now
   }
 
-  /// Check if any field in the list has a non-null, non-empty value
-  bool _hasNonEmptyFields(List<DeviceDataField> fields) {
+  /// Check if category should be visible based on field values and category config
+  bool _shouldShowCategory(List<DeviceDataField> fields, DeviceCategoryConfig? config) {
+    // Extract configuration (use defaults if not specified)
+    final hideWhenAllNull = config?.hideWhenAllNull ?? false;
+    final hideWhenAllZero = config?.hideWhenAllZero ?? false;
+
+    bool hasNonNullValue = false;
+    bool hasNonZeroValue = false;
+
     for (final field in fields) {
       final value = field.valueExtractor(_receivedData);
+
+      // Check for non-null values
       if (value != null && value.toString().isNotEmpty && value.toString() != '-') {
-        return true;
+        hasNonNullValue = true;
+
+        // Check for non-zero values
+        if (value is num) {
+          if (value.abs() > 0.0) {
+            hasNonZeroValue = true;
+            break; // Found a non-zero value, can stop checking
+          }
+        } else {
+          // Non-numeric values are considered "non-zero"
+          final numValue = num.tryParse(value.toString());
+          if (numValue == null || numValue.abs() > 0.0) {
+            hasNonZeroValue = true;
+            break;
+          }
+        }
       }
     }
-    return false;
+
+    // Apply filtering logic based on configuration
+    if (hideWhenAllNull && !hasNonNullValue) {
+      return false; // Hide: all values are null/empty
+    }
+
+    if (hideWhenAllZero && !hasNonZeroValue) {
+      return false; // Hide: all values are zero
+    }
+
+    return true; // Show the category
   }
 
   /// Get sorted list of categories based on configuration
@@ -561,27 +595,28 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Uncategorized fields first (no heading)
-        if (groupedFields.containsKey(null) &&
-            _hasNonEmptyFields(groupedFields[null]!))
-          _buildCategoryGrid(
-            groupedFields[null]!,
-            null,
-            CategoryLayout.standard,
-          ),
+        if (groupedFields.containsKey(null)) ...[
+          if (_shouldShowCategory(groupedFields[null]!, null))
+            _buildCategoryGrid(
+              groupedFields[null]!,
+              null,
+              CategoryLayout.standard,
+            ),
+        ],
 
         // Categorized fields
         ...sortedCategories.where((cat) => cat != null).map((category) {
           final fields = groupedFields[category]!;
 
-          // Skip category if all fields are empty
-          if (!_hasNonEmptyFields(fields)) {
-            return const SizedBox.shrink();
-          }
-
           final config = _getCategoryConfig(
             category!,
             widget.device.categoryConfigs,
           );
+
+          // Check if category should be shown based on config
+          if (!_shouldShowCategory(fields, config)) {
+            return const SizedBox.shrink();
+          }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -850,9 +885,12 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 ] else if (widget.device.timeSeriesFields.isNotEmpty) ...[
                   // TABLET/DESKTOP WITH GRAPHS: (controls+data) | graphs
                   _buildControlsDataAndGraphsLayout(),
-                ] else ...[
-                  // TABLET/DESKTOP WITHOUT GRAPHS: data | controls
+                ] else if (widget.device.controlItems.isNotEmpty) ...[
+                  // TABLET/DESKTOP WITHOUT GRAPHS BUT WITH CONTROLS: data | controls
                   _buildDataAndControlsLayout(),
+                ] else ...[
+                  // TABLET/DESKTOP WITHOUT GRAPHS AND WITHOUT CONTROLS: full-width data
+                  _buildDataFieldsSection(),
                 ],
               ] else
                 const Center(

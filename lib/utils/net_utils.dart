@@ -1,6 +1,21 @@
 import 'dart:io' show Platform, NetworkInterface, InternetAddressType;
 import 'package:flutter/foundation.dart';
 
+/// Simple model for network interface information
+class NetworkInterfaceInfo {
+  final String name;
+  final String ipAddress;
+  final String displayName;
+  final bool isPublic;
+
+  NetworkInterfaceInfo({
+    required this.name,
+    required this.ipAddress,
+    required this.displayName,
+    required this.isPublic,
+  });
+}
+
 /// Network utility functions for interface detection and validation
 class NetUtils {
   /// Check if an IP address is in a private network range (RFC1918)
@@ -43,62 +58,18 @@ class NetUtils {
   ///
   /// Returns list of IP addresses from active WiFi/Ethernet interfaces
   /// Excludes loopback, mobile, VPN, and other interface types
+  /// Only returns private IP addresses (filters out public IPs)
   ///
   /// Returns empty list if only mobile data is available
   static Future<List<String>> getLocalNetworkIPs() async {
-    final List<String> localIPs = [];
+    // Use getNetworkInterfaceList() as the single source of truth
+    final interfaces = await getNetworkInterfaceList();
 
-    try {
-
-      // Get all network interfaces
-      final interfaces = await NetworkInterface.list(
-        includeLoopback: false,
-        type: InternetAddressType.IPv4,
-      );
-
-      for (final interface in interfaces) {
-        // Filter by interface name patterns (platform-specific)
-        final name = interface.name.toLowerCase();
-
-        debugPrint("Found network interfaces: $name");
-
-        // Common WiFi interface names: wlan, wifi, en0 (macOS), wlp (Linux)
-        // Common Ethernet names: eth, en1, enp (Linux), em (BSD)
-        final isWiFi = name.contains('wlan') ||
-                       name.contains('wifi') ||
-                       (Platform.isMacOS && name == 'en0') ||
-                       name.startsWith('wlp');
-
-        final isEthernet = name.contains('eth') ||
-                           name.startsWith('enp') ||
-                           name.startsWith('em') ||
-                           (Platform.isMacOS && name == 'en1') ||
-                           name.contains('eno');
-
-        bool isUnknownButLocal = false;
-        for (final addr in interface.addresses) {
-          if (addr.type == InternetAddressType.IPv4) {
-            if(NetUtils.isPrivateIP(addr.address, true)){
-              isUnknownButLocal = true;
-            }
-          }
-        }
-
-        // Only include WiFi or Ethernet interfaces
-        if (isWiFi || isEthernet || isUnknownButLocal) {
-          for (final addr in interface.addresses) {
-            if (addr.type == InternetAddressType.IPv4) {
-              debugPrint('Found ${isWiFi ? "WiFi" : "Ethernet"} IP: ${addr.address} on ${interface.name}');
-              localIPs.add(addr.address);
-            }
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Error getting local network IPs: $e');
-    }
-
-    return localIPs;
+    // Extract and return just the private IP addresses
+    return interfaces
+        .where((interface) => !interface.isPublic)
+        .map((interface) => interface.ipAddress)
+        .toList();
   }
 
   /// Extract unique C-class subnets from list of IP addresses
@@ -118,5 +89,64 @@ class NetUtils {
     }
 
     return subnets.toList();
+  }
+
+  /// Get list of available network interfaces with metadata
+  ///
+  /// Returns list of NetworkInterfaceInfo objects for WiFi and Ethernet interfaces
+  /// Includes interface name, IP address, display name, and type (WiFi/Ethernet)
+  static Future<List<NetworkInterfaceInfo>> getNetworkInterfaceList() async {
+    final List<NetworkInterfaceInfo> interfaces = [];
+
+    try {
+      final networkInterfaces = await NetworkInterface.list(
+        includeLoopback: false,
+        type: InternetAddressType.IPv4,
+      );
+
+      for (final interface in networkInterfaces) {
+        final name = interface.name.toLowerCase();
+
+        // Detect interface type (same logic as getLocalNetworkIPs)
+        final isWiFi = name.contains('wlan') ||
+                       name.contains('wifi') ||
+                       (Platform.isMacOS && name == 'en0') ||
+                       name.startsWith('wlp');
+
+        final isEthernet = name.contains('eth') ||
+                           name.startsWith('enp') ||
+                           name.startsWith('em') ||
+                           (Platform.isMacOS && name == 'en1') ||
+                           name.contains('eno');
+
+        bool isUnknownButLocal = false;
+        for (final addr in interface.addresses) {
+          if (addr.type == InternetAddressType.IPv4) {
+            if (NetUtils.isPrivateIP(addr.address, true)) {
+              isUnknownButLocal = true;
+            }
+          }
+        }
+
+        //if (isWiFi || isEthernet || isUnknownButLocal) {
+          for (final addr in interface.addresses) {
+            if (addr.type == InternetAddressType.IPv4) {
+              final typeLabel = isWiFi ? 'WiFi' : (isEthernet ? 'Ethernet' : 'Network');
+              //final isPrivate = NetUtils.isPrivateIP(addr.address, false);
+              interfaces.add(NetworkInterfaceInfo(
+                name: interface.name,
+                ipAddress: addr.address,
+                displayName: '$typeLabel (${interface.name}) - ${addr.address}',
+                isPublic: !(isWiFi || isEthernet || isUnknownButLocal),
+              ));
+            }
+          }
+        }
+      //}
+    } catch (e) {
+      debugPrint('Error getting network interfaces: $e');
+    }
+
+    return interfaces;
   }
 }

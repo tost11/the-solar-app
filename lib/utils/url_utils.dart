@@ -1,5 +1,17 @@
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
+
 /// Utility class for URL manipulation and port handling
 class UrlUtils {
+  /// Opens a URL in the external browser
+  ///
+  /// Shows error snackbar if URL cannot be opened
+  static Future<void> openUrl(BuildContext context, String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  }
+
+
   /// Get default port for protocol
   /// - http: 80
   /// - https: 443

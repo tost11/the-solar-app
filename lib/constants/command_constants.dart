@@ -34,3 +34,4 @@ const String GENERAL_SETTGINS_ECO_MODE = "eco";
 const String GENERAL_SETTINGS_DISCOVERABLE = "discoverable";
 const String GENERAL_SETTINGS_DEBUG_MQTT = "debug_mqtt";
 const String GENERAL_SETTINGS_DEBUG_WEBSOCKET = "debug_websocket";
+const String GENERAL_SETTINGS_INVERTER_POWER = "inverter_power";

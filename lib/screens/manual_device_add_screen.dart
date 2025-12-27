@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:lan_scanner/lan_scanner.dart';
 import 'package:the_solar_app/models/devices/mixins/additional_port_mixin.dart';
+import 'package:the_solar_app/models/devices/mixins/device_authentication_mixin.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import '../models/device.dart';
 import '../models/network_device.dart';
@@ -339,6 +340,13 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
 
     if(knownDevice is AdditionalPortMixin){
       (knownDevice as AdditionalPortMixin).additionalPort = networkDevice.additionalPort!;
+    }
+
+    if(networkDevice.username != null && knownDevice is DeviceAuthenticationMixin){
+      (knownDevice as DeviceAuthenticationMixin).authUsername = networkDevice.username!;
+    }
+    if(networkDevice.password != null && knownDevice is DeviceAuthenticationMixin){
+      (knownDevice as DeviceAuthenticationMixin).authPassword = networkDevice.password!;
     }
 
     await _deviceStorageService.saveDevice(knownDevice);

@@ -25,12 +25,16 @@ class WiFiDeyeSunDevice extends GenericWiFiAuthDevice<DeyeSunWifiService, DeyeSu
     int? port = 80,
     int? modbusPort,
     super.deviceModel,
+    String? username,
+    String? password,
   }) : super(deviceImpl: DeyeSunDeviceImplementation()) {
     netPort = port;
     netHostname = hostname;
     netIpAddress = ipAddress;
     additionalPort = modbusPort ?? DeyeSunModbusConnection.DEFAULT_PORT;
     fetchDataInterval = DEFAULT_FETCH_INTERVAL;
+    authUsername = username ?? "admin";
+    authPassword = password ?? "admin";
   }
 
   /// Named constructor for JSON deserialization
@@ -103,6 +107,37 @@ class WiFiDeyeSunDevice extends GenericWiFiAuthDevice<DeyeSunWifiService, DeyeSu
       emitData(data['data'] as Map<String, dynamic>);
 
       return ret;
+    } else if (command == COMMAND_SET_GENERAL_SETTING) {
+      // Extract parameters
+      final name = params['name'] as String?;
+      final value = params['value'] as bool?;
+
+      if (name == null || value == null) {
+        throw Exception('Name and value parameters are required');
+      }
+
+      if (name == GENERAL_SETTINGS_INVERTER_POWER) {
+        // Reuse existing COMMAND_SET_MAIN_POWER logic
+        final success = await connectionService?.writeModbusPowerStatus(value);
+        final ret = {'success': success == true};
+
+        if (success != true) {
+          throw Exception('Failed to set power status via Modbus');
+        }
+
+        // Update local data field with new status value
+        if (data['data'] == null) {
+          data['data'] = <String, dynamic>{};
+        }
+        (data['data'] as Map<String, dynamic>)['limit_status'] = value ? 1 : 2;
+
+        // Emit updated data to trigger UI refresh
+        emitData(data['data'] as Map<String, dynamic>);
+
+        return ret;
+      } else {
+        throw UnimplementedError('Unknown general setting: $name');
+      }
     } else if (command == COMMAND_SET_WIFI) {
       // Extract parameters
       final ssid = params['ssid'] as String?;

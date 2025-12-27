@@ -21,9 +21,12 @@ class WiFiOpenDTUDevice extends GenericWiFiAuthDevice<
     super.hostname,
     super.port = 80,
     super.deviceModel,
+    String? username,
+    String? password,
   }) : super(deviceImpl: OpenDTUDeviceImplementation()) {
-    authUsername = 'admin';
-    authPassword = 'openDTU42';
+    fixedUserName = true;
+    authUsername = username ?? 'admin';
+    authPassword = password ?? 'openDTU42';
     fetchDataInterval = DEFAULT_FETCH_INTERVAL;
   }
 

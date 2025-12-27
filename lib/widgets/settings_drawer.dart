@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../utils/permission_utils.dart';
 import '../utils/globals.dart';
+import '../screens/app_info_screen.dart';
 
 class SettingsDrawer extends StatefulWidget {
   const SettingsDrawer({super.key});
@@ -11,6 +13,23 @@ class SettingsDrawer extends StatefulWidget {
 }
 
 class _SettingsDrawerState extends State<SettingsDrawer> {
+  PackageInfo? _packageInfo;
+
+  // Git hash from build-time constant
+  static const String gitHashShort = String.fromEnvironment('GIT_HASH_SHORT', defaultValue: 'dev');
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +90,23 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
             ),
             onTap: () {
               SystemNavigator.pop();
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(
+              _packageInfo != null
+                ? 'Version: v${_packageInfo!.version} ($gitHashShort)'
+                : 'Version: ...',
+            ),
+            subtitle: const Text('Tippen für Details'),
+            onTap: () {
+              Navigator.of(context).pop(); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AppInfoScreen()),
+              );
             },
           ),
         ],

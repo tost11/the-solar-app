@@ -71,7 +71,6 @@ class ResponsiveDataGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Get responsive values
-    final ratio = aspectRatio ?? ResponsiveBreakpoints.getCardAspectRatio(context);
     final spacing = crossAxisSpacing ?? ResponsiveBreakpoints.getCardSpacing(context);
     final mainSpacing = mainAxisSpacing ?? spacing;
 
@@ -99,7 +98,7 @@ class ResponsiveDataGrid extends StatelessWidget {
           padding: padding,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            childAspectRatio: ratio,
+            mainAxisExtent: 100.0,  // Fixed height instead of aspect ratio
             crossAxisSpacing: spacing,
             mainAxisSpacing: mainSpacing,
           ),

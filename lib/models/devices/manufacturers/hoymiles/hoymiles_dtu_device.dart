@@ -48,16 +48,11 @@ class HoymilesDTUDevice extends HoymilesDevice {
       // Daily energy
       DeviceDataField(
         name: 'Tagesertrag',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final daily = MapUtils.OM(data, ['realtime', 'dtu_daily_energy']);
-          if (daily != null && daily is num) {
-            return '${(daily / 1000).toStringAsFixed(2)} kWh';
-          }
-          return null;
-        },
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['realtime', 'dtu_daily_energy']),
         icon: Icons.wb_sunny,
         expertMode: false,
+        divisor: 1000,
       ),
       // Number of inverters
       DeviceDataField(

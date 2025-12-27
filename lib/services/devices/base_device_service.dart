@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
+
 import '../../models/devices/device_base.dart';
 
 abstract class BaseDeviceService {
@@ -10,6 +12,7 @@ abstract class BaseDeviceService {
     bool _timmerRunning = false;
     int LastTimeTick = 0;
     Duration ? _timeToFetch;
+    bool _wasConnected = false;
 
     BaseDeviceService(Duration ? updateTime,DeviceBase baseDevice){
       device = baseDevice;
@@ -42,6 +45,18 @@ abstract class BaseDeviceService {
     }
 
     void _update(Timer timer) {
+
+      if(isConnected()){
+        _wasConnected = true;
+      }else{
+        if(_wasConnected == true){
+          debugPrint("------------------------- updated connection status ----------------------");
+          device.emitData({});
+          device.emitStatus("nicht Verbunden");
+        }
+        _wasConnected = false;
+      }
+
       if( DateTime.now().millisecondsSinceEpoch - _timeToFetch!.inMilliseconds < LastTimeTick){
         return;
       }

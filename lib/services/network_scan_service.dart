@@ -160,6 +160,7 @@ class NetworkScanService {
     int maxConcurrentProbes = 10,
     int maxConcurrentPings = 40,
     Duration probeTimeout = const Duration(seconds: 2),
+    bool skipIcmpScan = false, // NEW: Skip ICMP ping sweep when true
   }) async {
     print('\n═══════════════════════════════════════════════════════════════');
     print('SCANNING LOCAL NETWORK VIA ICMP PING SWEEP');
@@ -207,44 +208,61 @@ class NetworkScanService {
         testedDevices: 0,
       ));
 
-      Future<void> pingNext() async {
-        while (true) {
-          String? ip;
-          await _progressMutex.protect(() async {
-            if (nextPingIndex < ipList.length) {
-              ip = ipList[nextPingIndex];
-              nextPingIndex++;
-            }
-          });
+      if (skipIcmpScan) {
+        // Skip ICMP ping sweep - treat all IPs as reachable
+        print('Skipping ICMP ping sweep - testing all ${ipList.length} IPs directly');
+        reachableIPs.addAll(ipList);
+        foundHostsCount = ipList.length;
+        checkedPingCount = totalIPs;
 
-          if (ip == null) break;
+        onProgress?.call(NetworkScanProgress(
+          totalIPs: totalIPs,
+          checkedIPs: totalIPs,
+          foundHosts: foundHostsCount,
+          knownDevices: knownDevicesCount,
+          testedDevices: testedDevicesCount,
+        ));
+      } else {
+        // Perform ICMP ping sweep to discover reachable hosts
+        Future<void> pingNext() async {
+          while (true) {
+            String? ip;
+            await _progressMutex.protect(() async {
+              if (nextPingIndex < ipList.length) {
+                ip = ipList[nextPingIndex];
+                nextPingIndex++;
+              }
+            });
 
-          final isReachable = await _pingHost(ip!, timeout);
+            if (ip == null) break;
 
-          await _progressMutex.protect(() async {
-            checkedPingCount++;
-            if (isReachable) {
-              reachableIPs.add(ip!);
-              foundHostsCount++;
-            }
-            // Progress update DURING ping sweep
-            onProgress?.call(NetworkScanProgress(
-              totalIPs: totalIPs,
-              checkedIPs: checkedPingCount,
-              foundHosts: foundHostsCount,
-              knownDevices: knownDevicesCount,
-              testedDevices: testedDevicesCount,
-            ));
-          });
+            final isReachable = await _pingHost(ip!, timeout);
+
+            await _progressMutex.protect(() async {
+              checkedPingCount++;
+              if (isReachable) {
+                reachableIPs.add(ip!);
+                foundHostsCount++;
+              }
+              // Progress update DURING ping sweep
+              onProgress?.call(NetworkScanProgress(
+                totalIPs: totalIPs,
+                checkedIPs: checkedPingCount,
+                foundHosts: foundHostsCount,
+                knownDevices: knownDevicesCount,
+                testedDevices: testedDevicesCount,
+              ));
+            });
+          }
         }
-      }
 
-      // Start ping workers
-      final pingWorkers = List.generate(
-        maxConcurrentPings.clamp(1, totalIPs),
-        (_) => pingNext(),
-      );
-      await Future.wait(pingWorkers);
+        // Start ping workers
+        final pingWorkers = List.generate(
+          maxConcurrentPings.clamp(1, totalIPs),
+          (_) => pingNext(),
+        );
+        await Future.wait(pingWorkers);
+      }
 
       print('Ping sweep completed. Found ${reachableIPs.length} reachable hosts out of ${totalIPs} IPs');
       print('\nProbing ${reachableIPs.length} devices for manufacturer identification...');

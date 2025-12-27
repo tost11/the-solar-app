@@ -56,7 +56,7 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
               currentUsername: 'admin',
               currentPassword: authDev.authPassword,
               currentEnabled: allowReadonly,
-              usernameEditable: false,
+              usernameEditable: !authDev.fixedUserName,
             ),
           );
 
@@ -311,6 +311,31 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
   List<DeviceDataField> getDataFields() {
     return [
       DeviceDataField(
+        name: 'Gesamtleistung',
+        type: DataFieldType.watt,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'total', 'Power', 'v']),
+        icon: Icons.bolt,
+        expertMode: false,
+        category: 'inverter',
+      ),
+      DeviceDataField(
+        name: 'Tagesertrag',
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'total', 'YieldDay', 'v']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        category: 'inverter',
+      ),
+      DeviceDataField(
+        name: 'Gesamtertrag',
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'total', 'YieldTotal', 'v']),
+        icon: Icons.energy_savings_leaf,
+        expertMode: false,
+        category: 'inverter',
+        precision: 3,
+      ),
+      DeviceDataField(
         name: 'Chip Model',
         type: DataFieldType.none,
         valueExtractor: (data) => MapUtils.OM(data, ['config', 'chipmodel']),
@@ -425,6 +450,12 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
   @override
   List<DeviceCategoryConfig> getCategoryConfigs() {
     return [
+      const DeviceCategoryConfig(
+        category: 'inverter',
+        displayName: 'Wechselrichter',
+        layout: CategoryLayout.standard,
+        order: 5,
+      ),
       const DeviceCategoryConfig(
         category: 'system',
         displayName: 'System',

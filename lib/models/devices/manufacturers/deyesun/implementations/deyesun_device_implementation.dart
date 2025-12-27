@@ -15,22 +15,38 @@ import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
+import '../../../generic_rendering/general_setting_item.dart';
+import 'package:the_solar_app/screens/configuration/general_settings_screen.dart';
 
 /// Simple implementation for DeyeSun devices
 ///
 /// No future device types expected, so kept minimal and straightforward
 class DeyeSunDeviceImplementation extends DeviceImplementation {
-  /// Helper method to format numeric values from data
-  static String? _formatNumber(dynamic value, int decimals, String unit) {
-    if (value == null) return null;
-    final numValue = value is num ? value : double.tryParse(value.toString());
-    if (numValue == null) return null;
-    return '${numValue.toStringAsFixed(decimals)} $unit';
-  }
-
   @override
   List<DeviceMenuItem> getMenuItems() {
     return [
+      DeviceMenuItem(
+        name: 'Allgemeine Einstellungen',
+        subtitle: 'Grundlegende Geräteeinstellungen verwalten',
+        icon: Icons.settings,
+        iconColor: Colors.purple,
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
+          // Build settings list with current device data
+          final settings = getGeneralSettings(device.data);
+
+          // Navigate to general settings screen
+          await NavigationUtils.pushConfigurationScreen(
+            context,
+            GeneralSettingsScreen(
+              device: device,
+              settings: settings,
+            ),
+          );
+        },
+      ),
       DeviceMenuItem(
         name: 'WiFi konfigurieren',
         subtitle: 'Netzwerkverbindung einrichten',
@@ -267,63 +283,33 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
     ];
   }
 
-  @override
-  List<DeviceControlItem> getControlItems() {
+  /// Returns the list of general settings available for this DeyeSun device
+  List<GeneralSettingItem> getGeneralSettings(Map<String, dynamic> data) {
+    // Extract current power status from Modbus data
+    // Check both device.data structure and direct structure
+    var limitStatus = MapUtils.OM(data, ['data', 'limit_status']);
+
+    // Fallback: if not found in nested structure, try direct access
+    limitStatus ??= MapUtils.OM(data, ['limit_status']);
+
+    // Default to false (off) if status cannot be determined
+    final currentStatus = limitStatus == 1; // 1 = on, 2 = off
+
     return [
-      // Power on/off control
-      DeviceControlItem(
+      GeneralSettingItem(
         name: 'Wechselrichter',
-        type: ControlType.switchToggle,
+        commandName: GENERAL_SETTINGS_INVERTER_POWER,
+        currentStatus: currentStatus,
+        popUpOnChange: true,
+        description: 'Wechselrichter ein- oder ausschalten',
         icon: Icons.power_settings_new,
-        valueExtractor: (data) {
-          final status = MapUtils.OM(data, ['data', 'limit_status']);
-          if (status == null) return null;
-          final statusValue = int.tryParse(status.toString());
-          return statusValue == 1; // 1 = on, 2 = off
-        },
-        onChanged: (context, device, newValue) async {
-          // Show confirmation dialog only when turning OFF
-          if (newValue == false) {
-            final confirmed = await showDialog<bool>(
-              context: context,
-              builder: (dialogContext) => AlertDialog(
-                title: const Text('Wechselrichter ausschalten'),
-                content: const Text('Sind Sie sicher, dass Sie den Wechselrichter ausschalten möchten?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext, false),
-                    child: const Text('Abbrechen'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext, true),
-                    child: const Text('Ausschalten'),
-                  ),
-                ],
-              ),
-            );
-
-            if (confirmed != true) return;
-          }
-
-          await DialogUtils.executeWithLoading(
-            context,
-            loadingMessage: newValue ? 'Schalte Wechselrichter ein...' : 'Schalte Wechselrichter aus...',
-            operation: () async {
-              await device.sendCommand(COMMAND_SET_MAIN_POWER, {
-                'on': newValue,
-              });
-
-              // Update local data after successful toggle
-              if (device.data.containsKey('data')) {
-                device.data['data']!['limit_status'] = newValue ? 1 : 2;
-                device.emitData(device.data['data']!);
-              }
-            },
-            showErrorDialog: true,
-          );
-        },
       ),
     ];
+  }
+
+  @override
+  List<DeviceControlItem> getControlItems() {
+    return [];
   }
 
   @override
@@ -338,30 +324,32 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
           // Try Modbus data first, fall back to HTTP config
           final value = MapUtils.OM(data, ['data', 'ac_power']) ??
               MapUtils.OM(data, ['config', 'webdata_now_p']);
-          return _formatNumber(value, 1, 'W');
+          return value;
         },
         icon: Icons.bolt,
         expertMode: false,
+        precision: 1,
       ),*/
       DeviceDataField(
         name: 'Tagesertrag',
-        type: DataFieldType.none,
+        type: DataFieldType.energy,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'day_energy']) ??
               MapUtils.OM(data, ['config', 'webdata_today_e']);
-          return _formatNumber(value, 1, 'kWh');
+          return value;
         },
         icon: Icons.wb_sunny,
         expertMode: false,
       ),
       DeviceDataField(
         name: 'Gesamtertrag',
-        type: DataFieldType.none,
+        type: DataFieldType.energy,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'total_energy']) ??
               MapUtils.OM(data, ['config', 'webdata_total_e']);
-          return _formatNumber(value, 1, 'kWh');
+          return value;
         },
+        divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
         icon: Icons.show_chart,
         expertMode: false,
       ),
@@ -369,93 +357,75 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       // Grid AC data
       DeviceDataField(
         name: 'Netzspannung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'ac_voltage']);
-          return _formatNumber(value, 1, 'V');
-        },
+        type: DataFieldType.voltage,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_voltage']),
         icon: Icons.electric_bolt,
         expertMode: false,
         category: 'ac',
       ),
       DeviceDataField(
         name: 'Netzstrom',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'ac_current']);
-          return _formatNumber(value, 2, 'A');
-        },
+        type: DataFieldType.current,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_current']),
         icon: Icons.flash_on,
         expertMode: false,
         category: 'ac',
       ),
       DeviceDataField(
         name: 'Netzfrequenz',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'ac_frequency']);
-          return _formatNumber(value, 2, 'Hz');
-        },
+        type: DataFieldType.frequency,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_frequency']),
         icon: Icons.waves,
         expertMode: true,
         category: 'ac',
       ),
       DeviceDataField(
         name: 'AC Leistung',
-        type: DataFieldType.none,
+        type: DataFieldType.watt,
         valueExtractor: (data) {
           var value = MapUtils.OM(data, ['data', 'ac_power']);
           if(value == null || value == 0){
             value = MapUtils.OM(data, ['config', 'webdata_now_p']);
           }
-          return _formatNumber(value, 1, 'W');
+          return value;
         },
         icon: Icons.bolt,
         expertMode: false,
         category: 'ac',
+        precision: 1,
       ),
 
       // PV1 String
       DeviceDataField(
         name: 'PV1 Spannung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv1_voltage']);
-          return _formatNumber(value, 1, 'V');
-        },
+        type: DataFieldType.voltage,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_voltage']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv1',
       ),
       DeviceDataField(
         name: 'PV1 Strom',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv1_current']);
-          return _formatNumber(value, 2, 'A');
-        },
+        type: DataFieldType.current,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_current']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv1',
       ),
       DeviceDataField(
         name: 'PV1 Leistung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv1_power']);
-          return _formatNumber(value, 1, 'W');
-        },
+        type: DataFieldType.watt,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_power']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv1',
+        precision: 1,
       ),
       DeviceDataField(
         name: 'PV1 Gesamtertrag',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv1_total_energy']);
-          return _formatNumber(value, 1, 'kWh');
-        },
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_total_energy']),
+        divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
         icon: Icons.show_chart,
         expertMode: true,
         category: 'pv1',
@@ -464,44 +434,34 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       // PV2 String
       DeviceDataField(
         name: 'PV2 Spannung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv2_voltage']);
-          return _formatNumber(value, 1, 'V');
-        },
+        type: DataFieldType.voltage,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_voltage']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv2',
       ),
       DeviceDataField(
         name: 'PV2 Strom',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv2_current']);
-          return _formatNumber(value, 2, 'A');
-        },
+        type: DataFieldType.current,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_current']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv2',
       ),
       DeviceDataField(
         name: 'PV2 Leistung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv2_power']);
-          return _formatNumber(value, 1, 'W');
-        },
+        type: DataFieldType.watt,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_power']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv2',
+        precision: 1,
       ),
       DeviceDataField(
         name: 'PV2 Gesamtertrag',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv2_total_energy']);
-          return _formatNumber(value, 1, 'kWh');
-        },
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_total_energy']),
+        divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
         icon: Icons.show_chart,
         expertMode: true,
         category: 'pv2',
@@ -510,44 +470,34 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       // PV3 String
       DeviceDataField(
         name: 'PV3 Spannung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv3_voltage']);
-          return _formatNumber(value, 1, 'V');
-        },
+        type: DataFieldType.voltage,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_voltage']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv3',
       ),
       DeviceDataField(
         name: 'PV3 Strom',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv3_current']);
-          return _formatNumber(value, 2, 'A');
-        },
+        type: DataFieldType.current,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_current']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv3',
       ),
       DeviceDataField(
         name: 'PV3 Leistung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv3_power']);
-          return _formatNumber(value, 1, 'W');
-        },
+        type: DataFieldType.watt,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_power']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv3',
+        precision: 1,
       ),
       DeviceDataField(
         name: 'PV3 Gesamtertrag',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv3_total_energy']);
-          return _formatNumber(value, 1, 'kWh');
-        },
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_total_energy']),
+        divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
         icon: Icons.show_chart,
         expertMode: true,
         category: 'pv3',
@@ -556,44 +506,34 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       // PV4 String
       DeviceDataField(
         name: 'PV4 Spannung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv4_voltage']);
-          return _formatNumber(value, 1, 'V');
-        },
+        type: DataFieldType.voltage,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_voltage']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv4',
       ),
       DeviceDataField(
         name: 'PV4 Strom',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv4_current']);
-          return _formatNumber(value, 2, 'A');
-        },
+        type: DataFieldType.current,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_current']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv4',
       ),
       DeviceDataField(
         name: 'PV4 Leistung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv4_power']);
-          return _formatNumber(value, 1, 'W');
-        },
+        type: DataFieldType.watt,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_power']),
         icon: Icons.solar_power,
         expertMode: true,
         category: 'pv4',
+        precision: 1,
       ),
       DeviceDataField(
         name: 'PV4 Gesamtertrag',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'pv4_total_energy']);
-          return _formatNumber(value, 1, 'kWh');
-        },
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_total_energy']),
+        divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
         icon: Icons.show_chart,
         expertMode: true,
         category: 'pv4',
@@ -602,23 +542,18 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       // Total DC Power
       DeviceDataField(
         name: 'DC Gesamtleistung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'dc_total_power']);
-          return _formatNumber(value, 1, 'W');
-        },
+        type: DataFieldType.watt,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc_total_power']),
         icon: Icons.electrical_services,
         expertMode: false,
+        precision: 1,
       ),
 
       // System information
       DeviceDataField(
         name: 'Temperatur',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'radiator_temp']);
-          return _formatNumber(value, 1, '°C');
-        },
+        type: DataFieldType.temperature,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'radiator_temp']),
         icon: Icons.thermostat,
         expertMode: true,
         category: 'system',
@@ -654,26 +589,24 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
 
-      // Power Limit Control
+      // Power Limit Control - Percentage
       DeviceDataField(
         name: 'Leistungsbegrenzung',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final value = MapUtils.OM(data, ['data', 'limit_percentage']);
-          return value != null ? '$value %' : null;
-        },
+        type: DataFieldType.percentage,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'limit_percentage']),
         icon: Icons.speed,
         expertMode: false,
       ),
 
-      // Power Limit Control
+      // Power Limit Control - Watt
       DeviceDataField(
         name: 'Leistungsbegrenzung',
-        type: DataFieldType.none,
+        type: DataFieldType.watt,
         valueExtractor: (data) {
-          var value = MapUtils.OM(data, ['data', 'limit_percentage']) as int?;
-          var powerRating = MapUtils.OM(data, ['config', 'power_rating']) as int?;
-          return value != null && powerRating != null ? '${value * powerRating * 0.01} W' : null;
+          final value = MapUtils.OM(data, ['data', 'limit_percentage']) as num?;
+          final powerRating = MapUtils.OM(data, ['config', 'power_rating']) as num?;
+          // Calculate watt value, DataFieldType.watt handles formatting
+          return (value != null && powerRating != null) ? value * powerRating * 0.01 : null;
         },
         icon: Icons.speed,
         expertMode: false,
@@ -725,42 +658,55 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         displayName: 'PV1',
         layout: CategoryLayout.standard,
         order: 10,
+        // PV1 always shown - use defaults (both false)
       ),
       const DeviceCategoryConfig(
         category: 'pv2',
         displayName: 'PV2',
         layout: CategoryLayout.standard,
         order: 20,
+        hideWhenAllNull: true,
+        hideWhenAllZero: true,
       ),
       const DeviceCategoryConfig(
         category: 'pv3',
         displayName: 'PV3',
         layout: CategoryLayout.standard,
         order: 30,
+        hideWhenAllNull: true,
+        hideWhenAllZero: true,
       ),
       const DeviceCategoryConfig(
         category: 'pv4',
         displayName: 'PV4',
         layout: CategoryLayout.standard,
         order: 40,
+        hideWhenAllNull: true,
+        hideWhenAllZero: true,
       ),
       const DeviceCategoryConfig(
         category: 'ac',
         displayName: 'AC (Netz)',
         layout: CategoryLayout.standard,
         order: 50,
+        hideWhenAllNull: true,
+        hideWhenAllZero: true,
       ),
       const DeviceCategoryConfig(
         category: 'system',
         displayName: 'System',
         layout: CategoryLayout.standard,
         order: 60,
+        hideWhenAllNull: true,
+        hideWhenAllZero: true,
       ),
       const DeviceCategoryConfig(
         category: 'device_info',
         displayName: 'Geräteinformationen',
         layout: CategoryLayout.oneLine,
         order: 70,
+        hideWhenAllNull: true,
+        hideWhenAllZero: true,
       ),
     ];
   }
@@ -787,6 +733,9 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
     } else if (command == COMMAND_SET_MAIN_POWER) {
       // Requires device state access for data updates
       throw UnimplementedError('COMMAND_SET_MAIN_POWER must be handled in device class');
+    } else if (command == COMMAND_SET_GENERAL_SETTING) {
+      // Requires device state access for data updates
+      throw UnimplementedError('COMMAND_SET_GENERAL_SETTING must be handled in device class');
     } else if (command == COMMAND_FETCH_AP_CONFIG) {
       // Fetch Access Point configuration from wirepoint.html (SSID, auth, encryption, etc.)
       final apConfig = await service.fetchConfig('wirepoint');

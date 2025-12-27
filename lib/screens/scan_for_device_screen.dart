@@ -22,6 +22,7 @@ import '../utils/net_utils.dart';
 import '../widgets/device_list_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/scan_advanced_options_widget.dart';
 import '../utils/permission_utils.dart';
 import 'manual_device_add_screen.dart';
 
@@ -51,7 +52,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
   // Network scanning progress - unified view
   NetworkScanProgress? _scanProgress;
-  bool _fastScanning = true; // Fast scanning enabled by default
+
+  // Advanced scanning options widget key
+  final GlobalKey<ScanAdvancedOptionsWidgetState> _advancedOptionsKey = GlobalKey();
 
   // Tabs
   late TabController _tabController;
@@ -174,8 +177,27 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   Future<void> _startNetworkScan() async {
     if (_isScanningNetwork) return;
 
-    // Get all local network IPs (WiFi + Ethernet) using NetUtils
-    final localIPs = await NetUtils.getLocalNetworkIPs();
+    // Get scanning configuration from advanced options widget
+    final config = _advancedOptionsKey.currentState?.getCurrentConfiguration();
+    if (config == null) {
+      debugPrint('Advanced options widget not initialized yet');
+      return;
+    }
+
+    // Get local network IPs based on configuration
+    List<String> localIPs;
+    if (config.isAutoMode) {
+      // Auto mode: scan all available networks
+      localIPs = await NetUtils.getLocalNetworkIPs();
+    } else {
+      // Specific interface selected
+      if (config.ipAddress != null) {
+        localIPs = [config.ipAddress!];
+      } else {
+        // Fallback to auto if selected interface no longer available
+        localIPs = await NetUtils.getLocalNetworkIPs();
+      }
+    }
 
     if (localIPs.isEmpty) {
       if (mounted) {
@@ -207,42 +229,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
     debugPrint('Scanning ${subnets.length} subnet(s): ${subnets.join(", ")}');
 
-    // Check WiFi permissions on Android 13+ (API 33+) only
-    if (Platform.isAndroid) {
-      try {
-        final deviceInfo = DeviceInfoPlugin();
-        final androidInfo = await deviceInfo.androidInfo;
-        final sdkInt = androidInfo.version.sdkInt;
-
-        // NEARBY_WIFI_DEVICES permission only exists on Android 13+ (API 33+)
-        if (sdkInt >= 33) {
-          final nearbyWifiDevices = await Permission.nearbyWifiDevices.status;
-
-          if (!nearbyWifiDevices.isGranted) {
-            final result = await Permission.nearbyWifiDevices.request();
-            if (!result.isGranted) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('WiFi-Geräte-Berechtigung benötigt für Netzwerk-Scan'),
-                    action: SnackBarAction(
-                      label: 'Einstellungen',
-                      onPressed: () => openAppSettings(),
-                    ),
-                  ),
-                );
-              }
-              return;
-            }
-          }
-        }
-        // On Android < 13, no additional permissions needed for mDNS
-      } catch (e) {
-        print('Error checking Android version: $e');
-        // Continue with scan if we can't determine version
-      }
-    }
-
     setState(() {
       _networkDevices.clear();
       _scanProgress = null;
@@ -250,14 +236,20 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     });
 
     try {
+      // Determine timeouts based on configuration
+      final icmpTimeout = config.useFastScanning
+          ? Duration(seconds: config.icmpTimeoutSeconds)
+          : Duration(seconds: config.deviceTimeoutSeconds);
+
+      final probeTimeout = Duration(seconds: config.deviceTimeoutSeconds);
+
       // Perform ICMP ping sweep to discover all devices on the network
       await _networkScanService.scanNetwork(
         subnets: subnets, // Pass list of subnets to scan
-        timeout: const Duration(seconds: 5), // Timeout per ping
+        timeout: icmpTimeout, // ICMP timeout from configuration
         maxConcurrentPings: 20, // 20 parallel ping workers
-        probeTimeout: _fastScanning
-            ? const Duration(seconds: 2)
-            : const Duration(seconds: 5),
+        probeTimeout: probeTimeout, // Device probe timeout from configuration
+        skipIcmpScan: !config.useFastScanning, // Skip ICMP when fast scanning disabled
         onProgress: (progress) {
           if (mounted) {
             setState(() {
@@ -619,6 +611,8 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
     // Show device list
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: _networkDevices.length,
       itemBuilder: (context, index) {
         final device = _networkDevices[index];
@@ -693,38 +687,34 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
             ],
           ),
 
-          // Network Tab
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Netzwerk-Geräte',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Scannen Sie Ihr lokales Netzwerk nach Geräten',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    // IMPORTANT: Both the scan button section and scanning status must have
-                    // the same fixed height (104px) to prevent the device list below from
-                    // jumping when scanning starts/stops. When modifying this UI, maintain
-                    // the SizedBox height wrapper on both branches of this conditional.
-                    if (_isScanningNetwork)
-                      SizedBox(
-                        height: 104,
-                        child: _buildCompactScanStatus(),
-                      )
-                    else
-                      SizedBox(
-                        height: 104,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+          // Network Tab - Fully scrollable
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Netzwerk-Geräte',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Scannen Sie Ihr lokales Netzwerk nach Geräten',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      // Scanning status or button section
+                      if (_isScanningNetwork)
+                        SizedBox(
+                          height: 104,
+                          child: _buildCompactScanStatus(),
+                        )
+                      else
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
                               children: [
@@ -755,34 +745,17 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Checkbox(
-                                  value: _fastScanning,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _fastScanning = value ?? true;
-                                    });
-                                  },
-                                ),
-                                const Text('Fast Scanning (2s)'),
-                                const SizedBox(width: 4),
-                                Tooltip(
-                                  message: 'Fast: 2s timeout\nSlow: 5s timeout',
-                                  child: Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
-                                ),
-                              ],
-                            ),
+                            // Advanced scanning options
+                            ScanAdvancedOptionsWidget(key: _advancedOptionsKey),
                           ],
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const Divider(),
-              Expanded(child: _buildNetworkDevicesList()),
-            ],
+                const Divider(),
+                _buildNetworkDevicesList(),
+              ],
+            ),
           ),
         ],
       ),

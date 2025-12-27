@@ -218,6 +218,40 @@ flutter build apk --release
 # build/app/outputs/flutter-apk/app-release.apk
 ```
 
+### Building with Git Version Information
+
+The app displays version information including the git commit hash in the settings drawer. To embed the git version at build time, use the `--dart-define` flags:
+
+#### Development Builds
+
+```bash
+# Android
+flutter run --dart-define=GIT_HASH=$(git rev-parse HEAD) --dart-define=GIT_HASH_SHORT=$(git rev-parse --short HEAD)
+
+# Linux
+flutter run -d linux --dart-define=GIT_HASH=$(git rev-parse HEAD) --dart-define=GIT_HASH_SHORT=$(git rev-parse --short HEAD)
+
+# Windows
+flutter run -d windows --dart-define=GIT_HASH=$(git rev-parse HEAD) --dart-define=GIT_HASH_SHORT=$(git rev-parse --short HEAD)
+```
+
+#### Production Builds
+
+```bash
+# Android Release APK
+flutter build apk --release --dart-define=GIT_HASH=$(git rev-parse HEAD) --dart-define=GIT_HASH_SHORT=$(git rev-parse --short HEAD)
+
+# Linux Release
+flutter build linux --release --dart-define=GIT_HASH=$(git rev-parse HEAD) --dart-define=GIT_HASH_SHORT=$(git rev-parse --short HEAD)
+
+# Windows Release
+flutter build windows --release --dart-define=GIT_HASH=$(git rev-parse HEAD) --dart-define=GIT_HASH_SHORT=$(git rev-parse --short HEAD)
+```
+
+**Note**: Without these flags, the app will display "dev" or "unknown" as the git version. The version information is shown in:
+- Settings drawer: "Version: v1.0.0 (git-hash)"
+- App info screen: Full commit hash with copy-to-clipboard functionality
+
 ### Permissions
 
 The app requires several permissions for device discovery and connection:

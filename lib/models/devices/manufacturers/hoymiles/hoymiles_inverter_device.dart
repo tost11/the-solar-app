@@ -54,16 +54,11 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
       // Daily energy
       DeviceDataField(
         name: 'Tagesertrag',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final daily = MapUtils.OM(data, ['data', 'dtu_daily_energy']);
-          if (daily != null && daily is num) {
-            return '${daily.toStringAsFixed(2)} kWh'; // Service already in kWh
-          }
-          return null;
-        },
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'dtu_daily_energy']),
         icon: Icons.wb_sunny,
         expertMode: false,
+        precision: 2,
       ),
       // Grid voltage
       DeviceDataField(
@@ -78,14 +73,8 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
       // Grid frequency
       DeviceDataField(
         name: 'Netzfrequenz',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final freq = MapUtils.OM(data, ['data', 'inverter', 'sgs', 'frequency']);
-          if (freq != null && freq is num) {
-            return '${freq.toStringAsFixed(2)} Hz'; // Service already in Hz
-          }
-          return null;
-        },
+        type: DataFieldType.frequency,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'sgs', 'frequency']),
         icon: Icons.waves,
         expertMode: true,
         category: 'ac',
@@ -146,32 +135,22 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
         // Total energy
         DeviceDataField(
           name: 'PV$i Gesamtertrag',
-          type: DataFieldType.none,
-          valueExtractor: (data) {
-            final total = MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_total']);
-            if (total != null && total is num) {
-              return '${total.toStringAsFixed(1)} kWh'; // Service already in kWh
-            }
-            return null;
-          },
+          type: DataFieldType.energy,
+          valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_total']),
           icon: Icons.analytics,
           expertMode: false,
           category: 'pv$i',
+          precision: 1,
         ),
         // Daily energy
         DeviceDataField(
           name: 'PV$i Tagesertrag',
-          type: DataFieldType.none,
-          valueExtractor: (data) {
-            final total = MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_daily']);
-            if (total != null && total is num) {
-              return '${total.toStringAsFixed(1)} kWh'; // Service already in kWh
-            }
-            return null;
-          },
+          type: DataFieldType.energy,
+          valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_daily']),
           icon: Icons.analytics,
           expertMode: false,
           category: 'pv$i',
+          precision: 1,
         )
       ],
     ],
@@ -379,6 +358,49 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     netIpAddress = ipAddress;
     netPort ??= HoymilesProtocol.DTU_PORT;
   }
+
+  @override
+  List<DeviceCategoryConfig> get categoryConfigs => [
+    const DeviceCategoryConfig(
+      category: 'pv1',
+      displayName: 'PV1',
+      layout: CategoryLayout.standard,
+      order: 10,
+      // PV1 always shown - use defaults (both false)
+    ),
+    const DeviceCategoryConfig(
+      category: 'pv2',
+      displayName: 'PV2',
+      layout: CategoryLayout.standard,
+      order: 20,
+      hideWhenAllNull: true,
+      hideWhenAllZero: true,
+    ),
+    const DeviceCategoryConfig(
+      category: 'pv3',
+      displayName: 'PV3',
+      layout: CategoryLayout.standard,
+      order: 30,
+      hideWhenAllNull: true,
+      hideWhenAllZero: true,
+    ),
+    const DeviceCategoryConfig(
+      category: 'pv4',
+      displayName: 'PV4',
+      layout: CategoryLayout.standard,
+      order: 40,
+      hideWhenAllNull: true,
+      hideWhenAllZero: true,
+    ),
+    const DeviceCategoryConfig(
+      category: 'ac',
+      displayName: 'AC (Netz)',
+      layout: CategoryLayout.standard,
+      order: 50,
+      hideWhenAllNull: true,
+      hideWhenAllZero: true,
+    ),
+  ];
 
   /// Organize flat device info into sections for UI
   Map<String, dynamic> _organizeDeviceInfo(Map<String, dynamic> data) {

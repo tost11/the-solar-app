@@ -12,6 +12,16 @@ mixin DeviceAuthenticationMixin {
   /// Password for device authentication (stored in plain text)
   String? authPassword;
 
+  /// Indicates whether the username is fixed and cannot be changed by the user.
+  ///
+  /// This is a runtime property set statically by device implementations
+  /// and is NOT serialized to JSON. Devices with a fixed username (e.g.,
+  /// OpenDTU and Shelly devices that use 'admin') should set this to true
+  /// in their constructor.
+  ///
+  /// When true, UI components should disable username editing.
+  bool fixedUserName = false;
+
   /// Serializes authentication fields to JSON
   ///
   /// Returns a map containing username, password, and authEnabled fields.

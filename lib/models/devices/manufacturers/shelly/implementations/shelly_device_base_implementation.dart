@@ -21,6 +21,7 @@ import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
 import '../../../generic_rendering/general_setting_item.dart';
+import '../../../mixins/device_authentication_mixin.dart';
 
 class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
@@ -236,6 +237,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           if (!context.mounted) return;
 
+          final authDev = device as DeviceAuthenticationMixin;
+
           await NavigationUtils.pushConfigurationScreen(
             context,
             AuthenticationScreen(
@@ -243,7 +246,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
               currentUsername: 'admin',
               currentPassword: null,
               currentEnabled: MapUtils.OMas(device.data,["config","auth_en"],false),
-              usernameEditable: false,
+              usernameEditable: !authDev.fixedUserName,
             ),
           );
         },

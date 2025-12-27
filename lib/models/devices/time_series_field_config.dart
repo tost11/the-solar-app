@@ -50,7 +50,21 @@ class TimeSeriesFieldConfig {
         return '°C';
       case DataFieldType.time:
         return 'min';
-      default:
+      case DataFieldType.energy:
+        return 'Wh';
+      case DataFieldType.frequency:
+        return 'Hz';
+      case DataFieldType.apparentPower:
+        return 'VA';
+      case DataFieldType.reactivePower:
+        return 'VAR';
+      case DataFieldType.powerFactor:
+        return '';
+      case DataFieldType.resistance:
+        return 'Ω';
+      case DataFieldType.count:
+        return '';
+      case DataFieldType.none:
         return '';
     }
   }
