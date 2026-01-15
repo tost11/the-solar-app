@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
+import 'package:the_solar_app/models/devices/device_base.dart';
 
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/shelly_constants.dart';
 import 'package:the_solar_app/models/shelly_script.dart';
 import 'package:the_solar_app/screens/configuration/authentication_screen.dart';
 import 'package:the_solar_app/screens/configuration/general_settings_screen.dart';
@@ -20,13 +22,28 @@ import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
+import '../../../generic_rendering/device_category_config.dart';
 import '../../../generic_rendering/general_setting_item.dart';
 import '../../../mixins/device_authentication_mixin.dart';
+import '../../../time_series_field_config.dart';
+import '../shelly_module_registry.dart';
 
 class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
   static const int CODE_CHUNK_LENGTH = 1000;
   static const int CODE_CHUNK_LENGTH_WIFI = 4000;
+
+  // Reference to the device (set after construction)
+  DeviceBase? _device;
+
+  // Cache detected modules for performance
+  Map<String, List<int>>? _cachedModules;
+
+  /// Set the device reference (called by device constructor)
+  void setDevice(DeviceBase device) {
+    _device = device;
+    _cachedModules = null; // Clear cache when device changes
+  }
 
   @override
   List<DeviceMenuItem> getMenuItems(){
@@ -296,22 +313,614 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
   }
 
   @override
-  List<DeviceControlItem> getControlItems(){return [];}
+  List<DeviceControlItem> getControlItems() {
+    final modules = _getDetectedModules();
+    if (modules.isEmpty) return [];
+
+    final controls = <DeviceControlItem>[];
+
+    for (final entry in modules.entries) {
+      final moduleType = entry.key;
+      final instances = entry.value;
+      final config = ShellyModuleRegistry.configs[moduleType];
+
+      if (config == null || config.controls.isEmpty) continue;
+
+      for (final instanceId in instances) {
+        for (final template in config.controls) {
+          controls.add(_buildControlItem(
+            template: template,
+            moduleType: moduleType,
+            instanceId: instanceId,
+            instanceCount: instances.length,
+          ));
+        }
+      }
+    }
+
+    return controls;
+  }
 
   @override
-  List<DeviceDataField> getDataFields(){return [];}
+  List<DeviceDataField> getDataFields() {
+    final modules = _getDetectedModules();
+    if (modules.isEmpty) return [];
+
+    final fields = <DeviceDataField>[];
+
+    // Generate fields for each detected module
+    for (final entry in modules.entries) {
+      final moduleType = entry.key;
+      final instances = entry.value;
+      final config = ShellyModuleRegistry.configs[moduleType];
+
+      if (config == null) continue; // Unknown module type
+
+      for (final instanceId in instances) {
+        for (final template in config.fields) {
+          fields.add(_buildDataField(
+            template: template,
+            moduleType: moduleType,
+            instanceId: instanceId,
+            instanceCount: instances.length,
+          ));
+        }
+      }
+    }
+
+    // Add calculated total fields for EM1 modules (multiple instances)
+    if (modules.containsKey('em1') && modules['em1']!.length > 1) {
+      final em1Instances = modules['em1']!;
+
+      // Total Active Power (Gesamt Wirkleistung)
+      fields.add(DeviceDataField(
+        name: 'Gesamt Wirkleistung',
+        type: DataFieldType.watt,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in em1Instances) {
+            final power = MapUtils.OM(data, ['data', 'em1:$id', 'act_power']);
+            if (power is num) {
+              total += power.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.power_settings_new,
+        expertMode: false,
+        category: 'em1_kombiniert',
+      ));
+
+      // Total Apparent Power (Gesamt Scheinleistung)
+      fields.add(DeviceDataField(
+        name: 'Gesamt Scheinleistung',
+        type: DataFieldType.watt,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in em1Instances) {
+            final power = MapUtils.OM(data, ['data', 'em1:$id', 'aprt_power']);
+            if (power is num) {
+              total += power.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.power_outlined,
+        expertMode: true,
+        category: 'em1_kombiniert',
+      ));
+    }
+
+    // Add calculated total fields for EM1Data modules (multiple instances)
+    if (modules.containsKey('em1data') && modules['em1data']!.length > 1) {
+      final em1dataInstances = modules['em1data']!;
+
+      // Total Energy Consumption (Gesamt Energie Bezug)
+      fields.add(DeviceDataField(
+        name: 'EM1 Gesamt Energie (Bezug)',
+        type: DataFieldType.energy,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in em1dataInstances) {
+            final energy = MapUtils.OM(data, ['data', 'em1data:$id', 'total_act_energy']);
+            if (energy is num) {
+              total += energy.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.energy_savings_leaf,
+        expertMode: false,
+        category: 'em1_kombiniert',
+      ));
+
+      // Total Energy Return/Export (Gesamt Energie Einspeisung)
+      fields.add(DeviceDataField(
+        name: 'EM1 Gesamt Energie (Einspeisung)',
+        type: DataFieldType.energy,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in em1dataInstances) {
+            final energy = MapUtils.OM(data, ['data', 'em1data:$id', 'total_act_ret_energy']);
+            if (energy is num) {
+              total += energy.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.arrow_circle_up,
+        expertMode: false,
+        category: 'em1_kombiniert',
+      ));
+    }
+
+    // Add calculated total fields for PM1 modules (multiple instances)
+    if (modules.containsKey('pm1') && modules['pm1']!.length > 1) {
+      final pm1Instances = modules['pm1']!;
+
+      // Total Active Power (Gesamt Wirkleistung)
+      fields.add(DeviceDataField(
+        name: 'PM Gesamt Wirkleistung',
+        type: DataFieldType.watt,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in pm1Instances) {
+            final power = MapUtils.OM(data, ['data', 'pm1:$id', 'apower']);
+            if (power is num) {
+              total += power.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.power_settings_new,
+        expertMode: false,
+        category: 'pm1_kombiniert',
+      ));
+
+      // Total Current (Gesamt Strom)
+      fields.add(DeviceDataField(
+        name: 'PM Gesamt Strom',
+        type: DataFieldType.current,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in pm1Instances) {
+            final current = MapUtils.OM(data, ['data', 'pm1:$id', 'current']);
+            if (current is num) {
+              total += current.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.flash_on,
+        expertMode: false,
+        category: 'pm1_kombiniert',
+      ));
+
+      // Total Energy Import (Gesamt Energie Bezug)
+      fields.add(DeviceDataField(
+        name: 'PM Gesamt Energie (Bezug)',
+        type: DataFieldType.energy,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in pm1Instances) {
+            final energy = MapUtils.OM(data, ['data', 'pm1:$id', 'aenergy', 'total']);
+            if (energy is num) {
+              total += energy.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.energy_savings_leaf,
+        expertMode: false,
+        category: 'pm1_kombiniert',
+      ));
+
+      // Total Energy Export (Gesamt Energie Einspeisung)
+      fields.add(DeviceDataField(
+        name: 'PM Gesamt Energie (Einspeisung)',
+        type: DataFieldType.energy,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in pm1Instances) {
+            final energy = MapUtils.OM(data, ['data', 'pm1:$id', 'ret_aenergy', 'total']);
+            if (energy is num) {
+              total += energy.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.arrow_circle_up,
+        expertMode: false,
+        category: 'pm1_kombiniert',
+      ));
+    }
+
+    // Add calculated total fields for Switch modules (multiple instances)
+    if (modules.containsKey('switch') && modules['switch']!.length > 1) {
+      final switchInstances = modules['switch']!;
+
+      // Total Active Power (Gesamt Leistung)
+      fields.add(DeviceDataField(
+        name: 'Switch Gesamt Leistung',
+        type: DataFieldType.watt,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in switchInstances) {
+            final power = MapUtils.OM(data, ['data', 'switch:$id', 'apower']);
+            if (power is num) {
+              total += power.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.power_settings_new,
+        expertMode: false,
+        category: 'switch_kombiniert',
+      ));
+
+      // Total Energy (Gesamt Energie)
+      fields.add(DeviceDataField(
+        name: 'Switch Gesamt Energie',
+        type: DataFieldType.energy,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in switchInstances) {
+            final energy = MapUtils.OM(data, ['data', 'switch:$id', 'aenergy', 'total']);
+            if (energy is num) {
+              total += energy.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.energy_savings_leaf,
+        expertMode: false,
+        category: 'switch_kombiniert',
+      ));
+
+      // Average Temperature (Durchschnitts Temperatur)
+      fields.add(DeviceDataField(
+        name: 'Switch Durchschnitts Temperatur',
+        type: DataFieldType.temperature,
+        valueExtractor: (data) {
+          double sum = 0.0;
+          int count = 0;
+          for (final id in switchInstances) {
+            final temp = MapUtils.OM(data, ['data', 'switch:$id', 'temperature', 'tC']);
+            if (temp is num) {
+              sum += temp.toDouble();
+              count++;
+            }
+          }
+          return count > 0 ? sum / count : null;
+        },
+        icon: Icons.thermostat,
+        expertMode: true,
+        category: 'switch_kombiniert',
+      ));
+
+      // Total Current (Gesamt Strom)
+      fields.add(DeviceDataField(
+        name: 'Switch Gesamt Strom',
+        type: DataFieldType.current,
+        valueExtractor: (data) {
+          double total = 0.0;
+          for (final id in switchInstances) {
+            final current = MapUtils.OM(data, ['data', 'switch:$id', 'current']);
+            if (current is num) {
+              total += current.toDouble();
+            }
+          }
+          return total;
+        },
+        icon: Icons.flash_on,
+        expertMode: true,
+        category: 'switch_kombiniert',
+      ));
+    }
+
+    return fields;
+  }
 
   @override
   List<DeviceCustomSection> getCustomSections() => [];
 
   @override
-  String getFetchCommand(){
-    return "Shelly.GetStatus";
+  IconData getDeviceIcon() {
+    final modules = _getDetectedModules();
+
+    // Priority: em > em1 > pm1 > switch > cover > default
+    if (modules.containsKey('em')) return Icons.electric_meter;
+    if (modules.containsKey('em1')) return Icons.electric_meter;
+    if (modules.containsKey('pm1')) return Icons.electric_meter;
+    if (modules.containsKey('switch')) return Icons.power;
+    if (modules.containsKey('cover')) return Icons.roller_shades;
+    return Icons.broadcast_on_home;
   }
 
   @override
-  IconData getDeviceIcon(){
-    return Icons.broadcast_on_home;
+  List<TimeSeriesFieldConfig> getTimeSeriesFields() {
+    final modules = _getDetectedModules();
+    final fields = <TimeSeriesFieldConfig>[];
+
+    // Auto-configure time series for switch modules
+    if (modules.containsKey('switch')) {
+      for (final id in modules['switch']!) {
+        final suffix = modules['switch']!.length > 1 ? ' ${id + 1}' : '';
+        fields.addAll([
+          TimeSeriesFieldConfig(
+            name: 'Leistung$suffix',
+            type: DataFieldType.watt,
+            mapping: ['switch:$id', 'apower'],
+            expertMode: false,
+            hideIfEmpty: true,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'Spannung$suffix',
+            type: DataFieldType.voltage,
+            mapping: ['switch:$id', 'voltage'],
+            expertMode: true,
+            hideIfEmpty: true,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'Strom$suffix',
+            type: DataFieldType.current,
+            mapping: ['switch:$id', 'current'],
+            expertMode: true,
+            hideIfEmpty: true,
+          ),
+        ]);
+      }
+    }
+
+    // Auto-configure time series for EM modules (3-phase)
+    if (modules.containsKey('em')) {
+      fields.addAll([
+        // Phase A
+        TimeSeriesFieldConfig(
+          name: 'Phase 1 Leistung',
+          type: DataFieldType.watt,
+          mapping: ['em:0', 'a_act_power'],
+          expertMode: false,
+        ),
+        TimeSeriesFieldConfig(
+          name: 'Phase 1 Spannung',
+          type: DataFieldType.voltage,
+          mapping: ['em:0', 'a_voltage'],
+          expertMode: true,
+        ),
+        TimeSeriesFieldConfig(
+          name: 'Phase 1 Strom',
+          type: DataFieldType.current,
+          mapping: ['em:0', 'a_current'],
+          expertMode: true,
+        ),
+
+        // Phase B
+        TimeSeriesFieldConfig(
+          name: 'Phase 2 Leistung',
+          type: DataFieldType.watt,
+          mapping: ['em:0', 'b_act_power'],
+          expertMode: false,
+        ),
+        TimeSeriesFieldConfig(
+          name: 'Phase 2 Spannung',
+          type: DataFieldType.voltage,
+          mapping: ['em:0', 'b_voltage'],
+          expertMode: true,
+        ),
+        TimeSeriesFieldConfig(
+          name: 'Phase 2 Strom',
+          type: DataFieldType.current,
+          mapping: ['em:0', 'b_current'],
+          expertMode: true,
+        ),
+
+        // Phase C
+        TimeSeriesFieldConfig(
+          name: 'Phase 3 Leistung',
+          type: DataFieldType.watt,
+          mapping: ['em:0', 'c_act_power'],
+          expertMode: false,
+        ),
+        TimeSeriesFieldConfig(
+          name: 'Phase 3 Spannung',
+          type: DataFieldType.voltage,
+          mapping: ['em:0', 'c_voltage'],
+          expertMode: true,
+        ),
+        TimeSeriesFieldConfig(
+          name: 'Phase 3 Strom',
+          type: DataFieldType.current,
+          mapping: ['em:0', 'c_current'],
+          expertMode: true,
+        ),
+
+        // Total
+        TimeSeriesFieldConfig(
+          name: 'Gesamt Leistung',
+          type: DataFieldType.watt,
+          mapping: ['em:0', 'total_act_power'],
+          expertMode: false,
+        ),
+      ]);
+    }
+
+    // Auto-configure time series for EM1 modules (single-phase, multi-instance)
+    if (modules.containsKey('em1')) {
+      for (final id in modules['em1']!) {
+        final suffix = modules['em1']!.length > 1 ? ' ${id + 1}' : '';
+        fields.addAll([
+          TimeSeriesFieldConfig(
+            name: 'EM1 Wirkleistung$suffix',
+            type: DataFieldType.watt,
+            mapping: ['em1:$id', 'act_power'],
+            expertMode: false,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'EM1 Spannung$suffix',
+            type: DataFieldType.voltage,
+            mapping: ['em1:$id', 'voltage'],
+            expertMode: true,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'EM1 Strom$suffix',
+            type: DataFieldType.current,
+            mapping: ['em1:$id', 'current'],
+            expertMode: true,
+          ),
+        ]);
+      }
+    }
+
+    // Auto-configure time series for PM1 modules (power meter Gen3, multi-instance)
+    if (modules.containsKey('pm1')) {
+      for (final id in modules['pm1']!) {
+        final suffix = modules['pm1']!.length > 1 ? ' ${id + 1}' : '';
+        fields.addAll([
+          TimeSeriesFieldConfig(
+            name: 'PM1 Wirkleistung$suffix',
+            type: DataFieldType.watt,
+            mapping: ['pm1:$id', 'apower'],
+            expertMode: false,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'PM1 Spannung$suffix',
+            type: DataFieldType.voltage,
+            mapping: ['pm1:$id', 'voltage'],
+            expertMode: true,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'PM1 Strom$suffix',
+            type: DataFieldType.current,
+            mapping: ['pm1:$id', 'current'],
+            expertMode: true,
+          ),
+          TimeSeriesFieldConfig(
+            name: 'PM1 Frequenz$suffix',
+            type: DataFieldType.frequency,
+            mapping: ['pm1:$id', 'freq'],
+            expertMode: true,
+          ),
+        ]);
+      }
+    }
+
+    return fields;
+  }
+
+  @override
+  List<DeviceCategoryConfig> getCategoryConfigs() {
+    final modules = _getDetectedModules();
+    final configs = <DeviceCategoryConfig>[];
+
+    // 3-Phase EM Categories (Phase 1, 2, 3, Totals)
+    if (modules.containsKey('em')) {
+      configs.addAll([
+        DeviceCategoryConfig(
+          category: 'phase1',
+          displayName: 'Phase 1',
+          order: 10,
+          layout: CategoryLayout.standard,
+        ),
+        DeviceCategoryConfig(
+          category: 'phase2',
+          displayName: 'Phase 2',
+          order: 20,
+          layout: CategoryLayout.standard,
+        ),
+        DeviceCategoryConfig(
+          category: 'phase3',
+          displayName: 'Phase 3',
+          order: 30,
+          layout: CategoryLayout.standard,
+        ),
+        DeviceCategoryConfig(
+          category: 'totals',
+          displayName: 'Totals',
+          order: 40,
+          layout: CategoryLayout.standard,
+        ),
+      ]);
+    }
+
+    // EM1 Categories (always create, even for single instance)
+    if (modules.containsKey('em1')) {
+      final instances = modules['em1']!;
+      for (int i = 0; i < instances.length; i++) {
+        final instanceNum = i + 1;
+        configs.add(DeviceCategoryConfig(
+          category: 'messung_$instanceNum',
+          displayName: 'Messung $instanceNum',
+          order: 50 + i,
+          layout: CategoryLayout.standard,
+          hideWhenAllZero: i > 0,  // Hide Messung 2, Messung 3 if all values are zero
+        ));
+      }
+
+      // Add EM1 combined category if multiple instances
+      if (instances.length > 1) {
+        configs.add(DeviceCategoryConfig(
+          category: 'em1_kombiniert',
+          displayName: 'Kombiniert',
+          order: 50 + instances.length,
+          layout: CategoryLayout.standard,
+        ));
+      }
+    }
+
+    // PM1 Categories (always create, even for single instance)
+    if (modules.containsKey('pm1')) {
+      final instances = modules['pm1']!;
+      for (int i = 0; i < instances.length; i++) {
+        final instanceNum = i + 1;
+        configs.add(DeviceCategoryConfig(
+          category: 'pm_messung_$instanceNum',
+          displayName: 'PM Messung $instanceNum',
+          order: 70 + i,
+          layout: CategoryLayout.standard,
+          hideWhenAllZero: i > 0,
+        ));
+      }
+
+      if (instances.length > 1) {
+        configs.add(DeviceCategoryConfig(
+          category: 'pm1_kombiniert',
+          displayName: 'PM Kombiniert',
+          order: 70 + instances.length,
+          layout: CategoryLayout.standard,
+        ));
+      }
+    }
+
+    // Multi-instance Switch Categories
+    if (modules.containsKey('switch')) {
+      final instances = modules['switch']!;
+      for (int i = 0; i < instances.length; i++) {
+        final instanceNum = i + 1;
+        configs.add(DeviceCategoryConfig(
+          category: 'switch_$instanceNum',
+          displayName: 'Switch $instanceNum',
+          order: 90 + i,
+          layout: CategoryLayout.standard,
+          hideWhenAllZero: i > 0,
+        ));
+      }
+
+      // Add Switch Kombiniert category if multiple switches
+      if (instances.length > 1) {
+        configs.add(DeviceCategoryConfig(
+          category: 'switch_kombiniert',
+          displayName: 'Switch Kombiniert',
+          order: 90 + instances.length,
+          layout: CategoryLayout.standard,
+        ));
+      }
+    }
+
+    // Temperature and other general fields stay uncategorized (null category)
+    // They will appear first in the UI before categorized sections
+
+    return configs;
   }
 
   /// Returns the list of general settings available for this Shelly device
@@ -372,16 +981,16 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     Map<String,dynamic>? ret;
 
     if(command == COMMAND_FETCH_DATA){
-      ret = await service.sendCommand('EM.GetStatus',{"id":0});
+      ret = await service.sendCommand(ShellyCommands.emGetStatus,{"id":0});
     }else if(command == COMMAND_FETCH_DEVICE_INFO){
-      ret = await service.sendCommand('Shelly.GetDeviceInfo',{"id":0});
+      ret = await service.sendCommand(ShellyCommands.getDeviceInfo,{"id":0});
     }else if(command == COMMAND_SET_WIFI){
       String ? ssid = params["ssid"];
       String ? password = params["password"];
       if(ssid == null || password == null){
         throw Exception("could not config wlan ssid or password empty");
       }
-      ret = await service.sendCommand('WiFi.SetConfig',{"config": {"sta":{"ssid":ssid,"pass":password,"enable":true}}});
+      ret = await service.sendCommand(ShellyCommands.wifiSetConfig,{"config": {"sta":{"ssid":ssid,"pass":password,"enable":true}}});
     }else if(command == COMMAND_SET_AP_CONFIG){
       var commandParams = <String,dynamic>{};
       commandParams["ssid"] = "whatever";//will not be accepted but when null wifi will be reset
@@ -395,19 +1004,19 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         commandParams["pass"] = null;
       }
       // Send command: {"config": {"ap": {...}}}
-      ret = await service.sendCommand('WiFi.SetConfig',{"config": {"ap": commandParams}});
+      ret = await service.sendCommand(ShellyCommands.wifiSetConfig,{"config": {"ap": commandParams}});
     }else if(command == COMMAND_FETCH_WIFI_CONFIG) {
-      ret = await service.sendCommand('WiFi.GetConfig', {});
+      ret = await service.sendCommand(ShellyCommands.wifiGetConfig, {});
     }else if(command == COMMAND_FETCH_SYS_CONFIG) {
-      ret = await service.sendCommand('Sys.GetConfig', {});
+      ret = await service.sendCommand(ShellyCommands.sysGetConfig, {});
     }else if(command == COMMAND_CONFIG_PORT) {
       int? port = params["port"];
       if(port == null){
         throw Exception("could not config port: port value is missing");
       }
-      ret = await service.sendCommand('Sys.SetConfig',{"config": {"rpc_udp": {"listen_port": port}}});
+      ret = await service.sendCommand(ShellyCommands.sysSetConfig,{"config": {"rpc_udp": {"listen_port": port}}});
     }else if(command == COMMAND_RESTART) {
-      ret = await service.sendCommand('Shelly.Reboot',{"delay_ms": 5000});//wait for 5sec so bluetooth connection is terminated nicely
+      ret = await service.sendCommand(ShellyCommands.reboot,{"delay_ms": 5000});//wait for 5sec so bluetooth connection is terminated nicely
     }else if(command == COMMAND_SET_GENERAL_SETTING) {
       String? name = params["name"];
       bool? value = params["value"];
@@ -417,13 +1026,13 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       }
 
       if(name == GENERAL_SETTINGS_DISCOVERABLE){
-        ret = await service.sendCommand('Sys.SetConfig',{"config": {"device": {"discoverable": value}}});
+        ret = await service.sendCommand(ShellyCommands.sysSetConfig,{"config": {"device": {"discoverable": value}}});
       }else if(name == GENERAL_SETTGINS_ECO_MODE){
-        ret = await service.sendCommand('Sys.SetConfig',{"config": {"device": {"eco_mode": value}}});
+        ret = await service.sendCommand(ShellyCommands.sysSetConfig,{"config": {"device": {"eco_mode": value}}});
       }else if(name == GENERAL_SETTINGS_DEBUG_MQTT){
-        ret = await service.sendCommand('Sys.SetConfig',{"config": {"debug": {"mqtt": {"enable": value}}}});
+        ret = await service.sendCommand(ShellyCommands.sysSetConfig,{"config": {"debug": {"mqtt": {"enable": value}}}});
       }else if(name == GENERAL_SETTINGS_DEBUG_WEBSOCKET){
-        ret = await service.sendCommand('Sys.SetConfig',{"config": {"debug": {"websocket": {"enable": value}}}});
+        ret = await service.sendCommand(ShellyCommands.sysSetConfig,{"config": {"debug": {"websocket": {"enable": value}}}});
       }
       ret = {"success": true, "setting": name, "value": value};
     }else if(command == COMMAND_SET_AUTH) {
@@ -431,38 +1040,38 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       // We need the device instance here
       throw UnimplementedError("COMMAND_SET_AUTH must be handled in device class due to required state access");
     }else if(command == COMMAND_FETCH_SCRIPTS) {
-      ret = await service.sendCommand('Script.List', {});
+      ret = await service.sendCommand(ShellyCommands.scriptList, {});
     }else if(command == COMMAND_GET_SCRIPT_STATUS) {
       int? scriptId = params["id"];
       if(scriptId == null) throw Exception("Script ID missing");
-      ret = await service.sendCommand('Script.GetStatus', {"id": scriptId});
+      ret = await service.sendCommand(ShellyCommands.scriptGetStatus, {"id": scriptId});
     }else if(command == COMMAND_SET_SCRIPT_ENABLE) {
       int? scriptId = params["id"];
       bool? enable = params["enable"];
       if(scriptId == null || enable == null) throw Exception("Script ID or enable value missing");
-      ret = await service.sendCommand('Script.SetConfig', {"id": scriptId, "config": {"enable": enable}});
+      ret = await service.sendCommand(ShellyCommands.scriptSetConfig, {"id": scriptId, "config": {"enable": enable}});
     }else if(command == COMMAND_START_SCRIPT) {
       int? scriptId = params["id"];
       if(scriptId == null) throw Exception("Script ID missing");
-      ret = await service.sendCommand('Script.Start', {"id": scriptId});
+      ret = await service.sendCommand(ShellyCommands.scriptStart, {"id": scriptId});
     }else if(command == COMMAND_STOP_SCRIPT) {
       int? scriptId = params["id"];
       if(scriptId == null) throw Exception("Script ID missing");
-      ret = await service.sendCommand('Script.Stop', {"id": scriptId});
+      ret = await service.sendCommand(ShellyCommands.scriptStop, {"id": scriptId});
     }else if(command == COMMAND_DELETE_SCRIPT) {
       int? scriptId = params["id"];
       if(scriptId == null) throw Exception("Script ID missing");
-      ret = await service.sendCommand('Script.Delete', {"id": scriptId});
+      ret = await service.sendCommand(ShellyCommands.scriptDelete, {"id": scriptId});
     }else if(command == COMMAND_CREATE_SCRIPT) {
       String? name = params["name"];
       if(name == null) throw Exception("Script name missing");
-      ret = await service.sendCommand('Script.Create', {"name": name});
+      ret = await service.sendCommand(ShellyCommands.scriptCreate, {"name": name});
       // Returns: {"id": 0}  (new script ID)
     }else if(command == COMMAND_RENAME_SCRIPT) {
       int? scriptId = params["id"];
       String? newName = params["name"];
       if(scriptId == null || newName == null) throw Exception("Script ID or name missing");
-      ret = await service.sendCommand('Script.SetConfig', {
+      ret = await service.sendCommand(ShellyCommands.scriptSetConfig, {
         "id": scriptId,
         "config": {"name": newName}
       });
@@ -482,7 +1091,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         // First chunk: append=false, subsequent chunks: append=true
         for (int i = 0; i < chunks.length; i++) {
           bool shouldAppend = i > 0;
-          await service.sendCommand('Script.PutCode', {
+          await service.sendCommand(ShellyCommands.scriptPutCode, {
             "id": scriptId,
             "code": chunks[i],
             "append": shouldAppend,
@@ -493,7 +1102,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         ret = {"success": true, "chunks": chunks.length};
       } else {
         // Send as single chunk (WiFi service or code <= CODE_CHUNK_LENGTH chars)
-        ret = await service.sendCommand('Script.PutCode', {
+        ret = await service.sendCommand(ShellyCommands.scriptPutCode, {
           "id": scriptId,
           "code": code,
           "append": append ?? false,
@@ -522,7 +1131,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           getCodeParams["len"] = CODE_CHUNK_LENGTH_WIFI;
         }
 
-        final response = await service.sendCommand('Script.GetCode', getCodeParams);
+        final response = await service.sendCommand(ShellyCommands.scriptGetCode, getCodeParams);
 
         if (response == null || response['data'] == null) break;
 
@@ -538,6 +1147,12 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       }
 
       ret = {"code": fullCode};
+    }else if(command == COMMAND_SET_MAIN_POWER) {
+      // Handle switch control (multi-instance support)
+      int? id = params["id"] ?? 0; // Default to first instance
+      bool? on = params["on"];
+      if(on == null) throw Exception("'on' parameter missing for switch control");
+      ret = await service.sendCommand('Switch.Set', {"id": id, "on": on});
     }else{
       throw UnimplementedError('Command not implemented: $command');
     }
@@ -578,5 +1193,132 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     }
 
     return chunks;
+  }
+
+  /// Get detected modules from device data
+  Map<String, List<int>> _getDetectedModules() {
+    if (_device == null) return {};
+
+    // Use cached modules if available
+    if (_cachedModules != null) return _cachedModules!;
+
+    // Extract from device.data['_detectedModules']
+    final stored = _device!.data['_detectedModules'];
+    if (stored is Map<String, dynamic>) {
+      // Convert to Map<String, List<int>>
+      final result = <String, List<int>>{};
+      stored.forEach((key, value) {
+        if (key is String && value is List) {
+          result[key] = value.cast<int>();
+        }
+      });
+      _cachedModules = result;
+      return result;
+    }
+
+    return {};
+  }
+
+  /// Build data field from template
+  DeviceDataField _buildDataField({
+    required FieldTemplate template,
+    required String moduleType,
+    required int instanceId,
+    required int instanceCount,
+  }) {
+    final suffix = instanceCount > 1 ? ' ${instanceId + 1}' : '';
+
+    // Determine category based on template and instance
+    String? category;
+    if (template.category != null) {
+      // Special handling: phase and totals categories always use template as-is
+      if (template.category == 'totals' || template.category!.startsWith('phase')) {
+        category = template.category;
+      }
+      // EM1/EM1data modules: ALWAYS assign instance categories
+      else if (moduleType == 'em1' || moduleType == 'em1data') {
+        category = 'messung_${instanceId + 1}';
+      }
+      // PM1 modules: ALWAYS assign instance categories
+      else if (moduleType == 'pm1') {
+        category = 'pm_messung_${instanceId + 1}';
+      }
+      // Switch modules: ALWAYS assign instance categories
+      else if (moduleType == 'switch') {
+        category = 'switch_${instanceId + 1}';
+      }
+      // Other multi-instance modules
+      else if (instanceCount > 1) {
+        category = '${moduleType}_${instanceId + 1}';
+      }
+      // Single instance of other modules: use template category
+      else {
+        category = template.category;
+      }
+    }
+
+    return DeviceDataField(
+      name: '${template.name}$suffix',
+      type: template.type,
+      valueExtractor: (data) {
+        // Split path by '.' for nested fields (e.g., "temperature.tC")
+        final pathParts = template.path.split('.');
+        final value = pathParts.length > 1
+          // Nested path: data -> module:id -> first_key -> second_key
+          ? MapUtils.OM(data, ['data', '$moduleType:$instanceId', ...pathParts])
+          // Simple path: data -> module:id -> key
+          : MapUtils.OM(data, ['data', '$moduleType:$instanceId', template.path]);
+
+        // Apply custom formatter if provided
+        if (template.formatter != null) {
+          return template.formatter!(value);
+        }
+        return value;
+      },
+      icon: template.icon,
+      expertMode: template.isExpert,
+      category: category,
+      hideIfEmpty: template.hideIfEmpty,
+    );
+  }
+
+  /// Build control item from template
+  DeviceControlItem _buildControlItem({
+    required ControlTemplate template,
+    required String moduleType,
+    required int instanceId,
+    required int instanceCount,
+  }) {
+    final suffix = instanceCount > 1 ? ' ${instanceId + 1}' : '';
+
+    return DeviceControlItem(
+      name: '${template.name}$suffix',
+      type: template.type,
+      icon: template.icon,
+      valueExtractor: (data) => MapUtils.OM(data,
+          ['data', '$moduleType:$instanceId', template.statePath]),
+      onChanged: (context, device, newValue) async {
+        await DialogUtils.executeWithLoading(
+          context,
+          loadingMessage: template.getLoadingMessage(newValue),
+          operation: () async {
+            await device.sendCommand(template.commandName, {
+              "id": instanceId,
+              ...template.buildParams(newValue),
+            });
+
+            // Update local state
+            if (device.data.containsKey('data')) {
+              final moduleData = device.data['data']!['$moduleType:$instanceId'];
+              if (moduleData is Map) {
+                moduleData[template.statePath] = newValue;
+                device.emitData(device.data['data']!);
+              }
+            }
+          },
+          showErrorDialog: true,
+        );
+      },
+    );
   }
 }

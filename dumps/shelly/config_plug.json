@@ -1,0 +1,13 @@
+{
+  "name": null,
+  "id": "shellyplusplugs-778899aabbcc",
+  "mac": "778899AABBCC",
+  "slot": 0,
+  "model": "SNPL-00112EU",
+  "gen": 2,
+  "fw_id": "20250924-062721/1.7.1-gd336f31",
+  "ver": "1.7.1",
+  "app": "PlusPlugS",
+  "auth_en": true,
+  "auth_domain": "shellyplusplugs-778899aabbcc"
+}

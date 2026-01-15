@@ -8,10 +8,10 @@ import '../../../widgets/app_bar_widget.dart';
 import '../../../widgets/app_scaffold.dart';
 import '../base_command_screen.dart';
 
-/// Detailed view for a single Shelly script with controls and periodic status updates
+/// Detailed view for a single Shelly script with controls and real-time status updates
 ///
 /// Shows script details, enable/disable toggle, start/stop controls, and error information.
-/// Automatically polls script status every 10 seconds.
+/// Subscribes to device data stream for automatic status updates.
 class ShellyScriptDetailScreen extends BaseCommandScreen {
   final ShellyScript script;
 
@@ -28,8 +28,7 @@ class ShellyScriptDetailScreen extends BaseCommandScreen {
 
 class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   late ShellyScript _currentScript;
-  Timer? _statusTimer;
-  bool _isLoadingStatus = false;
+  StreamSubscription<Map<String, dynamic>>? _dataSubscription;
 
   /// Error type translations from English to German
   static const Map<String, String> _errorTranslations = {
@@ -49,51 +48,39 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   void initState() {
     super.initState();
     _currentScript = widget.script;
-    _startPeriodicStatusCheck();
+
+    // Subscribe to device data updates
+    _dataSubscription = widget.device.dataStream.listen((data) {
+      _updateScriptStatus(data);
+    });
+
+    // Initial status update from current data
+    _updateScriptStatus(widget.device.data);
   }
 
   @override
   void dispose() {
-    _statusTimer?.cancel();
+    _dataSubscription?.cancel();
     super.dispose();
   }
 
-  /// Start periodic status polling every 10 seconds
-  void _startPeriodicStatusCheck() {
-    // Initial fetch
-    _fetchScriptStatus();
+  /// Update script status from device data stream
+  void _updateScriptStatus(Map<String, dynamic> data) {
+    if (!mounted) return;
 
-    // Set up periodic polling
-    _statusTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      _fetchScriptStatus();
-    });
-  }
+    // Extract script status from main data
+    final scriptKey = 'script:${_currentScript.id}';
+    final scriptData = data['data']?[scriptKey];
 
-  /// Fetch current script status from device
-  Future<void> _fetchScriptStatus() async {
-    if (_isLoadingStatus) return; // Avoid concurrent fetches
-
-    setState(() => _isLoadingStatus = true);
-
-    try {
-      final resp = await widget.sendCommandToDevice(
-        COMMAND_GET_SCRIPT_STATUS,
-        {"id": _currentScript.id},
-      );
-
-      if (!mounted) return;
-
-      if (resp != null) {
-        setState(() {
-          _currentScript = _currentScript.updateFromStatus(resp);
-        });
-      }
-    } catch (e) {
-      // Silent fail for background polling
-    } finally {
-      if (mounted) {
-        setState(() => _isLoadingStatus = false);
-      }
+    if (scriptData != null) {
+      setState(() {
+        _currentScript = _currentScript.copyWith(
+          running: scriptData['running'] as bool?,
+          memUsed: scriptData['mem_used'] as int?,
+          memPeak: scriptData['mem_peak'] as int?,
+          errors: (scriptData['errors'] as List?)?.cast<String>() ?? [],
+        );
+      });
     }
   }
 
@@ -117,8 +104,6 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
         context,
         enable ? 'Script aktiviert' : 'Script deaktiviert',
       );
-      // Refresh status after a short delay
-      Future.delayed(const Duration(milliseconds: 500), _fetchScriptStatus);
     }
   }
 
@@ -139,8 +124,6 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
         _currentScript = _currentScript.copyWith(running: true);
       });
       MessageUtils.showSuccess(context, 'Script gestartet');
-      // Refresh status after a short delay
-      Future.delayed(const Duration(milliseconds: 500), _fetchScriptStatus);
     }
   }
 
@@ -161,8 +144,6 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
         _currentScript = _currentScript.copyWith(running: false);
       });
       MessageUtils.showSuccess(context, 'Script gestoppt');
-      // Refresh status after a short delay
-      Future.delayed(const Duration(milliseconds: 500), _fetchScriptStatus);
     }
   }
 
@@ -214,12 +195,6 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                             ],
                           ),
                         ),
-                        if (_isLoadingStatus)
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
                       ],
                     ),
                   ],
@@ -411,7 +386,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                         Text(
                           '• Autostart: Script läuft automatisch bei Events\n'
                           '• Start/Stop: Manuelles Starten/Stoppen des Scripts\n'
-                          '• Status wird alle 10 Sekunden aktualisiert',
+                          '• Status wird automatisch aktualisiert',
                           style: TextStyle(
                             color: Colors.blue[900],
                             fontSize: 12,

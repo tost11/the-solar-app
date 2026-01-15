@@ -15,15 +15,16 @@ import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/Get
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/SetConfig.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/NetworkInfo.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/CommandPB.pb.dart';
+import '../../../models/devices/manufacturers/kostal/wifi_kostal_device.dart';
 import 'hoymiles_protocol.dart';
 import 'hoymiles_tcp_connection.dart';
 
 class HoymilesWifiService extends BaseDeviceService {
   final HoymilesProtocol _protocol = HoymilesProtocol();
   HoymilesTcpConnection? _connection;
-  int lastSeen = 0;
-  bool fetchDataEnabled = true;
   late HoymilesDevice hoymilesDevice;
+  static const int CONNECTION_TIMEOUT_MS = 40000;  // 30 seconds
+  late WiFiKostalDevice wifiDevice;
 
   /// Power mapping table from Hoymiles serial number prefix to power rating
   /// Based on hoymiles-wifi Python reference implementation
@@ -75,8 +76,6 @@ class HoymilesWifiService extends BaseDeviceService {
   HoymilesWifiService(DeviceBase device)
       : super((device as HoymilesDevice).fetchDataInterval, device) {
     hoymilesDevice = device as HoymilesDevice;
-    // Fetch first data
-    fetchData();
   }
 
   /// Detect if serial is a DTU (not an inverter)
@@ -379,71 +378,48 @@ class HoymilesWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> connect() async {
-    device.emitStatus("Verbindungsaufbau...");
+  Future<bool> internalConnect() async {
 
-    try {
-      // Create persistent connection if not exists
+    await hoymilesDevice.connectIpOrHostname((ip, port) async {
       _connection ??= HoymilesTcpConnection(
-        host: hoymilesDevice.netIpAddress ?? '',
-        port: hoymilesDevice.netPort ?? HoymilesProtocol.DTU_PORT,
+        host: ip,
+        port: port,
         protocol: _protocol,
       );
-
-      // Establish connection
-      final connected = await _connection!.connect();
-      if (!connected) {
-        device.emitStatus("Verbindung fehlgeschlagen");
-        throw Exception('Failed to connect to Hoymiles device');
+      if(!await _connection!.connect()){
+        throw Exception('Failed to connect to Hoymiles device on $ip:$port');
       }
+    });
 
-      // Test connection by fetching real data
-      final result = await getRealDataNew();
-      if (result != null) {
-        device.emitStatus("Verbunden");
-        lastSeen = DateTime.now().millisecondsSinceEpoch;
-        device.data["data"] = result;
-        device.emitData(result);
-
-        resetTimer();
-      } else {
-        device.emitStatus("Verbindung fehlgeschlagen");
-        throw Exception('Failed to connect to Hoymiles device');
-      }
-    } catch (e) {
-      device.emitStatus("Verbindung fehlgeschlagen");
-      debugPrint('[Hoymiles] Connection error: $e');
-      rethrow;
-    }
+    return true;
   }
 
   @override
-  Future<void> disconnect() async {
-    //fetchDataEnabled = false;
+  Future<void> internalDisconnect() async {
+    // Disconnect TCP connection
     await _connection?.disconnect();
   }
 
   @override
   void dispose() {
-    fetchDataEnabled = false;
     _connection?.dispose();
     super.dispose();
   }
 
   @override
   bool isConnected() {
-    return _connection?.isConnected ?? false;
+    if(_connection?.isConnected == true){
+      if((DateTime.now().millisecondsSinceEpoch - lastSeen) < CONNECTION_TIMEOUT_MS){
+        return true;
+      }
+      //timeout disconnect (retry will be handled by base implemention)
+      _connection?.disconnect();
+    }
+    return false;
   }
 
   @override
-  bool isInitialized() {
-    return device.data["data"] != null;
-  }
-
-  @override
-  void fetchData() async {
-    if (!fetchDataEnabled) return;
-
+  Future<void> internalFetchData() async {
     const maxRetries = 2;
 
     for (int attempt = 1; attempt < maxRetries; attempt++) {
@@ -455,7 +431,6 @@ class HoymilesWifiService extends BaseDeviceService {
           device.data["data"] = realData;
           device.emitData(realData);
           lastSeen = DateTime.now().millisecondsSinceEpoch;
-          device.emitStatus("Verbunden");
           return; // Exit on success
         }
 
@@ -467,9 +442,9 @@ class HoymilesWifiService extends BaseDeviceService {
       }
     }
 
-    // All retries failed - disconnect
-    debugPrint('[Hoymiles] All $maxRetries fetch attempts failed, disconnecting...');
-    await disconnect(); // This will emit "Getrennt" status and close connection
+    // All retries failed - throw exception (base class will handle error)
+    debugPrint('[Hoymiles] All $maxRetries fetch attempts failed');
+    throw Exception('Failed to fetch data after $maxRetries attempts');
   }
 
   /// Get real-time data from device (RealDataNew command)
@@ -1123,5 +1098,20 @@ class HoymilesWifiService extends BaseDeviceService {
       return;
     }
     throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errorCode}");
+  }
+
+  @override
+  Future<bool> internalInitializeDevice() async{
+
+    // Test connection by fetching real data
+    final result = await getRealDataNew();
+    if (result != null) {
+      device.data["data"] = result;
+      device.emitData(result);
+    } else {
+      throw Exception('Failed to fetch data from Hoymiles device');
+    }
+
+    return false;
   }
 }

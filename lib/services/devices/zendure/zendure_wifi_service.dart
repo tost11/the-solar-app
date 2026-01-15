@@ -66,34 +66,36 @@ class ZendureWifiService extends BaseDeviceService {
     return null;
   }
 
-  int lastSeen = 0;
-  bool fetchDataEnabled = true;
+  // Connection timeout - if no data received within this time, consider disconnected
+  static const int CONNECTION_TIMEOUT_MS = 15000;  // 15 seconds
+
   late WiFiZendureDevice wifiDevice;
 
   ZendureWifiService(DeviceBase device):
     super((device as WiFiZendureDevice).fetchDataInterval, device) {
     wifiDevice = device as WiFiZendureDevice;
-    //fetch first data
-    fetchData();
   }
 
-  @override
-  Future<void> disconnect() async {
-    fetchDataEnabled = false;
-  }
+  // No need to override internalDisconnect() - default implementation is sufficient
+  // (wrapper handles lastSeen, autoReconnect, data clearing, status messages)
 
   String getBaseUri(){
     return 'http://${wifiDevice.getCurrentBaseUrl()}';
   }
 
-  Future<void> connect()async{
+  @override
+  Future<bool> internalConnect() async {
     await wifiDevice.connectIpOrHostname((ip,port) async {
-      fetchData();
+      // Connection verified
+      await internalFetchData();//getBaseUri() uses paramters set here so call wihtout functions is fine
     });
+
+    isInitialized = true;
+    return false;//do not fetch data directly init data is fine
   }
 
   @override
-  void fetchData() async{
+  Future<void> internalFetchData() async{
 
     //debugPrint("request new data!");
 
@@ -132,12 +134,7 @@ class ZendureWifiService extends BaseDeviceService {
 
   @override
   bool isConnected() {
-    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < 1000 * 15;
-  }
-
-  @override
-  bool isInitialized() {
-    return true;
+    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < CONNECTION_TIMEOUT_MS;
   }
 
   Future<Map<String,dynamic>?> sendCommand(dynamic data) async {

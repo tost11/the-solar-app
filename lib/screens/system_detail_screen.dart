@@ -6,7 +6,7 @@ import 'package:the_solar_app/services/device_storage_service.dart';
 import 'package:the_solar_app/services/system_aggregator_service.dart';
 import 'package:the_solar_app/screens/device_detail_screen.dart';
 import 'package:the_solar_app/screens/system_edit_screen.dart';
-import 'package:the_solar_app/utils/bluetooth_connection_utils.dart';
+import 'package:the_solar_app/utils/device_connection_utils.dart';
 import 'package:the_solar_app/widgets/system_metric_card.dart';
 
 /// System detail screen showing aggregated metrics for ONE system
@@ -86,46 +86,18 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
   }
 
   Future<void> _connectDevices() async {
-    // Get devices in this system
     final deviceSnsInSystem = widget.system.deviceSerialNumbers.toSet();
     final devicesInSystem = _allDevices.where(
       (d) => deviceSnsInSystem.contains(d.deviceSn),
     ).toList();
 
-    // Separate WiFi and Bluetooth devices
-    final wifiDevices = devicesInSystem.where(
-      (d) => d.connectionType == ConnectionType.wifi,
+    // Connect all devices efficiently with unified method
+    // This fixes the WiFi bug: fullConnection=true ensures connect() is called
+    await DeviceConnectionUtils.connectMultipleDevices(
+      devicesInSystem,
+      fullConnection: true,
+      timeout: const Duration(seconds: 5),
     );
-    final bluetoothDevices = devicesInSystem.where(
-      (d) => d.connectionType == ConnectionType.bluetooth,
-    ).toList();
-
-    // Connect WiFi devices immediately
-    for (final device in wifiDevices) {
-      try {
-        device.setUpServiceConnection(null);
-      } catch (e) {
-        debugPrint('Failed to connect to WiFi device ${device.name}: $e');
-      }
-    }
-
-    // Scan and connect Bluetooth devices in batch (more efficient)
-    if (bluetoothDevices.isNotEmpty) {
-      await _connectBluetoothDevices(bluetoothDevices);
-    }
-  }
-
-  Future<void> _connectBluetoothDevices(List<DeviceBase> bluetoothDevices) async {
-    // Filter to only devices that are not currently connected
-    final disconnectedDevices = bluetoothDevices.where((device) {
-      final service = device.getServiceConnection();
-      return service == null || !service.isConnected();
-    }).toList();
-
-    if (disconnectedDevices.isEmpty) return;
-
-    debugPrint('Trying to connect ${disconnectedDevices.length} Bluetooth devices...');
-    await BluetoothConnectionUtils.scanAndConnectMultiple(disconnectedDevices);
   }
 
   void _startConnectionRetryTimer() {
@@ -133,16 +105,8 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     _connectionRetryTimer = Timer.periodic(_retryInterval, (_) async {
       if (!mounted) return;
 
-      // Get Bluetooth devices in this system
-      final deviceSnsInSystem = widget.system.deviceSerialNumbers.toSet();
-      final bluetoothDevices = _allDevices.where((d) {
-        return deviceSnsInSystem.contains(d.deviceSn) &&
-               d.connectionType == ConnectionType.bluetooth;
-      }).toList();
-
-      if (bluetoothDevices.isNotEmpty) {
-        await _connectBluetoothDevices(bluetoothDevices);
-      }
+      // Reconnect all devices in system
+      await _connectDevices();
     });
   }
 

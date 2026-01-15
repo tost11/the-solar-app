@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/device.dart';
+import '../models/devices/time_series_field_config.dart';
+import '../utils/globals.dart';
 import '../utils/responsive_breakpoints.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -58,6 +60,13 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
     super.dispose();
   }
 
+  /// Get time series fields visible based on expert mode
+  List<TimeSeriesFieldConfig> _getVisibleTimeSeriesFields() {
+    return widget.device.timeSeriesFields
+        .where((field) => !field.expertMode || Globals.expertMode)
+        .toList();
+  }
+
   // Removed: _buildChart - now using TimeSeriesChartCard widget
 
   @override
@@ -70,12 +79,12 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: widget.device.timeSeriesFields.isEmpty
+      body: _getVisibleTimeSeriesFields().isEmpty
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(24.0),
                 child: Text(
-                  'Dieses Gerät hat keine konfigurierten Diagrammfelder.',
+                  'Dieses Gerät hat keine sichtbaren Diagrammfelder.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -119,12 +128,15 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
                       // Use the calculated ratio, but cap at reasonable values
                       final aspectRatio = calculatedRatio.clamp(1.2, 2.5);
 
+                      // Get visible graphs (filtered by expert mode)
+                      final visibleGraphs = _getVisibleTimeSeriesFields();
+
                       return ResponsiveGraphGrid(
-                        itemCount: widget.device.timeSeriesFields.length,
+                        itemCount: visibleGraphs.length,
                         aspectRatio: aspectRatio,
                         itemBuilder: (context, index) {
                           return TimeSeriesChartCard(
-                            field: widget.device.timeSeriesFields[index],
+                            field: visibleGraphs[index],
                           );
                         },
                       );

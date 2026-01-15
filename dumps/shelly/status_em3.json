@@ -1,0 +1,127 @@
+{
+  "ble": {},
+  "bthome": {},
+  "cloud": {
+    "connected": false
+  },
+  "em:0": {
+    "id": 0,
+    "a_current": 0.027,
+    "a_voltage": 0.0,
+    "a_act_power": 0.0,
+    "a_aprt_power": 0.0,
+    "a_pf": 0.00,
+    "a_freq": 0.0,
+    "b_current": 0.027,
+    "b_voltage": 0.0,
+    "b_act_power": 0.0,
+    "b_aprt_power": 0.0,
+    "b_pf": 0.00,
+    "b_freq": 0.0,
+    "c_current": 0.541,
+    "c_voltage": 230.3,
+    "c_act_power": 98.4,
+    "c_aprt_power": 124.8,
+    "c_pf": 0.80,
+    "c_freq": 50.0,
+    "n_current": null,
+    "total_current": 0.596,
+    "total_act_power": 98.362,
+    "total_aprt_power": 124.790,
+    "user_calibrated_phase": []
+  },
+  "emdata:0": {
+    "id": 0,
+    "a_total_act_energy": 0.12,
+    "a_total_act_ret_energy": 0.00,
+    "b_total_act_energy": 0.13,
+    "b_total_act_ret_energy": 0.00,
+    "c_total_act_energy": 3113.53,
+    "c_total_act_ret_energy": 1465.53,
+    "total_act": 3113.77,
+    "total_act_ret": 1465.53
+  },
+  "eth": {
+    "ip": null,
+    "ip6": null
+  },
+  "modbus": {},
+  "mqtt": {
+    "connected": false
+  },
+  "script:1": {
+    "id": 1,
+    "running": false,
+    "mem_free": 25004,
+    "cpu": 0
+  },
+  "script:2": {
+    "id": 2,
+    "running": true,
+    "mem_used": 182,
+    "mem_peak": 9268,
+    "mem_free": 25004,
+    "cpu": 0
+  },
+  "script:4": {
+    "id": 4,
+    "running": false,
+    "mem_free": 25004,
+    "cpu": 0
+  },
+  "script:5": {
+    "id": 5,
+    "running": false,
+    "mem_free": 25004,
+    "cpu": 0
+  },
+  "script:3": {
+    "id": 3,
+    "running": false,
+    "mem_free": 25004,
+    "cpu": 0
+  },
+  "sys": {
+    "mac": "112233445566",
+    "restart_required": false,
+    "time": "18:54",
+    "unixtime": 1768240459,
+    "last_sync_ts": 1768239186,
+    "uptime": 6546,
+    "ram_size": 259100,
+    "ram_free": 84648,
+    "ram_min_free": 62660,
+    "fs_size": 524288,
+    "fs_free": 163840,
+    "cfg_rev": 63,
+    "kvs_rev": 0,
+    "schedule_rev": 0,
+    "webhook_rev": 0,
+    "btrelay_rev": 0,
+    "available_updates": {
+      "beta": {
+        "version": "1.7.4-beta2"
+      }
+    },
+    "reset_reason": 1,
+    "utc_offset": 3600
+  },
+  "temperature:0": {
+    "id": 0,
+    "tC": 43.6,
+    "tF": 110.5
+  },
+  "wifi": {
+    "sta_ip": "192.168.1.101",
+    "status": "got ip",
+    "ssid": "MyNetwork",
+    "bssid": "aa:bb:cc:dd:ee:ff",
+    "rssi": -71,
+    "sta_ip6": [
+      "fe80::1234:5678:abcd:ef00"
+    ]
+  },
+  "ws": {
+    "connected": false
+  }
+}

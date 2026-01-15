@@ -13,6 +13,7 @@ import '../../models/device.dart';
 ///   connectionStatus: 'Verbunden',
 ///   connectionType: ConnectionType.wifi,
 ///   isConnected: true,
+///   isAutoReconnecting: false,
 /// )
 /// ```
 class ConnectionStatusHeader extends StatelessWidget {
@@ -28,11 +29,15 @@ class ConnectionStatusHeader extends StatelessWidget {
   /// Whether the device is currently connected
   final bool isConnected;
 
+  /// Whether the device is auto-reconnecting
+  final bool isAutoReconnecting;
+
   const ConnectionStatusHeader({
     required this.deviceName,
     required this.connectionStatus,
     required this.connectionType,
     required this.isConnected,
+    this.isAutoReconnecting = false,
     super.key,
   });
 
@@ -47,7 +52,9 @@ class ConnectionStatusHeader extends StatelessWidget {
 
   /// Get the color based on connection state
   Color _getIconColor() {
-    return isConnected ? Colors.green : Colors.grey;
+    if (isConnected) return Colors.green;
+    if (isAutoReconnecting) return Colors.orange.shade700;
+    return Colors.grey;
   }
 
   @override

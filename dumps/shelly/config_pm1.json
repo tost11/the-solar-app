@@ -1,0 +1,18 @@
+{
+  "id": "shellypmg3-ddeeff112233",
+  "mac": "DDEEFF112233",
+  "model": "S3PM-002CXCEU",
+  "gen": 3,
+  "fw_id": "2024.11.0",
+  "ver": "1.4.3",
+  "app": "PM",
+  "auth_en": false,
+  "auth_domain": null,
+  "profile": "single",
+  "name": "Shelly PM Gen3",
+  "manufacturer": "Shelly",
+  "num_outputs": 0,
+  "num_meters": 2,
+  "timezone": "Europe/Berlin",
+  "country": "DE"
+}

@@ -53,6 +53,10 @@ class DeviceDataField {
   /// Disable automatic unit conversion for large values (e.g., W → kW)
   final bool disableAutoConversion;
 
+  /// Hide this field when valueExtractor returns null (default: false)
+  /// When true, the field card will not be rendered at all if the value is null
+  final bool hideIfEmpty;
+
   const DeviceDataField({
     required this.name,
     required this.type,
@@ -64,6 +68,7 @@ class DeviceDataField {
     this.precision,
     this.divisor,
     this.disableAutoConversion = false,
+    this.hideIfEmpty = false,
   });
 
   /// Get the unit string based on the field type

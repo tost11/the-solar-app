@@ -13,8 +13,9 @@ import '../../../models/devices/manufacturers/kostal/wifi_kostal_device.dart';
 import 'kostal_modbus_connection.dart';
 
 class KostalWifiService extends BaseDeviceService {
-  int lastSeen = 0;
-  bool fetchDataEnabled = true;
+  // Connection timeout - if no data received within this time, consider disconnected
+  static const int CONNECTION_TIMEOUT_MS = 65000;  // 65 seconds
+
   late WiFiKostalDevice wifiDevice;
 
   // Modbus connection for real-time data
@@ -23,9 +24,6 @@ class KostalWifiService extends BaseDeviceService {
   KostalWifiService(WiFiKostalDevice device) : super(device.fetchDataInterval, device) {
     wifiDevice = device;
     _modbusConnection = KostalModbusConnection();
-
-    // Fetch first data
-    fetchData();
   }
 
   /// Static method to detect if device is a Kostal inverter
@@ -106,10 +104,9 @@ class KostalWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> disconnect() async {
-    fetchDataEnabled = false;
+  Future<void> internalDisconnect() async {
+    // Disconnect Modbus connection
     await _modbusConnection.disconnect();
-    device.emitStatus('Getrennt');
   }
 
   @override
@@ -119,17 +116,8 @@ class KostalWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> connect() async {
+  Future<bool> internalConnect() async {
     device.emitStatus('Verbindungsaufbau...');
-
-    try {
-      await (device as DeviceWifiMixin).connectIpOrHostname((ip, port) async {
-        // Connection verified, now connect Modbus
-      });
-    } catch (ex) {
-      device.emitStatus('Verbindung fehlgeschlagen');
-      throw Exception("Could not connect to Kostal device");
-    }
 
     // Connect Modbus if not already connected
     if (!_modbusConnection.isConnected) {
@@ -140,7 +128,7 @@ class KostalWifiService extends BaseDeviceService {
         await wifiDevice.connectIpOrHostname((ip, port) async {
           await _modbusConnection.connect(
             wifiDevice.getCurrenHostOrIp(),
-            (device as AdditionalPortMixin).additionalPort ?? KostalModbusConnection.DEFAULT_PORT,
+            (device as AdditionalPortMixin).additionalPort,
           );
         });
 
@@ -154,48 +142,29 @@ class KostalWifiService extends BaseDeviceService {
       }
     }
 
-    // Fetch initial data
-    await fetchData();
-
-    // Only emit "Verbunden" if fetchData succeeded
-    if (device.data["modbus"] != null) {
-      device.emitStatus('Verbunden');
-    }
-
-    resetTimer();
+    return true;//directly fetch again
   }
 
   @override
-  Future<void> fetchData() async {
-    if (!fetchDataEnabled) return;
-
+  Future<void> internalFetchData() async {
     // Try Modbus connection for real-time data
     if (_modbusConnection.isConnected) {
-      try {
-        final data = await _fetchModbusData();
+      final data = await _fetchModbusData();
+      if (data != null && data.isNotEmpty) {
+        device.data["data"] = data;
+        device.emitData(data);
 
-        if (data != null && data.isNotEmpty) {
-          device.data["data"] = data;
-          device.emitData(data);
-
-          debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched Modbus data: ${data.keys.length} fields');
-          lastSeen = DateTime.now().millisecondsSinceEpoch;
-
-          device.emitStatus('Verbunden');
-          return;
-        } else {
-          debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Modbus read returned no data');
-          device.emitStatus('Keine Daten');
-          return;
-        }
-      } catch (e) {
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Modbus fetch error: $e');
-        device.emitStatus('Fehler beim Abrufen der Daten');
+        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched Modbus data: ${data.keys.length} fields');
+        lastSeen = DateTime.now().millisecondsSinceEpoch;
+        return;
+      } else {
+        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Modbus read returned no data');
+        device.emitStatus('Keine Daten');
         return;
       }
     }
 
-    device.emitStatus('Nicht Verbunden');
+    throw Exception('Nicht Verbunden');
   }
 
   /// Fetch all data from Modbus registers
@@ -579,11 +548,16 @@ class KostalWifiService extends BaseDeviceService {
 
   @override
   bool isConnected() {
-    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < 1000 * 65;
+    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < CONNECTION_TIMEOUT_MS;
   }
 
+
   @override
-  bool isInitialized() {
-    return device.data["modbus"] != null;
+  Future<bool> internalInitializeDevice() async {
+    await internalFetchData();
+    if(device.data["modbus"] != null){
+      throw new Exception("failed read init data from Kostal device");
+    }
+    return false;//no reset needet init data is alreacy fetch
   }
 }

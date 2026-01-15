@@ -1,0 +1,124 @@
+[
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["text/html"]
+      },
+      "body": "<!DOCTYPE html>\n<html data-theme=\"dark\">\n<head>\n  <title>Shelly Web Admin</title>\n</head>\n<body>\n  <h1>Shelly Plus Plug S</h1>\n  <p>Device: SNPL-00112EU</p>\n</body>\n</html>",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/rpc",
+      "body": {
+        "type": "JSON",
+        "json": {
+          "method": "Shelly.GetDeviceInfo"
+        },
+        "matchType": "ONLY_MATCHING_FIELDS"
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "id": 1768255378,
+        "src": "shellyplusplugs-778899aabbcc",
+        "dst": "flutter_app",
+        "result": {
+          "name": null,
+          "id": "shellyplusplugs-778899aabbcc",
+          "mac": "778899AABBCC",
+          "slot": 0,
+          "model": "SNPL-00112EU",
+          "gen": 2,
+          "fw_id": "20250924-062721/1.7.1-gd336f31",
+          "ver": "1.7.1",
+          "app": "PlusPlugS",
+          "auth_en": true,
+          "auth_domain": "shellyplusplugs-778899aabbcc"
+        }
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/rpc/Shelly.GetDeviceInfo"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "name": null,
+        "id": "shellyplusplugs-778899aabbcc",
+        "mac": "778899AABBCC",
+        "slot": 0,
+        "model": "SNPL-00112EU",
+        "gen": 2,
+        "fw_id": "20250924-062721/1.7.1-gd336f31",
+        "ver": "1.7.1",
+        "app": "PlusPlugS",
+        "auth_en": true,
+        "auth_domain": "shellyplusplugs-778899aabbcc"
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/rpc",
+      "body": {
+        "type": "JSON",
+        "json": {
+          "method": "Shelly.GetStatus"
+        },
+        "matchType": "ONLY_MATCHING_FIELDS"
+      }
+    },
+    "httpResponseTemplate": {
+      "template": "var minutesSinceEpoch = Math.floor(Date.now() / 60000); var power_0 = Math.random() * 4.5 + 0.5; var voltage_0 = 230 + (Math.random() - 0.5) * 10; var current_0 = Math.abs(power_0 / voltage_0); var temp_0_C = 30 + Math.random() * 10; var temp_0_F = temp_0_C * 1.8 + 32; var power_1 = Math.random() * 400 + 300; var voltage_1 = 230 + (Math.random() - 0.5) * 10; var current_1 = Math.abs(power_1 / voltage_1); var temp_1_C = 30 + Math.random() * 10; var temp_1_F = temp_1_C * 1.8 + 32; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ id: 1768255378, src: 'shellyplusplugs-778899aabbcc', dst: 'flutter_app', result: { ble: {}, cloud: { connected: false }, mqtt: { connected: false }, plugs_ui: {}, 'script:1': { id: 1, running: true, mem_used: 406, mem_peak: 2436, mem_free: 24584, cpu: 0 }, 'script:2': { id: 2, running: true, mem_used: 182, mem_peak: 1652, mem_free: 24584, cpu: 0 }, 'switch:0': { id: 0, source: 'init', output: true, apower: parseFloat(power_0.toFixed(1)), voltage: parseFloat(voltage_0.toFixed(1)), current: parseFloat(current_0.toFixed(3)), aenergy: { total: parseFloat((minutesSinceEpoch * 2.0).toFixed(3)), by_minute: [ parseFloat(((minutesSinceEpoch - 2) * 2.0).toFixed(3)), parseFloat(((minutesSinceEpoch - 1) * 2.0).toFixed(3)), parseFloat((minutesSinceEpoch * 2.0).toFixed(3)) ], minute_ts: Math.floor(Date.now() / 1000) }, temperature: { tC: parseFloat(temp_0_C.toFixed(1)), tF: parseFloat(temp_0_F.toFixed(1)) } }, 'switch:1': { id: 1, source: 'init', output: true, apower: parseFloat(power_1.toFixed(1)), voltage: parseFloat(voltage_1.toFixed(1)), current: parseFloat(current_1.toFixed(2)), aenergy: { total: parseFloat((minutesSinceEpoch * 25.0).toFixed(3)), by_minute: [ parseFloat(((minutesSinceEpoch - 2) * 25.0).toFixed(3)), parseFloat(((minutesSinceEpoch - 1) * 25.0).toFixed(3)), parseFloat((minutesSinceEpoch * 25.0).toFixed(3)) ], minute_ts: Math.floor(Date.now() / 1000) }, temperature: { tC: parseFloat(temp_1_C.toFixed(1)), tF: parseFloat(temp_1_F.toFixed(1)) } }, sys: { mac: '778899AABBCC', restart_required: false, time: new Date().toTimeString().substring(0, 5), unixtime: Math.floor(Date.now() / 1000), last_sync_ts: Math.floor(Date.now() / 1000) - 1606, uptime: Math.floor(Math.random() * 86400) + 3600, ram_size: 265420, ram_free: Math.floor(Math.random() * 30000) + 100000, ram_min_free: 99276, fs_size: 393216, fs_free: Math.floor(Math.random() * 10000) + 100000, cfg_rev: 33, kvs_rev: 0, schedule_rev: 0, webhook_rev: 0, btrelay_rev: 0, available_updates: { beta: { version: '1.7.4-beta2' } }, reset_reason: 1, utc_offset: 3600 }, wifi: { sta_ip: '192.168.1.102', status: 'got ip', ssid: 'MyNetwork', bssid: '11:22:33:44:55:66', rssi: Math.floor(Math.random() * 20) - 55 }, ws: { connected: false } } }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/rpc/Shelly.GetStatus"
+    },
+    "httpResponseTemplate": {
+      "template": "var minutesSinceEpoch = Math.floor(Date.now() / 60000); var power_0 = Math.random() * 4.5 + 0.5; var voltage_0 = 230 + (Math.random() - 0.5) * 10; var current_0 = Math.abs(power_0 / voltage_0); var temp_0_C = 30 + Math.random() * 10; var temp_0_F = temp_0_C * 1.8 + 32; var power_1 = Math.random() * 400 + 300; var voltage_1 = 230 + (Math.random() - 0.5) * 10; var current_1 = Math.abs(power_1 / voltage_1); var temp_1_C = 30 + Math.random() * 10; var temp_1_F = temp_1_C * 1.8 + 32; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ ble: {}, cloud: { connected: false }, mqtt: { connected: false }, plugs_ui: {}, 'script:1': { id: 1, running: true, mem_used: 406, mem_peak: 2436, mem_free: 24584, cpu: 0 }, 'script:2': { id: 2, running: true, mem_used: 182, mem_peak: 1652, mem_free: 24584, cpu: 0 }, 'switch:0': { id: 0, source: 'init', output: true, apower: parseFloat(power_0.toFixed(1)), voltage: parseFloat(voltage_0.toFixed(1)), current: parseFloat(current_0.toFixed(3)), aenergy: { total: parseFloat((minutesSinceEpoch * 2.0).toFixed(3)), by_minute: [ parseFloat(((minutesSinceEpoch - 2) * 2.0).toFixed(3)), parseFloat(((minutesSinceEpoch - 1) * 2.0).toFixed(3)), parseFloat((minutesSinceEpoch * 2.0).toFixed(3)) ], minute_ts: Math.floor(Date.now() / 1000) }, temperature: { tC: parseFloat(temp_0_C.toFixed(1)), tF: parseFloat(temp_0_F.toFixed(1)) } }, 'switch:1': { id: 1, source: 'init', output: true, apower: parseFloat(power_1.toFixed(1)), voltage: parseFloat(voltage_1.toFixed(1)), current: parseFloat(current_1.toFixed(2)), aenergy: { total: parseFloat((minutesSinceEpoch * 25.0).toFixed(3)), by_minute: [ parseFloat(((minutesSinceEpoch - 2) * 25.0).toFixed(3)), parseFloat(((minutesSinceEpoch - 1) * 25.0).toFixed(3)), parseFloat((minutesSinceEpoch * 25.0).toFixed(3)) ], minute_ts: Math.floor(Date.now() / 1000) }, temperature: { tC: parseFloat(temp_1_C.toFixed(1)), tF: parseFloat(temp_1_F.toFixed(1)) } }, sys: { mac: '778899AABBCC', restart_required: false, time: new Date().toTimeString().substring(0, 5), unixtime: Math.floor(Date.now() / 1000), last_sync_ts: Math.floor(Date.now() / 1000) - 1606, uptime: Math.floor(Math.random() * 86400) + 3600, ram_size: 265420, ram_free: Math.floor(Math.random() * 30000) + 100000, ram_min_free: 99276, fs_size: 393216, fs_free: Math.floor(Math.random() * 10000) + 100000, cfg_rev: 33, kvs_rev: 0, schedule_rev: 0, webhook_rev: 0, btrelay_rev: 0, available_updates: { beta: { version: '1.7.4-beta2' } }, reset_reason: 1, utc_offset: 3600 }, wifi: { sta_ip: '192.168.1.102', status: 'got ip', ssid: 'MyNetwork', bssid: '11:22:33:44:55:66', rssi: Math.floor(Math.random() * 20) - 55 }, ws: { connected: false } }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  }
+]

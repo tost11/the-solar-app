@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/device.dart';
 import '../models/system.dart';
 import '../services/device_storage_service.dart';
 import '../services/system_storage_service.dart';
+import '../utils/device_connection_utils.dart';
 import '../utils/responsive_breakpoints.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -40,6 +42,12 @@ class _DeviceListScreenState extends State<DeviceListScreen>
   Device? _selectedDevice; // For master-detail layout
   Device? _selectedDeviceForActions; // For showing actions in AppBar
   int _currentMasterDetailTab = 0; // Track master-detail tab selection
+  StreamSubscription<Map<String, dynamic>>? _dataSubscription;
+
+  // Connection state tracking
+  final Map<String, bool> _deviceConnectionStates = {};
+  final Map<String, bool> _deviceAutoReconnectStates = {};
+  final Map<String, StreamSubscription<String>> _connectionSubscriptions = {};
 
   @override
   void initState() {
@@ -60,6 +68,12 @@ class _DeviceListScreenState extends State<DeviceListScreen>
 
   @override
   void dispose() {
+    _dataSubscription?.cancel();
+    // Cancel all connection status subscriptions
+    for (final subscription in _connectionSubscriptions.values) {
+      subscription.cancel();
+    }
+    _connectionSubscriptions.clear();
     _tabController.dispose();
     super.dispose();
   }
@@ -89,6 +103,48 @@ class _DeviceListScreenState extends State<DeviceListScreen>
 
       _isLoading = false;
     });
+
+    // Setup connection listeners for newly loaded devices
+    _setupConnectionListeners();
+  }
+
+  void _setupConnectionListeners() {
+    for (final device in _devices) {
+      _listenToDeviceConnection(device);
+    }
+  }
+
+  void _listenToDeviceConnection(Device device) {
+    // Cancel existing subscription if any
+    _connectionSubscriptions[device.id]?.cancel();
+
+    // Listen to connection status changes
+    _connectionSubscriptions[device.id] = device.connectionStatus.listen((status) {
+      if (mounted) {
+        setState(() {
+          _deviceConnectionStates[device.id] = device.getServiceConnection()?.isConnected() ?? false;
+          _deviceAutoReconnectStates[device.id] = device.getServiceConnection()?.autoReconnect ?? false;
+        });
+      }
+    });
+
+    // Set initial connection and auto-reconnect state
+    _deviceConnectionStates[device.id] = device.getServiceConnection()?.isConnected() ?? false;
+    _deviceAutoReconnectStates[device.id] = device.getServiceConnection()?.autoReconnect ?? false;
+  }
+
+  void _setupDeviceDataListener() {
+    // Cancel existing subscription
+    _dataSubscription?.cancel();
+
+    // Setup new subscription if device is selected
+    if (_selectedDeviceForActions != null) {
+      _dataSubscription = _selectedDeviceForActions!.dataStream.listen((data) {
+        setState(() {
+          // Force rebuild to update graph icon visibility
+        });
+      });
+    }
   }
 
   Future<void> _deleteDevice(Device device) async {
@@ -128,6 +184,14 @@ class _DeviceListScreenState extends State<DeviceListScreen>
         );
       }
     }
+  }
+
+  Future<void> _connectDevice(Device device) async {
+    await DeviceConnectionUtils.connectDevice(context, device);
+  }
+
+  Future<void> _disconnectDevice(Device device) async {
+    await DeviceConnectionUtils.disconnectDevice(context, device);
   }
 
   void _showDeviceMoreFunctions(BuildContext context, Device device) {
@@ -375,6 +439,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
               setState(() {
                 _selectedDeviceForActions = selectedDevice;
               });
+              _setupDeviceDataListener();
             }
           });
 
@@ -479,6 +544,8 @@ class _DeviceListScreenState extends State<DeviceListScreen>
               : null,
           child: DeviceListItem(
             device: device,
+            isConnected: _deviceConnectionStates[device.id] ?? false,
+            isAutoReconnecting: _deviceAutoReconnectStates[device.id] ?? false,
             onTap: () {
               if (isMobile) {
                 _navigateToDevice(device);
@@ -491,6 +558,8 @@ class _DeviceListScreenState extends State<DeviceListScreen>
               }
             },
             onDelete: () => _deleteDevice(device),
+            onConnect: () => _connectDevice(device),
+            onDisconnect: () => _disconnectDevice(device),
           ),
         );
       },

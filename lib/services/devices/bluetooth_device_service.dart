@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:the_solar_app/models/device.dart';
 
@@ -35,7 +36,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
 
   @override
   bool isConnected(){
-    return bluetoothDevice != null;
+    return bluetoothDevice.isConnected;
   }
 
   BluetoothDevice? get connectedDevice => bluetoothDevice;
@@ -67,93 +68,78 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
     this.readNotifyCharacteristicUuidShort,
   }):super(updateTime,baseDevice);
 
-  /// Connect to a Bluetooth device
-  Future<void> connect() async {
-    try {
-      device.emitStatus('Verbinde...');
-      print('\n═══════════════════════════════════════════════════════════════');
-      print('CONNECTING TO DEVICE');
-      print('═══════════════════════════════════════════════════════════════');
-      print('Device: ${bluetoothDevice.platformName}');
-      print('ID: ${bluetoothDevice.remoteId}');
+  /// Connect to a Bluetooth device - device-specific connection logic
+  @override
+  Future<bool> internalConnect() async {
+    debugPrint('\n═══════════════════════════════════════════════════════════════');
+    debugPrint('CONNECTING TO DEVICE');
+    debugPrint('═══════════════════════════════════════════════════════════════');
+    debugPrint('Device: ${bluetoothDevice.platformName}');
+    debugPrint('ID: ${bluetoothDevice.remoteId}');
 
-      // Connect to device
-      await bluetoothDevice.connect(timeout: const Duration(seconds: 15));
-      print('Connected successfully!');
+    // Connect to device
+    await bluetoothDevice.connect(timeout: const Duration(seconds: 15));
+    debugPrint('Connected successfully!');
 
-      device.emitStatus('Verbunden');
+    device.emitStatus('Verbunden');
 
-      // Allow subclasses to perform device-specific connection optimization
-      await onDeviceConnected(bluetoothDevice);
+    // Allow device-specific optimizations (e.g., MTU negotiation, GATT cache clear)
+    await onDeviceConnected();
 
-      // Discover services
-      print('\nDiscovering services...');
-      List<BluetoothService> services = await bluetoothDevice.discoverServices();
-      print('Found ${services.length} services');
+    // Discover services
+    debugPrint('\nDiscovering services...');
+    List<BluetoothService> services = await bluetoothDevice.discoverServices();
+    debugPrint('Found ${services.length} services');
 
-      // Find the device-specific service
-      BluetoothService? deviceService = _findService(services);
-      if (deviceService == null) {
-        throw Exception('Device service not found');
-      }
-
-      // Find characteristics based on provided UUIDs
-      _findCharacteristics(services);
-
-      // Validate that required characteristics were found
-      if (!validateCharacteristics()) {
-        throw Exception('Required characteristics not found');
-      }
-
-      print('All required characteristics found');
-
-      // Allow subclasses to setup characteristics (e.g., enable notifications)
-      await setupCharacteristics();
-
-      // Initialize device-specific communication
-      await initializeDevice();
-
-      print('Device ready!');
-      print('═══════════════════════════════════════════════════════════════\n');
-      LastTimeTick = 0;
-    } catch (e) {
-      print('Error connecting: $e');
-      device.emitError('Verbindungsfehler: $e');
-      device.emitStatus('Fehler: $e');
-      await disconnect();
-      rethrow;
+    // Find the device-specific service
+    BluetoothService? deviceService = _findService(services);
+    if (deviceService == null) {
+      await bluetoothDevice.disconnect();
+      throw Exception('Device service not found');
     }
+
+    // Find characteristics based on provided UUIDs
+    _findCharacteristics(services);
+
+    // Validate that required characteristics were found
+    if (!validateCharacteristics()) {
+      await bluetoothDevice.disconnect();
+      throw Exception('Required characteristics not found');
+    }
+
+    debugPrint('All required characteristics found');
+
+    // Allow subclasses to setup characteristics (e.g., enable notifications)
+    await setupCharacteristics();
+
+    debugPrint('Device ready!');
+    debugPrint('═══════════════════════════════════════════════════════════════\n');
+
+    return true;
   }
 
+  /// Device-specific Bluetooth disconnection logic
   @override
-  bool isInitialized();
-
-  /// Disconnect from the device
-  @override
-  Future<void> disconnect() async {
-    await onBeforeDisconnect();
+  Future<void> internalDisconnect() async {
+    // Disconnect Bluetooth device
     await bluetoothDevice.disconnect();
 
+    // Clear characteristic references
     _notifyCharacteristic = null;
     _writeCharacteristic = null;
     _rwCharacteristic = null;
     _readNotifyCharacteristic = null;
-
-    await onAfterDisconnect();
-
-    device.emitStatus('Nicht verbunden');
-    print('\nDisconnected from device');
   }
 
   /// Find the device-specific service from discovered services
   BluetoothService? _findService(List<BluetoothService> services) {
     for (var service in services) {
       String serviceUuidStr = service.uuid.toString().toLowerCase();
-      print('Service: $serviceUuidStr');
+      debugPrint('Service: $serviceUuidStr');
 
       if (serviceUuidStr == serviceUuid.toLowerCase() ||
           (serviceUuidShort != null && serviceUuidStr == serviceUuidShort!.toLowerCase())) {
-        print('Found device service!');
+        debugPrint('Found device service!');
         return service;
       }
     }
@@ -165,14 +151,14 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
     for (var service in services) {
       for (var char in service.characteristics) {
         String charUuid = char.uuid.toString().toLowerCase();
-        print('Characteristic: $charUuid');
+        debugPrint('Characteristic: $charUuid');
 
         // Check notify characteristic
         if (notifyCharacteristicUuid != null &&
             (charUuid == notifyCharacteristicUuid!.toLowerCase() ||
              (notifyCharacteristicUuidShort != null && charUuid == notifyCharacteristicUuidShort!.toLowerCase()))) {
           _notifyCharacteristic = char;
-          print('Found notify characteristic!');
+          debugPrint('Found notify characteristic!');
         }
 
         // Check write characteristic
@@ -180,7 +166,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
             (charUuid == writeCharacteristicUuid!.toLowerCase() ||
              (writeCharacteristicUuidShort != null && charUuid == writeCharacteristicUuidShort!.toLowerCase()))) {
           _writeCharacteristic = char;
-          print('Found write characteristic!');
+          debugPrint('Found write characteristic!');
         }
 
         // Check RW characteristic (used by Shelly)
@@ -188,7 +174,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
             (charUuid == rwCharacteristicUuid!.toLowerCase() ||
              (rwCharacteristicUuidShort != null && charUuid == rwCharacteristicUuidShort!.toLowerCase()))) {
           _rwCharacteristic = char;
-          print('Found RW characteristic!');
+          debugPrint('Found RW characteristic!');
         }
 
         // Check read/notify characteristic (used by Shelly)
@@ -196,7 +182,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
             (charUuid == readNotifyCharacteristicUuid!.toLowerCase() ||
              (readNotifyCharacteristicUuidShort != null && charUuid == readNotifyCharacteristicUuidShort!.toLowerCase()))) {
           _readNotifyCharacteristic = char;
-          print('Found read/notify characteristic!');
+          debugPrint('Found read/notify characteristic!');
         }
       }
     }
@@ -208,6 +194,21 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
     super.dispose();
   }
 
+  // Hook methods for subclass customization
+
+  /// Override to perform device-specific optimizations after connection
+  /// but before service discovery.
+  ///
+  /// Examples:
+  /// - Clear GATT cache (Shelly)
+  /// - Negotiate MTU size
+  /// - Set connection priority
+  ///
+  /// Default implementation does nothing.
+  Future<void> onDeviceConnected() async {
+    // Default: no optimization needed
+  }
+
   // Abstract methods to be implemented by subclasses
 
   /// Validate that all required characteristics were found
@@ -216,23 +217,4 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
 
   /// Setup characteristics after discovery (e.g., enable notifications)
   Future<void> setupCharacteristics();
-
-  /// Initialize device-specific communication after connection
-  Future<void> initializeDevice();
-
-  /// Hook called after device is connected but before service discovery
-  /// Can be used for device-specific connection optimization (MTU, connection priority, etc.)
-  Future<void> onDeviceConnected(BluetoothDevice device) async {
-    // Default: do nothing
-  }
-
-  /// Hook called before disconnecting
-  Future<void> onBeforeDisconnect() async {
-    // Default: do nothing
-  }
-
-  /// Hook called after disconnecting
-  Future<void> onAfterDisconnect() async {
-    // Default: do nothing
-  }
 }

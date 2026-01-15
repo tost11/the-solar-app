@@ -21,7 +21,6 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
 
   static const Duration DEFAULT_FETCH_INTERVAL = Duration(seconds: 10);
 
-  late String fetchDataCommand;
   String? deviceScr;
 
   ShellyBluetoothDeviceTemplate({
@@ -32,7 +31,6 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
     super.deviceModel,
     required super.deviceImpl,
   }) {
-    fetchDataCommand = deviceImpl.getFetchCommand();
     fetchDataInterval = DEFAULT_FETCH_INTERVAL;
     fixedUserName = true;
     authUsername = 'admin';
@@ -50,16 +48,14 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
   ShellyBluetoothDeviceTemplate.fromJsonFields({
     required Map<String, dynamic> json,
     required ShellyDeviceBaseImplementation deviceImpl,
-  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl) {
-    fetchDataCommand = deviceImpl.getFetchCommand();
-  }
+  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl);
 
   @override
   String get deviceType => DEVICE_MANUFACTURER_SHELLY;
 
   @override
   ShellyBluetoothService createService(BluetoothDevice device) {
-    return ShellyBluetoothService(this, device, fetchDataCommand);
+    return ShellyBluetoothService(this, device);
   }
 
   /// Computes HA1 hash for authentication: SHA256("user:realm:password")
@@ -134,19 +130,26 @@ class ShellyBluetoothDevice extends ShellyBluetoothDeviceTemplate {
     required super.lastSeen,
     required super.deviceSn,
     super.deviceModel,
-  }) : super(deviceImpl: ShellyDeviceBaseImplementation());
+  }) : super(deviceImpl: ShellyDeviceBaseImplementation()) {
+    // Set device reference in implementation for dynamic field generation
+    deviceImpl.setDevice(this);
+  }
 
   /// Named constructor for JSON deserialization
   ShellyBluetoothDevice.fromJsonFields({
     required Map<String, dynamic> json,
     required ShellyDeviceBaseImplementation deviceImpl,
-  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl);
+  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl) {
+    // Set device reference in implementation for dynamic field generation
+    deviceImpl.setDevice(this);
+  }
 
   /// Factory constructor from JSON
   factory ShellyBluetoothDevice.fromJson(Map<String, dynamic> json) {
+    final impl = ShellyDeviceBaseImplementation();
     final device = ShellyBluetoothDevice.fromJsonFields(
       json: json,
-      deviceImpl: ShellyDeviceBaseImplementation(),
+      deviceImpl: impl,
     );
     device.authFromJson(json);
     device.fetchDataIntervalFromJson(json, ShellyBluetoothDeviceTemplate.DEFAULT_FETCH_INTERVAL);

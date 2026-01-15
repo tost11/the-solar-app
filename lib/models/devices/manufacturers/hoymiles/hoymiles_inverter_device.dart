@@ -33,127 +33,6 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     super.deviceModel,
   }) : super(
     connectionType: ConnectionType.wifi,
-    dataFields: [
-      // Current power from SGSMO
-      DeviceDataField(
-        name: 'Aktuelle Leistung',
-        type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'inverter', 'sgs', 'active_power']),
-        icon: Icons.bolt,
-        expertMode: false,
-      ),
-      DeviceDataField(
-        name: 'Aktuelle Leistung PV',
-        type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'inverter', 'pv', 'power']),
-        icon: Icons.bolt,
-        expertMode: false,
-      ),
-      // Daily energy
-      DeviceDataField(
-        name: 'Tagesertrag',
-        type: DataFieldType.energy,
-        valueExtractor: (data) => MapUtils.OM(data, ['data', 'dtu_daily_energy']),
-        icon: Icons.wb_sunny,
-        expertMode: false,
-        precision: 2,
-      ),
-      // Grid voltage
-      DeviceDataField(
-        name: 'Netzspannung',
-        type: DataFieldType.voltage,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'inverter', 'sgs', 'voltage']),
-        icon: Icons.electric_bolt,
-        expertMode: false,
-        category: 'ac',
-      ),
-      // Grid frequency
-      DeviceDataField(
-        name: 'Netzfrequenz',
-        type: DataFieldType.frequency,
-        valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'sgs', 'frequency']),
-        icon: Icons.waves,
-        expertMode: true,
-        category: 'ac',
-      ),
-      // Temperature
-      DeviceDataField(
-        name: 'Temperatur',
-        type: DataFieldType.temperature,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'inverter', 'sgs', 'temperature']),
-        icon: Icons.thermostat,
-        expertMode: false,
-        category: 'ac',
-      ),
-      // Power limit TODO this is in config fetch on regular basis
-      /*DeviceDataField(
-        name: 'Leistungslimit',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          var limit = MapUtils.OM(data, ['data', 'inverter', 'sgs', 'power_limit']);
-          if (limit != null && limit is num) {
-            return '$limit %'; // Service already validated
-          }
-          return null;
-        },
-        icon: Icons.speed,
-        expertMode: false,
-        category: 'ac',
-      ),*/
-      for (var i = 1; i <= 4; i++) ...[
-        DeviceDataField(
-          name: 'PV$i Leistung',
-          type: DataFieldType.watt,
-          valueExtractor: (data) =>
-              MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'power']),
-          icon: Icons.solar_power,
-          expertMode: false,
-          category: 'pv$i',
-        ),
-        DeviceDataField(
-          name: 'PV$i Spannung',
-          type: DataFieldType.voltage,
-          valueExtractor: (data) =>
-              MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'voltage']),
-          icon: Icons.electrical_services,
-          expertMode: true,
-          category: 'pv$i',
-        ),
-        DeviceDataField(
-          name: 'PV$i Strom',
-          type: DataFieldType.current,
-          valueExtractor: (data) =>
-              MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'current']),
-          icon: Icons.electrical_services,
-          expertMode: true,
-          category: 'pv$i',
-        ),
-        // Total energy
-        DeviceDataField(
-          name: 'PV$i Gesamtertrag',
-          type: DataFieldType.energy,
-          valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_total']),
-          icon: Icons.analytics,
-          expertMode: false,
-          category: 'pv$i',
-          precision: 1,
-        ),
-        // Daily energy
-        DeviceDataField(
-          name: 'PV$i Tagesertrag',
-          type: DataFieldType.energy,
-          valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_daily']),
-          icon: Icons.analytics,
-          expertMode: false,
-          category: 'pv$i',
-          precision: 1,
-        )
-      ],
-    ],
     menuItems: [
       DeviceMenuItem(
         name: 'Geräteinformationen',
@@ -358,6 +237,115 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     netIpAddress = ipAddress;
     netPort ??= HoymilesProtocol.DTU_PORT;
   }
+
+  /// Dynamically compute data fields based on current device state
+  @override
+  List<DeviceDataField> get dataFields => [
+    // Current power from SGSMO
+    DeviceDataField(
+      name: 'Aktuelle Leistung',
+      type: DataFieldType.watt,
+      valueExtractor: (data) =>
+          MapUtils.OM(data, ['data', 'inverter', 'sgs', 'active_power']),
+      icon: Icons.bolt,
+      expertMode: false,
+    ),
+    DeviceDataField(
+      name: 'Aktuelle Leistung PV',
+      type: DataFieldType.watt,
+      valueExtractor: (data) =>
+          MapUtils.OM(data, ['data', 'inverter', 'pv', 'power']),
+      icon: Icons.bolt,
+      expertMode: false,
+    ),
+    // Daily energy
+    DeviceDataField(
+      name: 'Tagesertrag',
+      type: DataFieldType.energy,
+      valueExtractor: (data) => MapUtils.OM(data, ['data', 'dtu_daily_energy']),
+      icon: Icons.wb_sunny,
+      expertMode: false,
+      precision: 2,
+    ),
+    // Grid voltage
+    DeviceDataField(
+      name: 'Netzspannung',
+      type: DataFieldType.voltage,
+      valueExtractor: (data) =>
+          MapUtils.OM(data, ['data', 'inverter', 'sgs', 'voltage']),
+      icon: Icons.electric_bolt,
+      expertMode: false,
+      category: 'ac',
+    ),
+    // Grid frequency
+    DeviceDataField(
+      name: 'Netzfrequenz',
+      type: DataFieldType.frequency,
+      valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'sgs', 'frequency']),
+      icon: Icons.waves,
+      expertMode: true,
+      category: 'ac',
+    ),
+    // Temperature
+    DeviceDataField(
+      name: 'Temperatur',
+      type: DataFieldType.temperature,
+      valueExtractor: (data) =>
+          MapUtils.OM(data, ['data', 'inverter', 'sgs', 'temperature']),
+      icon: Icons.thermostat,
+      expertMode: false,
+      category: 'ac',
+    ),
+    for (var i = 1; i <= 4; i++) ...[
+      DeviceDataField(
+        name: 'PV$i Leistung',
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'power']),
+        icon: Icons.solar_power,
+        expertMode: false,
+        category: 'pv$i',
+      ),
+      DeviceDataField(
+        name: 'PV$i Spannung',
+        type: DataFieldType.voltage,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'voltage']),
+        icon: Icons.electrical_services,
+        expertMode: true,
+        category: 'pv$i',
+      ),
+      DeviceDataField(
+        name: 'PV$i Strom',
+        type: DataFieldType.current,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'current']),
+        icon: Icons.electrical_services,
+        expertMode: true,
+        category: 'pv$i',
+      ),
+      // Total energy
+      DeviceDataField(
+        name: 'PV$i Gesamtertrag',
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_total']),
+        icon: Icons.analytics,
+        expertMode: false,
+        category: 'pv$i',
+        precision: 1,
+      ),
+      // Daily energy
+      DeviceDataField(
+        name: 'PV$i Tagesertrag',
+        type: DataFieldType.energy,
+        valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_daily']),
+        icon: Icons.analytics,
+        expertMode: false,
+        category: 'pv$i',
+        precision: 1,
+      )
+    ],
+  ];
 
   @override
   List<DeviceCategoryConfig> get categoryConfigs => [

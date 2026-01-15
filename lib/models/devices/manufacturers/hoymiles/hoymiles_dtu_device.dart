@@ -30,62 +30,6 @@ class HoymilesDTUDevice extends HoymilesDevice {
     super.deviceModel,
   }) : super(
     connectionType: ConnectionType.wifi,
-    dataFields: [
-      // Aggregate power
-      DeviceDataField(
-        name: 'Gesamtleistung',
-        type: DataFieldType.watt,
-        valueExtractor: (data) {
-          final power = MapUtils.OM(data, ['realtime', 'dtu_power']);
-          if (power != null && power is num) {
-            return power.toInt();
-          }
-          return null;
-        },
-        icon: Icons.bolt,
-        expertMode: false,
-      ),
-      // Daily energy
-      DeviceDataField(
-        name: 'Tagesertrag',
-        type: DataFieldType.energy,
-        valueExtractor: (data) => MapUtils.OM(data, ['realtime', 'dtu_daily_energy']),
-        icon: Icons.wb_sunny,
-        expertMode: false,
-        divisor: 1000,
-      ),
-      // Number of inverters
-      DeviceDataField(
-        name: 'Anzahl Wechselrichter',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final inverters = MapUtils.OM(data, ['realtime', 'inverters']) as Map?;
-          return inverters?.length.toString() ?? '0';
-        },
-        icon: Icons.dashboard,
-        expertMode: false,
-      ),
-      // Device serial number
-      DeviceDataField(
-        name: 'Seriennummer',
-        type: DataFieldType.none,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['realtime', 'device_serial_number']),
-        icon: Icons.qr_code,
-        expertMode: true,
-      ),
-      // Firmware version
-      DeviceDataField(
-        name: 'Firmware-Version',
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final version = MapUtils.OM(data, ['realtime', 'firmware_version']);
-          return version?.toString();
-        },
-        icon: Icons.system_update,
-        expertMode: true,
-      ),
-    ],
     menuItems: [
       DeviceMenuItem(
         name: 'Geräteinformationen',
@@ -203,6 +147,65 @@ class HoymilesDTUDevice extends HoymilesDevice {
     netIpAddress = ipAddress;
     netPort ??= HoymilesProtocol.DTU_PORT;
   }
+
+  /// Dynamically compute data fields based on current device state
+  @override
+  List<DeviceDataField> get dataFields => [
+    // Aggregate power
+    DeviceDataField(
+      name: 'Gesamtleistung',
+      type: DataFieldType.watt,
+      valueExtractor: (data) {
+        final power = MapUtils.OM(data, ['realtime', 'dtu_power']);
+        if (power != null && power is num) {
+          return power.toInt();
+        }
+        return null;
+      },
+      icon: Icons.bolt,
+      expertMode: false,
+    ),
+    // Daily energy
+    DeviceDataField(
+      name: 'Tagesertrag',
+      type: DataFieldType.energy,
+      valueExtractor: (data) => MapUtils.OM(data, ['realtime', 'dtu_daily_energy']),
+      icon: Icons.wb_sunny,
+      expertMode: false,
+      divisor: 1000,
+    ),
+    // Number of inverters
+    DeviceDataField(
+      name: 'Anzahl Wechselrichter',
+      type: DataFieldType.none,
+      valueExtractor: (data) {
+        final inverters = MapUtils.OM(data, ['realtime', 'inverters']) as Map?;
+        return inverters?.length.toString() ?? '0';
+      },
+      icon: Icons.dashboard,
+      expertMode: false,
+    ),
+    // Device serial number
+    DeviceDataField(
+      name: 'Seriennummer',
+      type: DataFieldType.none,
+      valueExtractor: (data) =>
+          MapUtils.OM(data, ['realtime', 'device_serial_number']),
+      icon: Icons.qr_code,
+      expertMode: true,
+    ),
+    // Firmware version
+    DeviceDataField(
+      name: 'Firmware-Version',
+      type: DataFieldType.none,
+      valueExtractor: (data) {
+        final version = MapUtils.OM(data, ['realtime', 'firmware_version']);
+        return version?.toString();
+      },
+      icon: Icons.system_update,
+      expertMode: true,
+    ),
+  ];
 
   /// Organize flat device info into sections for UI
   Map<String, dynamic> _organizeDeviceInfo(Map<String, dynamic> data) {
