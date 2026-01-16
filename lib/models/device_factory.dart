@@ -2,8 +2,6 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'devices/device_base.dart';
 import 'devices/manufacturers/shelly/shelly_bluetooth_device.dart';
-import 'devices/manufacturers/shelly/shelly_device_em3.dart';
-import 'devices/manufacturers/shelly/shelly_device_plug.dart';
 import 'devices/manufacturers/shelly/shelly_wifi_device.dart';
 import 'devices/manufacturers/zendure/bluetooth_zendure_device.dart';
 import 'devices/manufacturers/zendure/wifi_zendure_device.dart';
@@ -30,16 +28,8 @@ class DeviceFactory {
          if(deviceType == DEVICE_MANUFACTURER_ZENDURE) {
           return BluetoothZendureDevice.fromJson(json);
         } else if(deviceType == DEVICE_MANUFACTURER_SHELLY) {
-          final deviceModel = json['deviceModel'] as String?;
-          final modelLower = deviceModel?.toLowerCase() ?? '';
-          if (modelLower.startsWith('spem')) {
-            return ShellyDeviceEm3Bluetooth.fromJson(json);
-          } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
-            return ShellyDevicePlugBluetooth.fromJson(json);
-          } else {
-            // Generic Shelly device for other models
-            return ShellyBluetoothDevice.fromJson(json);
-          }
+          // All Shelly devices use the generic implementation with dynamic module detection
+          return ShellyBluetoothDevice.fromJson(json);
         }else{
           return null;
         }
@@ -52,16 +42,8 @@ class DeviceFactory {
           // Default to Zendure for backward compatibility
           return WiFiZendureDevice.fromJson(json);
         } else if(deviceType == DEVICE_MANUFACTURER_SHELLY) {
-          final deviceModel = json['deviceModel'] as String?;
-          final modelLower = deviceModel?.toLowerCase() ?? '';
-          if (modelLower.startsWith('spem')) {
-            return ShellyDeviceEm3Wifi.fromJson(json);
-          } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
-            return ShellyDevicePlugWifi.fromJson(json);
-          } else {
-            // Generic Shelly device for other models
-            return ShellyWifiDevice.fromJson(json);
-          }
+          // All Shelly devices use the generic implementation with dynamic module detection
+          return ShellyWifiDevice.fromJson(json);
         } else if(deviceType == DEVICE_MANUFACTURER_OPENDTU){
           return WiFiOpenDTUDevice.fromJson(json);
         } else if(deviceType == DEVICE_MANUFACTURER_HOYMILES){
@@ -94,33 +76,14 @@ class DeviceFactory {
           deviceModel: deviceModel
       );
     }else if(deviceType == DEVICE_MANUFACTURER_SHELLY){
-      final modelLower = (deviceModel?.isEmpty ?? true) ? 'Unknown' : deviceModel!.toLowerCase();
-      if (modelLower.startsWith('spem')) {
-        return ShellyDeviceEm3Bluetooth(
-          id: id,
-          name: name,
-          lastSeen: DateTime.now(),
-          deviceSn: deviceSn,
-          deviceModel: deviceModel,
-        );
-      } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
-        return ShellyDevicePlugBluetooth(
-          id: id,
-          name: name,
-          lastSeen: DateTime.now(),
-          deviceSn: deviceSn,
-          deviceModel: deviceModel
-        );
-      } else {
-        // Generic Shelly device for other/unknown models
-        return ShellyBluetoothDevice(
-          id: id,
-          name: name,
-          lastSeen: DateTime.now(),
-          deviceSn: deviceSn,
-          deviceModel: deviceModel
-        );
-      }
+      // All Shelly devices use the generic implementation with dynamic module detection
+      return ShellyBluetoothDevice(
+        id: id,
+        name: name,
+        lastSeen: DateTime.now(),
+        deviceSn: deviceSn,
+        deviceModel: deviceModel
+      );
     }
     throw Exception("could not create bluetooth device $deviceType doese not exist");
   }
@@ -196,42 +159,17 @@ class DeviceFactory {
         deviceModel: deviceModel
       );
     } else if (deviceType == DEVICE_MANUFACTURER_SHELLY) {
-      final modelLower = (deviceModel?.isEmpty ?? true) ? 'Unknown' : deviceModel!.toLowerCase();
-      if (modelLower.startsWith('spem')) {
-        return ShellyDeviceEm3Wifi(
-          id: id,
-          name: name,
-          lastSeen: DateTime.now(),
-          deviceSn: deviceSn,
-          deviceModel: deviceModel,
-          ipAddress: ipAddress,
-          hostname: hostname,
-          port: port,
-        );
-      } else if (modelLower.startsWith('snpl') || modelLower.startsWith('s3pl')) {
-        return ShellyDevicePlugWifi(
-          id: id,
-          name: name,
-          lastSeen: DateTime.now(),
-          deviceSn: deviceSn,
-          deviceModel: deviceModel,
-          ipAddress: ipAddress,
-          hostname: hostname,
-          port: port,
-        );
-      } else {
-        // Generic Shelly device for other/unknown models
-        return ShellyWifiDevice(
-          id: id,
-          name: name,
-          lastSeen: DateTime.now(),
-          deviceSn: deviceSn,
-          deviceModel: deviceModel,
-          ipAddress: ipAddress,
-          hostname: hostname,
-          port: port,
-        );
-      }
+      // All Shelly devices use the generic implementation with dynamic module detection
+      return ShellyWifiDevice(
+        id: id,
+        name: name,
+        lastSeen: DateTime.now(),
+        deviceSn: deviceSn,
+        deviceModel: deviceModel,
+        ipAddress: ipAddress,
+        hostname: hostname,
+        port: port,
+      );
     } else if (deviceType == DEVICE_MANUFACTURER_ZENDURE) {
       return WiFiZendureDevice(
         id: id,

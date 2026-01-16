@@ -124,49 +124,50 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
     // Detect device brand based on MAC prefix or name
     if (name.startsWith(BLUETOOTH_NAME_PREFIX_SHELLY)) {
-      return await _connectToBluetoothDevice(device,DEVICE_MANUFACTURER_SHELLY,["config","model"]);
+      return await _connectToBluetoothDevice(device, DEVICE_MANUFACTURER_SHELLY);
     } else if (macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE)) {
-      return await _connectToBluetoothDevice(device,DEVICE_MANUFACTURER_ZENDURE,["config","model"]);
+      return await _connectToBluetoothDevice(device, DEVICE_MANUFACTURER_ZENDURE);
     } else {
       throw Exception('Unknown device brand');
     }
   }
 
-  Future<DeviceBase> _connectToBluetoothDevice(BluetoothDevice device, String type,List<String> param) async {
-
+  Future<DeviceBase> _connectToBluetoothDevice(BluetoothDevice device, String type) async {
     String id = device.remoteId.toString() + "_ble";
 
     try {
-      var tempDevice = DeviceFactory.createBluetoothDevice(
-          bluetoothDevice: device,
-          name: "Gerät "+type,
-          manufacturer: type,
-          deviceModel: null,//will be fetched in next step
-          deviceSn: device.remoteId.toString(),
-          id: id);
+      // Check if device already exists in storage
+      final existingDevices = await _storageService.getKnownDevices();
+      DeviceBase? existingDevice;
+      try {
+        existingDevice = existingDevices.firstWhere((d) => d.id == id);
+      } catch (e) {
+        existingDevice = null;
+      }
 
-      tempDevice.setUpServiceConnection(device);
+      // If device already exists, return it (keep existing name, don't overwrite)
+      if (existingDevice != null) {
+        debugPrint("Device already known, using existing: ${existingDevice.name}");
+        return existingDevice;
+      }
 
-      //this will check if services for bluetooth exist
-      await tempDevice.getServiceConnection()?.connect();
+      // New device: use advertised name as temporary name
+      String advertisedName = device.advName;
+      String deviceName = advertisedName.isNotEmpty ? advertisedName : "$type Device";
 
-      // Get device model from config data
-      String deviceModel = MapUtils.OM(tempDevice.data,param) as String? ?? "";
-
-      tempDevice.removeServiceConnection();
-
-      // Create the correct device instance based on the model
+      // Create device with temporary name
+      // Model will be updated later when device info is fetched
       final knownDevice = DeviceFactory.createBluetoothDevice(
         id: id,
-        name: type + deviceModel,
+        name: deviceName,
         deviceSn: device.remoteId.toString(),
-        deviceModel: deviceModel,
+        deviceModel: null,  // Will be updated after connection
         manufacturer: type,
         bluetoothDevice: device
       );
 
       await _storageService.saveDevice(knownDevice);
-
+      debugPrint("New device created: $deviceName");
       return knownDevice;
     } catch (e) {
       debugPrint("error while creating bluetooth device with type $type: $e");

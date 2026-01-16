@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
+import '../../../constants/shelly_constants.dart';
 import 'package:the_solar_app/models/devices/device_base.dart';
 import 'package:the_solar_app/models/network_device.dart';
 import 'package:the_solar_app/models/additional_connection_info.dart';
 import '../../../models/devices/mixins/device_wifi_mixin.dart';
 import '../../../models/devices/manufacturers/shelly/shelly_wifi_device.dart';
+import '../base_device_service.dart';
+import 'shelly_auth_mixin.dart';
 import 'shelly_service.dart';
 import '../../../utils/shelly_auth_utils.dart';
 
@@ -15,10 +18,10 @@ import '../../../utils/shelly_auth_utils.dart';
 /// Uses HTTP RPC protocol:
 /// - Endpoint: http://{ipAddress}:{port}/rpc/{method}
 /// - POST request with JSON-RPC payload
-class ShellyWifiService extends ShellyService {
-  final String _readDataCommand;
-  int lastSeen = 0;
-  bool fetchDataEnabled = true;
+class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implements ShellyService {
+  // Connection timeout - if no data received within this time, consider disconnected
+  static const int CONNECTION_TIMEOUT_MS = 15000;  // 15 seconds
+
   late DeviceWifiMixin wifiDevice;
 
   /// Static method to detect if HTTP response is from a Shelly device
@@ -44,7 +47,7 @@ class ShellyWifiService extends ShellyService {
 
           // Confirmed Shelly device - now get device details via JSON-RPC API
           final response = await http.get(
-            Uri.parse('http://$ipAddress:$port/rpc/Shelly.GetDeviceInfo'),
+            Uri.parse('http://$ipAddress:$port/rpc/${ShellyCommands.getDeviceInfo}'),
             headers: {
               'Accept': 'application/json',
             },
@@ -84,48 +87,38 @@ class ShellyWifiService extends ShellyService {
     return null;
   }
 
-  ShellyWifiService(DeviceBase device, this._readDataCommand)
+  ShellyWifiService(DeviceBase device)
       :super((device as ShellyWifiDeviceTemplate).fetchDataInterval, device) {
     wifiDevice = device as DeviceWifiMixin;
-    // Fetch first data
-    fetchData();
   }
 
   @override
-  Future<void> connect() async {
-    //fetch config
-    wifiDevice.connectIpOrHostname((ip,port) async {
-      await sendCommand("Shelly.GetDeviceInfo",{"id": 0});
+  Future<bool> internalConnect() async {
+    await wifiDevice.connectIpOrHostname((ip,port) async {
+      device.emitStatus('Lese Geräteinfo...');
+      await sendCommand(ShellyCommands.getDeviceInfo, {"id": 0});
     });
-    fetchData();
-    resetTimer();
+
+    isInitialized = true;
+    return true;//direclty fetch data
   }
 
   @override
-  Future<void> disconnect() async {
-    fetchDataEnabled = false;
+  Future<void> internalDisconnect() async {
+    // Clear Shelly-specific auth cache
     resetAuthCache();
-    device.data.remove("config");
+    // Note: device.data (including config) is cleared by wrapper
   }
 
   @override
   bool isConnected() {
-    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < 1000 * 15;
-  }
-
-  @override
-  bool isInitialized() {
-    return device.data.containsKey("config");
+    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < CONNECTION_TIMEOUT_MS;
   }
 
   /// Fetch data from the device (called periodically)
   @override
-  void fetchData() async {
-
-    var data = await sendCommand(
-      _readDataCommand,
-      _readDataCommand == "Shelly.GetStatus" ? {} : {"id": 0},
-    );
+  Future<void> internalFetchData() async {
+    var data = await sendCommand(ShellyCommands.getStatus, {});
 
     if(data == null){
       throw Exception("Shelly rest fetch data failed no data received");
@@ -136,7 +129,7 @@ class ShellyWifiService extends ShellyService {
   }
 
   void _handleResponse(String methode, Map<String,dynamic> data){
-    if(methode == "Shelly.GetDeviceInfo"){
+    if(methode == ShellyCommands.getDeviceInfo){
       var src = data["auth_domain"] as String?;
       if(src != null){
         //TODO make this better
@@ -145,10 +138,77 @@ class ShellyWifiService extends ShellyService {
       }
       device.data['config'] = data;
       device.emitData(data);
-    }else if(methode == "Shelly.GetStatus" || methode == _readDataCommand){
+      device.emitStatus('Geräteinfo erhalten');
+    }else if(methode == ShellyCommands.getStatus){
+      // Detect modules in response
+      final detectedModules = _detectModules(data);
+
+      // Update cached modules and regenerate fields if modules changed
+      final currentModules = device.data['_detectedModules'];
+      if (currentModules == null || !_mapsEqual(currentModules as Map?, detectedModules)) {
+        device.data['_detectedModules'] = detectedModules;
+        debugPrint('Detected Shelly modules: $detectedModules');
+
+        // Regenerate dynamic fields, controls, and time series based on new modules
+        _updateDeviceElements();
+      }
+
       device.data['data'] = data;
       device.emitData(data);
+      device.emitStatus('Daten empfangen');
     }
+  }
+
+  /// Update device UI elements after module detection
+  void _updateDeviceElements() {
+    final impl = (wifiDevice as dynamic).deviceImpl;
+    // dataFields is now a computed getter - no need to update
+    device.controlItems = impl.getControlItems();
+    device.timeSeriesFields = impl.getTimeSeriesFields();
+  }
+
+  /// Detect Shelly modules in the response data
+  Map<String, List<int>> _detectModules(Map<String, dynamic> data) {
+    final modules = <String, List<int>>{};
+    final regex = RegExp(r'^(em|em1|em1data|emdata|pm1|switch|cover|input|light|temperature):(\d+)$');
+
+    for (final key in data.keys) {
+      final match = regex.firstMatch(key);
+      if (match != null) {
+        final moduleType = match.group(1)!;
+        final instanceId = int.parse(match.group(2)!);
+        modules.putIfAbsent(moduleType, () => []).add(instanceId);
+      }
+    }
+
+    // Sort instance IDs
+    modules.forEach((key, value) => value.sort());
+
+    return modules;
+  }
+
+  /// Compare two maps for equality (deep comparison of structure)
+  bool _mapsEqual(Map<dynamic, dynamic>? map1, Map<dynamic, dynamic>? map2) {
+    if (map1 == null && map2 == null) return true;
+    if (map1 == null || map2 == null) return false;
+    if (map1.length != map2.length) return false;
+
+    for (final key in map1.keys) {
+      if (!map2.containsKey(key)) return false;
+      final val1 = map1[key];
+      final val2 = map2[key];
+
+      if (val1 is List && val2 is List) {
+        if (val1.length != val2.length) return false;
+        for (int i = 0; i < val1.length; i++) {
+          if (val1[i] != val2[i]) return false;
+        }
+      } else if (val1 != val2) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /// Send a JSON-RPC command to the device via HTTP
@@ -227,7 +287,10 @@ class ShellyWifiService extends ShellyService {
       }
     } catch (e) {
       debugPrint('Error sending command $method: $e');
-      device.emitError('Befehl fehlgeschlagen: $e');
+      if(method != ShellyCommands.getStatus && method != ShellyCommands.getDeviceInfo) {
+        //ony when command from user show inf forderground
+        device.emitError('Befehl fehlgeschlagen: $e');
+      }
       rethrow;
     }
   }
@@ -295,39 +358,8 @@ class ShellyWifiService extends ShellyService {
     }
   }
 
-  /// Handle JSON-RPC 401 error (within HTTP 200 response)
-  Future<Map<String, dynamic>?> _handleJsonRpcAuthChallenge(
-    String method,
-    Map<String, dynamic> params,
-    dynamic error,
-  ) async {
-    try {
-      // Extract error message
-      final errorMessage = error is Map ? error['message'] as String? : null;
-      if (errorMessage == null) {
-        throw Exception('No error message in 401 JSON-RPC error');
-      }
-
-      // Use base class method to build auth
-      final authObject = parseAndBuildAuth(errorMessage);
-      if (authObject == null) {
-        throw Exception('Failed to build authentication object');
-      }
-
-      debugPrint('Auth object built, retrying HTTP request...');
-
-      // Retry with authentication (retryOnAuth: false to prevent infinite loop)
-      return await _sendCommandWithAuth(method, params, retryOnAuth: false);
-    } catch (e) {
-      debugPrint('Error handling JSON-RPC auth challenge: $e');
-      resetAuthCache();
-      rethrow;
-    }
-  }
-
   @override
   void dispose() {
-    fetchDataEnabled = false;
     super.dispose();
   }
 }

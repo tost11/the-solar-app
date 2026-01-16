@@ -11,6 +11,19 @@ import 'generic_rendering/device_control_item.dart';
 import 'generic_rendering/device_custom_section.dart';
 import 'time_series_field_config.dart';
 
+/// Error payload with background/foreground routing flag
+class DeviceError {
+  final String message;
+  final bool isBackgroundError;  // true = footer, false = overlay
+  final DateTime timestamp;
+
+  DeviceError({
+    required this.message,
+    required this.isBackgroundError,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
+}
+
 enum ConnectionType {
   bluetooth,
   wifi;
@@ -44,12 +57,16 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   final String deviceSn;
   String? deviceModel;
   final ConnectionType connectionType;
-  late final List<DeviceDataField> dataFields;
-  late final List<DeviceMenuItem> menuItems;
-  late final List<DeviceControlItem> controlItems;
-  late final List<DeviceCustomSection> customSections;
-  late final List<DeviceCategoryConfig> categoryConfigs;
-  late final List<TimeSeriesFieldConfig> timeSeriesFields;
+
+  /// Dynamically compute data fields based on current device state
+  /// This ensures fields reflect detected modules/components after connection
+  List<DeviceDataField> get dataFields;
+
+  late List<DeviceMenuItem> menuItems;
+  late List<DeviceControlItem> controlItems;  // Removed final to allow dynamic updates
+  late List<DeviceCustomSection> customSections;
+  late List<DeviceCategoryConfig> categoryConfigs;
+  late List<TimeSeriesFieldConfig> timeSeriesFields;  // Removed final to allow dynamic updates
   Map<String,Map<String,dynamic>> data = {};
   ServiceType ? connectionService;
 
@@ -60,13 +77,13 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   // Stream controllers for state management
   final _connectionStatusController = StreamController<String>.broadcast();
   final _dataController = StreamController<Map<String,dynamic>>.broadcast();
-  final _errorController = StreamController<String>.broadcast();
+  final _errorController = StreamController<DeviceError>.broadcast();
   final _deviceInfoController = StreamController<Map<String, dynamic>>.broadcast();
 
   // Public streams
   Stream<String> get connectionStatus => _connectionStatusController.stream;
   Stream<Map<String,dynamic>> get dataStream => _dataController.stream;
-  Stream<String> get errors => _errorController.stream;
+  Stream<DeviceError> get errors => _errorController.stream;
   Stream<Map<String, dynamic>> get deviceInfo => _deviceInfoController.stream;
 
   void emitStatus(String status){
@@ -78,8 +95,23 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     _trackTimeSeriesData(data);
   }
 
-  void emitError(String status){
-    _errorController.add(status);
+  /// Emit an error (defaults to foreground/overlay for backward compatibility)
+  ///
+  /// Use this for command errors that should show in global overlay
+  void emitError(String error) {
+    emitErrorWithFlag(error, false);  // false = global overlay (default)
+  }
+
+  /// Emit error with routing flag
+  ///
+  /// [error] - Error message to emit
+  /// [isBackgroundError] - If true, show in detail screen footer (connection errors)
+  ///                       If false, show in global overlay (command errors)
+  void emitErrorWithFlag(String error, bool isBackgroundError) {
+    _errorController.add(DeviceError(
+      message: error,
+      isBackgroundError: isBackgroundError,
+    ));
   }
 
   /// Track time series data for graphing
@@ -120,7 +152,6 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     required this.lastSeen,
     required this.deviceSn,
     required this.connectionType,
-    required this.dataFields,
     required this.menuItems,
     this.controlItems = const [],
     this.customSections = const [],
@@ -133,7 +164,7 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     return connectionService;
   }
 
-  void setUpServiceConnection(BluetoothDevice ? device);
+  Future<void> setUpServiceConnection(BluetoothDevice ? device);
 
   /// Serialize to JSON for storage
   Map<String, dynamic> toJson() {
@@ -156,10 +187,11 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     );
   }
 
-  void removeServiceConnection(){
-    if(connectionService != null){
-      connectionService?.disconnect();
-      connectionService?.dispose();
+  Future<void> removeServiceConnection() async {
+    final cs = this.connectionService;
+    if(cs != null){
+      await cs.disconnect();
+      cs.dispose();
     }
 
     connectionService = null;
@@ -169,7 +201,7 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   Future<Map<String,dynamic>?> sendCommand(String command,Map<String, dynamic> params);
 
   void assertServiceIsFine(){
-    if(connectionService == null || connectionService?.isConnected() != true || connectionService?.isInitialized() != true){
+    if(connectionService == null || connectionService?.isConnected() != true || connectionService?.isServiceInitialized() != true){
       throw Exception("device no ready to send commands");
     }
   }

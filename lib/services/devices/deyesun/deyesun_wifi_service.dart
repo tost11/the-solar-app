@@ -16,9 +16,9 @@ import '../../../utils/number_utils.dart';
 import 'deyesun_modbus_connection.dart';
 
 class DeyeSunWifiService extends BaseDeviceService {
+  // Connection timeout - if no data received within this time, consider disconnected
+  static const int CONNECTION_TIMEOUT_MS = 40000;  // 30 seconds
 
-  int lastSeen = 0;
-  bool fetchDataEnabled = true;
   late WiFiDeyeSunDevice wifiDevice;
 
   // Modbus connection for real-time data
@@ -31,9 +31,6 @@ class DeyeSunWifiService extends BaseDeviceService {
     wifiDevice = device;
 
     _modbusConnection = DeyeSunModbusConnection();
-
-    // Fetch first data
-    fetchData();
   }
 
   /// Static method to detect if HTTP response is from a DeyeSun device
@@ -136,6 +133,8 @@ class DeyeSunWifiService extends BaseDeviceService {
       client.close();
     }
   }
+
+
 
   /// Posts form data with Basic authentication using HttpClient with preserveHeaderCase
   static Future<HttpClientResponse> _postWithAuth(String url, Map<String, String> formData, {int timeoutSeconds = 5}) async {
@@ -329,8 +328,8 @@ class DeyeSunWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> disconnect() async {
-    fetchDataEnabled = false;
+  Future<void> internalDisconnect() async {
+    // Disconnect secondary Modbus connection
     await _modbusConnection.disconnect();
   }
 
@@ -345,69 +344,62 @@ class DeyeSunWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> connect() async {
+  Future<bool> internalConnect() async {
+    await (device as DeviceWifiMixin).connectIpOrHostname((ip, port) async {
+      //call this once here to check connection working //TODO maby refactor
+      await fetchHttp();
+    });
 
-    try {
-      await (device as DeviceWifiMixin).connectIpOrHostname((ip, port) async {
-        await fetchData();//fetch data without socket connection
-        //fetch data will also connect modbus if needed
-      });
-    }catch (ex){
-      throw new Exception("Could not connect to deye sun device");
+    //so no init proces is triggered
+    isInitialized = true;
+    return true;//reset timer to direct fetch data again for modbus
+  }
+
+  Future<bool> fetchHttp() async {
+    final response = await _fetchWithAuth('${getBaseUri()}/status.html', timeoutSeconds: 5);
+
+    if (response.statusCode == 200) {
+      // Read response body
+      final body = await response.transform(utf8.decoder).join();
+
+      // Parse JavaScript variables from HTML
+      final jsVars = _parseJavaScriptVariables(body);
+
+      var model = getModelFromSerial(device.deviceSn);
+      if (model != null) {
+        jsVars['model'] = model;
+        final powerRating = getPowerRatingForModel(model);
+        if (powerRating != null) {
+          jsVars['power_rating'] = powerRating;
+        }
+      }
+
+      // Store all parsed variables in config (HTTP is for configuration)
+
+      jsVars["webdata_now_p"] = NumberUtils.parseToDouble(jsVars["webdata_now_p"]);
+      jsVars["webdata_today_e"] = NumberUtils.parseToDouble(jsVars["webdata_today_e"]);
+      jsVars["webdata_total_e"] = NumberUtils.parseToDouble(jsVars["webdata_total_e"]);
+
+      device.data["config"] = jsVars;
+
+      device.emitData(jsVars);
+
+      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched HTTP data');
+      lastSeen = DateTime.now().millisecondsSinceEpoch;
+    } else {
+      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data error: ${response.statusCode}');
+      return false;
     }
-
-    //This have to be done twice... fist read always fails no idea why... buffer seems ok and cleared after connect (even delay wont work)
-    //mbay a helly message is nessesary
-    await fetchData();
-    resetTimer();
+    return true;
   }
 
   @override
-  Future<void> fetchData() async {
-    if (!fetchDataEnabled) return;
-
+  Future<void> internalFetchData() async {
     String connectedWith = "";
 
     try {
-      final response = await _fetchWithAuth('${getBaseUri()}/status.html', timeoutSeconds: 5);
-
-      if (response.statusCode == 200) {
-        // Read response body
-        final body = await response.transform(utf8.decoder).join();
-
-        // Parse JavaScript variables from HTML
-        final jsVars = _parseJavaScriptVariables(body);
-
-        var model = getModelFromSerial(device.deviceSn);
-        if (model != null) {
-          jsVars['model'] = model;
-          final powerRating = getPowerRatingForModel(model);
-          if (powerRating != null) {
-            jsVars['power_rating'] = powerRating;
-          }
-        }
-
-        // Store all parsed variables in config (HTTP is for configuration)
-
-        jsVars["webdata_now_p"] = NumberUtils.parseToDouble(jsVars["webdata_now_p"]);
-        jsVars["webdata_today_e"] = NumberUtils.parseToDouble(jsVars["webdata_today_e"]);
-        jsVars["webdata_total_e"] = NumberUtils.parseToDouble(jsVars["webdata_total_e"]);
-
-        device.data["config"] = jsVars;
-
-        //debugPrint("jsVars extracted deye sun: ${jsVars.toString()}");
-
-        device.emitData(jsVars);
-
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched HTTP data');
-        lastSeen = DateTime.now().millisecondsSinceEpoch;
-        if(connectedWith.isNotEmpty){
-          connectedWith+=",";
-        }
-        connectedWith += "http";
-      } else {
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data error: ${response.statusCode}');
-      }
+      fetchHttp();
+      connectedWith += "http";
     } catch (e) {
       debugPrint('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data exception: $e');
     }
@@ -444,19 +436,15 @@ class DeyeSunWifiService extends BaseDeviceService {
     if(connectedWith.isNotEmpty){
       device.emitStatus('Verbunden ($connectedWith)');
     }else{
-      device.emitStatus('Nicht Verbunden');
+      throw Exception('Nicht Verbunden');
     }
   }
 
   @override
   bool isConnected() {
-    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < 1000 * 30;
+    return (DateTime.now().millisecondsSinceEpoch - lastSeen) < CONNECTION_TIMEOUT_MS;
   }
 
-  @override
-  bool isInitialized() {
-    return device.data["config"] != null || device.data["data"] != null;
-  }
 
   /// Parse Modbus register data into usable format
   ///

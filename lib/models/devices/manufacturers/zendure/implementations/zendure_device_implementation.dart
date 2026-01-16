@@ -544,7 +544,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
       }
 
       // Delegate to service (works for both Bluetooth and WiFi)
-      await (connectionService as dynamic).sendPropertiesCommand(params);
+      await connectionService.sendCommand(params);
     } else if (command == COMMAND_BATTERY_LIMITS) {
       var props = <String, dynamic>{};
 
@@ -560,7 +560,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         throw Exception("props to send are empty, no battery limits set");
       }
 
-      await (connectionService as dynamic).sendPropertiesCommand(props);
+      await connectionService.sendCommand(props);
     } else if (command == COMMAND_SET_POWER_CONFIG) {
       var props = <String, dynamic>{};
 
@@ -579,7 +579,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         throw Exception("props to send are empty, no power config set");
       }
 
-      await connectionService.sendPropertiesCommand(props);
+      await connectionService.sendCommand(props);
     } /*else if (command == COMMAND_SET_MAIN_POWER) { //TODO check if working
       var props = <String, dynamic>{};
 

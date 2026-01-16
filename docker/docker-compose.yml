@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # Shelly EM1 MockServer (Gen3, 2-channel energy meter + switch)
+  shelly-em1:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-em1-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/em1_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "8081:1080"  # Map MockServer port 1080 to host 8081
+    volumes:
+      - ./mockserver:/config:ro  # Mount expectations as read-only
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - shelly-mock-net
+
+  # Shelly EM3 MockServer (Pro 3EM, 3-phase energy meter)
+  shelly-em3:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-em3-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/em3_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "8082:1080"  # Map MockServer port 1080 to host 8082
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - shelly-mock-net
+
+  # Shelly Plug S MockServer (Smart plug with power monitoring)
+  shelly-plug:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-plug-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/plug_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "8083:1080"  # Map MockServer port 1080 to host 8083
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - shelly-mock-net
+
+  # Shelly PM1 MockServer (Gen3, power meter)
+  shelly-pm1:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-pm1-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/pm1_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "8084:1080"  # Map MockServer port 1080 to host 8084
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - shelly-mock-net
+
+networks:
+  shelly-mock-net:
+    driver: bridge

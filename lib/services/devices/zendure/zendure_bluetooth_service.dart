@@ -6,6 +6,7 @@ import '../../../constants/bluetooth_constants.dart';
 import '../../../models/devices/device_base.dart';
 import '../../../utils/map_utils.dart';
 import '../bluetooth_device_service.dart';
+import '../../device_storage_service.dart';
 
 /// Service for communicating with Zendure devices via Bluetooth Low Energy
 ///
@@ -38,7 +39,15 @@ class ZendureBluetoothService extends BluetoothDeviceService {
           writeCharacteristicUuid: ZENDURE_WRITE_UUID,
           writeCharacteristicUuidShort: ZENDURE_WRITE_SHORT,
         ){
-    connect();
+  }
+
+  Future<bool> internalConnect()async {
+
+    await super.internalConnect();
+
+    //not realy correct but ok for now
+    isInitialized = true;
+    return false;//data will come by notification
   }
 
   @override
@@ -48,14 +57,22 @@ class ZendureBluetoothService extends BluetoothDeviceService {
   }
 
   @override
-  void fetchData(){
+  Future<void> internalFetchData() async {
     //nothing to do here data come from device automaticly
   }
 
-
   @override
-  bool isInitialized(){
-    return isConnected();
+  Future<void> internalDisconnect() async {
+    // Call parent's Bluetooth disconnect logic (characteristics, lifecycle hooks)
+    await super.internalDisconnect();
+
+    await bluetoothDevice.disconnect();
+
+    if(_notifySubscription != null){
+      await _notifySubscription?.cancel();
+      _notifySubscription = null;
+    }
+    _deviceSn = null;
   }
 
   @override
@@ -72,26 +89,6 @@ class ZendureBluetoothService extends BluetoothDeviceService {
     });
 
     print('Notifications enabled');
-  }
-
-  @override
-  Future<void> initializeDevice() async {
-    print('\nWaiting for BLESPP message from device...');
-    device.emitStatus('Warte auf BLESPP...');
-    // Device will send BLESPP handshake automatically
-  }
-
-  @override
-  Future<void> onBeforeDisconnect() async {
-    await _notifySubscription?.cancel();
-    _notifySubscription = null;
-  }
-
-  @override
-  Future<void> onAfterDisconnect() async {
-    _deviceSn = null;
-    //_inverterData.rawData.clear();
-    //emitData(_inverterData);
   }
 
   Future<void> sendPlainCommand(Map<String,dynamic> properites) async {
@@ -198,6 +195,11 @@ class ZendureBluetoothService extends BluetoothDeviceService {
 
     device.data["firmwares"] = firmwares;
 
+    // Note: Zendure doesn't provide model field in API response
+    // deviceSn is also final and cannot be updated
+    // Name was already set from advName during initial scan
+    // No further updates needed for Zendure devices
+
     // Emit device info through stream
     device.emitDeviceInfo({
       'deviceSn': _deviceSn,
@@ -233,11 +235,23 @@ class ZendureBluetoothService extends BluetoothDeviceService {
       }
     }
     if (newPackData != null) {
-      var newData = MapUtils.mergeLists(oldPackData,newPackData);
-      if(newData != null){
-        debugPrint("new packData are: ${newData.toString()}");
-        (device.data["data"] as Map<String,dynamic>)['packData'] = newData;
+      newPackData.removeWhere((item) => item is Map && item.length <= 1);//remove all pack data only containing id
+      var lastPackData = (device.data["data"] as Map<String,dynamic>)['packData'] ?? [];
+
+      for(var oldItem in lastPackData){
+        bool found = false;
+        for (var newItem in newPackData){
+          if ((newItem as Map)["sn"] == (oldItem as Map)["sn"]) {
+            found = true;
+            break;
+          }
+        }
+        if(found == false){
+          newPackData.add(oldItem);
+        }
       }
+
+      (device.data["data"] as Map<String,dynamic>)['packData'] = newPackData;
     }
 
     if (data['properties'] != null) {

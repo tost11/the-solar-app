@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:the_solar_app/services/devices/base_device_service.dart';
 import 'device_base.dart';
 import 'device_implementation.dart';
+import 'generic_rendering/device_data_field.dart';
 
 /// Generic template for Bluetooth devices
 ///
@@ -68,11 +69,14 @@ abstract class GenericBluetoothDevice<TService extends BaseDeviceService, TImpl 
     connectionType: ConnectionType.bluetooth,
     menuItems: deviceImpl.getMenuItems(),
     controlItems: deviceImpl.getControlItems(),
-    dataFields: deviceImpl.getDataFields(),
     customSections: deviceImpl.getCustomSections(),
     categoryConfigs: deviceImpl.getCategoryConfigs(),
     timeSeriesFields: deviceImpl.getTimeSeriesFields(),
   );
+
+  /// Dynamically compute data fields based on current device state
+  @override
+  List<DeviceDataField> get dataFields => deviceImpl.getDataFields();
 
   /// Protected named constructor for JSON deserialization
   ///
@@ -110,11 +114,11 @@ abstract class GenericBluetoothDevice<TService extends BaseDeviceService, TImpl 
   /// Automatically handles null check and service cleanup before
   /// calling the device-specific createService() method.
   @override
-  void setUpServiceConnection(BluetoothDevice? device) {
+  Future<void> setUpServiceConnection(BluetoothDevice? device) async {
     if (device == null) {
       throw Exception("Bluetooth device required for $runtimeType");
     }
-    removeServiceConnection();
+    await removeServiceConnection();
     connectionService = createService(device);
   }
 

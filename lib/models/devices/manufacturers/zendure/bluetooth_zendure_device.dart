@@ -84,7 +84,23 @@ class BluetoothZendureDevice extends GenericBluetoothDevice<
       }
       return null;
     }else if (command == COMMAND_SET_WIFI) {
-      throw Exception("Not implemented yet");
+      String? ssid = params["ssid"];
+      String? password = params["password"];
+
+      if (ssid == null || password == null ) {
+        throw Exception("could not config wifi password or ssid missing");
+      }
+
+      var wifiParams = {
+        'messageId': 1002,
+        'method': 'token',
+        'password': password,
+        'ssid': ssid,
+        'timeZone': 'GMT+01:00',
+        'token': Utils.generateRandomToken(16),
+      };
+      await connectionService?.sendPlainCommand(wifiParams);
+      return null;
     }else if (command == COMMAND_SET_MQTT) {
       throw Exception("Not implemented yet");
     }

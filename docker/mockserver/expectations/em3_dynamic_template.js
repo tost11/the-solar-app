@@ -1,0 +1,119 @@
+var hour = new Date().getHours();
+var minutesSinceEpoch = Math.floor(Date.now() / 60000);
+
+// Phase A: Grid consumption
+var consumed_a = 800 + (Math.random() - 0.5) * 300;
+var voltage_a = 230 + (Math.random() - 0.5) * 10;
+var current_a = consumed_a / voltage_a;
+
+// Phase B: Grid consumption
+var consumed_b = 850 + (Math.random() - 0.5) * 300;
+var voltage_b = 230 + (Math.random() - 0.5) * 10;
+var current_b = consumed_b / voltage_b;
+
+// Phase C: Solar generation (lower power, can be negative)
+var solarFactor = Math.max(0, Math.sin((hour - 6) * Math.PI / 12));
+var solar_c = solarFactor * 600;
+var consumed_c = 400 + (Math.random() - 0.5) * 200;
+var netPower_c = consumed_c - solar_c;
+var voltage_c = 230 + (Math.random() - 0.5) * 10;
+var current_c = netPower_c / voltage_c;
+
+// Totals
+var total_current = current_a + current_b + current_c;
+var total_act_power = consumed_a + consumed_b + netPower_c;
+var total_aprt_power = total_act_power * 1.02;
+
+return {
+  statusCode: 200,
+  headers: { 'Content-Type': ['application/json'] },
+  body: JSON.stringify({
+    id: 1768255378,
+    src: 'shellypro3em-112233445566',
+    dst: 'flutter_app',
+    result: {
+      ble: {},
+      bthome: {},
+      cloud: { connected: false },
+      'em:0': {
+        id: 0,
+        a_current: parseFloat(current_a.toFixed(3)),
+        a_voltage: parseFloat(voltage_a.toFixed(1)),
+        a_act_power: parseFloat(consumed_a.toFixed(1)),
+        a_aprt_power: parseFloat((consumed_a * 1.02).toFixed(1)),
+        a_pf: 0.98,
+        a_freq: 50.0,
+        b_current: parseFloat(current_b.toFixed(3)),
+        b_voltage: parseFloat(voltage_b.toFixed(1)),
+        b_act_power: parseFloat(consumed_b.toFixed(1)),
+        b_aprt_power: parseFloat((consumed_b * 1.02).toFixed(1)),
+        b_pf: 0.98,
+        b_freq: 50.0,
+        c_current: parseFloat(current_c.toFixed(3)),
+        c_voltage: parseFloat(voltage_c.toFixed(1)),
+        c_act_power: parseFloat(netPower_c.toFixed(1)),
+        c_aprt_power: parseFloat((netPower_c * 1.02).toFixed(1)),
+        c_pf: 0.80,
+        c_freq: 50.0,
+        n_current: null,
+        total_current: parseFloat(total_current.toFixed(3)),
+        total_act_power: parseFloat(total_act_power.toFixed(3)),
+        total_aprt_power: parseFloat(total_aprt_power.toFixed(3)),
+        user_calibrated_phase: []
+      },
+      'emdata:0': {
+        id: 0,
+        a_total_act_energy: parseFloat((minutesSinceEpoch * 1.0).toFixed(2)),
+        a_total_act_ret_energy: parseFloat((minutesSinceEpoch * 0.1).toFixed(2)),
+        b_total_act_energy: parseFloat((minutesSinceEpoch * 1.0).toFixed(2)),
+        b_total_act_ret_energy: parseFloat((minutesSinceEpoch * 0.1).toFixed(2)),
+        c_total_act_energy: parseFloat((minutesSinceEpoch * 1.5).toFixed(2)),
+        c_total_act_ret_energy: parseFloat((minutesSinceEpoch * 0.8).toFixed(2)),
+        total_act: parseFloat((minutesSinceEpoch * 3.5).toFixed(2)),
+        total_act_ret: parseFloat((minutesSinceEpoch * 1.0).toFixed(2))
+      },
+      eth: { ip: null, ip6: null },
+      modbus: {},
+      mqtt: { connected: false },
+      'script:1': { id: 1, running: false, mem_free: 25004, cpu: 0 },
+      'script:2': { id: 2, running: true, mem_used: 182, mem_peak: 9268, mem_free: 25004, cpu: 0 },
+      'script:3': { id: 3, running: false, mem_free: 25004, cpu: 0 },
+      'script:4': { id: 4, running: false, mem_free: 25004, cpu: 0 },
+      'script:5': { id: 5, running: false, mem_free: 25004, cpu: 0 },
+      sys: {
+        mac: '112233445566',
+        restart_required: false,
+        time: new Date().toTimeString().substring(0, 5),
+        unixtime: Math.floor(Date.now() / 1000),
+        last_sync_ts: Math.floor(Date.now() / 1000) - 1200,
+        uptime: Math.floor(Math.random() * 86400) + 3600,
+        ram_size: 259100,
+        ram_free: Math.floor(Math.random() * 30000) + 60000,
+        ram_min_free: 62660,
+        fs_size: 524288,
+        fs_free: Math.floor(Math.random() * 10000) + 153840,
+        cfg_rev: 63,
+        kvs_rev: 0,
+        schedule_rev: 0,
+        webhook_rev: 0,
+        btrelay_rev: 0,
+        available_updates: { beta: { version: '1.7.4-beta2' } },
+        reset_reason: 1,
+        utc_offset: 3600
+      },
+      'temperature:0': {
+        id: 0,
+        tC: parseFloat((40 + Math.random() * 10).toFixed(1)),
+        tF: parseFloat((104 + Math.random() * 18).toFixed(1))
+      },
+      wifi: {
+        sta_ip: '192.168.1.101',
+        status: 'got ip',
+        ssid: 'MyNetwork',
+        bssid: 'aa:bb:cc:dd:ee:ff',
+        rssi: Math.floor(Math.random() * 20) - 70
+      },
+      ws: { connected: false }
+    }
+  })
+};

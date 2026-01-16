@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/devices/base_device_service.dart';
 import 'generic_rendering/device_category_config.dart';
 import 'generic_rendering/device_control_item.dart';
 import 'generic_rendering/device_custom_section.dart';
@@ -62,10 +63,6 @@ abstract class DeviceImplementation {
 
   /// Returns the icon to display for this device type
   IconData getDeviceIcon();
-
-  /// Returns the command name used to fetch data from the device
-  /// Example: "Shelly.GetStatus", "EM.GetStatus", etc.
-  String getFetchCommand();
 
   /// Handle device-specific commands
   ///

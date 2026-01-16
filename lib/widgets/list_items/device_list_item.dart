@@ -25,10 +25,26 @@ class DeviceListItem extends StatelessWidget {
   /// Callback when the delete button is pressed
   final VoidCallback onDelete;
 
+  /// Callback when the connect button is pressed
+  final VoidCallback onConnect;
+
+  /// Callback when the disconnect button is pressed
+  final VoidCallback onDisconnect;
+
+  /// Whether the device is currently connected
+  final bool isConnected;
+
+  /// Whether the device is auto-reconnecting
+  final bool isAutoReconnecting;
+
   const DeviceListItem({
     required this.device,
     required this.onTap,
     required this.onDelete,
+    required this.onConnect,
+    required this.onDisconnect,
+    required this.isConnected,
+    required this.isAutoReconnecting,
     super.key,
   });
 
@@ -113,10 +129,47 @@ class DeviceListItem extends StatelessWidget {
         ],
       ),
 
-      // Delete button
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outline),
-        onPressed: onDelete,
+      // Connect/Disconnect and Delete buttons
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Connect/Disconnect button
+          Container(
+            decoration: BoxDecoration(
+              color: isConnected
+                  ? Colors.green.withOpacity(0.2)  // Green background when connected
+                  : (isAutoReconnecting
+                      ? Colors.orange.withOpacity(0.2)  // Orange background when auto-reconnecting
+                      : null),  // No background when disconnected
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: Icon(
+                isConnected
+                    ? (device.connectionType == ConnectionType.bluetooth
+                        ? Icons.bluetooth_connected
+                        : Icons.wifi)
+                    : (device.connectionType == ConnectionType.bluetooth
+                        ? Icons.bluetooth_disabled
+                        : Icons.wifi_off),
+              ),
+              color: isConnected
+                  ? Colors.green.shade700  // Dark green icon when connected
+                  : (isAutoReconnecting
+                      ? Colors.orange.shade700  // Dark orange icon when reconnecting
+                      : Colors.grey),  // Grey icon when disconnected
+              onPressed: (isConnected || isAutoReconnecting) ? onDisconnect : onConnect,
+              tooltip: isConnected
+                  ? 'Trennen'
+                  : (isAutoReconnecting ? 'Auto-Verbindung aktiv - Tippen zum Stoppen' : 'Verbinden'),
+            ),
+          ),
+          // Delete button
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: onDelete,
+          ),
+        ],
       ),
 
       // Navigate to device detail on tap
@@ -133,7 +186,7 @@ class DeviceListItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Top row: icon and delete button
+            // Top row: icon, connect/disconnect button, and delete button
             Row(
               children: [
                 // Device icon
@@ -143,6 +196,41 @@ class DeviceListItem extends StatelessWidget {
                   size: 20,
                 ),
                 const Spacer(),
+                // Connect/Disconnect button
+                Container(
+                  decoration: BoxDecoration(
+                    color: isConnected
+                        ? Colors.green.withOpacity(0.2)  // Green background when connected
+                        : (isAutoReconnecting
+                            ? Colors.orange.withOpacity(0.2)  // Orange background when auto-reconnecting
+                            : null),  // No background when disconnected
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      isConnected
+                          ? (device.connectionType == ConnectionType.bluetooth
+                              ? Icons.bluetooth_connected
+                              : Icons.wifi)
+                          : (device.connectionType == ConnectionType.bluetooth
+                              ? Icons.bluetooth_disabled
+                              : Icons.wifi_off),
+                      size: 20,
+                    ),
+                    color: isConnected
+                        ? Colors.green.shade700  // Dark green icon when connected
+                        : (isAutoReconnecting
+                            ? Colors.orange.shade700  // Dark orange icon when reconnecting
+                            : Colors.grey),  // Grey icon when disconnected
+                    onPressed: (isConnected || isAutoReconnecting) ? onDisconnect : onConnect,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: isConnected
+                        ? 'Trennen'
+                        : (isAutoReconnecting ? 'Auto-Verbindung aktiv' : 'Verbinden'),
+                  ),
+                ),
+                const SizedBox(width: 4),
                 // Delete button (smaller)
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 20),

@@ -21,6 +21,14 @@ class TimeSeriesFieldConfig {
   /// Example: (value) => value / 10 to convert from 0.1V to V
   final num Function(num)? formatter;
 
+  /// Whether this field requires expert mode to be visible
+  /// Set to true for technical fields like voltage/current
+  final bool expertMode;
+
+  /// Hide this field when no historical data points exist (default: false)
+  /// When true, the chart card will not be rendered at all if values.isEmpty
+  final bool hideIfEmpty;
+
   /// Runtime storage for historical data points
   /// Only data from the last 5 minutes is kept
   final List<TimeSeriesDataPoint> values = [];
@@ -33,6 +41,8 @@ class TimeSeriesFieldConfig {
     required this.type,
     required this.mapping,
     this.formatter,
+    this.expertMode = false,
+    this.hideIfEmpty = false,
   });
 
   /// Get the unit string based on the field type

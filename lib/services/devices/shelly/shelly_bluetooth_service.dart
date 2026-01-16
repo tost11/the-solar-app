@@ -4,9 +4,13 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../../../constants/bluetooth_constants.dart';
+import '../../../constants/shelly_constants.dart';
 import '../../../models/devices/device_base.dart';
 import '../../../models/devices/manufacturers/shelly/shelly_bluetooth_device.dart';
 import '../../../utils/map_utils.dart';
+import '../bluetooth_device_service.dart';
+import '../../device_storage_service.dart';
+import 'shelly_auth_mixin.dart';
 import 'shelly_service.dart';
 import 'package:mutex/mutex.dart';
 
@@ -17,138 +21,61 @@ import 'package:mutex/mutex.dart';
 /// 2. Write JSON-RPC request to RW characteristic
 /// 3. Read response length (4 bytes) from read/notify characteristic
 /// 4. Read response data in chunks from RW characteristic
-class ShellyBluetoothService extends ShellyService {
-
-  // Bluetooth connection
-  final BluetoothDevice bluetoothDevice;
-
-  // Characteristics
-  BluetoothCharacteristic? _notifyCharacteristic;
-  BluetoothCharacteristic? _writeCharacteristic;
-  BluetoothCharacteristic? _rwCharacteristic;
-  BluetoothCharacteristic? _readNotifyCharacteristic;
-
-  // Protected getters
-  BluetoothCharacteristic? get notifyCharacteristic => _notifyCharacteristic;
-  BluetoothCharacteristic? get writeCharacteristic => _writeCharacteristic;
-  BluetoothCharacteristic? get rwCharacteristic => _rwCharacteristic;
-  BluetoothCharacteristic? get readNotifyCharacteristic => _readNotifyCharacteristic;
-  BluetoothDevice? get connectedDevice => bluetoothDevice;
+class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin implements ShellyService {
 
   final Mutex _commandMutex = Mutex();
-  bool _initialized = false;
-  final String _readDataCommand;
 
-  /// Constructor - initializes BLE connection
-  ShellyBluetoothService(DeviceBase device, BluetoothDevice bluetoothDevice, String readDataCommand)
-      : bluetoothDevice = bluetoothDevice,
-        _readDataCommand = readDataCommand,
-        super((device as ShellyBluetoothDeviceTemplate).fetchDataInterval, device) {
-    connect();
-  }
-
-  @override
-  bool isConnected() {
-    return bluetoothDevice.isConnected;
-  }
-
-  @override
-  bool isInitialized() {
-    return _initialized;
-  }
+  /// Constructor - initializes BLE connection with Shelly-specific UUIDs
+  ShellyBluetoothService(DeviceBase device, BluetoothDevice bluetoothDevice)
+      : super(
+          updateTime: (device as ShellyBluetoothDeviceTemplate).fetchDataInterval,
+          bluetoothDevice: bluetoothDevice,
+          baseDevice: device,
+          serviceUuid: SHELLY_GATT_SERVICE_UUID,
+          rwCharacteristicUuid: SHELLY_RW_UUID,
+          readNotifyCharacteristicUuid: SHELLY_READ_NOTIFY_UUID,
+          writeCharacteristicUuid: SHELLY_WRITE_UUID,
+        );
 
   /// Connect to the Bluetooth device
+  /// Reuses parent's connection logic and adds Shelly-specific initialization
   @override
-  Future<void> connect() async {
-    try {
-      device.emitStatus('Verbinde...');
-      debugPrint('\n═══════════════════════════════════════════════════════════════');
-      debugPrint('CONNECTING TO SHELLY DEVICE');
-      debugPrint('═══════════════════════════════════════════════════════════════');
-      debugPrint('Device: ${bluetoothDevice.platformName}');
-      debugPrint('ID: ${bluetoothDevice.remoteId}');
+  Future<bool> internalConnect() async {
+    // Use parent's Bluetooth connection logic
+    await super.internalConnect();
 
-      // Connect to device
-      await bluetoothDevice.connect(timeout: const Duration(seconds: 15));
-      debugPrint('Connected successfully!');
-
-      device.emitStatus('Verbunden');
-
-      // Perform device-specific connection optimization
-      await _onDeviceConnected();
-
-      // Discover services
-      debugPrint('\nDiscovering services...');
-      List<BluetoothService> services = await bluetoothDevice.discoverServices();
-      debugPrint('Found ${services.length} services');
-
-      // Find characteristics
-      await _findCharacteristics(services);
-
-      // Validate characteristics
-      if (!_validateCharacteristics()) {
-        throw Exception('Required characteristics not found');
-      }
-
-      // Setup characteristics (enable notifications, etc.)
-      await _setupCharacteristics();
-
-      // Initialize device
-      await _initializeDevice();
-
-    } catch (e) {
-      debugPrint('Connection error: $e');
-      device.emitError('Verbindungsfehler: $e');
-      device.emitStatus('Verbindung fehlgeschlagen');
-      rethrow;
-    }
+    // Shelly immediately fetches data after connection
+    return true;
   }
 
-  /// Disconnect from the Bluetooth device
+  /// Perform Shelly-specific connection optimizations
+  /// Called by parent after connection but before service discovery
   @override
-  Future<void> disconnect() async {
-    try {
-      await bluetoothDevice.disconnect();
-      await _onAfterDisconnect();
-      resetAuthCache();
-    } catch (e) {
-      debugPrint('Disconnect error: $e');
-    }
+  Future<void> onDeviceConnected() async {
+    await _onDeviceConnected();
   }
 
-  /// Find Shelly-specific characteristics across all services
-  Future<void> _findCharacteristics(List<BluetoothService> services) async {
-    debugPrint('\nSearching for Shelly characteristics...');
+  /// Device-specific Shelly Bluetooth disconnection logic
+  @override
+  Future<void> internalDisconnect() async {
+    // Call parent's Bluetooth disconnect logic (characteristics, lifecycle hooks)
+    await super.internalDisconnect();
 
-    for (var service in services) {
-      for (var characteristic in service.characteristics) {
-        String uuid = characteristic.uuid.toString().toUpperCase();
-
-        if (uuid.contains(SHELLY_RW_UUID.toUpperCase())) {
-          _rwCharacteristic = characteristic;
-          debugPrint('Found RW characteristic: $uuid');
-        }
-        if (uuid.contains(SHELLY_READ_NOTIFY_UUID.toUpperCase())) {
-          _readNotifyCharacteristic = characteristic;
-          debugPrint('Found Read/Notify characteristic: $uuid');
-        }
-        if (uuid.contains(SHELLY_WRITE_UUID.toUpperCase())) {
-          _writeCharacteristic = characteristic;
-          debugPrint('Found Write characteristic: $uuid');
-        }
-      }
-    }
+    // Clear Shelly-specific auth cache
+    resetAuthCache();
   }
 
-  /// Validate that all required characteristics were found
-  bool _validateCharacteristics() {
+  /// Validate that all required Shelly characteristics were found by parent
+  @override
+  bool validateCharacteristics() {
     return rwCharacteristic != null &&
         readNotifyCharacteristic != null &&
         writeCharacteristic != null;
   }
 
-  /// Setup characteristics (enable notifications)
-  Future<void> _setupCharacteristics() async {
+  /// Setup Shelly characteristics (enable notifications)
+  @override
+  Future<void> setupCharacteristics() async {
     debugPrint('\nEnabling notifications...');
     try {
       await readNotifyCharacteristic!.setNotifyValue(true);
@@ -158,15 +85,10 @@ class ShellyBluetoothService extends ShellyService {
     }
   }
 
-  /// Initialize the device (request device info, etc.)
-  Future<void> _initializeDevice() async {
-    device.emitStatus('Bereit');
-    debugPrint('Ready to send commands\n');
-
-    // Request device info
-    await _requestDeviceInfo();
-
-    _initialized = true;
+  @override
+  Future<bool> internalInitializeDevice() async {
+    await sendCommand(ShellyCommands.getDeviceInfo, {});
+    return true;
   }
 
   /// Perform device-specific connection optimization
@@ -192,13 +114,6 @@ class ShellyBluetoothService extends ShellyService {
     } catch (e) {
       debugPrint('Connection priority request failed: $e');
     }
-  }
-
-  /// Clean up after disconnect
-  Future<void> _onAfterDisconnect() async {
-    device.data = {};
-    device.emitData(device.data);
-    _initialized = false;
   }
 
   /// Send a JSON-RPC command to the device via BLE
@@ -326,7 +241,10 @@ class ShellyBluetoothService extends ShellyService {
         returnResponse = MapUtils.OM(response, ["result"]) as Map<String, dynamic>?;
       } catch (e) {
         debugPrint('Error sending command $method: $e');
-        device.emitError('Befehl fehlgeschlagen: $e');
+        if(method != ShellyCommands.getStatus && method != ShellyCommands.getDeviceInfo) {
+          //ony when command from user show inf forderground
+          device.emitError('Befehl fehlgeschlagen: $e');
+        }
         rethrow;
       }
     });
@@ -336,20 +254,8 @@ class ShellyBluetoothService extends ShellyService {
 
   /// Fetch data from the device (called periodically)
   @override
-  void fetchData() {
-    sendCommand(
-      _readDataCommand,
-      _readDataCommand == "Shelly.GetStatus" ? {} : {"id": 0},
-    );
-  }
-
-  // Private methods
-
-  /// Request device information
-  Future<void> _requestDeviceInfo() async {
-    debugPrint('\nRequesting device info...');
-    device.emitStatus('Lese Geräteinfo...');
-    await sendCommand('Shelly.GetDeviceInfo', {});
+  Future<void> internalFetchData() async {
+    await sendCommand(ShellyCommands.getStatus, {});
   }
 
   /// Process response from device
@@ -366,8 +272,7 @@ class ShellyBluetoothService extends ShellyService {
 
     if (response.containsKey('error')) {
       debugPrint('Error in response: ${response['error']}');
-      device.emitError('Fehler: ${response['error']}');
-      return;
+      throw Exception("Error from shelly received: ${response['error']}");
     }
 
     var result = response['result'];
@@ -376,9 +281,9 @@ class ShellyBluetoothService extends ShellyService {
       return;
     }
 
-    if (method == 'Shelly.GetDeviceInfo') {
+    if (method == ShellyCommands.getDeviceInfo) {
       _handleDeviceInfo(result);
-    } else if (method == _readDataCommand) {
+    } else if (method == ShellyCommands.getStatus) {
       _handleData(result);
     } else {
       debugPrint('Unhandled method response: $method');
@@ -401,14 +306,96 @@ class ShellyBluetoothService extends ShellyService {
     device.data["config"] = info;
     device.emitDeviceInfo(info);
 
+    // Update device name and model if we got real model info
+    if (deviceModel != null && deviceModel.isNotEmpty) {
+      String newName = "Shelly $deviceModel";
+
+      // Only save if name or model actually changed (avoid unnecessary writes)
+      if (device.name != newName || device.deviceModel != deviceModel) {
+        device.deviceModel = deviceModel;
+        device.name = newName;
+        debugPrint('Updated device name from "${device.name}" to "$newName"');
+
+        // Save updated device to storage
+        DeviceStorageService().saveDevice(device);
+      } else {
+        debugPrint('Device name already correct: ${device.name}');
+      }
+    }
+
     device.emitStatus('Geräteinfo erhalten');
   }
 
   /// Handle energy monitoring data response
   void _handleData(Map<String, dynamic> data) {
+    // Detect modules in response
+    final detectedModules = _detectModules(data);
+
+    // Update cached modules and regenerate fields if modules changed
+    final currentModules = device.data['_detectedModules'];
+    if (currentModules == null || !_mapsEqual(currentModules as Map?, detectedModules)) {
+      device.data['_detectedModules'] = detectedModules;
+      debugPrint('Detected Shelly modules: $detectedModules');
+
+      // Regenerate dynamic fields, controls, and time series based on new modules
+      _updateDeviceElements();
+    }
+
     device.data["data"] = data;
     device.emitData(data);
     device.emitStatus('Daten empfangen');
+  }
+
+  /// Update device UI elements after module detection
+  void _updateDeviceElements() {
+    final impl = (device as dynamic).deviceImpl;
+    // dataFields is now a computed getter - no need to update
+    device.controlItems = impl.getControlItems();
+    device.timeSeriesFields = impl.getTimeSeriesFields();
+  }
+
+  /// Detect Shelly modules in the response data
+  Map<String, List<int>> _detectModules(Map<String, dynamic> data) {
+    final modules = <String, List<int>>{};
+    final regex = RegExp(r'^(em|em1|em1data|emdata|pm1|switch|cover|input|light|temperature):(\d+)$');
+
+    for (final key in data.keys) {
+      final match = regex.firstMatch(key);
+      if (match != null) {
+        final moduleType = match.group(1)!;
+        final instanceId = int.parse(match.group(2)!);
+        modules.putIfAbsent(moduleType, () => []).add(instanceId);
+      }
+    }
+
+    // Sort instance IDs
+    modules.forEach((key, value) => value.sort());
+
+    return modules;
+  }
+
+  /// Compare two maps for equality (deep comparison of structure)
+  bool _mapsEqual(Map<dynamic, dynamic>? map1, Map<dynamic, dynamic>? map2) {
+    if (map1 == null && map2 == null) return true;
+    if (map1 == null || map2 == null) return false;
+    if (map1.length != map2.length) return false;
+
+    for (final key in map1.keys) {
+      if (!map2.containsKey(key)) return false;
+      final val1 = map1[key];
+      final val2 = map2[key];
+
+      if (val1 is List && val2 is List) {
+        if (val1.length != val2.length) return false;
+        for (int i = 0; i < val1.length; i++) {
+          if (val1[i] != val2[i]) return false;
+        }
+      } else if (val1 != val2) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /// Handle authentication challenge (401 error) and retry request

@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:the_solar_app/services/devices/base_device_service.dart';
 import 'device_base.dart';
 import 'device_implementation.dart';
+import 'generic_rendering/device_data_field.dart';
 import 'mixins/device_wifi_mixin.dart';
 
 /// Generic template for WiFi devices
@@ -80,7 +81,6 @@ abstract class GenericWiFiDevice<TService extends BaseDeviceService, TImpl exten
     connectionType: ConnectionType.wifi,
     menuItems: deviceImpl.getMenuItems(),
     controlItems: deviceImpl.getControlItems(),
-    dataFields: deviceImpl.getDataFields(),
     customSections: deviceImpl.getCustomSections(),
     categoryConfigs: deviceImpl.getCategoryConfigs(),
     timeSeriesFields: deviceImpl.getTimeSeriesFields(),
@@ -89,6 +89,10 @@ abstract class GenericWiFiDevice<TService extends BaseDeviceService, TImpl exten
     netHostname = hostname;
     netPort = port;
   }
+
+  /// Dynamically compute data fields based on current device state
+  @override
+  List<DeviceDataField> get dataFields => deviceImpl.getDataFields();
 
   /// Protected named constructor for JSON deserialization
   ///
@@ -128,8 +132,8 @@ abstract class GenericWiFiDevice<TService extends BaseDeviceService, TImpl exten
   /// Automatically handles service cleanup before calling the
   /// device-specific createService() method.
   @override
-  void setUpServiceConnection(BluetoothDevice? device) {
-    removeServiceConnection();
+  Future<void> setUpServiceConnection(BluetoothDevice? device) async {
+    await removeServiceConnection();
     connectionService = createService();
   }
 

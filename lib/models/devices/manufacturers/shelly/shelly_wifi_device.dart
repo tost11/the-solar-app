@@ -18,7 +18,6 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
 
   static const Duration DEFAULT_FETCH_INTERVAL = Duration(seconds: 5);
 
-  late String fetchDataCommand;
   String? deviceScr;
 
   ShellyWifiDeviceTemplate({
@@ -32,7 +31,6 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
     super.hostname,
     super.port = 80,
   }) {
-    fetchDataCommand = deviceImpl.getFetchCommand();
     fetchDataInterval = DEFAULT_FETCH_INTERVAL;
     fixedUserName = true;
     authUsername = 'admin';
@@ -50,16 +48,14 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
   ShellyWifiDeviceTemplate.fromJsonFields({
     required Map<String, dynamic> json,
     required ShellyDeviceBaseImplementation deviceImpl,
-  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl) {
-    fetchDataCommand = deviceImpl.getFetchCommand();
-  }
+  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl);
 
   @override
   String get deviceType => DEVICE_MANUFACTURER_SHELLY;
 
   @override
   ShellyWifiService createService() {
-    return ShellyWifiService(this, fetchDataCommand);
+    return ShellyWifiService(this);
   }
 
   /// Computes HA1 hash for authentication: SHA256("user:realm:password")
@@ -137,19 +133,26 @@ class ShellyWifiDevice extends ShellyWifiDeviceTemplate {
     super.ipAddress,
     super.port,
     super.hostname,
-  }) : super(deviceImpl: ShellyDeviceBaseImplementation());
+  }) : super(deviceImpl: ShellyDeviceBaseImplementation()) {
+    // Set device reference in implementation for dynamic field generation
+    deviceImpl.setDevice(this);
+  }
 
   /// Named constructor for JSON deserialization
   ShellyWifiDevice.fromJsonFields({
     required Map<String, dynamic> json,
     required ShellyDeviceBaseImplementation deviceImpl,
-  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl);
+  }) : super.fromJsonFields(json: json, deviceImpl: deviceImpl) {
+    // Set device reference in implementation for dynamic field generation
+    deviceImpl.setDevice(this);
+  }
 
   /// Factory constructor from JSON
   factory ShellyWifiDevice.fromJson(Map<String, dynamic> json) {
+    final impl = ShellyDeviceBaseImplementation();
     final device = ShellyWifiDevice.fromJsonFields(
       json: json,
-      deviceImpl: ShellyDeviceBaseImplementation(),
+      deviceImpl: impl,
     );
     device.deserializeWiFi(json); // Handles both WiFi and Auth
     device.fetchDataIntervalFromJson(json, ShellyWifiDeviceTemplate.DEFAULT_FETCH_INTERVAL);

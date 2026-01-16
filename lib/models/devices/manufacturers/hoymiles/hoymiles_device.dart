@@ -22,7 +22,6 @@ abstract class HoymilesDevice extends DeviceBase<HoymilesWifiService> with Devic
     required super.lastSeen,
     required super.deviceSn,
     required super.connectionType,
-    required super.dataFields,
     required super.menuItems,
     super.customSections = const [],
     super.categoryConfigs = const [],
@@ -99,8 +98,8 @@ abstract class HoymilesDevice extends DeviceBase<HoymilesWifiService> with Devic
   }
 
   @override
-  void setUpServiceConnection(BluetoothDevice? device) {
-    removeServiceConnection();
+  Future<void> setUpServiceConnection(BluetoothDevice? device) async {
+    await removeServiceConnection();
     connectionService = HoymilesWifiService(this);
   }
 }

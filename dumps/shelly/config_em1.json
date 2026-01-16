@@ -1,0 +1,18 @@
+{
+  "id": "shelly-emg3-aabbccddeeff",
+  "mac": "AABBCCDDEEFF",
+  "model": "S3EM-002CXCEU",
+  "gen": 3,
+  "fw_id": "2024.11.0",
+  "ver": "1.4.3",
+  "app": "EM",
+  "auth_en": false,
+  "auth_domain": null,
+  "profile": "single",
+  "name": "Shelly EM Gen3",
+  "manufacturer": "Shelly",
+  "num_outputs": 0,
+  "num_meters": 2,
+  "timezone": "Europe/Berlin",
+  "country": "DE"
+}

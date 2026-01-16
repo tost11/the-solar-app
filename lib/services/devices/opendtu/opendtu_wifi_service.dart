@@ -13,6 +13,9 @@ import '../../../utils/exception_utils.dart';
 import 'opendtu_websocket_connection.dart';
 
 class OpenDTUWifiService extends BaseDeviceService {
+  // Connection timeout - if no data received within this time, consider disconnected
+  static const int CONNECTION_TIMEOUT_MS = 60000;  // 60 seconds (1 minute)
+
   // WebSocket connection for real-time data
   OpenDtuWebSocketConnection? _websocketConnection;
 
@@ -73,8 +76,6 @@ class OpenDTUWifiService extends BaseDeviceService {
     return null;
   }
 
-  int lastSeen = 0;
-  bool fetchDataEnabled = true;
   late WiFiOpenDTUDevice wifiDevice;
 
   OpenDTUWifiService(DeviceBase device):
@@ -84,8 +85,6 @@ class OpenDTUWifiService extends BaseDeviceService {
     _websocketConnection = OpenDtuWebSocketConnection(
       onDataReceived: _handleWebSocketData,
     );
-    // Fetch first data
-    fetchData();
   }
 
   /// Handle WebSocket data callback
@@ -95,9 +94,8 @@ class OpenDTUWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> disconnect() async {
-    fetchDataEnabled = false;
-    // Disconnect WebSocket (allows reconnection)
+  Future<void> internalDisconnect() async {
+    // Disconnect WebSocket connection
     await _websocketConnection?.disconnect();
   }
 
@@ -114,19 +112,21 @@ class OpenDTUWifiService extends BaseDeviceService {
   }
 
   @override
-  Future<void> connect() async {
+  Future<bool> internalConnect() async {
     device.emitStatus("Verbindungsaufbau...");
 
     bool httpConnected = false;
     bool wsConnected = false;
 
-    //this throws excptin of not working
+    //this throws exception if not working
     await wifiDevice.connectIpOrHostname((ip,port) async {
       await fetchSystemInfo();
       httpConnected = true;
     });
 
-    //todo maby retry if http not working
+    isInitialized = true;
+
+    //todo maybe retry if http not working
     try {
       wsConnected = await _websocketConnection?.connect(
         wifiDevice.getCurrenHostOrIp(),
@@ -151,7 +151,8 @@ class OpenDTUWifiService extends BaseDeviceService {
     device.emitStatus("Verbunden ($connectedWith)");
     device.data["data"] = {};
     device.emitData({});
-    resetTimer();
+
+    return true;//directly fetch data
   }
 
   /// Build HTTP headers with optional authentication
@@ -172,9 +173,7 @@ class OpenDTUWifiService extends BaseDeviceService {
   }
 
   @override
-  void fetchData() async {
-    if (!fetchDataEnabled) return;
-
+  Future<void> internalFetchData() async {
     String connectedWith = "";
 
     // 1. Check WebSocket health (data comes via callback)
@@ -184,52 +183,40 @@ class OpenDTUWifiService extends BaseDeviceService {
 
     // 2. HTTP configuration data (always fetch for system info)
     try {
-      final sysInfo = await fetchSystemInfo();
-      if (sysInfo != null) {
-        device.data["config"] = sysInfo;
-        device.emitDeviceInfo(sysInfo);
-        if (connectedWith.isNotEmpty) {
-          connectedWith += ",";
-        }
-        connectedWith += "http";
-      }
+      await fetchSystemInfo();
     } catch (e) {
       debugPrint('Error fetching OpenDTU HTTP data: $e');
     }
 
-    // 3. Emit connection status
+    // 3. Emit custom connection status (shows connection types)
     if (connectedWith.isNotEmpty) {
       device.emitStatus('Verbunden ($connectedWith)');
     } else {
-      device.emitStatus('Nicht Verbunden');
+      throw Exception('Nicht Verbunden');
     }
   }
 
   @override
   bool isConnected() {
     // Consider connected if either HTTP or WebSocket is healthy
-    final httpHealthy = (DateTime.now().millisecondsSinceEpoch - lastSeen) < 1000 * 60;
+    final httpHealthy = (DateTime.now().millisecondsSinceEpoch - lastSeen) < CONNECTION_TIMEOUT_MS;
     final wsHealthy = _websocketConnection?.isHealthy ?? false;
     return httpHealthy || wsHealthy;
-  }
-
-  @override
-  bool isInitialized() {
-    return device.data["config"] != null;
   }
 
   /// Fetch system information from OpenDTU device via HTTP
   ///
   /// Returns the system info data without emitting (fetchData() handles emission)
   Future<Map<String, dynamic>?> fetchSystemInfo() async {
-
     try {
-
       var data = await sendGetCommand("/api/system/status");
       debugPrint("OpenDTU received HTTP data: $data");
 
-      lastSeen = DateTime.now().millisecondsSinceEpoch;
-      return data;
+      if (data == null) {
+        throw Exception("System info from OpenDTU null when fetching");
+      }
+      device.data["config"] = data;
+      device.emitDeviceInfo(data);
     } catch (e) {
       debugPrint('Error fetching system info: $e');
       rethrow;

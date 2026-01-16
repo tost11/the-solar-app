@@ -1,0 +1,83 @@
+{
+  "ble": {},
+  "bthome": {
+    "errors": [
+      "bluetooth_disabled"
+    ]
+  },
+  "cloud": {
+    "connected": true
+  },
+  "mqtt": {
+    "connected": false
+  },
+  "pm1:0": {
+    "id": 0,
+    "voltage": 229.8,
+    "current": 2.193,
+    "apower": 501.1,
+    "freq": 50.0,
+    "aenergy": {
+      "total": 2232980.170,
+      "by_minute": [
+        8326.225,
+        8112.732,
+        8326.225
+      ],
+      "minute_ts": 1768254360
+    },
+    "ret_aenergy": {
+      "total": 0.000,
+      "by_minute": [
+        0.000,
+        0.000,
+        0.000
+      ],
+      "minute_ts": 1768254360
+    }
+  },
+  "script:1": {
+    "id": 1,
+    "running": false,
+    "mem_free": 25200,
+    "cpu": 0
+  },
+  "sys": {
+    "mac": "DDEEFF112233",
+    "restart_required": false,
+    "time": "22:46",
+    "unixtime": 1768254404,
+    "last_sync_ts": 1768253504,
+    "uptime": 2167877,
+    "ram_size": 268460,
+    "ram_free": 137516,
+    "ram_min_free": 110896,
+    "fs_size": 1048576,
+    "fs_free": 630784,
+    "cfg_rev": 47,
+    "kvs_rev": 0,
+    "schedule_rev": 2,
+    "webhook_rev": 0,
+    "btrelay_rev": 2,
+    "available_updates": {
+      "beta": {
+        "version": "1.7.4-beta2"
+      }
+    },
+    "reset_reason": 3,
+    "utc_offset": 3600
+  },
+  "wifi": {
+    "sta_ip": "192.168.1.104",
+    "status": "got ip",
+    "ssid": "MyNetwork",
+    "bssid": "dd:ee:ff:11:22:33",
+    "rssi": -87,
+    "sta_ip6": [
+      "fe80::1234:5678:abcd:ef04"
+    ]
+  },
+  "ws": {
+    "connected": false
+  }
+}
