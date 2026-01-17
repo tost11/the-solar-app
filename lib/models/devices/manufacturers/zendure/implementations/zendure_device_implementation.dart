@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
 import 'package:the_solar_app/screens/configuration/battery_soc_screen.dart';
+import 'package:the_solar_app/screens/configuration/general_settings_screen.dart';
 import 'package:the_solar_app/screens/configuration/power_limit_screen.dart';
 import 'package:the_solar_app/screens/configuration/power_screen.dart';
 import 'package:the_solar_app/utils/globals.dart';
@@ -13,6 +14,7 @@ import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
+import '../../../generic_rendering/general_setting_item.dart';
 import '../../../time_series_field_config.dart';
 
 /// Shared implementation for all Zendure devices (Bluetooth and WiFi)
@@ -164,6 +166,26 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MessageUtils.showError(
                 context, 'Konnte Gerätedaten nicht abrufen: $e');
           }
+        },
+      ),
+      DeviceMenuItem(
+        name: 'Allgemeine Einstellungen',
+        subtitle: 'Lampe und Notstromsteckdose',
+        icon: Icons.settings,
+        iconColor: Colors.purple,
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
+          final settings = getGeneralSettings(device.data);
+
+          await NavigationUtils.pushConfigurationScreen(
+            context,
+            GeneralSettingsScreen(
+              device: device,
+              settings: settings,
+            ),
+          );
         },
       ),
     ];
@@ -465,6 +487,57 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   }
 
   @override
+  List<GeneralSettingItem> getGeneralSettings(Map<String, dynamic> data) {
+    // Extract current lamp switch state (0=off, 1=on)
+    final lampState = MapUtils.OM(data, ['data', 'properties', 'lampSwitch']) as int? ?? 0;
+    final lampStatus = lampState == 1;
+
+    // Extract current grid off mode state (0=normal, 1=power-saving, 2=off)
+    final gridOffMode = MapUtils.OM(data, ['data', 'properties', 'gridOffMode']) as int? ?? 0;
+
+    return [
+      // Existing lamp toggle
+      GeneralSettingItem(
+        name: 'Lampe',
+        commandName: GENERAL_SETTINGS_LAMP_SWITCH,
+        type: SettingType.toggle,
+        currentStatus: lampStatus,
+        popUpOnChange: false,
+        description: 'Gerätebeleuchtung ein- oder ausschalten',
+        icon: Icons.lightbulb,
+      ),
+
+      // NEW: Grid power supply dropdown
+      GeneralSettingItem(
+        name: 'Notstromversorgung',
+        commandName: GENERAL_SETTINGS_GRID_OFF_MODE,
+        type: SettingType.dropdown,
+        currentValue: gridOffMode,
+        options: const [
+          SettingOption(
+            label: 'Ein - Normalmodus',
+            value: 0,
+            description: 'Normale Leistung',
+          ),
+          SettingOption(
+            label: 'Ein - Energiesparmodus',
+            value: 1,
+            description: 'Reduzierte Leistung',
+          ),
+          SettingOption(
+            label: 'Aus',
+            value: 2,
+            description: 'Notstromversorgung deaktiviert',
+          ),
+        ],
+        popUpOnChange: false,
+        description: 'Netzstrom-Modus für das Gerät',
+        icon: Icons.power,
+      ),
+    ];
+  }
+
+  @override
   List<DeviceCustomSection> getCustomSections() {
     return [
       DeviceCustomSection(
@@ -580,6 +653,24 @@ class ZendureDeviceImplementation extends DeviceImplementation {
       }
 
       await connectionService.sendCommand(props);
+    } else if (command == COMMAND_SET_GENERAL_SETTING) {
+      // Handle general settings (toggle and dropdown types)
+      final settingName = params["name"] as String?;
+      final settingValue = params["value"]; // Can be bool or int
+
+      if (settingName == GENERAL_SETTINGS_LAMP_SWITCH) {
+        // Lamp switch: boolean → 0/1
+        var props = <String, dynamic>{};
+        props["lampSwitch"] = settingValue == true ? 1 : 0;
+        await connectionService.sendCommand(props);
+      } else if (settingName == GENERAL_SETTINGS_GRID_OFF_MODE) {
+        // Grid off mode: integer value (0, 1, or 2)
+        var props = <String, dynamic>{};
+        props["gridOffMode"] = settingValue as int;
+        await connectionService.sendCommand(props);
+      } else {
+        throw UnimplementedError('General setting not implemented: $settingName');
+      }
     } /*else if (command == COMMAND_SET_MAIN_POWER) { //TODO check if working
       var props = <String, dynamic>{};
 

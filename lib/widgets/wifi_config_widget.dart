@@ -7,6 +7,9 @@ class WiFiConfigWidget extends StatefulWidget {
   final bool isSending;
   final String? initialSsid;
   final String? initialPassword;
+  final bool showButton;
+  final TextEditingController? ssidController;
+  final TextEditingController? passwordController;
 
   const WiFiConfigWidget({
     super.key,
@@ -15,6 +18,9 @@ class WiFiConfigWidget extends StatefulWidget {
     required this.isSending,
     this.initialSsid,
     this.initialPassword,
+    this.showButton = true,
+    this.ssidController,
+    this.passwordController,
   });
 
   @override
@@ -23,23 +29,35 @@ class WiFiConfigWidget extends StatefulWidget {
 
 class _WiFiConfigWidgetState extends State<WiFiConfigWidget> {
   late TextEditingController _ssidController;
-  late TextEditingController _passwordController = TextEditingController();
+  late TextEditingController _passwordController;
   TextEditingController? _autocompleteController;
   bool _isScanningWifi = false;
   bool _listenerAdded = false;
   bool _obscurePassword = true;
+  bool _shouldDisposeControllers = false;
 
   @override
   void initState() {
     super.initState();
-    _ssidController = TextEditingController(text: widget.initialSsid ?? '');
-    _passwordController = TextEditingController(text: widget.initialPassword ?? '');
+    // Use external controllers if provided, otherwise create internal ones
+    if (widget.ssidController != null) {
+      _ssidController = widget.ssidController!;
+      _passwordController = widget.passwordController!;
+      _shouldDisposeControllers = false;
+    } else {
+      _ssidController = TextEditingController(text: widget.initialSsid ?? '');
+      _passwordController = TextEditingController(text: widget.initialPassword ?? '');
+      _shouldDisposeControllers = true;
+    }
   }
 
   @override
   void dispose() {
-    _ssidController.dispose();
-    _passwordController.dispose();
+    // Only dispose if we created the controllers internally
+    if (_shouldDisposeControllers) {
+      _ssidController.dispose();
+      _passwordController.dispose();
+    }
     super.dispose();
   }
 
@@ -183,19 +201,20 @@ class _WiFiConfigWidgetState extends State<WiFiConfigWidget> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: widget.isSending ? null : _sendConfiguration,
-            icon: Icon(widget.isSending ? Icons.hourglass_empty : Icons.send),
-            label: Text(widget.isSending ? 'Sende...' : 'WiFi konfigurieren'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade100,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+        if (widget.showButton) const SizedBox(height: 8),
+        if (widget.showButton)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: widget.isSending ? null : _sendConfiguration,
+              icon: Icon(widget.isSending ? Icons.hourglass_empty : Icons.send),
+              label: Text(widget.isSending ? 'Sende...' : 'WiFi konfigurieren'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade100,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
             ),
           ),
-        ),
       ],
     );
   }

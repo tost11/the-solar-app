@@ -48,35 +48,32 @@ abstract class BaseDeviceService {
     /// Template method for disconnection - handles standard disconnect flow
     /// Subclasses should override internalDisconnect() for device-specific logic
     Future<void> disconnect() async {
+      print('[${device.connectionType}][${device.name}] Disconnecting...');
+
+      // Prevent auto-reconnect
+      lastSeen = 0;
+      autoReconnect = false;
+
       try {
-        // Reset connection state (always first)
-        lastSeen = 0;
-        autoReconnect = false;
-
-        // Emit disconnecting status
-        device.emitStatus('Trennen...');
-
         // Clear all device data (forces fresh data on reconnect)
         device.data.clear();
 
-        // Call device-specific disconnect logic
+        // Run service-specific disconnect logic
         await internalDisconnect();
 
         isInitialized = false;
         resetTimer();
 
-        // Emit final disconnected status
-        device.emitStatus('Getrennt');
-
-        debugPrint('[${device.name}] Disconnected successfully');
+        // Emit status AFTER disconnect completes
+        final isDeviceConnected = isConnected();
+        if (!isDeviceConnected) {
+          device.emitStatus("Getrennt");
+          print('[${device.connectionType}][${device.name}] Successfully disconnected.');
+        }
       } catch (e) {
-        debugPrint('[${device.name}] Disconnect error: $e');
-        device.emitErrorWithFlag('Trennung fehlgeschlagen: $e', true);
-
-        // Still mark as disconnected even on error
-        lastSeen = 0;
-        autoReconnect = false;
-        device.emitStatus('Getrennt (mit Fehler)');
+        print('[${device.connectionType}][${device.name}] Error during disconnect: $e');
+        device.emitStatus("Fehler beim Trennen");
+        rethrow;
       }
     }
 

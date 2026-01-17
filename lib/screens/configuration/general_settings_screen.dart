@@ -27,7 +27,7 @@ class GeneralSettingsScreen extends BaseCommandScreen {
 
 class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
   // Track local state of each setting
-  late Map<String, bool> _settingsState;
+  late Map<String, dynamic> _settingsState;
 
   // Track which settings are currently being changed
   final Set<String> _changingSettings = {};
@@ -36,12 +36,17 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
   void initState() {
     super.initState();
     // Initialize local state from provided settings
-    _settingsState = {
-      for (var setting in widget.settings) setting.name: setting.currentStatus
-    };
+    _settingsState = {};
+    for (final setting in widget.settings) {
+      if (setting.type == SettingType.toggle) {
+        _settingsState[setting.commandName] = setting.currentStatus ?? false;
+      } else if (setting.type == SettingType.dropdown) {
+        _settingsState[setting.commandName] = setting.currentValue;
+      }
+    }
   }
 
-  Future<void> _toggleSetting(GeneralSettingItem setting, bool newValue) async {
+  Future<void> _handleSettingChange(GeneralSettingItem setting, dynamic newValue) async {
     // Check if confirmation is needed
     if (setting.popUpOnChange) {
       final confirmed = await _showConfirmationDialog(setting, newValue);
@@ -68,10 +73,12 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
 
           // Update local state
           setState(() {
-            _settingsState[setting.name] = newValue;
+            _settingsState[setting.commandName] = newValue;
           });
         },
-        onSuccess: (_) => MessageUtils.showSuccess(context, '${setting.name} wurde ${newValue ? "aktiviert" : "deaktiviert"}',
+        onSuccess: (_) => MessageUtils.showSuccess(
+          context,
+          '${setting.name} wurde aktualisiert',
         ),
         onError: (e) => MessageUtils.showError(
           context,
@@ -88,11 +95,11 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
   }
 
   Future<bool?> _showConfirmationDialog(
-      GeneralSettingItem setting, bool newValue) async {
+      GeneralSettingItem setting, dynamic newValue) async {
     final title = setting.confirmationTitle ??
-        '${setting.name} ${newValue ? "aktivieren" : "deaktivieren"}?';
+        '${setting.name} ${newValue == true ? "aktivieren" : "deaktivieren"}?';
     final message = setting.confirmationMessage ??
-        'Möchten Sie ${setting.name} wirklich ${newValue ? "aktivieren" : "deaktivieren"}?';
+        'Möchten Sie ${setting.name} wirklich ${newValue == true ? "aktivieren" : "deaktivieren"}?';
 
     return showDialog<bool>(
       context: context,
@@ -114,8 +121,14 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
   }
 
   Widget _buildSettingCard(GeneralSettingItem setting) {
-    final currentValue = _settingsState[setting.name] ?? setting.currentStatus;
+    final currentValue = _settingsState[setting.commandName];
     final isChanging = _changingSettings.contains(setting.name);
+
+    // Determine icon color based on setting type
+    Color iconColor = Colors.grey;
+    if (setting.type == SettingType.toggle && currentValue == true) {
+      iconColor = Colors.green;
+    }
 
     return Card(
       child: Padding(
@@ -128,7 +141,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                 if (setting.icon != null) ...[
                   Icon(
                     setting.icon,
-                    color: currentValue ? Colors.green : Colors.grey,
+                    color: iconColor,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -141,19 +154,53 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                         ),
                   ),
                 ),
-                if (isChanging)
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else
-                  Switch(
-                    value: currentValue,
-                    onChanged: (value) => _toggleSetting(setting, value),
-                  ),
+                // Only show toggle switches in trailing position
+                if (setting.type == SettingType.toggle) ...[
+                  if (isChanging)
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    Switch(
+                      value: currentValue as bool? ?? false,
+                      onChanged: (newValue) => _handleSettingChange(setting, newValue),
+                    ),
+                ],
               ],
             ),
+            // Show dropdown below title if it's a dropdown type
+            if (setting.type == SettingType.dropdown) ...[
+              const SizedBox(height: 12),
+              if (isChanging)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              else
+                DropdownButtonFormField<dynamic>(
+                  value: currentValue,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  isExpanded: true,
+                  items: setting.options?.map((option) {
+                    return DropdownMenuItem<dynamic>(
+                      value: option.value,
+                      child: Text(option.label),
+                    );
+                  }).toList() ?? [],
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      _handleSettingChange(setting, newValue);
+                    }
+                  },
+                ),
+            ],
             if (setting.description != null) ...[
               const SizedBox(height: 8),
               Text(

@@ -727,15 +727,6 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
     if (command == COMMAND_FETCH_DATA) {
       return await service.fetchStatus();
-    } else if (command == COMMAND_SET_LIMIT) {
-      // Requires device state access for data updates
-      throw UnimplementedError('COMMAND_SET_LIMIT must be handled in device class');
-    } else if (command == COMMAND_SET_MAIN_POWER) {
-      // Requires device state access for data updates
-      throw UnimplementedError('COMMAND_SET_MAIN_POWER must be handled in device class');
-    } else if (command == COMMAND_SET_GENERAL_SETTING) {
-      // Requires device state access for data updates
-      throw UnimplementedError('COMMAND_SET_GENERAL_SETTING must be handled in device class');
     } else if (command == COMMAND_FETCH_AP_CONFIG) {
       // Fetch Access Point configuration from wirepoint.html (SSID, auth, encryption, etc.)
       final apConfig = await service.fetchConfig('wirepoint');
@@ -752,12 +743,6 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
     } else if (command == COMMAND_FETCH_WIFI_CONFIG) {
       // Fetch WiFi/STA configuration from wireless.html
       return await service.fetchConfig('wireless');
-    } else if (command == COMMAND_SET_WIFI) {
-      // Requires device context to call sendCommand(COMMAND_RESTART)
-      throw UnimplementedError('COMMAND_SET_WIFI must be handled in device class');
-    } else if (command == COMMAND_SET_AP_CONFIG) {
-      // Requires device context to call sendCommand(COMMAND_RESTART)
-      throw UnimplementedError('COMMAND_SET_AP_CONFIG must be handled in device class');
     } else if (command == COMMAND_RESTART) {
       return await service.sendCommand(
         'up_succ',

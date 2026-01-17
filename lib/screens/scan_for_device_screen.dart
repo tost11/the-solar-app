@@ -153,7 +153,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
       // New device: use advertised name as temporary name
       String advertisedName = device.advName;
-      String deviceName = advertisedName.isNotEmpty ? advertisedName : "$type Device";
+      String deviceName = advertisedName.isNotEmpty ? "Zendure $advertisedName" : "Zendure Device";
 
       // Create device with temporary name
       // Model will be updated later when device info is fetched

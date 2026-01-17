@@ -35,3 +35,5 @@ const String GENERAL_SETTINGS_DISCOVERABLE = "discoverable";
 const String GENERAL_SETTINGS_DEBUG_MQTT = "debug_mqtt";
 const String GENERAL_SETTINGS_DEBUG_WEBSOCKET = "debug_websocket";
 const String GENERAL_SETTINGS_INVERTER_POWER = "inverter_power";
+const String GENERAL_SETTINGS_LAMP_SWITCH = "lamp_switch";
+const String GENERAL_SETTINGS_GRID_OFF_MODE = "grid_off_mode";

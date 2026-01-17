@@ -119,7 +119,7 @@ class DeviceConnectionUtils {
     bool showMessages = true,
   }) async {
     try {
-      device.getServiceConnection()?.disconnect();
+      await device.getServiceConnection()?.disconnect();
       if (showMessages && context.mounted) {
         MessageUtils.showSuccess(context, '${device.name} getrennt');
       }

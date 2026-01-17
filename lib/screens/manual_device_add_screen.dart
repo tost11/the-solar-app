@@ -5,6 +5,7 @@ import 'package:lan_scanner/lan_scanner.dart';
 import 'package:the_solar_app/models/devices/mixins/additional_port_mixin.dart';
 import 'package:the_solar_app/models/devices/mixins/device_authentication_mixin.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import '../models/authentication_mode.dart';
 import '../models/device.dart';
 import '../models/network_device.dart';
 import '../models/manufacturer_detector_info.dart';
@@ -83,13 +84,13 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
         }
 
         // Update auth fields based on requirements
-        if (_currentDetectorInfo!.requiresUsername) {
+        if (_currentDetectorInfo!.usernameMode != AuthenticationMode.none) {
           _usernameController.text = _currentDetectorInfo!.defaultUsername ?? '';
         } else {
           _usernameController.clear();
         }
 
-        if (_currentDetectorInfo!.requiresPassword) {
+        if (_currentDetectorInfo!.passwordMode != AuthenticationMode.none) {
           _passwordController.text = _currentDetectorInfo!.defaultPassword ?? '';
         } else {
           _passwordController.clear();
@@ -152,29 +153,23 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
     });
   }
 
-  /// Validate username (required only if username is configurable)
+  /// Validate username (required only if mode is required)
   void _validateUsername() {
     final value = _usernameController.text.trim();
     setState(() {
-      final usernameRequired = _currentDetectorInfo?.requiresUsername ?? false;
-      if (!usernameRequired) {
-        _usernameValid = true;
-      } else {
-        _usernameValid = value.isNotEmpty;
-      }
+      final usernameMode = _currentDetectorInfo?.usernameMode ?? AuthenticationMode.none;
+      // Valid if: mode is none/optional OR (mode is required AND has value)
+      _usernameValid = usernameMode != AuthenticationMode.required || value.isNotEmpty;
     });
   }
 
-  /// Validate password (required only if password is required)
+  /// Validate password (required only if mode is required)
   void _validatePassword() {
     final value = _passwordController.text.trim();
     setState(() {
-      final passwordRequired = _currentDetectorInfo?.requiresPassword ?? false;
-      if (!passwordRequired) {
-        _passwordValid = true;
-      } else {
-        _passwordValid = value.isNotEmpty;
-      }
+      final passwordMode = _currentDetectorInfo?.passwordMode ?? AuthenticationMode.none;
+      // Valid if: mode is none/optional OR (mode is required AND has value)
+      _passwordValid = passwordMode != AuthenticationMode.required || value.isNotEmpty;
     });
   }
 
@@ -258,10 +253,10 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
         debugPrint('Resolved hostname $inputValue to IP $resolvedIp');
       }
 
-      // Use default 'admin' username if not configurable
-      final username = _currentDetectorInfo!.requiresUsername
+      // Determine username based on authentication mode
+      final username = _currentDetectorInfo!.usernameMode != AuthenticationMode.none
           ? (_usernameController.text.isEmpty ? null : _usernameController.text)
-          : (_currentDetectorInfo!.requiresPassword ? 'admin' : null);
+          : (_currentDetectorInfo!.passwordMode != AuthenticationMode.none ? 'admin' : null);
 
       final device = await NetworkScanService.probeManufacturer(
         manufacturerKey: _selectedManufacturer!,
@@ -565,98 +560,140 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
               ],
 
               // Authentication (conditional)
-              // Show username field ONLY if username is configurable
-              if (_currentDetectorInfo?.requiresUsername == true) ...[
+              // Show username field if mode is optional or required
+              if (_currentDetectorInfo?.usernameMode != null &&
+                  _currentDetectorInfo!.usernameMode != AuthenticationMode.none) ...[
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
                     labelText: 'Benutzername',
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: _usernameController.text.isEmpty
-                            ? Colors.red
-                            : _usernameValid
-                                ? Colors.green
-                                : Colors.red,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: _usernameController.text.isEmpty
-                            ? Colors.red
-                            : _usernameValid
-                                ? Colors.green
-                                : Colors.red,
-                        width: 2.0,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: _usernameController.text.isEmpty
-                            ? Colors.blue
-                            : _usernameValid
-                                ? Colors.green
-                                : Colors.red,
-                        width: 2.0,
-                      ),
-                    ),
-                    suffixIcon: _usernameController.text.isEmpty
-                        ? null
-                        : Icon(
-                            _usernameValid ? Icons.check_circle : Icons.error,
-                            color: _usernameValid ? Colors.green : Colors.red,
+                    helperText: _currentDetectorInfo!.usernameMode == AuthenticationMode.optional
+                        ? 'Optional'
+                        : null,
+                    border: _currentDetectorInfo!.usernameMode == AuthenticationMode.optional
+                        ? const OutlineInputBorder()
+                        : OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: _usernameController.text.isEmpty
+                                  ? Colors.red
+                                  : _usernameValid
+                                      ? Colors.green
+                                      : Colors.red,
+                            ),
                           ),
+                    enabledBorder: _currentDetectorInfo!.usernameMode == AuthenticationMode.optional
+                        ? const OutlineInputBorder(
+                            borderSide: BorderSide(width: 2.0),
+                          )
+                        : OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: _usernameController.text.isEmpty
+                                  ? Colors.red
+                                  : _usernameValid
+                                      ? Colors.green
+                                      : Colors.red,
+                              width: 2.0,
+                            ),
+                          ),
+                    focusedBorder: _currentDetectorInfo!.usernameMode == AuthenticationMode.optional
+                        ? const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                          )
+                        : OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: _usernameController.text.isEmpty
+                                  ? Colors.blue
+                                  : _usernameValid
+                                      ? Colors.green
+                                      : Colors.red,
+                              width: 2.0,
+                            ),
+                          ),
+                    suffixIcon: _currentDetectorInfo!.usernameMode == AuthenticationMode.optional
+                        ? null
+                        : (_usernameController.text.isEmpty
+                            ? null
+                            : Icon(
+                                _usernameValid ? Icons.check_circle : Icons.error,
+                                color: _usernameValid ? Colors.green : Colors.red,
+                              )),
                   ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Bitte Benutzername eingeben' : null,
+                  validator: (value) {
+                    if (_currentDetectorInfo!.usernameMode != AuthenticationMode.required) {
+                      return null; // Optional or none - always valid
+                    }
+                    return value?.isEmpty ?? true ? 'Bitte Benutzername eingeben' : null;
+                  },
                 ),
               ],
 
-              // Show password field if password is required
-              if (_currentDetectorInfo?.requiresPassword == true) ...[
+              // Show password field if mode is optional or required
+              if (_currentDetectorInfo?.passwordMode != null &&
+                  _currentDetectorInfo!.passwordMode != AuthenticationMode.none) ...[
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Passwort',
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: _passwordController.text.isEmpty
-                            ? Colors.red
-                            : _passwordValid
-                                ? Colors.green
-                                : Colors.red,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: _passwordController.text.isEmpty
-                            ? Colors.red
-                            : _passwordValid
-                                ? Colors.green
-                                : Colors.red,
-                        width: 2.0,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: _passwordController.text.isEmpty
-                            ? Colors.blue
-                            : _passwordValid
-                                ? Colors.green
-                                : Colors.red,
-                        width: 2.0,
-                      ),
-                    ),
-                    suffixIcon: _passwordController.text.isEmpty
-                        ? null
-                        : Icon(
-                            _passwordValid ? Icons.check_circle : Icons.error,
-                            color: _passwordValid ? Colors.green : Colors.red,
+                    helperText: _currentDetectorInfo!.passwordMode == AuthenticationMode.optional
+                        ? 'Optional'
+                        : null,
+                    border: _currentDetectorInfo!.passwordMode == AuthenticationMode.optional
+                        ? const OutlineInputBorder()
+                        : OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: _passwordController.text.isEmpty
+                                  ? Colors.red
+                                  : _passwordValid
+                                      ? Colors.green
+                                      : Colors.red,
+                            ),
                           ),
+                    enabledBorder: _currentDetectorInfo!.passwordMode == AuthenticationMode.optional
+                        ? const OutlineInputBorder(
+                            borderSide: BorderSide(width: 2.0),
+                          )
+                        : OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: _passwordController.text.isEmpty
+                                  ? Colors.red
+                                  : _passwordValid
+                                      ? Colors.green
+                                      : Colors.red,
+                              width: 2.0,
+                            ),
+                          ),
+                    focusedBorder: _currentDetectorInfo!.passwordMode == AuthenticationMode.optional
+                        ? const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                          )
+                        : OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: _passwordController.text.isEmpty
+                                  ? Colors.blue
+                                  : _passwordValid
+                                      ? Colors.green
+                                      : Colors.red,
+                              width: 2.0,
+                            ),
+                          ),
+                    suffixIcon: _currentDetectorInfo!.passwordMode == AuthenticationMode.optional
+                        ? null
+                        : (_passwordController.text.isEmpty
+                            ? null
+                            : Icon(
+                                _passwordValid ? Icons.check_circle : Icons.error,
+                                color: _passwordValid ? Colors.green : Colors.red,
+                              )),
                   ),
                   obscureText: true,
-                  validator: (value) => value?.isEmpty ?? true ? 'Bitte Passwort eingeben' : null,
+                  validator: (value) {
+                    if (_currentDetectorInfo!.passwordMode != AuthenticationMode.required) {
+                      return null; // Optional or none - always valid
+                    }
+                    return value?.isEmpty ?? true ? 'Bitte Passwort eingeben' : null;
+                  },
                 ),
               ],
 

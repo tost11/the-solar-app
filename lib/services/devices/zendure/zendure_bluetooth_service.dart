@@ -63,16 +63,29 @@ class ZendureBluetoothService extends BluetoothDeviceService {
 
   @override
   Future<void> internalDisconnect() async {
+    // Cancel subscription FIRST (before BLE disconnect)
+    if (_notifySubscription != null) {
+      try {
+        await _notifySubscription?.cancel();
+      } catch (e) {
+        print('Error cancelling BLE subscription: $e');
+      } finally {
+        _notifySubscription = null;
+      }
+    }
+
+    // Clear device serial number
+    _deviceSn = null;
+
     // Call parent's Bluetooth disconnect logic (characteristics, lifecycle hooks)
     await super.internalDisconnect();
 
-    await bluetoothDevice.disconnect();
-
-    if(_notifySubscription != null){
-      await _notifySubscription?.cancel();
-      _notifySubscription = null;
+    // Disconnect from BLE device
+    try {
+      await bluetoothDevice.disconnect();
+    } catch (e) {
+      print('Error disconnecting from BLE device: $e');
     }
-    _deviceSn = null;
   }
 
   @override

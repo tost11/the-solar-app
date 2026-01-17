@@ -167,21 +167,46 @@ class _DeviceListScreenState extends State<DeviceListScreen>
     );
 
     if (confirmed == true) {
-      await _storageService.removeDevice(device.id);
+      try {
+        // Cancel connection state subscription for this device
+        final subscription = _connectionSubscriptions[device.id];
+        if (subscription != null) {
+          await subscription.cancel();
+          _connectionSubscriptions.remove(device.id);
+        }
 
-      // Clear selected device if it was deleted
-      if (_selectedDevice?.id == device.id) {
-        setState(() {
-          _selectedDevice = null;
-          _selectedDeviceForActions = null;
-        });
-      }
+        // Disconnect and dispose service connection to prevent memory leak
+        await device.removeServiceConnection();
 
-      await _loadDevices();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${device.name} wurde entfernt')),
-        );
+        // Remove from storage
+        await _storageService.removeDevice(device.id);
+
+        // Clear selected device if it was deleted
+        if (_selectedDevice?.id == device.id) {
+          setState(() {
+            _selectedDevice = null;
+            _selectedDeviceForActions = null;
+          });
+        }
+
+        // Reload devices and show success message
+        await _loadDevices();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${device.name} wurde entfernt')),
+          );
+        }
+      } catch (e) {
+        // Log error and show user-friendly message
+        debugPrint('Error during device deletion: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Fehler beim Entfernen: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

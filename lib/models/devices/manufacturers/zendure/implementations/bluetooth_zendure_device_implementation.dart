@@ -36,21 +36,13 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
           return;
         }
         bool result;
-        if(firmware <= ZENDURE_FIRMWARE_OLD_VERSION){
-          result = await NavigationUtils.pushConfigurationScreen(
-            context,
-            ZendureWifiMqttConfigurationScreen(
-              device: device,
-              currentMqtt: firmware < ZENDURE_FIRMWARE_OLD_VERSION ? "mq.zen-iot.com":"mqtteu.zen-iot.com"
-            ),
-          );
-        }else{
-          result = await NavigationUtils.pushConfigurationScreen(
-            context,
-            WiFiConfigurationScreen(device: device),
-          );
-        }
-
+        result = await NavigationUtils.pushConfigurationScreen(
+          context,
+          ZendureWifiMqttConfigurationScreen(
+            device: device,
+            currentMqtt: firmware < ZENDURE_FIRMWARE_OLD_VERSION ? "mq.zen-iot.com":"mqtteu.zen-iot.com"
+          ),
+        );
         if (result == true && context.mounted) {
           MessageUtils.showSuccess(
               context, 'WiFi-Konfiguration abgeschlossen');

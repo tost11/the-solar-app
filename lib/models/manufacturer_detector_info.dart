@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'additional_connection_info.dart';
+import 'authentication_mode.dart';
 import 'network_device.dart';
 
 /// Encapsulates all manufacturer-specific configuration for device detection
@@ -23,11 +24,11 @@ class ManufacturerDetectorInfo {
   /// UI label for additional port field (e.g., "Modbus", "WebSocket")
   final String? additionalPortLabel;
 
-  /// Whether username is configurable (if false, uses 'admin' as default)
-  final bool requiresUsername;
+  /// Authentication mode for username field (none/optional/required)
+  final AuthenticationMode usernameMode;
 
-  /// Whether password is required for this manufacturer
-  final bool requiresPassword;
+  /// Authentication mode for password field (none/optional/required)
+  final AuthenticationMode passwordMode;
 
   /// Default username for authentication (if required)
   final String? defaultUsername;
@@ -57,8 +58,8 @@ class ManufacturerDetectorInfo {
     required this.defaultPort,
     this.additionalPort,
     this.additionalPortLabel,
-    this.requiresUsername = false,
-    this.requiresPassword = false,
+    this.usernameMode = AuthenticationMode.none,
+    this.passwordMode = AuthenticationMode.none,
     this.defaultUsername,
     this.defaultPassword,
     required this.detector,
