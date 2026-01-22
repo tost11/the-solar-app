@@ -10,6 +10,7 @@ import 'package:dart_ping/dart_ping.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/services/devices/kostal/kostal_modbus_connection.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
+import '../models/authentication_mode.dart';
 import '../models/network_device.dart';
 import '../models/manufacturer_detector_info.dart';
 import '../models/additional_connection_info.dart';
@@ -67,46 +68,46 @@ class NetworkScanService {
     registerDetector(DEVICE_MANUFACTURER_ZENDURE, ManufacturerDetectorInfo(
       manufacturerName: 'Zendure',
       defaultPort: 80,
-      requiresUsername: false,
-      requiresPassword: false,
+      usernameMode: AuthenticationMode.none,
+      passwordMode: AuthenticationMode.none,
       detector: ZendureWifiService.isResponseFromManufacturer,
       httpStartPage: false
     ));
 
-    // Register DeyeSun - Both username and password configurable
+    // Register DeyeSun - Both username and password required
     registerDetector(DEVICE_MANUFACTURER_DEYE_SUN, ManufacturerDetectorInfo(
       manufacturerName: 'DeyeSun',
       defaultPort: 80,
       additionalPort: DeyeSunModbusConnection.DEFAULT_PORT, // 8899
       additionalPortLabel: 'Modbus',
-      requiresUsername: true,
-      requiresPassword: true,
+      usernameMode: AuthenticationMode.required,
+      passwordMode: AuthenticationMode.required,
       defaultUsername: 'admin',
       defaultPassword: 'admin',
       detector: DeyeSunWifiService.isResponseFromManufacturer,
       httpStartPage: true
     ));
 
-    // Register Shelly - Fixed username 'admin', password configurable
+    // Register Shelly - Password optional only (fixed username 'admin')
     registerDetector(DEVICE_MANUFACTURER_SHELLY, ManufacturerDetectorInfo(
       manufacturerName: 'Shelly',
       defaultPort: 80,
-      requiresUsername: false,
-      requiresPassword: true,
-      defaultUsername: 'admin',
-      defaultPassword: '', // No default password
+      usernameMode: AuthenticationMode.none,
+      passwordMode: AuthenticationMode.optional,
+      defaultUsername: 'admin', // Used internally (fixed in device model)
+      defaultPassword: '',
       detector: ShellyWifiService.isResponseFromManufacturer,
       httpStartPage: true
     ));
 
-    // Register OpenDTU - Fixed username 'admin', password configurable
+    // Register OpenDTU - Password optional only (fixed username 'admin')
     registerDetector(DEVICE_MANUFACTURER_OPENDTU, ManufacturerDetectorInfo(
       manufacturerName: 'OpenDTU',
       defaultPort: 80,
-      requiresUsername: false,
-      requiresPassword: true,
-      defaultUsername: 'admin',
-      defaultPassword: '', // No default password
+      usernameMode: AuthenticationMode.none,
+      passwordMode: AuthenticationMode.optional,
+      defaultUsername: 'admin', // Used internally (fixed in device model)
+      defaultPassword: '',
       detector: OpenDTUWifiService.isResponseFromManufacturer,
       httpStartPage: true
     ));
@@ -115,8 +116,8 @@ class NetworkScanService {
     registerDetector(DEVICE_MANUFACTURER_HOYMILES, ManufacturerDetectorInfo(
       manufacturerName: 'Hoymiles',
       defaultPort: HoymilesProtocol.DTU_PORT, // 10081
-      requiresUsername: false,
-      requiresPassword: false,
+      usernameMode: AuthenticationMode.none,
+      passwordMode: AuthenticationMode.none,
       detector: HoymilesWifiService.isResponseFromManufacturer,
       httpStartPage: false
     ));
@@ -125,8 +126,8 @@ class NetworkScanService {
     registerDetector(DEVICE_MANUFACTURER_KOSTAL, ManufacturerDetectorInfo(
       manufacturerName: 'Kostal',
       defaultPort: 80,
-      requiresUsername: false,
-      requiresPassword: false,
+      usernameMode: AuthenticationMode.none,
+      passwordMode: AuthenticationMode.none,
       detector: KostalWifiService.isResponseFromManufacturer,
       httpStartPage: true, // Enable HTTP probing for faster detection
       additionalPort: KostalModbusConnection.DEFAULT_PORT,

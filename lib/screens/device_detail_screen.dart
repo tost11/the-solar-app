@@ -84,8 +84,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
     // Load cached data if device is already initialized
     if (isConnected && isInitialized) {
-      final cachedData = widget.device.data['data'];
-      if (cachedData is Map<String, Map<String, dynamic>>) {
+      final cachedData = widget.device.data;
+      if (cachedData.isNotEmpty) {
         _receivedData = cachedData;
       }
     }
