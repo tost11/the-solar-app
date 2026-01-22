@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:the_solar_app/generated/l10n/app_localizations.dart';
 import 'screens/device_list_screen.dart';
 import 'services/device_storage_service.dart';
 import 'utils/globals.dart';

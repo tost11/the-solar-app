@@ -1,4 +1,4 @@
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:the_solar_app/generated/l10n/app_localizations.dart';
 
 /// Helper function to get field translation by key
 ///

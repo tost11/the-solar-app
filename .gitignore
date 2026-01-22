@@ -118,3 +118,5 @@ lib/generated_plugin_registrant.dart
 macos
 ios
 web
+# Flutter runner folder (using old structure)
+linux/runner/

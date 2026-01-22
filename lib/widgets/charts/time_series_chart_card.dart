@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:the_solar_app/generated/l10n/app_localizations.dart';
 import '../../models/devices/time_series_field_config.dart';
 import '../../models/devices/time_series_field_group.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:the_solar_app/generated/l10n/app_localizations.dart';
 import 'device_data_field.dart';
 import '../../../utils/field_translation_helper.dart';
 

@@ -3136,33 +3136,13 @@
   "@menuSubtitleSetupNetwork": {
     "description": "Menu item subtitle for setting up network connection"
   },
-  "menuSubtitleDeviceInfo": "Detaillierte Geräteinformationen anzeigen",
-  "@menuSubtitleDeviceInfo": {
-    "description": "Menu item subtitle for showing device information"
-  },
   "menuSubtitleSetupAccessPoint": "AP WiFi einrichten",
   "@menuSubtitleSetupAccessPoint": {
     "description": "Menu item subtitle for setting up access point"
   },
-  "menuSubtitlePowerLimit": "Wechselrichterleistung begrenzen",
-  "@menuSubtitlePowerLimit": {
-    "description": "Menu item subtitle for power limit"
-  },
   "menuSubtitleMqttSetup": "MQTT-Broker Verbindung einrichten",
   "@menuSubtitleMqttSetup": {
     "description": "Menu item subtitle for MQTT setup"
-  },
-  "menuSubtitleGeneralSettings": "Grundlegende Geräteeinstellungen verwalten",
-  "@menuSubtitleGeneralSettings": {
-    "description": "Menu item subtitle for general settings"
-  },
-  "menuSubtitleOnlineMonitoring": "Server für Datenübertragung einrichten",
-  "@menuSubtitleOnlineMonitoring": {
-    "description": "Menu item subtitle for online monitoring"
-  },
-  "menuSubtitleRestartDevice": "Startet das Gerät neu",
-  "@menuSubtitleRestartDevice": {
-    "description": "Menu item subtitle for restarting device"
   },
   "menuSubtitleToggleAllInverters": "Schaltet alle Wechselrichter",
   "@menuSubtitleToggleAllInverters": {

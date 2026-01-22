@@ -3136,33 +3136,13 @@
   "@menuSubtitleSetupNetwork": {
     "description": "Menu item subtitle for setting up network connection"
   },
-  "menuSubtitleDeviceInfo": "Show detailed device information",
-  "@menuSubtitleDeviceInfo": {
-    "description": "Menu item subtitle for showing device information"
-  },
   "menuSubtitleSetupAccessPoint": "Set up AP WiFi",
   "@menuSubtitleSetupAccessPoint": {
     "description": "Menu item subtitle for setting up access point"
   },
-  "menuSubtitlePowerLimit": "Limit inverter power",
-  "@menuSubtitlePowerLimit": {
-    "description": "Menu item subtitle for power limit"
-  },
   "menuSubtitleMqttSetup": "Set up MQTT broker connection",
   "@menuSubtitleMqttSetup": {
     "description": "Menu item subtitle for MQTT setup"
-  },
-  "menuSubtitleGeneralSettings": "Manage basic device settings",
-  "@menuSubtitleGeneralSettings": {
-    "description": "Menu item subtitle for general settings"
-  },
-  "menuSubtitleOnlineMonitoring": "Set up server for data transfer",
-  "@menuSubtitleOnlineMonitoring": {
-    "description": "Menu item subtitle for online monitoring"
-  },
-  "menuSubtitleRestartDevice": "Restart the device",
-  "@menuSubtitleRestartDevice": {
-    "description": "Menu item subtitle for restarting device"
   },
   "menuSubtitleToggleAllInverters": "Toggle all inverters",
   "@menuSubtitleToggleAllInverters": {
