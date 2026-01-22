@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../services/devices/base_device_service.dart';
 import 'generic_rendering/device_category_config.dart';
 import 'generic_rendering/device_control_item.dart';
 import 'generic_rendering/device_custom_section.dart';
 import 'generic_rendering/device_data_field.dart';
 import 'generic_rendering/device_menu_item.dart';
 import 'time_series_field_config.dart';
+import 'time_series_field_group.dart';
 
 /// Base interface for device-specific implementations
 /// Following Shelly's successful strategy pattern
@@ -61,8 +61,13 @@ abstract class DeviceImplementation {
   /// Default implementation returns empty list (no tracking)
   List<TimeSeriesFieldConfig> getTimeSeriesFields() => [];
 
+  /// Returns the list of time series field groups for multi-series graphs
+  /// Default implementation returns empty list (no grouped graphs)
+  List<TimeSeriesFieldGroup> getTimeSeriesFieldGroups() => [];
+
   /// Returns the icon to display for this device type
-  IconData getDeviceIcon();
+  /// Returns null to use manufacturer-based fallback icon
+  IconData? getDeviceIcon() => null;  // Default returns null (triggers manufacturer fallback)
 
   /// Handle device-specific commands
   ///

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:the_solar_app/services/devices/base_device_service.dart';
+import '../device_factory.dart';
 import 'device_base.dart';
 import 'device_implementation.dart';
 import 'generic_rendering/device_data_field.dart';
@@ -84,6 +85,7 @@ abstract class GenericWiFiDevice<TService extends BaseDeviceService, TImpl exten
     customSections: deviceImpl.getCustomSections(),
     categoryConfigs: deviceImpl.getCategoryConfigs(),
     timeSeriesFields: deviceImpl.getTimeSeriesFields(),
+    timeSeriesFieldGroups: deviceImpl.getTimeSeriesFieldGroups(),
   ) {
     netIpAddress = ipAddress;
     netHostname = hostname;
@@ -123,9 +125,17 @@ abstract class GenericWiFiDevice<TService extends BaseDeviceService, TImpl exten
     deviceImpl: deviceImpl,
   );
 
-  /// Returns device icon from implementation
+  /// Returns device icon from implementation or manufacturer-based fallback
   @override
-  IconData get deviceIcon => deviceImpl.getDeviceIcon();
+  IconData get deviceIcon {
+    // Try implementation-specific icon first
+    final implIcon = deviceImpl.getDeviceIcon();
+    if (implIcon != null) {
+      return implIcon;  // Use custom icon
+    }
+    // Fallback to manufacturer-based icon
+    return DeviceFactory.getDefaultIconByManufacturer(getManufacturer());
+  }
 
   /// Common WiFi service setup pattern
   ///

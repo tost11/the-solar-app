@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_menu_item.dart';
 import 'package:the_solar_app/models/devices/manufacturers/zendure/implementations/zendure_device_implementation.dart';
-import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/screens/configuration/zendure_wifi_mqtt_configuration_screen.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
@@ -22,8 +23,8 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
 
     // Add Bluetooth-specific WiFi configuration item
     baseItems.add(DeviceMenuItem(
-      name: 'WiFi konfigurieren',
-      subtitle: 'Netzwerkverbindung einrichten',
+      name: TO(key: MenuTranslationKeys.wifiConfiguration),
+      subtitle: TO(key: MenuSubtitleKeys.wifiConfigurationSubtitle),
       icon: Icons.wifi,
       iconColor: Colors.green,
       onTap: (ctx) async {
@@ -51,8 +52,8 @@ class BluetoothZendureDeviceImplementation extends ZendureDeviceImplementation {
     ));
 
     baseItems.add(DeviceMenuItem(
-      name: 'Mqtt konfigurieren',
-      subtitle: 'MQTT-Broker Verbindung einrichten',
+      name: TO(key: MenuTranslationKeys.mqttConfiguration),
+      subtitle: TO(key: MenuSubtitleKeys.mqttConfigurationSubtitle),
       disabled: (device){
         int? firmware = MapUtils.OM(device.data, ["firmwares", "MASTER"]) as int?;
         if (firmware == null || firmware <= ZENDURE_FIRMWARE_OLD_VERSION) {

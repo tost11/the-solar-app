@@ -29,7 +29,7 @@ return {
   headers: { 'Content-Type': ['application/json'] },
   body: JSON.stringify({
     id: 1768255378,
-    src: 'shellypro3em-112233445566',
+    src: 'shellypro3em-223344556677',
     dst: 'flutter_app',
     result: {
       ble: {},
@@ -81,7 +81,7 @@ return {
       'script:4': { id: 4, running: false, mem_free: 25004, cpu: 0 },
       'script:5': { id: 5, running: false, mem_free: 25004, cpu: 0 },
       sys: {
-        mac: '112233445566',
+        mac: '223344556677',
         restart_required: false,
         time: new Date().toTimeString().substring(0, 5),
         unixtime: Math.floor(Date.now() / 1000),

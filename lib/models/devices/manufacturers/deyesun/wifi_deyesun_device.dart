@@ -47,6 +47,9 @@ class WiFiDeyeSunDevice extends GenericWiFiAuthDevice<DeyeSunWifiService, DeyeSu
   String get deviceType => DEVICE_MANUFACTURER_DEYE_SUN;
 
   @override
+  String getManufacturer() => DEVICE_MANUFACTURER_DEYE_SUN;
+
+  @override
   DeyeSunWifiService createService() {
     return DeyeSunWifiService(this);
   }

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../device_base.dart';
 import 'device_menu_item_context.dart';
+import '../../to.dart';
 
 /// Generic menu item definition for device actions
 ///
 /// This class defines a menu entry in the device's "More Functions" menu,
 /// including its name, icon, and action to perform when tapped.
 class DeviceMenuItem {
-  /// Display name shown to the user
-  final String name;
+  /// Display name shown to the user (Translation Object)
+  final TO name;
 
-  /// Optional subtitle/description
-  final String? subtitle;
+  /// Optional subtitle/description (Translation Object)
+  final TO? subtitle;
 
   /// Icon to display with this menu item
   final IconData icon;
@@ -35,4 +36,10 @@ class DeviceMenuItem {
     required this.onTap,
     this.disabled,
   });
+
+  /// Get localized name
+  String getName(BuildContext context) => name.getText(context);
+
+  /// Get localized subtitle
+  String? getSubtitle(BuildContext context) => subtitle?.getText(context);
 }

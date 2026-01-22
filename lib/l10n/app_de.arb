@@ -1,0 +1,4495 @@
+{
+  "@@locale": "de",
+  "appTitle": "The Solar App",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button label"
+  },
+  "cancel": "Abbrechen",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "save": "Speichern",
+  "@save": {
+    "description": "Save button label"
+  },
+  "delete": "Löschen",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "edit": "Bearbeiten",
+  "@edit": {
+    "description": "Edit button label"
+  },
+  "select": "Auswählen",
+  "@select": {
+    "description": "Select button label"
+  },
+  "confirm": "Bestätigen",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "close": "Schließen",
+  "@close": {
+    "description": "Close button label"
+  },
+  "update": "Aktualisieren",
+  "@update": {
+    "description": "Update button label"
+  },
+  "install": "Installieren",
+  "@install": {
+    "description": "Install button label"
+  },
+  "preview": "Vorschau",
+  "@preview": {
+    "description": "Preview button label"
+  },
+  "connected": "Verbunden",
+  "@connected": {
+    "description": "Connection status - connected"
+  },
+  "notConnected": "Nicht verbunden",
+  "@notConnected": {
+    "description": "Connection status - not connected"
+  },
+  "connecting": "Verbinde...",
+  "@connecting": {
+    "description": "Connection status - connecting"
+  },
+  "loadingDeviceData": "Lade Gerätedaten...",
+  "@loadingDeviceData": {
+    "description": "Loading message while fetching device data"
+  },
+  "connectionFailed": "Verbindung fehlgeschlagen",
+  "@connectionFailed": {
+    "description": "Connection failed message"
+  },
+  "disconnecting": "Trenne Verbindung...",
+  "@disconnecting": {
+    "description": "Disconnecting message"
+  },
+  "error": "Fehler",
+  "@error": {
+    "description": "Error dialog default title"
+  },
+  "deviceNotConnected": "Gerät nicht verbunden",
+  "@deviceNotConnected": {
+    "description": "Error message when device is not connected"
+  },
+  "noResponseFromDevice": "Keine Antwort vom Gerät",
+  "@noResponseFromDevice": {
+    "description": "Error when device doesn't respond"
+  },
+  "couldNotRetrieveData": "Daten konnten nicht abgerufen werden",
+  "@couldNotRetrieveData": {
+    "description": "Error when data retrieval fails"
+  },
+  "operationFailed": "Vorgang fehlgeschlagen",
+  "@operationFailed": {
+    "description": "Generic operation failed message"
+  },
+  "settings": "Einstellungen",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "expertMode": "Expertenmodus",
+  "@expertMode": {
+    "description": "Expert mode setting label"
+  },
+  "expertModeDescription": "Erweiterte Optionen anzeigen",
+  "@expertModeDescription": {
+    "description": "Expert mode description"
+  },
+  "permissions": "Berechtigungen",
+  "@permissions": {
+    "description": "Permissions setting label"
+  },
+  "permissionsDescription": "App-Berechtigungen prüfen",
+  "@permissionsDescription": {
+    "description": "Permissions description"
+  },
+  "language": "Sprache",
+  "@language": {
+    "description": "Language setting label"
+  },
+  "languageDescription": "Sprache der Benutzeroberfläche",
+  "@languageDescription": {
+    "description": "Language setting description"
+  },
+  "german": "Deutsch",
+  "@german": {
+    "description": "German language name"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+  "exitApp": "App beenden",
+  "@exitApp": {
+    "description": "Exit application label"
+  },
+  "version": "Version",
+  "@version": {
+    "description": "Version label"
+  },
+  "tapForDetails": "Tippen für Details",
+  "@tapForDetails": {
+    "description": "Tap for details hint"
+  },
+  "devices": "Geräte",
+  "@devices": {
+    "description": "Devices label"
+  },
+  "knownDevices": "Bekannte Geräte",
+  "@knownDevices": {
+    "description": "Known devices title"
+  },
+  "addDevice": "Gerät hinzufügen",
+  "@addDevice": {
+    "description": "Add device button"
+  },
+  "scanForDevices": "Nach Geräten suchen",
+  "@scanForDevices": {
+    "description": "Scan for devices button"
+  },
+  "deviceName": "Gerätename",
+  "@deviceName": {
+    "description": "Device name label"
+  },
+  "deviceType": "Gerätetyp",
+  "@deviceType": {
+    "description": "Device type label"
+  },
+  "deviceInfo": "Geräteinformationen",
+  "@deviceInfo": {
+    "description": "Device information label"
+  },
+  "deviceSettings": "Geräteeinstellungen",
+  "@deviceSettings": {
+    "description": "Device settings label"
+  },
+  "deleteDevice": "Gerät löschen",
+  "@deleteDevice": {
+    "description": "Delete device label"
+  },
+  "deviceRole": "Geräterolle",
+  "@deviceRole": {
+    "description": "Device role label"
+  },
+  "selectDeviceRole": "Geräterolle auswählen",
+  "@selectDeviceRole": {
+    "description": "Select device role prompt"
+  },
+  "confirmation": "Bestätigung",
+  "@confirmation": {
+    "description": "Confirmation dialog title"
+  },
+  "areYouSure": "Sind Sie sicher?",
+  "@areYouSure": {
+    "description": "Are you sure confirmation"
+  },
+  "deleteDeviceConfirm": "Möchten Sie dieses Gerät wirklich löschen?",
+  "@deleteDeviceConfirm": {
+    "description": "Delete device confirmation message"
+  },
+  "cannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@cannotBeUndone": {
+    "description": "Action cannot be undone warning"
+  },
+  "deviceList": "Geräteliste",
+  "@deviceList": {
+    "description": "Device list screen title"
+  },
+  "deviceDetail": "Gerätedetails",
+  "@deviceDetail": {
+    "description": "Device detail screen title"
+  },
+  "scanScreen": "Geräte suchen",
+  "@scanScreen": {
+    "description": "Scan screen title"
+  },
+  "manualAdd": "Manuell hinzufügen",
+  "@manualAdd": {
+    "description": "Manual add screen title"
+  },
+  "scanning": "Suche...",
+  "@scanning": {
+    "description": "Scanning status"
+  },
+  "bluetoothDevices": "Bluetooth-Geräte",
+  "@bluetoothDevices": {
+    "description": "Bluetooth devices label"
+  },
+  "networkDevices": "Netzwerkgeräte",
+  "@networkDevices": {
+    "description": "Network devices label"
+  },
+  "noDevicesFound": "Keine Geräte gefunden",
+  "@noDevicesFound": {
+    "description": "No devices found message"
+  },
+  "devicesFound": "{count, plural, =0{Keine Geräte gefunden} =1{1 Gerät gefunden} other{{count} Geräte gefunden}}",
+  "@devicesFound": {
+    "description": "Number of devices found",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect": "Verbinden",
+  "@connect": {
+    "description": "Connect button"
+  },
+  "disconnect": "Trennen",
+  "@disconnect": {
+    "description": "Disconnect button"
+  },
+  "reconnect": "Erneut verbinden",
+  "@reconnect": {
+    "description": "Reconnect button"
+  },
+  "autoReconnect": "Automatisch neu verbinden",
+  "@autoReconnect": {
+    "description": "Auto reconnect label"
+  },
+  "power": "Leistung",
+  "@power": {
+    "description": "Power label"
+  },
+  "voltage": "Spannung",
+  "@voltage": {
+    "description": "Voltage label"
+  },
+  "current": "Strom",
+  "@current": {
+    "description": "Current label"
+  },
+  "battery": "Batterie",
+  "@battery": {
+    "description": "Battery label"
+  },
+  "batteryLevel": "Batteriestand",
+  "@batteryLevel": {
+    "description": "Battery level label"
+  },
+  "outputLimit": "Ausgangsgrenze",
+  "@outputLimit": {
+    "description": "Output limit label"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Status label"
+  },
+  "temperature": "Temperatur",
+  "@temperature": {
+    "description": "Temperature label"
+  },
+  "energy": "Energie",
+  "@energy": {
+    "description": "Energy label"
+  },
+  "parameters": "Parameter",
+  "@parameters": {
+    "description": "Parameters label"
+  },
+  "configureParameters": "Parameter konfigurieren",
+  "@configureParameters": {
+    "description": "Configure parameters label"
+  },
+  "newParametersAvailable": "Neue Parameter verfügbar",
+  "@newParametersAvailable": {
+    "description": "New parameters available message"
+  },
+  "updateToNewVersion": "Auf neue Version aktualisieren?",
+  "@updateToNewVersion": {
+    "description": "Update to new version prompt"
+  },
+  "updateParameters": "Parameter aktualisieren",
+  "@updateParameters": {
+    "description": "Update parameters label"
+  },
+  "directInstall": "Direkt installieren",
+  "@directInstall": {
+    "description": "Direct install label"
+  },
+  "installOnDevice": "Auf Gerät installieren",
+  "@installOnDevice": {
+    "description": "Install on device label"
+  },
+  "createFromTemplate": "Aus Vorlage erstellen",
+  "@createFromTemplate": {
+    "description": "Create from template label"
+  },
+  "scripts": "Scripte",
+  "@scripts": {
+    "description": "Scripts label"
+  },
+  "deleteScript": "Script löschen?",
+  "@deleteScript": {
+    "description": "Delete script confirmation"
+  },
+  "installScript": "Script installieren?",
+  "@installScript": {
+    "description": "Install script confirmation"
+  },
+  "autostartEnabled": "Autostart aktiviert",
+  "@autostartEnabled": {
+    "description": "Autostart enabled label"
+  },
+  "showAllScripts": "Alle Scripte anzeigen",
+  "@showAllScripts": {
+    "description": "Show all scripts label"
+  },
+  "compatibilityInfo": "Kompatibilitäts-Information",
+  "@compatibilityInfo": {
+    "description": "Compatibility information label"
+  },
+  "loading": "Lädt...",
+  "@loading": {
+    "description": "Loading message"
+  },
+  "refresh": "Aktualisieren",
+  "@refresh": {
+    "description": "Refresh label"
+  },
+  "retry": "Erneut versuchen",
+  "@retry": {
+    "description": "Retry label"
+  },
+  "all": "Alle",
+  "@all": {
+    "description": "All label"
+  },
+  "none": "Keine",
+  "@none": {
+    "description": "None label"
+  },
+  "enabled": "Aktiviert",
+  "@enabled": {
+    "description": "Enabled label"
+  },
+  "disabled": "Deaktiviert",
+  "@disabled": {
+    "description": "Disabled label"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Name label"
+  },
+  "value": "Wert",
+  "@value": {
+    "description": "Value label"
+  },
+  "description": "Beschreibung",
+  "@description": {
+    "description": "Description label"
+  },
+  "savedSuccessfully": "Erfolgreich gespeichert",
+  "@savedSuccessfully": {
+    "description": "Saved successfully message"
+  },
+  "deletedSuccessfully": "Erfolgreich gelöscht",
+  "@deletedSuccessfully": {
+    "description": "Deleted successfully message"
+  },
+  "updatedSuccessfully": "Erfolgreich aktualisiert",
+  "@updatedSuccessfully": {
+    "description": "Updated successfully message"
+  },
+  "installedSuccessfully": "Erfolgreich installiert",
+  "@installedSuccessfully": {
+    "description": "Installed successfully message"
+  },
+  "connectedSuccessfully": "Erfolgreich verbunden",
+  "@connectedSuccessfully": {
+    "description": "Connected successfully message"
+  },
+  "disconnectedSuccessfully": "Erfolgreich getrennt",
+  "@disconnectedSuccessfully": {
+    "description": "Disconnected successfully message"
+  },
+  "noItemSelected": "Kein Element ausgewählt",
+  "@noItemSelected": {
+    "description": "No item selected message in master-detail view"
+  },
+  "selectItemFromList": "Wählen Sie ein Element aus der Liste",
+  "@selectItemFromList": {
+    "description": "Select item from list instruction in master-detail view"
+  },
+  "errorWhileSaving": "Fehler beim Speichern: {error}",
+  "@errorWhileSaving": {
+    "description": "Error message when saving fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileLoading": "Fehler beim Laden: {error}",
+  "@errorWhileLoading": {
+    "description": "Error message when loading fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileToggling": "Fehler beim Umschalten: {error}",
+  "@errorWhileToggling": {
+    "description": "Error message when toggling fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileExecuting": "Fehler beim Ausführen: {error}",
+  "@errorWhileExecuting": {
+    "description": "Error message when execution fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileAdjusting": "Fehler beim Anpassen: {error}",
+  "@errorWhileAdjusting": {
+    "description": "Error message when adjusting fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileRestarting": "Fehler beim Neustarten des Geräts: {error}",
+  "@errorWhileRestarting": {
+    "description": "Error message when restarting device fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileDisconnecting": "Fehler beim Trennen: {error}",
+  "@errorWhileDisconnecting": {
+    "description": "Error message when disconnecting fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWhileUploading": "Fehler beim Hochladen des Codes",
+  "@errorWhileUploading": {
+    "description": "Error message when uploading code fails"
+  },
+  "errorWhileLoadingConfig": "Fehler beim Laden der Konfiguration: {error}",
+  "@errorWhileLoadingConfig": {
+    "description": "Error message when loading configuration fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCouldNotRetrieveScripts": "Konnte Scripts nicht laden: {error}",
+  "@errorCouldNotRetrieveScripts": {
+    "description": "Error message when retrieving scripts fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCouldNotRetrieveScriptCode": "Konnte Script-Code nicht abrufen",
+  "@errorCouldNotRetrieveScriptCode": {
+    "description": "Error message when retrieving script code fails"
+  },
+  "errorCouldNotLoadLatestVersion": "Konnte neueste Version nicht laden",
+  "@errorCouldNotLoadLatestVersion": {
+    "description": "Error message when loading latest version fails"
+  },
+  "validationFieldCannotBeEmpty": "Feld darf nicht leer sein",
+  "@validationFieldCannotBeEmpty": {
+    "description": "Validation error for empty field"
+  },
+  "validationDeviceNameCannotBeEmpty": "Gerätename darf nicht leer sein",
+  "@validationDeviceNameCannotBeEmpty": {
+    "description": "Validation error for empty device name"
+  },
+  "validationUsernameCannotBeEmpty": "Benutzername darf nicht leer sein",
+  "@validationUsernameCannotBeEmpty": {
+    "description": "Validation error for empty username"
+  },
+  "validationMqttServerCannotBeEmpty": "MQTT-Server darf nicht leer sein",
+  "@validationMqttServerCannotBeEmpty": {
+    "description": "Validation error for empty MQTT server"
+  },
+  "validationEnterIpOrHostname": "Bitte IP-Adresse oder Hostname eingeben",
+  "@validationEnterIpOrHostname": {
+    "description": "Validation prompt for IP or hostname"
+  },
+  "validationEnterSecurePassword": "Geben Sie ein sicheres Passwort ein",
+  "@validationEnterSecurePassword": {
+    "description": "Validation prompt for secure password"
+  },
+  "formUsername": "Benutzername",
+  "@formUsername": {
+    "description": "Form label for username"
+  },
+  "formPassword": "Passwort",
+  "@formPassword": {
+    "description": "Form label for password"
+  },
+  "formSsid": "SSID",
+  "@formSsid": {
+    "description": "Form label for SSID"
+  },
+  "formPort": "Port",
+  "@formPort": {
+    "description": "Form label for port"
+  },
+  "formHostname": "Hostname",
+  "@formHostname": {
+    "description": "Form label for hostname"
+  },
+  "formIpAddress": "IP-Adresse",
+  "@formIpAddress": {
+    "description": "Form label for IP address"
+  },
+  "formManufacturer": "Hersteller",
+  "@formManufacturer": {
+    "description": "Form label for manufacturer"
+  },
+  "formEnterUsername": "Benutzername eingeben",
+  "@formEnterUsername": {
+    "description": "Form hint for entering username"
+  },
+  "formEnterPassword": "Passwort eingeben",
+  "@formEnterPassword": {
+    "description": "Form hint for entering password"
+  },
+  "formEnterPort": "Geben Sie die Port-Nummer ein",
+  "@formEnterPort": {
+    "description": "Form hint for entering port number"
+  },
+  "formEnterSsid": "Geben Sie den SSID ein",
+  "@formEnterSsid": {
+    "description": "Form hint for entering SSID"
+  },
+  "formEnterWifiPassword": "WiFi-Passwort",
+  "@formEnterWifiPassword": {
+    "description": "Form hint for entering WiFi password"
+  },
+  "formSelectOrEnterWifiNetwork": "WiFi-Netzwerkname eingeben oder auswählen",
+  "@formSelectOrEnterWifiNetwork": {
+    "description": "Form hint for selecting or entering WiFi network"
+  },
+  "formProtocolPort": "Protokoll-Port (z.B. Modbus)",
+  "@formProtocolPort": {
+    "description": "Form label for protocol port"
+  },
+  "formAdditionalPortHelper": "Zusätzlicher Port für Protokollkommunikation",
+  "@formAdditionalPortHelper": {
+    "description": "Form helper text for additional port"
+  },
+  "messageDeviceNameSaved": "Gerätename gespeichert",
+  "@messageDeviceNameSaved": {
+    "description": "Success message when device name is saved"
+  },
+  "messageDeviceSaved": "Gerät gespeichert",
+  "@messageDeviceSaved": {
+    "description": "Success message when device is saved"
+  },
+  "messageDeviceRestarting": "Gerät wird neu gestartet",
+  "@messageDeviceRestarting": {
+    "description": "Info message when device is restarting"
+  },
+  "messagePowerLimitSet": "Leistungslimit erfolgreich gesetzt",
+  "@messagePowerLimitSet": {
+    "description": "Success message when power limit is set"
+  },
+  "messageMqttEnabled": "MQTT-Verbindung wurde aktiviert",
+  "@messageMqttEnabled": {
+    "description": "Success message when MQTT is enabled"
+  },
+  "messageMqttDisabled": "MQTT-Verbindung wurde deaktiviert",
+  "@messageMqttDisabled": {
+    "description": "Success message when MQTT is disabled"
+  },
+  "messageAuthSaved": "Authentifizierung gespeichert",
+  "@messageAuthSaved": {
+    "description": "Success message when authentication is saved"
+  },
+  "messageNetworkSaved": "Netzwerk gespeichert",
+  "@messageNetworkSaved": {
+    "description": "Success message when network is saved"
+  },
+  "messageIntervalSaved": "Intervall gespeichert",
+  "@messageIntervalSaved": {
+    "description": "Success message when interval is saved"
+  },
+  "messageSaving": "Wird gespeichert...",
+  "@messageSaving": {
+    "description": "Loading message while saving"
+  },
+  "statusDeviceNotFound": "Gerät nicht gefunden",
+  "@statusDeviceNotFound": {
+    "description": "Status message when device is not found"
+  },
+  "statusConnectionError": "Verbindungsfehler",
+  "@statusConnectionError": {
+    "description": "Status message for connection error"
+  },
+  "statusNoInvertersFound": "Keine Wechselrichter gefunden",
+  "@statusNoInvertersFound": {
+    "description": "Status message when no inverters are found"
+  },
+  "statusNoScriptsFound": "Keine Scripts gefunden",
+  "@statusNoScriptsFound": {
+    "description": "Status message when no scripts are found"
+  },
+  "statusDeviceAlreadyInSystem": "Gerät bereits im System",
+  "@statusDeviceAlreadyInSystem": {
+    "description": "Status message when device is already in system"
+  },
+  "statusDeviceRemoved": "Gerät entfernt",
+  "@statusDeviceRemoved": {
+    "description": "Status message when device is removed"
+  },
+  "statusDeviceHasNoRoleConfig": "Gerät hat keine Rollen-Konfiguration",
+  "@statusDeviceHasNoRoleConfig": {
+    "description": "Status message when device has no role configuration"
+  },
+  "statusDeviceHasNoConfigurableRoles": "Gerät hat keine konfigurierbaren Rollen",
+  "@statusDeviceHasNoConfigurableRoles": {
+    "description": "Status message when device has no configurable roles"
+  },
+  "screenDeviceSettings": "Geräteeinstellungen",
+  "@screenDeviceSettings": {
+    "description": "Title for device settings screen"
+  },
+  "screenAuthentication": "Authentifizierung",
+  "@screenAuthentication": {
+    "description": "Title for authentication screen"
+  },
+  "screenMqttConfig": "MQTT Konfiguration",
+  "@screenMqttConfig": {
+    "description": "Title for MQTT configuration screen"
+  },
+  "screenWifiConfig": "WiFi konfigurieren",
+  "@screenWifiConfig": {
+    "description": "Title for WiFi configuration screen"
+  },
+  "screenGeneralSettings": "Allgemeine Einstellungen",
+  "@screenGeneralSettings": {
+    "description": "Title for general settings screen"
+  },
+  "screenManualDeviceAdd": "Gerät manuell hinzufügen",
+  "@screenManualDeviceAdd": {
+    "description": "Title for manual device add screen"
+  },
+  "screenNetworkConfig": "Netzwerkverbindung",
+  "@screenNetworkConfig": {
+    "description": "Title for network configuration screen"
+  },
+  "screenAccessPointConfig": "Access Point Konfiguration",
+  "@screenAccessPointConfig": {
+    "description": "Title for access point configuration screen"
+  },
+  "screenUpdateParameters": "Parameter aktualisieren",
+  "@screenUpdateParameters": {
+    "description": "Title for update parameters screen"
+  },
+  "screenAutomation": "Automatisierung",
+  "@screenAutomation": {
+    "description": "Title for automation screen"
+  },
+  "actionSaveNetwork": "Netzwerk speichern",
+  "@actionSaveNetwork": {
+    "description": "Action label for saving network"
+  },
+  "actionSaveAuth": "Authentifizierung speichern",
+  "@actionSaveAuth": {
+    "description": "Action label for saving authentication"
+  },
+  "actionSaveInterval": "Intervall speichern",
+  "@actionSaveInterval": {
+    "description": "Action label for saving interval"
+  },
+  "actionSetupNetwork": "Netzwerkverbindung einrichten",
+  "@actionSetupNetwork": {
+    "description": "Action label for setting up network"
+  },
+  "actionSetupAccessPoint": "WiFi Access Point einrichten",
+  "@actionSetupAccessPoint": {
+    "description": "Action label for setting up access point"
+  },
+  "actionSetupAuth": "Benutzername und Passwort einrichten",
+  "@actionSetupAuth": {
+    "description": "Action label for setting up authentication"
+  },
+  "actionLimitOutput": "Ausgangsleistung begrenzen",
+  "@actionLimitOutput": {
+    "description": "Action label for limiting output power"
+  },
+  "actionToggleInverters": "Wechselrichter ein-/ausschalten",
+  "@actionToggleInverters": {
+    "description": "Action label for toggling inverters"
+  },
+  "actionTogglesAllInverters": "Schaltet alle Wechselrichter",
+  "@actionTogglesAllInverters": {
+    "description": "Action description for toggling all inverters"
+  },
+  "actionRestart": "Neu starten",
+  "@actionRestart": {
+    "description": "Action label for restarting device"
+  },
+  "helpDeviceSettingsDescription": "Konfigurieren Sie den Namen und die Authentifizierung für dieses Gerät.",
+  "@helpDeviceSettingsDescription": {
+    "description": "Help text for device settings screen"
+  },
+  "helpMqttDescription": "Verbinden Sie Ihr Gerät mit einem MQTT-Broker für Home Automation Integration.",
+  "@helpMqttDescription": {
+    "description": "Help text for MQTT configuration"
+  },
+  "helpEnableOrDisableMqtt": "Aktiviert oder deaktiviert die MQTT-Verbindung",
+  "@helpEnableOrDisableMqtt": {
+    "description": "Help text for MQTT enable/disable"
+  },
+  "helpEnableOrDisableAp": "Aktiviert oder deaktiviert den Access Point",
+  "@helpEnableOrDisableAp": {
+    "description": "Help text for access point enable/disable"
+  },
+  "helpApWarning": "Warnung: Wenn deaktiviert, ist möglicherweise keine Interaktion mit dem Gerät mehr möglich. Vorsichtig verwenden!",
+  "@helpApWarning": {
+    "description": "Warning text for access point disable"
+  },
+  "helpOpenNetwork": "Netzwerk ohne Passwort (nicht empfohlen)",
+  "@helpOpenNetwork": {
+    "description": "Help text for open network option"
+  },
+  "helpUpdateIntervalDescription": "Zeitintervall zwischen Datenabrufen vom Gerät",
+  "@helpUpdateIntervalDescription": {
+    "description": "Help text for update interval"
+  },
+  "helpIntervalDefault": "Standard: 30 Sekunden (Bereich: 1-300)",
+  "@helpIntervalDefault": {
+    "description": "Help text for interval default value"
+  },
+  "helpAuthDescription": "Benutzername und Passwort für die Geräteauthentifizierung",
+  "@helpAuthDescription": {
+    "description": "Help text for authentication"
+  },
+  "wifiEnableAccessPoint": "Access Point aktivieren",
+  "@wifiEnableAccessPoint": {
+    "description": "Label for enabling access point"
+  },
+  "wifiOpenNetwork": "Offenes Netzwerk",
+  "@wifiOpenNetwork": {
+    "description": "Label for open network"
+  },
+  "wifiConfigureWifi": "WiFi konfigurieren",
+  "@wifiConfigureWifi": {
+    "description": "Label for configuring WiFi"
+  },
+  "wifiSsidLabel": "SSID",
+  "@wifiSsidLabel": {
+    "description": "Label for WiFi SSID"
+  },
+  "wifiPasswordLabel": "Passwort",
+  "@wifiPasswordLabel": {
+    "description": "Label for WiFi password"
+  },
+  "wifiSelectNetwork": "Netzwerk auswählen",
+  "@wifiSelectNetwork": {
+    "description": "Label for selecting WiFi network"
+  },
+  "wifiEnterNetworkName": "Netzwerkname eingeben",
+  "@wifiEnterNetworkName": {
+    "description": "Label for entering network name"
+  },
+  "wifiApMode": "Access Point Modus",
+  "@wifiApMode": {
+    "description": "Label for access point mode"
+  },
+  "wifiStationMode": "Station Modus",
+  "@wifiStationMode": {
+    "description": "Label for station mode"
+  },
+  "wifiScanNetworks": "Netzwerke scannen",
+  "@wifiScanNetworks": {
+    "description": "Label for scanning networks"
+  },
+  "wifiNoNetworksFound": "Keine Netzwerke gefunden",
+  "@wifiNoNetworksFound": {
+    "description": "Message when no WiFi networks are found"
+  },
+  "wifiConnectionStrength": "Verbindungsstärke",
+  "@wifiConnectionStrength": {
+    "description": "Label for connection strength"
+  },
+  "mqttConfiguration": "MQTT Konfiguration",
+  "@mqttConfiguration": {
+    "description": "Label for MQTT configuration"
+  },
+  "mqttEnable": "MQTT aktivieren",
+  "@mqttEnable": {
+    "description": "Label for enabling MQTT"
+  },
+  "mqttServer": "MQTT Server",
+  "@mqttServer": {
+    "description": "Label for MQTT server"
+  },
+  "mqttPort": "MQTT Port",
+  "@mqttPort": {
+    "description": "Label for MQTT port"
+  },
+  "mqttTopic": "MQTT Topic",
+  "@mqttTopic": {
+    "description": "Label for MQTT topic"
+  },
+  "mqttUsername": "MQTT Benutzername",
+  "@mqttUsername": {
+    "description": "Label for MQTT username"
+  },
+  "mqttPassword": "MQTT Passwort",
+  "@mqttPassword": {
+    "description": "Label for MQTT password"
+  },
+  "mqttQos": "QoS Level",
+  "@mqttQos": {
+    "description": "Label for MQTT QoS level"
+  },
+  "authTitle": "Authentifizierung",
+  "@authTitle": {
+    "description": "Title for authentication section"
+  },
+  "authUsername": "Benutzername",
+  "@authUsername": {
+    "description": "Label for authentication username"
+  },
+  "authPassword": "Passwort",
+  "@authPassword": {
+    "description": "Label for authentication password"
+  },
+  "authUsernameCannotBeChanged": "Benutzername kann nicht geändert werden",
+  "@authUsernameCannotBeChanged": {
+    "description": "Message when username cannot be changed"
+  },
+  "authRequired": "Authentifizierung erforderlich",
+  "@authRequired": {
+    "description": "Message when authentication is required"
+  },
+  "networkIpAddress": "IP-Adresse",
+  "@networkIpAddress": {
+    "description": "Label for network IP address"
+  },
+  "networkHostname": "Hostname",
+  "@networkHostname": {
+    "description": "Label for network hostname"
+  },
+  "networkPort": "Port",
+  "@networkPort": {
+    "description": "Label for network port"
+  },
+  "networkSubnet": "Subnetz",
+  "@networkSubnet": {
+    "description": "Label for network subnet"
+  },
+  "networkGateway": "Gateway",
+  "@networkGateway": {
+    "description": "Label for network gateway"
+  },
+  "networkDns": "DNS Server",
+  "@networkDns": {
+    "description": "Label for network DNS server"
+  },
+  "menuSetupNetwork": "Netzwerkverbindung einrichten",
+  "@menuSetupNetwork": {
+    "description": "Menu subtitle for setting up network"
+  },
+  "menuSetupAccessPoint": "WiFi Access Point einrichten",
+  "@menuSetupAccessPoint": {
+    "description": "Menu subtitle for setting up access point"
+  },
+  "menuSetupAuth": "Benutzername und Passwort einrichten",
+  "@menuSetupAuth": {
+    "description": "Menu subtitle for setting up authentication"
+  },
+  "menuLimitPower": "Ausgangsleistung begrenzen",
+  "@menuLimitPower": {
+    "description": "Menu subtitle for limiting power"
+  },
+  "menuLampAndEmergency": "Lampe und Notstromsteckdose",
+  "@menuLampAndEmergency": {
+    "description": "Menu subtitle for lamp and emergency outlet"
+  },
+  "menuToggleInverters": "Schaltet alle Wechselrichter",
+  "@menuToggleInverters": {
+    "description": "Menu subtitle for toggling inverters"
+  },
+  "menuConfigureDevice": "Gerät konfigurieren",
+  "@menuConfigureDevice": {
+    "description": "Menu subtitle for configuring device"
+  },
+  "intervalUpdateInterval": "Aktualisierungsintervall",
+  "@intervalUpdateInterval": {
+    "description": "Label for update interval"
+  },
+  "intervalSeconds": "Sekunden",
+  "@intervalSeconds": {
+    "description": "Label for seconds"
+  },
+  "intervalEnterInterval": "Intervall (Sekunden)",
+  "@intervalEnterInterval": {
+    "description": "Hint for entering interval in seconds"
+  },
+  "intervalDefaultRange": "Standard: {defaultValue} Sekunden (Bereich: {min}-{max})",
+  "@intervalDefaultRange": {
+    "description": "Help text for interval default and range",
+    "placeholders": {
+      "defaultValue": {
+        "type": "int"
+      },
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalDescription": "Zeitintervall zwischen Datenabrufen vom Gerät",
+  "@intervalDescription": {
+    "description": "Description for interval setting"
+  },
+  "systemGrid": "Netz",
+  "@systemGrid": {
+    "description": "System metric: Grid"
+  },
+  "systemConsumer": "Verbraucher",
+  "@systemConsumer": {
+    "description": "System metric: Consumer"
+  },
+  "systemAdditionalLoad": "Zusätzliche Last",
+  "@systemAdditionalLoad": {
+    "description": "System metric: Additional load"
+  },
+  "systemInverter": "Wechselrichter",
+  "@systemInverter": {
+    "description": "Label for inverter in system view"
+  },
+  "systemBattery": "Batterie",
+  "@systemBattery": {
+    "description": "System metric: Battery"
+  },
+  "systemSolarPanels": "Solarmodule",
+  "@systemSolarPanels": {
+    "description": "Label for solar panels in system view"
+  },
+  "deviceOff": "Aus",
+  "@deviceOff": {
+    "description": "Label for device off state"
+  },
+  "deviceOn": "Ein",
+  "@deviceOn": {
+    "description": "Label for device on state"
+  },
+  "deviceAuto": "Automatisch",
+  "@deviceAuto": {
+    "description": "Label for device auto mode"
+  },
+  "deviceManual": "Manuell",
+  "@deviceManual": {
+    "description": "Label for device manual mode"
+  },
+  "deviceResetToDefaults": "Auf Standardwerte zurücksetzen",
+  "@deviceResetToDefaults": {
+    "description": "Label for resetting to defaults"
+  },
+  "deviceFactoryReset": "Werkseinstellungen",
+  "@deviceFactoryReset": {
+    "description": "Label for factory reset"
+  },
+  "powerRange": "Bereich: {min} - {max} W",
+  "@powerRange": {
+    "description": "Label for power range",
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "powerLimit": "Leistungsgrenze",
+  "@powerLimit": {
+    "description": "Label for power limit"
+  },
+  "powerOutput": "Ausgangsleistung",
+  "@powerOutput": {
+    "description": "Label for power output"
+  },
+  "powerInput": "Eingangsleistung",
+  "@powerInput": {
+    "description": "Label for power input"
+  },
+  "powerConsumption": "Verbrauch",
+  "@powerConsumption": {
+    "description": "Label for power consumption"
+  },
+  "tabDevices": "Geräte",
+  "@tabDevices": {
+    "description": "Label for devices tab"
+  },
+  "tabNetwork": "Netzwerk",
+  "@tabNetwork": {
+    "description": "Label for network tab"
+  },
+  "tabBluetooth": "Bluetooth",
+  "@tabBluetooth": {
+    "description": "Label for bluetooth tab"
+  },
+  "tabSystems": "Systeme",
+  "@tabSystems": {
+    "description": "Label for systems tab"
+  },
+  "tabSettings": "Einstellungen",
+  "@tabSettings": {
+    "description": "Label for settings tab"
+  },
+  "miscRange": "Bereich",
+  "@miscRange": {
+    "description": "Label for range"
+  },
+  "miscDefault": "Standard",
+  "@miscDefault": {
+    "description": "Label for default"
+  },
+  "miscOptional": "Optional",
+  "@miscOptional": {
+    "description": "Label for optional"
+  },
+  "miscRequired": "Erforderlich",
+  "@miscRequired": {
+    "description": "Label for required"
+  },
+  "actionRemoveDevice": "Gerät entfernen",
+  "@actionRemoveDevice": {
+    "description": "Action to remove a device"
+  },
+  "confirmRemoveDevice": "Möchten Sie \"{deviceName}\" wirklich entfernen?",
+  "@confirmRemoveDevice": {
+    "description": "Confirmation message for removing a device",
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRemove": "Entfernen",
+  "@actionRemove": {
+    "description": "Remove action button"
+  },
+  "errorWhileRemoving": "Fehler beim Entfernen: {error}",
+  "@errorWhileRemoving": {
+    "description": "Error message when removing fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "actionCreateNewSystem": "Neues System erstellen",
+  "@actionCreateNewSystem": {
+    "description": "Action to create a new system"
+  },
+  "formSystemName": "System-Name",
+  "@formSystemName": {
+    "description": "Form label for system name"
+  },
+  "actionCreate": "Erstellen",
+  "@actionCreate": {
+    "description": "Create action button"
+  },
+  "screenMyDevices": "Meine Geräte",
+  "@screenMyDevices": {
+    "description": "Title for my devices screen"
+  },
+  "screenSystems": "Systeme",
+  "@screenSystems": {
+    "description": "Title for systems screen"
+  },
+  "actionLiveCharts": "Live-Diagramme",
+  "@actionLiveCharts": {
+    "description": "Action for live charts"
+  },
+  "actionMoreFunctions": "Weitere Funktionen",
+  "@actionMoreFunctions": {
+    "description": "Action for more functions"
+  },
+  "emptyStateNoDevices": "Keine Geräte",
+  "@emptyStateNoDevices": {
+    "description": "Empty state title when no devices"
+  },
+  "emptyStateAddFirstDevice": "Fügen Sie Ihr erstes Gerät hinzu",
+  "@emptyStateAddFirstDevice": {
+    "description": "Empty state message to add first device"
+  },
+  "actionAddDevice": "Gerät hinzufügen",
+  "@actionAddDevice": {
+    "description": "Action to add a device"
+  },
+  "labelDevice": "Gerät",
+  "@labelDevice": {
+    "description": "Label for device"
+  },
+  "emptyStateNoDeviceSelected": "Kein Gerät ausgewählt",
+  "@emptyStateNoDeviceSelected": {
+    "description": "Empty state when no device is selected"
+  },
+  "actionAddSystem": "System hinzufügen",
+  "@actionAddSystem": {
+    "description": "Action to add a system"
+  },
+  "labelPermissions": "Berechtigungen",
+  "@labelPermissions": {
+    "description": "Label for permissions"
+  },
+  "errorNoWifiLanConnection": "Netzwerk-Scan ist nur über WiFi oder LAN möglich.\n\nBitte verbinden Sie sich mit einem WiFi-Netzwerk oder LAN und versuchen Sie es erneut.",
+  "@errorNoWifiLanConnection": {
+    "description": "Error when no WiFi/LAN connection"
+  },
+  "titleNoWifiLanConnection": "Keine WiFi/LAN-Verbindung",
+  "@titleNoWifiLanConnection": {
+    "description": "Title for no WiFi/LAN connection error"
+  },
+  "errorNoPrivateNetwork": "Keine privaten Netzwerke gefunden.\n\nGefundene IPs: {ips}\n\nStellen Sie sicher, dass Sie mit einem lokalen Netzwerk verbunden sind.",
+  "@errorNoPrivateNetwork": {
+    "description": "Error when no private network found",
+    "placeholders": {
+      "ips": {
+        "type": "String"
+      }
+    }
+  },
+  "titleNoPrivateNetwork": "Kein privates Netzwerk",
+  "@titleNoPrivateNetwork": {
+    "description": "Title for no private network error"
+  },
+  "errorNetworkScan": "Netzwerk-Scan Fehler",
+  "@errorNetworkScan": {
+    "description": "Generic network scan error"
+  },
+  "errorNotConnectedToWifi": "Nicht mit WiFi verbunden. Bitte WiFi aktivieren.",
+  "@errorNotConnectedToWifi": {
+    "description": "Error message when not connected to WiFi"
+  },
+  "errorNetworkScanWithDetails": "Netzwerk-Scan Fehler: {error}",
+  "@errorNetworkScanWithDetails": {
+    "description": "Network scan error with details",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "warningPublicNetwork": "Ihre aktuelle IP-Adresse scheint nicht in einem privaten Netzwerk zu sein.\n\nAktuelle IP: {currentIp}\n\nDas Scannen von öffentlichen IP-Bereichen ist möglicherweise nicht sinnvoll. Stellen Sie sicher, dass Sie mit einem lokalen WiFi-Netzwerk verbunden sind.\n\nMöchten Sie trotzdem fortfahren?",
+  "@warningPublicNetwork": {
+    "description": "Warning about public network",
+    "placeholders": {
+      "currentIp": {
+        "type": "String"
+      }
+    }
+  },
+  "titleWarningPublicNetwork": "Warnung: Öffentliches Netzwerk",
+  "@titleWarningPublicNetwork": {
+    "description": "Title for public network warning"
+  },
+  "actionOkContinue": "OK, Fortfahren",
+  "@actionOkContinue": {
+    "description": "OK, continue action"
+  },
+  "messageIpUpdated": "IP-Adresse wurde von {oldIp}:{oldPort} auf {newIp}:{newPort} aktualisiert",
+  "@messageIpUpdated": {
+    "description": "Message when IP and port updated",
+    "placeholders": {
+      "oldIp": {
+        "type": "String"
+      },
+      "oldPort": {
+        "type": "String"
+      },
+      "newIp": {
+        "type": "String"
+      },
+      "newPort": {
+        "type": "String"
+      }
+    }
+  },
+  "messageIpAddressUpdated": "IP-Adresse wurde von {oldIp} auf {newIp} aktualisiert",
+  "@messageIpAddressUpdated": {
+    "description": "Message when IP address updated",
+    "placeholders": {
+      "oldIp": {
+        "type": "String"
+      },
+      "newIp": {
+        "type": "String"
+      }
+    }
+  },
+  "messagePortUpdated": "Port wurde von {oldPort} auf {newPort} aktualisiert",
+  "@messagePortUpdated": {
+    "description": "Message when port was updated",
+    "placeholders": {
+      "oldPort": {
+        "type": "String"
+      },
+      "newPort": {
+        "type": "String"
+      }
+    }
+  },
+  "messageSavingDevice": "Gerät wird gespeichert...",
+  "@messageSavingDevice": {
+    "description": "Loading message while saving device"
+  },
+  "messageConnectingToDevice": "Verbinde zu Gerät...",
+  "@messageConnectingToDevice": {
+    "description": "Loading message while connecting to device"
+  },
+  "labelDeviceKnown": "Gerät bekannt",
+  "@labelDeviceKnown": {
+    "description": "Label for known device"
+  },
+  "labelKnownNewAddress": "Bekannt (neue Adresse)",
+  "@labelKnownNewAddress": {
+    "description": "Label for known device with new address"
+  },
+  "labelFound": "Gefunden",
+  "@labelFound": {
+    "description": "Label for found devices"
+  },
+  "labelKnownDevices": "Bekannte Geräte",
+  "@labelKnownDevices": {
+    "description": "Label for known devices"
+  },
+  "labelTested": "Geprüft",
+  "@labelTested": {
+    "description": "Label for tested devices"
+  },
+  "labelRemaining": "Verbleibend",
+  "@labelRemaining": {
+    "description": "Label for remaining devices"
+  },
+  "labelKnown": "Bekannt",
+  "@labelKnown": {
+    "description": "Label for known"
+  },
+  "labelLeft": "Übrig",
+  "@labelLeft": {
+    "description": "Label for devices left"
+  },
+  "actionUpdateIp": "IP Aktualisieren",
+  "@actionUpdateIp": {
+    "description": "Action to update IP address"
+  },
+  "actionAddDevices": "Geräte hinzufügen",
+  "@actionAddDevices": {
+    "description": "Action to add devices"
+  },
+  "actionInspectDevice": "Gerät inspizieren",
+  "@actionInspectDevice": {
+    "description": "Action to inspect device"
+  },
+  "actionChooseRole": "Rolle wählen",
+  "@actionChooseRole": {
+    "description": "Action to choose a role"
+  },
+  "actionCreateSystem": "System erstellen",
+  "@actionCreateSystem": {
+    "description": "Action to create a system"
+  },
+  "actionDeleteSystem": "System löschen",
+  "@actionDeleteSystem": {
+    "description": "Action to delete a system"
+  },
+  "messageDeviceHasNoRoleConfig": "Gerät hat keine Rollen-Konfiguration",
+  "@messageDeviceHasNoRoleConfig": {
+    "description": "Error message when device has no role configuration"
+  },
+  "messageDeviceHasNoConfigurableRoles": "Gerät hat keine konfigurierbaren Rollen",
+  "@messageDeviceHasNoConfigurableRoles": {
+    "description": "Error message when device has no configurable roles"
+  },
+  "messageDeviceAlreadyInSystem": "Gerät bereits im System",
+  "@messageDeviceAlreadyInSystem": {
+    "description": "Warning message when device is already in system"
+  },
+  "messageDeviceAddedWithRoles": "Gerät \"{name}\" hinzugefügt mit Rolle(n): {roles}",
+  "@messageDeviceAddedWithRoles": {
+    "description": "Success message when device is added with roles",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
+  "messageDeviceRemoved": "Gerät entfernt",
+  "@messageDeviceRemoved": {
+    "description": "Success message when device is removed"
+  },
+  "messageNoDevicesInSystem": "Keine Geräte im System",
+  "@messageNoDevicesInSystem": {
+    "description": "Message shown when system has no devices"
+  },
+  "messageAddDevicesToSeeMetrics": "Fügen Sie Geräte hinzu, um Metriken zu sehen.",
+  "@messageAddDevicesToSeeMetrics": {
+    "description": "Help message prompting to add devices"
+  },
+  "messageNoActiveDevicesWithData": "Keine aktiven Geräte mit Daten",
+  "@messageNoActiveDevicesWithData": {
+    "description": "Message shown when no devices have data"
+  },
+  "messageNoSystems": "Keine Systeme",
+  "@messageNoSystems": {
+    "description": "Message shown when there are no systems"
+  },
+  "messageCreateYourFirstSystem": "Erstellen Sie Ihr erstes System",
+  "@messageCreateYourFirstSystem": {
+    "description": "Prompt to create first system"
+  },
+  "confirmRemoveDeviceWithRoles": "Möchten Sie \"{name}\" mit {count} Rolle(n) ({roles}) aus diesem System entfernen?",
+  "@confirmRemoveDeviceWithRoles": {
+    "description": "Confirmation dialog for removing device with roles",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveUnknownDeviceWithRoles": "Möchten Sie dieses Gerät mit {count} Rolle(n) ({roles}) aus dem System entfernen?",
+  "@confirmRemoveUnknownDeviceWithRoles": {
+    "description": "Confirmation dialog for removing unknown device",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmDeleteSystem": "Möchten Sie \"{name}\" wirklich löschen?",
+  "@confirmDeleteSystem": {
+    "description": "Confirmation dialog for deleting system",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "screenEditSystem": "{name} bearbeiten",
+  "@screenEditSystem": {
+    "description": "Screen title for editing system",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "screenCreateNewSystem": "Neues System erstellen",
+  "@screenCreateNewSystem": {
+    "description": "Screen title for creating new system"
+  },
+  "labelRoles": "Rollen: {roles}",
+  "@labelRoles": {
+    "description": "Label for roles",
+    "placeholders": {
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
+  "labelDevicesCount": "{count} Geräte",
+  "@labelDevicesCount": {
+    "description": "Label for device count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelDevicesWithCount": "Geräte ({count})",
+  "@labelDevicesWithCount": {
+    "description": "Label with device count in parentheses",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusDeviceNotFoundWithSn": "Gerät {sn} nicht gefunden",
+  "@statusDeviceNotFoundWithSn": {
+    "description": "Status message when device with serial number is not found",
+    "placeholders": {
+      "sn": {
+        "type": "String"
+      }
+    }
+  },
+  "systemSolarProduction": "Solar-Produktion",
+  "@systemSolarProduction": {
+    "description": "System metric: Solar production"
+  },
+  "systemSolarToGrid": "Solar ins Netz",
+  "@systemSolarToGrid": {
+    "description": "System metric: Solar to grid"
+  },
+  "active": "aktiv",
+  "@active": {
+    "description": "Label for active status"
+  },
+  "errorNoWifiLanConnectionTitle": "Keine WiFi/LAN-Verbindung",
+  "@errorNoWifiLanConnectionTitle": {
+    "description": "Error title for no WiFi/LAN connection"
+  },
+  "errorNoPrivateNetworkTitle": "Kein privates Netzwerk",
+  "@errorNoPrivateNetworkTitle": {
+    "description": "Error title for no private network"
+  },
+  "messageDevicesFoundInNetwork": "{count} Geräte im Netzwerk gefunden",
+  "@messageDevicesFoundInNetwork": {
+    "description": "Message showing number of devices found in network",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorNetworkScanError": "Netzwerk-Scan Fehler",
+  "@errorNetworkScanError": {
+    "description": "Error message for network scan error"
+  },
+  "errorNetworkScanFailed": "Netzwerk-Scan Fehler: {error}",
+  "@errorNetworkScanFailed": {
+    "description": "Error message for network scan failure",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "warningPublicNetworkTitle": "Warnung: Öffentliches Netzwerk",
+  "@warningPublicNetworkTitle": {
+    "description": "Warning title for public network"
+  },
+  "actionContinueAnyway": "OK, Fortfahren",
+  "@actionContinueAnyway": {
+    "description": "Action to continue anyway"
+  },
+  "messageIpOnlyUpdated": "IP-Adresse wurde von {oldIp} auf {newIp} aktualisiert",
+  "@messageIpOnlyUpdated": {
+    "description": "Message when only IP was updated",
+    "placeholders": {
+      "oldIp": {
+        "type": "String"
+      },
+      "newIp": {
+        "type": "String"
+      }
+    }
+  },
+  "labelKnownDevice": "Gerät bekannt",
+  "@labelKnownDevice": {
+    "description": "Label for known device"
+  },
+  "device": "Gerät",
+  "@device": {
+    "description": "Generic device label"
+  },
+  "actionUpdate": "Aktualisieren",
+  "@actionUpdate": {
+    "description": "Action to update"
+  },
+  "startScanToFindDevices": "Starten Sie einen Scan um Geräte zu finden",
+  "@startScanToFindDevices": {
+    "description": "Prompt to start scan to find devices"
+  },
+  "messageSearchingForKnownDevices": "Suche nach bekannten Geräten...",
+  "@messageSearchingForKnownDevices": {
+    "description": "Message when searching for known devices"
+  },
+  "bluetooth": "Bluetooth",
+  "@bluetooth": {
+    "description": "Bluetooth label"
+  },
+  "network": "Netzwerk",
+  "@network": {
+    "description": "Network label"
+  },
+  "labelBluetoothDevices": "Bluetooth-Geräte",
+  "@labelBluetoothDevices": {
+    "description": "Label for Bluetooth devices"
+  },
+  "helpScanForNearbyDevices": "Scannen Sie nach Geräten in der Nähe (Zendure, Shelly)",
+  "@helpScanForNearbyDevices": {
+    "description": "Help text for scanning nearby devices"
+  },
+  "messageScanning": "Scannt...",
+  "@messageScanning": {
+    "description": "Message when scanning"
+  },
+  "actionBluetoothScan": "Bluetooth-Scan",
+  "@actionBluetoothScan": {
+    "description": "Action to perform Bluetooth scan"
+  },
+  "labelNetworkDevices": "Netzwerk-Geräte",
+  "@labelNetworkDevices": {
+    "description": "Label for network devices"
+  },
+  "helpScanLocalNetwork": "Scannen Sie Ihr lokales Netzwerk nach Geräten",
+  "@helpScanLocalNetwork": {
+    "description": "Help text for scanning local network"
+  },
+  "actionNetworkScan": "Netzwerk-Scan",
+  "@actionNetworkScan": {
+    "description": "Action to perform network scan"
+  },
+  "actionManual": "Manuell",
+  "@actionManual": {
+    "description": "Manual action"
+  },
+  "remove": "Entfernen",
+  "@remove": {
+    "description": "Remove action"
+  },
+  "create": "Erstellen",
+  "@create": {
+    "description": "Create action"
+  },
+  "screenDeviceInfo": "Geräteinformationen",
+  "@screenDeviceInfo": {
+    "description": "Screen title for device information"
+  },
+  "messageNoInformationAvailable": "Keine Informationen verfügbar",
+  "@messageNoInformationAvailable": {
+    "description": "Message when no information is available"
+  },
+  "yes": "Ja",
+  "@yes": {
+    "description": "Yes label"
+  },
+  "no": "Nein",
+  "@no": {
+    "description": "No label"
+  },
+  "screenLiveGraphs": "Live-Diagramme",
+  "@screenLiveGraphs": {
+    "description": "Title for live graphs screen"
+  },
+  "screenAppInfo": "App-Informationen",
+  "@screenAppInfo": {
+    "description": "Title for app info screen"
+  },
+  "screenPowerLimit": "Leistungslimit einstellen",
+  "@screenPowerLimit": {
+    "description": "Title for power limit screen"
+  },
+  "screenAdvancedPowerSettings": "Erweiterte Leistungseinstellungen",
+  "@screenAdvancedPowerSettings": {
+    "description": "Title for advanced power settings screen"
+  },
+  "screenPortConfiguration": "{portName}",
+  "@screenPortConfiguration": {
+    "description": "Title for port configuration screen",
+    "placeholders": {
+      "portName": {
+        "type": "String"
+      }
+    }
+  },
+  "screenPercentagePowerLimit": "Leistungsbegrenzung",
+  "@screenPercentagePowerLimit": {
+    "description": "Title for percentage power limit screen"
+  },
+  "screenOnlineMonitoring": "Online-Monitoring konfigurieren",
+  "@screenOnlineMonitoring": {
+    "description": "Title for online monitoring screen"
+  },
+  "screenBatterySoc": "Batterie-Limits einstellen",
+  "@screenBatterySoc": {
+    "description": "Title for battery SOC screen"
+  },
+  "screenPower": "Leistung einstellen",
+  "@screenPower": {
+    "description": "Title for power screen"
+  },
+  "screenZendureWifiMqtt": "MQTT Konfiguration",
+  "@screenZendureWifiMqtt": {
+    "description": "Title for Zendure WiFi MQTT configuration screen"
+  },
+  "screenOpenDtuOnlineMonitoring": "Online-Monitoring",
+  "@screenOpenDtuOnlineMonitoring": {
+    "description": "Title for OpenDTU online monitoring screen"
+  },
+  "validationSsidRequired": "SSID darf nicht leer sein",
+  "@validationSsidRequired": {
+    "description": "Validation error for empty SSID"
+  },
+  "validationPasswordRequired": "Passwort darf nicht leer sein",
+  "@validationPasswordRequired": {
+    "description": "Validation error for empty password"
+  },
+  "validationPortRequired": "Port darf nicht leer sein",
+  "@validationPortRequired": {
+    "description": "Validation error for empty port"
+  },
+  "validationPortRange": "Port muss eine Zahl zwischen 1 und 65535 sein",
+  "@validationPortRange": {
+    "description": "Validation error for port range"
+  },
+  "validationUsernameRequired": "Benutzername darf nicht leer sein",
+  "@validationUsernameRequired": {
+    "description": "Validation error for empty username"
+  },
+  "validationPasswordEmpty": "Passwort darf nicht leer sein",
+  "@validationPasswordEmpty": {
+    "description": "Validation error for empty password field"
+  },
+  "validationMinSocLessThanMax": "Minimum SOC muss kleiner als Maximum SOC sein",
+  "@validationMinSocLessThanMax": {
+    "description": "Validation error for min/max SOC"
+  },
+  "validationPrimaryServerRequired": "Primärer Server URL ist erforderlich",
+  "@validationPrimaryServerRequired": {
+    "description": "Validation error for empty primary server"
+  },
+  "validationPrimaryUrlInvalid": "Ungültige primäre Server URL (kein Protokoll http:// oder https:// verwenden)",
+  "@validationPrimaryUrlInvalid": {
+    "description": "Validation error for invalid primary URL"
+  },
+  "validationSystemIdRequired": "System-ID ist erforderlich",
+  "@validationSystemIdRequired": {
+    "description": "Validation error for empty system ID"
+  },
+  "validationTokenRequired": "Token/Passwort ist erforderlich",
+  "@validationTokenRequired": {
+    "description": "Validation error for empty token"
+  },
+  "validationSecondaryUrlInvalid": "Ungültige sekundäre Server URL (kein Protokoll http:// oder https:// verwenden)",
+  "@validationSecondaryUrlInvalid": {
+    "description": "Validation error for invalid secondary URL"
+  },
+  "validationPrimaryPortInvalid": "Ungültiger primärer Port (1-65535)",
+  "@validationPrimaryPortInvalid": {
+    "description": "Validation error for invalid primary port"
+  },
+  "validationSecondaryPortInvalid": "Ungültiger sekundärer Port (1-65535)",
+  "@validationSecondaryPortInvalid": {
+    "description": "Validation error for invalid secondary port"
+  },
+  "validationUploadIntervalRange": "Upload-Intervall muss zwischen 1 und 3600 Sekunden liegen",
+  "@validationUploadIntervalRange": {
+    "description": "Validation error for upload interval range"
+  },
+  "validationServerAIpRequired": "Server A: IP-Adresse oder Domain muss angegeben werden",
+  "@validationServerAIpRequired": {
+    "description": "Validation error for empty server A IP"
+  },
+  "validationServerAIpInvalid": "Server A: Ungültige IP-Adresse",
+  "@validationServerAIpInvalid": {
+    "description": "Validation error for invalid server A IP"
+  },
+  "validationServerAPortRange": "Server A: Port muss zwischen 1 und 65534 liegen",
+  "@validationServerAPortRange": {
+    "description": "Validation error for server A port range"
+  },
+  "validationServerBIpRequired": "Server B: IP-Adresse oder Domain muss angegeben werden",
+  "@validationServerBIpRequired": {
+    "description": "Validation error for empty server B IP"
+  },
+  "validationServerBIpInvalid": "Server B: Ungültige IP-Adresse",
+  "@validationServerBIpInvalid": {
+    "description": "Validation error for invalid server B IP"
+  },
+  "validationServerBPortRange": "Server B: Port muss zwischen 1 und 65534 liegen",
+  "@validationServerBPortRange": {
+    "description": "Validation error for server B port range"
+  },
+  "messageCopiedToClipboard": "In Zwischenablage kopiert",
+  "@messageCopiedToClipboard": {
+    "description": "Success message when copied to clipboard"
+  },
+  "messageWifiConfigSent": "WiFi-Konfiguration erfolgreich gesendet!",
+  "@messageWifiConfigSent": {
+    "description": "Success message when WiFi config sent"
+  },
+  "messagePortConfigured": "{portName} erfolgreich konfiguriert",
+  "@messagePortConfigured": {
+    "description": "Success message when port configured",
+    "placeholders": {
+      "portName": {
+        "type": "String"
+      }
+    }
+  },
+  "messagePowerLimitSetWithValue": "Leistungseinstellungen erfolgreich gesetzt: {value} W",
+  "@messagePowerLimitSetWithValue": {
+    "description": "Success message when power limit set with value",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "messagePowerPercentageSet": "Leistungsbegrenzung auf {percentage}% gesetzt",
+  "@messagePowerPercentageSet": {
+    "description": "Success message when power percentage set",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "messageBatteryLimitsSet": "Batterie-Limits erfolgreich gesetzt: Min {min}%, Max {max}%",
+  "@messageBatteryLimitsSet": {
+    "description": "Success message when battery limits set",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "messageOnlineMonitoringConfigured": "Online-Monitoring erfolgreich konfiguriert",
+  "@messageOnlineMonitoringConfigured": {
+    "description": "Success message when online monitoring configured"
+  },
+  "messageSettingUpdated": "{settingName} wurde aktualisiert",
+  "@messageSettingUpdated": {
+    "description": "Success message when setting updated",
+    "placeholders": {
+      "settingName": {
+        "type": "String"
+      }
+    }
+  },
+  "messageAuthEnabled": "Authentifizierung wurde aktiviert",
+  "@messageAuthEnabled": {
+    "description": "Success message when authentication enabled"
+  },
+  "messageAuthDisabled": "Authentifizierung wurde deaktiviert",
+  "@messageAuthDisabled": {
+    "description": "Success message when authentication disabled"
+  },
+  "errorWhileSending": "Fehler beim Senden: {error}",
+  "@errorWhileSending": {
+    "description": "Error message when sending fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorConfiguringPort": "Fehler beim Konfigurieren des Ports: {error}",
+  "@errorConfiguringPort": {
+    "description": "Error message when configuring port fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSettingPowerLimit": "Fehler beim Setzen der Einstellungen: {error}",
+  "@errorSettingPowerLimit": {
+    "description": "Error message when setting power limit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSettingPercentageLimit": "Fehler beim Setzen der Leistungsbegrenzung: {error}",
+  "@errorSettingPercentageLimit": {
+    "description": "Error message when setting percentage limit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSettingBatteryLimits": "Fehler beim Setzen der Batterie-Limits: {error}",
+  "@errorSettingBatteryLimits": {
+    "description": "Error message when setting battery limits fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorConfiguringOnlineMonitoring": "Fehler beim Konfigurieren des Online-Monitorings: {error}",
+  "@errorConfiguringOnlineMonitoring": {
+    "description": "Error message when configuring online monitoring fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorChangingSetting": "Fehler beim Ändern der Einstellung: {error}",
+  "@errorChangingSetting": {
+    "description": "Error message when changing setting fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingAuth": "Fehler beim Speichern der Authentifizierung: {error}",
+  "@errorSavingAuth": {
+    "description": "Error message when saving authentication fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionNetworkSetup": "Netzwerk einrichten",
+  "@sectionNetworkSetup": {
+    "description": "Section title for network setup"
+  },
+  "sectionMqttConfig": "MQTT Konfiguration",
+  "@sectionMqttConfig": {
+    "description": "Section title for MQTT configuration"
+  },
+  "sectionNote": "Hinweis",
+  "@sectionNote": {
+    "description": "Section title for note"
+  },
+  "sectionLimitType": "Limit-Typ",
+  "@sectionLimitType": {
+    "description": "Section title for limit type"
+  },
+  "sectionCurrentValue": "Aktueller Wert",
+  "@sectionCurrentValue": {
+    "description": "Section title for current value"
+  },
+  "sectionAdjustLimit": "Limit anpassen",
+  "@sectionAdjustLimit": {
+    "description": "Section title for adjust limit"
+  },
+  "sectionCurrentSettings": "Aktuelle Einstellungen",
+  "@sectionCurrentSettings": {
+    "description": "Section title for current settings"
+  },
+  "sectionMaxInverterPower": "Max Wechselrichter Leistung",
+  "@sectionMaxInverterPower": {
+    "description": "Section title for max inverter power"
+  },
+  "sectionPreciseInput": "Präzise Eingabe",
+  "@sectionPreciseInput": {
+    "description": "Section title for precise input"
+  },
+  "sectionGridFeedback": "Netzrückspeisung",
+  "@sectionGridFeedback": {
+    "description": "Section title for grid feedback"
+  },
+  "sectionGridStandard": "Netzstandard",
+  "@sectionGridStandard": {
+    "description": "Section title for grid standard"
+  },
+  "sectionPortNumber": "Port-Nummer",
+  "@sectionPortNumber": {
+    "description": "Section title for port number"
+  },
+  "sectionPercentageLimit": "Leistungsbegrenzung in Prozent",
+  "@sectionPercentageLimit": {
+    "description": "Section title for percentage limit"
+  },
+  "sectionWattLimit": "Leistungsbegrenzung in Watt",
+  "@sectionWattLimit": {
+    "description": "Section title for watt limit"
+  },
+  "sectionDeviceInfo": "Geräteinformationen",
+  "@sectionDeviceInfo": {
+    "description": "Section title for device information"
+  },
+  "sectionOnlineMonitoring": "Online-Monitoring",
+  "@sectionOnlineMonitoring": {
+    "description": "Section title for online monitoring"
+  },
+  "sectionPrimaryServer": "Primärer Server",
+  "@sectionPrimaryServer": {
+    "description": "Section title for primary server"
+  },
+  "sectionSecondaryServer": "Sekundärer Server",
+  "@sectionSecondaryServer": {
+    "description": "Section title for secondary server"
+  },
+  "sectionCredentials": "Zugangsdaten",
+  "@sectionCredentials": {
+    "description": "Section title for credentials"
+  },
+  "sectionServerA": "Server A (Hauptserver)",
+  "@sectionServerA": {
+    "description": "Section title for server A"
+  },
+  "sectionServerB": "Server B (Sekundärserver)",
+  "@sectionServerB": {
+    "description": "Section title for server B"
+  },
+  "sectionGeneralSettings": "Allgemeine Einstellungen",
+  "@sectionGeneralSettings": {
+    "description": "Section title for general settings"
+  },
+  "sectionCurrentValues": "Aktuelle Werte",
+  "@sectionCurrentValues": {
+    "description": "Section title for current values"
+  },
+  "sectionMinSoc": "Minimum SOC",
+  "@sectionMinSoc": {
+    "description": "Section title for minimum SOC"
+  },
+  "sectionMaxSoc": "Maximum SOC",
+  "@sectionMaxSoc": {
+    "description": "Section title for maximum SOC"
+  },
+  "sectionAuthConfig": "Authentifizierung konfigurieren",
+  "@sectionAuthConfig": {
+    "description": "Section title for authentication configuration"
+  },
+  "sectionUsername": "Benutzername",
+  "@sectionUsername": {
+    "description": "Section title for username"
+  },
+  "sectionPassword": "Passwort",
+  "@sectionPassword": {
+    "description": "Section title for password"
+  },
+  "buttonCopy": "Kopieren",
+  "@buttonCopy": {
+    "description": "Button label for copy"
+  },
+  "buttonConfigureWifi": "WiFi konfigurieren",
+  "@buttonConfigureWifi": {
+    "description": "Button label for configure WiFi"
+  },
+  "buttonSavePowerLimit": "Leistungsbegrenzung speichern",
+  "@buttonSavePowerLimit": {
+    "description": "Button label for save power limit"
+  },
+  "buttonDeactivate": "Deaktivieren",
+  "@buttonDeactivate": {
+    "description": "Button label for deactivate"
+  },
+  "segmentDisabled": "Deaktiviert",
+  "@segmentDisabled": {
+    "description": "Segment label for disabled"
+  },
+  "segmentAllowed": "Erlaubt",
+  "@segmentAllowed": {
+    "description": "Segment label for allowed"
+  },
+  "segmentForbidden": "Verboten",
+  "@segmentForbidden": {
+    "description": "Segment label for forbidden"
+  },
+  "segmentGermany": "Deutschland",
+  "@segmentGermany": {
+    "description": "Segment label for Germany"
+  },
+  "segmentFrance": "Frankreich",
+  "@segmentFrance": {
+    "description": "Segment label for France"
+  },
+  "segmentAustria": "Österreich",
+  "@segmentAustria": {
+    "description": "Segment label for Austria"
+  },
+  "labelMaxInverterPower": "Max Wechselrichter Leistung",
+  "@labelMaxInverterPower": {
+    "description": "Label for max inverter power"
+  },
+  "labelGridFeedback": "Rückspeisung",
+  "@labelGridFeedback": {
+    "description": "Label for grid feedback"
+  },
+  "labelGridStandard": "Netzstandard",
+  "@labelGridStandard": {
+    "description": "Label for grid standard"
+  },
+  "labelPowerInWatts": "Leistung in Watt",
+  "@labelPowerInWatts": {
+    "description": "Label for power in watts"
+  },
+  "labelPercent": "Prozent",
+  "@labelPercent": {
+    "description": "Label for percent"
+  },
+  "labelWatt": "Watt",
+  "@labelWatt": {
+    "description": "Label for watt"
+  },
+  "labelMinimum": "Minimum",
+  "@labelMinimum": {
+    "description": "Label for minimum"
+  },
+  "labelMaximum": "Maximum",
+  "@labelMaximum": {
+    "description": "Label for maximum"
+  },
+  "labelMinSoc": "Min SOC",
+  "@labelMinSoc": {
+    "description": "Label for min SOC"
+  },
+  "labelMaxSoc": "Max SOC",
+  "@labelMaxSoc": {
+    "description": "Label for max SOC"
+  },
+  "labelProtocol": "Protokoll{required}",
+  "@labelProtocol": {
+    "description": "Label for protocol with required marker",
+    "placeholders": {
+      "required": {
+        "type": "String"
+      }
+    }
+  },
+  "labelServerUrl": "Server-URL{required}",
+  "@labelServerUrl": {
+    "description": "Label for server URL with required marker",
+    "placeholders": {
+      "required": {
+        "type": "String"
+      }
+    }
+  },
+  "labelPortField": "Port",
+  "@labelPortField": {
+    "description": "Label for port field"
+  },
+  "labelSystemId": "System-ID *",
+  "@labelSystemId": {
+    "description": "Label for system ID"
+  },
+  "labelToken": "Token/Passwort *",
+  "@labelToken": {
+    "description": "Label for token/password"
+  },
+  "labelUploadInterval": "Upload-Intervall (Sekunden)",
+  "@labelUploadInterval": {
+    "description": "Label for upload interval"
+  },
+  "labelIpAddress": "IP-Adresse",
+  "@labelIpAddress": {
+    "description": "Label for IP address"
+  },
+  "labelDomain": "Domain",
+  "@labelDomain": {
+    "description": "Label for domain"
+  },
+  "labelUsername": "Benutzername",
+  "@labelUsername": {
+    "description": "Label for username"
+  },
+  "labelPassword": "Passwort",
+  "@labelPassword": {
+    "description": "Label for password"
+  },
+  "labelRequiredField": "Erforderlich",
+  "@labelRequiredField": {
+    "description": "Label for required field"
+  },
+  "labelOptionalField": "Optional",
+  "@labelOptionalField": {
+    "description": "Label for optional field"
+  },
+  "labelInputLimit": "Input (Netz → Gerät)",
+  "@labelInputLimit": {
+    "description": "Label for input limit"
+  },
+  "labelOutputLimit": "Output (Gerät → Netz)",
+  "@labelOutputLimit": {
+    "description": "Label for output limit"
+  },
+  "labelUnknown": "Unbekannt",
+  "@labelUnknown": {
+    "description": "Label for unknown"
+  },
+  "helpConnectDeviceToWifi": "Verbinden Sie Ihr Gerät mit Ihrem WLAN-Netzwerk,",
+  "@helpConnectDeviceToWifi": {
+    "description": "Help text for connecting device to WiFi"
+  },
+  "helpWifiSetupInstructions": "• Stellen Sie sicher, dass Ihr Gerät eingeschaltet ist\n• Das WLAN-Passwort wird sicher übertragen\n• Nach erfolgreicher Konfiguration kann es einige Sekunden dauern, bis das Gerät verbunden ist",
+  "@helpWifiSetupInstructions": {
+    "description": "Help text with WiFi setup instructions"
+  },
+  "helpMqttExplanation": "Dies ist für die offizielle App Web-Kommunikation, nicht für lokales MQTT. Bei alten Versionen war es der einzige Weg, um Daten zu bekommen. Nur ändern, wenn Sie wissen, was Sie tun!",
+  "@helpMqttExplanation": {
+    "description": "Help text explaining MQTT configuration"
+  },
+  "helpMqttServerExample": "z.B. broker.example.com:1883",
+  "@helpMqttServerExample": {
+    "description": "Help text with MQTT server example"
+  },
+  "helpPleaseWait": "Bitte warten Sie einen Moment",
+  "@helpPleaseWait": {
+    "description": "Help text asking to wait"
+  },
+  "helpInputNotAvailable": "Input-Limit ist nicht verfügbar",
+  "@helpInputNotAvailable": {
+    "description": "Help text when input limit not available"
+  },
+  "helpPowerRange": "Bereich: 0 - {maxValue} W",
+  "@helpPowerRange": {
+    "description": "Help text showing power range",
+    "placeholders": {
+      "maxValue": {
+        "type": "String"
+      }
+    }
+  },
+  "helpWattValue": "Wert zwischen 1 und 100",
+  "@helpWattValue": {
+    "description": "Help text for watt value range"
+  },
+  "helpMaxWatt": "Max: {maxWatt} W (entspricht 100%)",
+  "@helpMaxWatt": {
+    "description": "Help text showing max watt",
+    "placeholders": {
+      "maxWatt": {
+        "type": "String"
+      }
+    }
+  },
+  "helpWattRounding": "Watt-Werte werden auf volle Prozentschritte gerundet",
+  "@helpWattRounding": {
+    "description": "Help text about watt value rounding"
+  },
+  "helpNominalPower": "Nennleistung: {maxWatt} W",
+  "@helpNominalPower": {
+    "description": "Help text showing nominal power",
+    "placeholders": {
+      "maxWatt": {
+        "type": "String"
+      }
+    }
+  },
+  "helpCurrentLimit": "Aktuelle Begrenzung: {watt} W ({percentage}%)",
+  "@helpCurrentLimit": {
+    "description": "Help text showing current limit",
+    "placeholders": {
+      "watt": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "helpGridFeedbackDescription": "Bestimmt, ob Energie ins Netz eingespeist werden darf",
+  "@helpGridFeedbackDescription": {
+    "description": "Help text describing grid feedback"
+  },
+  "helpGridStandardDescription": "Netzanschluss-Standard für Ihr Land",
+  "@helpGridStandardDescription": {
+    "description": "Help text describing grid standard"
+  },
+  "helpPortRange": "Port muss zwischen 1 und 65535 liegen",
+  "@helpPortRange": {
+    "description": "Help text showing port range"
+  },
+  "helpPortWarning": "• Stellen Sie sicher, dass der Port nicht von anderen Diensten verwendet wird\n• Nach der Konfiguration wird das Gerät möglicherweise neu gestartet\n• Standard-Ports sollten nur geändert werden, wenn notwendig",
+  "@helpPortWarning": {
+    "description": "Help text with port configuration warnings"
+  },
+  "helpCurrentPercentageLimit": "Aktuelle Begrenzung: {limit}%",
+  "@helpCurrentPercentageLimit": {
+    "description": "Help text showing current percentage limit",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "helpServerUrlFormat": "Ohne http:// oder https://",
+  "@helpServerUrlFormat": {
+    "description": "Help text for server URL format"
+  },
+  "helpDefaultPort": "Standard: {port}",
+  "@helpDefaultPort": {
+    "description": "Help text showing default port",
+    "placeholders": {
+      "port": {
+        "type": "String"
+      }
+    }
+  },
+  "helpDefaultPortNote": "Standard-Ports werden nicht in URL angezeigt",
+  "@helpDefaultPortNote": {
+    "description": "Help text about default ports in URL"
+  },
+  "helpConfigureOnlineMonitoring": "Konfigurieren Sie die Server für das Online-Monitoring",
+  "@helpConfigureOnlineMonitoring": {
+    "description": "Help text for configuring online monitoring"
+  },
+  "helpOnlineMonitoringInstructions": "• Geben Sie die URL des Monitoring-Servers ein\n• Tragen Sie Ihre Zugangsdaten ein\n• Optional können Sie einen zweiten Server konfigurieren\n• Das Upload-Intervall bestimmt, wie oft Daten gesendet werden\n• Nach der Konfiguration werden Daten automatisch hochgeladen",
+  "@helpOnlineMonitoringInstructions": {
+    "description": "Help text with online monitoring instructions"
+  },
+  "helpServerExampleIp": "z.B. 192.168.1.100",
+  "@helpServerExampleIp": {
+    "description": "Help text with server IP example"
+  },
+  "helpServerExampleDomain": "z.B. monitoring.example.com",
+  "@helpServerExampleDomain": {
+    "description": "Help text with server domain example"
+  },
+  "helpPortExample": "z.B. 10000",
+  "@helpPortExample": {
+    "description": "Help text with port example"
+  },
+  "helpSystemIdExample": "z.B. 1234",
+  "@helpSystemIdExample": {
+    "description": "Help text with system ID example"
+  },
+  "helpUploadIntervalExample": "z.B. 30",
+  "@helpUploadIntervalExample": {
+    "description": "Help text with upload interval example"
+  },
+  "helpProtocolExample": "z.B. solar.pihost.org",
+  "@helpProtocolExample": {
+    "description": "Help text with protocol example"
+  },
+  "helpOnlineMonitoringDescription": "• Stellen Sie sicher, dass die Server-URLs korrekt sind\n• Optional: Sekundärer Server als Backup\n• Upload-Intervall: 1-3600 Sekunden\n• Änderungen werden sofort übernommen",
+  "@helpOnlineMonitoringDescription": {
+    "description": "Help text describing online monitoring configuration"
+  },
+  "helpManageDeviceSettings": "Verwalten Sie die grundlegenden Einstellungen Ihres Geräts.",
+  "@helpManageDeviceSettings": {
+    "description": "Help text for managing device settings"
+  },
+  "helpNoSettingsAvailable": "Keine Einstellungen verfügbar",
+  "@helpNoSettingsAvailable": {
+    "description": "Help text when no settings available"
+  },
+  "helpSettingsApplyImmediately": "Änderungen werden sofort auf das Gerät übertragen. Einstellungen mit Bestätigungsanforderung zeigen einen Dialog vor der Änderung an.",
+  "@helpSettingsApplyImmediately": {
+    "description": "Help text about settings applying immediately"
+  },
+  "helpConfirmationRequired": "Bestätigung erforderlich",
+  "@helpConfirmationRequired": {
+    "description": "Help text indicating confirmation required"
+  },
+  "helpProtectDevice": "Schützen Sie Ihr Gerät mit Benutzername und Passwort.",
+  "@helpProtectDevice": {
+    "description": "Help text for protecting device"
+  },
+  "helpAuthToggle": "Aktiviert oder deaktiviert die Passwortabfrage für das Gerät",
+  "@helpAuthToggle": {
+    "description": "Help text for authentication toggle"
+  },
+  "helpUsernameCannotChange": "Benutzername kann nicht geändert werden",
+  "@helpUsernameCannotChange": {
+    "description": "Help text when username cannot be changed"
+  },
+  "helpEnterSecurePassword": "Geben Sie ein sicheres Passwort ein",
+  "@helpEnterSecurePassword": {
+    "description": "Help text for entering secure password"
+  },
+  "helpAuthWarning": "Warnung: Wenn die Authentifizierung deaktiviert ist, kann jeder im Netzwerk auf das Gerät zugreifen.",
+  "@helpAuthWarning": {
+    "description": "Help text warning about authentication disabled"
+  },
+  "dialogWifiConfigSending": "WiFi-Konfiguration wird gesendet...",
+  "@dialogWifiConfigSending": {
+    "description": "Dialog message when sending WiFi configuration"
+  },
+  "dialogSettingChanging": "Einstellung wird geändert...",
+  "@dialogSettingChanging": {
+    "description": "Dialog message when changing setting"
+  },
+  "dialogPowerLimitSetting": "Setze Leistungsbegrenzung auf {percentage}%...",
+  "@dialogPowerLimitSetting": {
+    "description": "Dialog message when setting power limit",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogConfirmToggleSetting": "{settingName} {action}?",
+  "@dialogConfirmToggleSetting": {
+    "description": "Dialog title for confirming toggle setting",
+    "placeholders": {
+      "settingName": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogConfirmToggleMessage": "Möchten Sie {settingName} wirklich {action}?",
+  "@dialogConfirmToggleMessage": {
+    "description": "Dialog message for confirming toggle",
+    "placeholders": {
+      "settingName": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogActionEnable": "aktivieren",
+  "@dialogActionEnable": {
+    "description": "Dialog action text for enable"
+  },
+  "dialogActionDisable": "deaktivieren",
+  "@dialogActionDisable": {
+    "description": "Dialog action text for disable"
+  },
+  "dialogDisableAuthTitle": "Authentifizierung deaktivieren?",
+  "@dialogDisableAuthTitle": {
+    "description": "Dialog title for disabling authentication"
+  },
+  "dialogDisableAuthMessage": "Möchten Sie die Authentifizierung wirklich deaktivieren? Das Gerät wird danach ohne Passwortschutz zugänglich sein.",
+  "@dialogDisableAuthMessage": {
+    "description": "Dialog message for disabling authentication"
+  },
+  "infoNoGraphFields": "Dieses Gerät hat keine sichtbaren Diagrammfelder.",
+  "@infoNoGraphFields": {
+    "description": "Info message when no graph fields"
+  },
+  "infoDataRange": "Datenbereich: Letzte 5 Minuten | Aktualisierung: alle 5 Sekunden",
+  "@infoDataRange": {
+    "description": "Info text showing data range"
+  },
+  "infoWattRoundingNote": "Watt-Werte werden auf volle Prozentschritte gerundet",
+  "@infoWattRoundingNote": {
+    "description": "Info note about watt value rounding"
+  },
+  "shellyScriptsScreenTitle": "Scripts & Automationen",
+  "@shellyScriptsScreenTitle": {
+    "description": "Screen title for Shelly scripts list"
+  },
+  "shellyScriptDetailTitle": "Script-Details",
+  "@shellyScriptDetailTitle": {
+    "description": "Screen title for script details"
+  },
+  "shellyScriptConfigTitle": "Parameter konfigurieren",
+  "@shellyScriptConfigTitle": {
+    "description": "Screen title for script parameter configuration"
+  },
+  "shellyScriptLibraryTitle": "Script-Vorlagen",
+  "@shellyScriptLibraryTitle": {
+    "description": "Screen title for script template library"
+  },
+  "shellyScriptPreviewTitle": "Code-Vorschau",
+  "@shellyScriptPreviewTitle": {
+    "description": "Screen title for script code preview"
+  },
+  "shellyScriptUpdateTitle": "Parameter aktualisieren",
+  "@shellyScriptUpdateTitle": {
+    "description": "Screen title for updating script parameters"
+  },
+  "statusActivated": "Aktiviert",
+  "@statusActivated": {
+    "description": "Status label for activated"
+  },
+  "statusDeactivated": "Deaktiviert",
+  "@statusDeactivated": {
+    "description": "Status label for deactivated"
+  },
+  "statusRunning": "Läuft",
+  "@statusRunning": {
+    "description": "Status label for running"
+  },
+  "statusStopped": "Gestoppt",
+  "@statusStopped": {
+    "description": "Status label for stopped"
+  },
+  "shellyScriptsConfigureParams": "Parameter konfigurieren",
+  "@shellyScriptsConfigureParams": {
+    "description": "Button label for configuring parameters"
+  },
+  "shellyScriptsDirectInstall": "Direkt installieren",
+  "@shellyScriptsDirectInstall": {
+    "description": "Button label for direct installation"
+  },
+  "shellyScriptsRepairScript": "Script reparieren (fehlgeschlagenes Update)",
+  "@shellyScriptsRepairScript": {
+    "description": "Button label for repairing failed script"
+  },
+  "shellyScriptsUpgradeVersion": "Auf neue Version aktualisieren",
+  "@shellyScriptsUpgradeVersion": {
+    "description": "Button label for upgrading to new version"
+  },
+  "shellyScriptsLoadingCode": "Lade Script-Code...",
+  "@shellyScriptsLoadingCode": {
+    "description": "Loading message for script code"
+  },
+  "shellyScriptsLoadingCurrent": "Lade aktuelles Script...",
+  "@shellyScriptsLoadingCurrent": {
+    "description": "Loading message for current script"
+  },
+  "shellyScriptsStoppingScript": "Stoppe Script...",
+  "@shellyScriptsStoppingScript": {
+    "description": "Loading message for stopping script"
+  },
+  "shellyScriptsPreparingUpdate": "Bereite Update vor...",
+  "@shellyScriptsPreparingUpdate": {
+    "description": "Loading message for preparing update"
+  },
+  "shellyScriptsUpdatingScript": "Aktualisiere Script...",
+  "@shellyScriptsUpdatingScript": {
+    "description": "Loading message for updating script"
+  },
+  "shellyScriptsFinalizingUpdate": "Finalisiere Update...",
+  "@shellyScriptsFinalizingUpdate": {
+    "description": "Loading message for finalizing update"
+  },
+  "shellyScriptsDeletingScript": "Lösche Script...",
+  "@shellyScriptsDeletingScript": {
+    "description": "Loading message for deleting script"
+  },
+  "shellyScriptsActivatingScript": "Aktiviere Script...",
+  "@shellyScriptsActivatingScript": {
+    "description": "Loading message for activating script"
+  },
+  "shellyScriptsDeactivatingScript": "Deaktiviere Script...",
+  "@shellyScriptsDeactivatingScript": {
+    "description": "Loading message for deactivating script"
+  },
+  "shellyScriptsStartingScript": "Starte Script...",
+  "@shellyScriptsStartingScript": {
+    "description": "Loading message for starting script"
+  },
+  "shellyScriptsStartScript": "Script starten",
+  "@shellyScriptsStartScript": {
+    "description": "Button label for start script"
+  },
+  "shellyScriptsStopScript": "Script stoppen",
+  "@shellyScriptsStopScript": {
+    "description": "Button label for stop script"
+  },
+  "shellyScriptsCreatingScript": "Erstelle Script auf Gerät...",
+  "@shellyScriptsCreatingScript": {
+    "description": "Loading message for creating script on device"
+  },
+  "shellyScriptsUploadingCode": "Lade Script-Code hoch...",
+  "@shellyScriptsUploadingCode": {
+    "description": "Loading message for uploading script code"
+  },
+  "shellyScriptsFinalizingInstall": "Finalisiere Installation...",
+  "@shellyScriptsFinalizingInstall": {
+    "description": "Loading message for finalizing installation"
+  },
+  "shellyScriptsSearchingDevices": "Suche Geräte...",
+  "@shellyScriptsSearchingDevices": {
+    "description": "Loading message for searching devices"
+  },
+  "shellyScriptsScriptUpdated": "Script erfolgreich auf Version {version} aktualisiert",
+  "@shellyScriptsScriptUpdated": {
+    "description": "Success message for script update",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsScriptDeleted": "Script gelöscht",
+  "@shellyScriptsScriptDeleted": {
+    "description": "Success message for script deletion"
+  },
+  "shellyScriptsScriptActivated": "Script aktiviert",
+  "@shellyScriptsScriptActivated": {
+    "description": "Success message for script activation"
+  },
+  "shellyScriptsScriptDeactivated": "Script deaktiviert",
+  "@shellyScriptsScriptDeactivated": {
+    "description": "Success message for script deactivation"
+  },
+  "shellyScriptsScriptStarted": "Script gestartet",
+  "@shellyScriptsScriptStarted": {
+    "description": "Success message for script start"
+  },
+  "shellyScriptsScriptStopped": "Script gestoppt",
+  "@shellyScriptsScriptStopped": {
+    "description": "Success message for script stop"
+  },
+  "shellyScriptsScriptInstalled": "Script erfolgreich installiert und gestartet",
+  "@shellyScriptsScriptInstalled": {
+    "description": "Success message for script installation"
+  },
+  "shellyScriptsParamsUpdated": "Parameter erfolgreich aktualisiert",
+  "@shellyScriptsParamsUpdated": {
+    "description": "Success message for parameter update"
+  },
+  "shellyScriptsErrorLoadingCode": "Konnte Script-Code nicht abrufen",
+  "@shellyScriptsErrorLoadingCode": {
+    "description": "Error message for loading script code"
+  },
+  "shellyScriptsErrorNoMetadata": "Konnte Template-Metadaten nicht extrahieren",
+  "@shellyScriptsErrorNoMetadata": {
+    "description": "Error message for missing metadata"
+  },
+  "shellyScriptsErrorNoTemplateId": "Template-ID fehlt in Metadaten",
+  "@shellyScriptsErrorNoTemplateId": {
+    "description": "Error message for missing template ID"
+  },
+  "shellyScriptsErrorTemplateNotFound": "Vorlage nicht gefunden: {templateId}",
+  "@shellyScriptsErrorTemplateNotFound": {
+    "description": "Error message for template not found",
+    "placeholders": {
+      "templateId": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorUpdatingStaging": "Fehler beim Aktualisieren: {error}\nScript bleibt im Staging-Status (0.0.0).",
+  "@shellyScriptsErrorUpdatingStaging": {
+    "description": "Error message for update staging failure",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorNoScriptId": "Fehler: Konnte Script-ID nicht abrufen",
+  "@shellyScriptsErrorNoScriptId": {
+    "description": "Error message for missing script ID"
+  },
+  "shellyScriptsErrorUploadingCode": "Fehler beim Hochladen: {error}\nScript bleibt im Staging-Status (0.0.0).",
+  "@shellyScriptsErrorUploadingCode": {
+    "description": "Error message for code upload failure",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorCodeUploadFailed": "Fehler beim Hochladen des Codes",
+  "@shellyScriptsErrorCodeUploadFailed": {
+    "description": "Error message for code upload failed"
+  },
+  "shellyScriptsErrorInstalling": "Fehler beim Installieren des Scripts: {error}",
+  "@shellyScriptsErrorInstalling": {
+    "description": "Error message for script installation failure",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorLoadingTemplates": "Fehler beim Laden der Vorlagen: {error}",
+  "@shellyScriptsErrorLoadingTemplates": {
+    "description": "Error message for loading templates failure",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorSectionTitle": "Fehler",
+  "@shellyScriptsErrorSectionTitle": {
+    "description": "Error section title"
+  },
+  "shellyScriptErrorCrashed": "Absturz",
+  "@shellyScriptErrorCrashed": {
+    "description": "Script error type: crashed"
+  },
+  "shellyScriptErrorSyntax": "Syntaxfehler",
+  "@shellyScriptErrorSyntax": {
+    "description": "Script error type: syntax error"
+  },
+  "shellyScriptErrorReference": "Referenzfehler",
+  "@shellyScriptErrorReference": {
+    "description": "Script error type: reference error"
+  },
+  "shellyScriptErrorType": "Typfehler",
+  "@shellyScriptErrorType": {
+    "description": "Script error type: type error"
+  },
+  "shellyScriptErrorMemory": "Speicher voll",
+  "@shellyScriptErrorMemory": {
+    "description": "Script error type: out of memory"
+  },
+  "shellyScriptErrorCodespace": "Code-Speicher voll",
+  "@shellyScriptErrorCodespace": {
+    "description": "Script error type: out of codespace"
+  },
+  "shellyScriptErrorInternal": "Interner Fehler",
+  "@shellyScriptErrorInternal": {
+    "description": "Script error type: internal error"
+  },
+  "shellyScriptErrorNotImplemented": "Nicht implementiert",
+  "@shellyScriptErrorNotImplemented": {
+    "description": "Script error type: not implemented"
+  },
+  "shellyScriptErrorFileRead": "Datei-Lesefehler",
+  "@shellyScriptErrorFileRead": {
+    "description": "Script error type: file read error"
+  },
+  "shellyScriptErrorBadArgs": "Ungültige Parameter",
+  "@shellyScriptErrorBadArgs": {
+    "description": "Script error type: bad arguments"
+  },
+  "shellyScriptsValidationRequired": "{label} ist erforderlich",
+  "@shellyScriptsValidationRequired": {
+    "description": "Validation message for required field",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsValidationMustBeNumber": "{label} muss eine Zahl sein",
+  "@shellyScriptsValidationMustBeNumber": {
+    "description": "Validation message for number field",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsValidationMinValue": "{label} muss mindestens {min} sein",
+  "@shellyScriptsValidationMinValue": {
+    "description": "Validation message for minimum value",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsValidationMaxValue": "{label} darf höchstens {max} sein",
+  "@shellyScriptsValidationMaxValue": {
+    "description": "Validation message for maximum value",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsValidationPortRange": "Port muss zwischen 1 und 65535 liegen",
+  "@shellyScriptsValidationPortRange": {
+    "description": "Validation message for port range"
+  },
+  "shellyScriptsValidationFieldRequired": "Dieses Feld ist erforderlich",
+  "@shellyScriptsValidationFieldRequired": {
+    "description": "Generic validation message for required field"
+  },
+  "shellyScriptsValidationInvalidValue": "Ungültiger Wert",
+  "@shellyScriptsValidationInvalidValue": {
+    "description": "Generic validation message for invalid value"
+  },
+  "shellyScriptsDialogNewParamsTitle": "Neue Parameter verfügbar",
+  "@shellyScriptsDialogNewParamsTitle": {
+    "description": "Dialog title for new parameters available"
+  },
+  "shellyScriptsDialogNewParamsMessage": "Die neue Version {version} enthält neue Parameter, die konfiguriert werden müssen:\n\n{params}\n\nAktuelle Version: {currentVersion}\nNeue Version: {newVersion}",
+  "@shellyScriptsDialogNewParamsMessage": {
+    "description": "Dialog message for new parameters available",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "params": {
+        "type": "String"
+      },
+      "currentVersion": {
+        "type": "String"
+      },
+      "newVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsDialogUpgradeTitle": "Auf neue Version aktualisieren?",
+  "@shellyScriptsDialogUpgradeTitle": {
+    "description": "Dialog title for upgrade confirmation"
+  },
+  "shellyScriptsDialogUpgradeMessage": "Möchten Sie das Script auf Version {version} aktualisieren?\n\nDiese Operation wird das Script kurzzeitig stoppen und neu starten.",
+  "@shellyScriptsDialogUpgradeMessage": {
+    "description": "Dialog message for upgrade confirmation",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsDialogDeleteTitle": "Script löschen?",
+  "@shellyScriptsDialogDeleteTitle": {
+    "description": "Dialog title for delete confirmation"
+  },
+  "shellyScriptsDialogDeleteMessage": "Möchten Sie das Script \"{name}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@shellyScriptsDialogDeleteMessage": {
+    "description": "Dialog message for delete confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsDialogInstallTitle": "Script installieren?",
+  "@shellyScriptsDialogInstallTitle": {
+    "description": "Dialog title for install confirmation"
+  },
+  "shellyScriptsDialogInstallMessage": "Möchten Sie das Script \"{name}\" ohne Vorschau installieren?",
+  "@shellyScriptsDialogInstallMessage": {
+    "description": "Dialog message for install confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsDialogInstallConfirmTitle": "Script auf Gerät installieren?",
+  "@shellyScriptsDialogInstallConfirmTitle": {
+    "description": "Dialog title for install on device confirmation"
+  },
+  "shellyScriptsDialogInstallConfirmMessage": "Möchten Sie das Script \"{name}\" wirklich auf Ihrem Shelly-Gerät installieren?",
+  "@shellyScriptsDialogInstallConfirmMessage": {
+    "description": "Dialog message for install on device confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsDialogUpdateParamsTitle": "Parameter aktualisieren?",
+  "@shellyScriptsDialogUpdateParamsTitle": {
+    "description": "Dialog title for parameter update confirmation"
+  },
+  "shellyScriptsDialogUpdateParamsMessage": "Möchten Sie die Parameter wirklich aktualisieren? Das Script wird mit den neuen Werten neu generiert.",
+  "@shellyScriptsDialogUpdateParamsMessage": {
+    "description": "Dialog message for parameter update confirmation"
+  },
+  "shellyScriptsDialogCompatibilityTitle": "Kompatibilitäts-Information",
+  "@shellyScriptsDialogCompatibilityTitle": {
+    "description": "Dialog title for compatibility information"
+  },
+  "shellyScriptsInfoAutomation": "Automatisierung",
+  "@shellyScriptsInfoAutomation": {
+    "description": "Info label for automation"
+  },
+  "shellyScriptsInfoFailed": "Fehlgeschlagen",
+  "@shellyScriptsInfoFailed": {
+    "description": "Info label for failed"
+  },
+  "shellyScriptsInfoVersion": "Version: {version} • ID: {id}",
+  "@shellyScriptsInfoVersion": {
+    "description": "Info text for version and ID",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsInfoScriptId": "Script ID: {id}",
+  "@shellyScriptsInfoScriptId": {
+    "description": "Info text for script ID",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsInfoVersionUpdating": "Version: {version} (wird aktualisiert)",
+  "@shellyScriptsInfoVersionUpdating": {
+    "description": "Info text for version being updated",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsHelpEditTip": "Tippen Sie auf Bearbeiten um ein Script zu öffnen.",
+  "@shellyScriptsHelpEditTip": {
+    "description": "Help text for editing tip"
+  },
+  "shellyScriptsEmptyStateTitle": "Keine Scripts verfügbar",
+  "@shellyScriptsEmptyStateTitle": {
+    "description": "Empty state title when no scripts"
+  },
+  "shellyScriptsEmptyStateMessage": "Auf diesem Gerät sind aktuell keine Scripts konfiguriert.",
+  "@shellyScriptsEmptyStateMessage": {
+    "description": "Empty state message when no scripts"
+  },
+  "shellyScriptsInfoTitle": "Hinweise:",
+  "@shellyScriptsInfoTitle": {
+    "description": "Info section title"
+  },
+  "shellyScriptsInfoContent": "• Aktiviert: Script läuft automatisch bei Events\n• Läuft: Script wird gerade ausgeführt\n• Status wird alle 10 Sekunden aktualisiert\n• Bearbeiten: Öffnet Detailansicht mit Steuerung",
+  "@shellyScriptsInfoContent": {
+    "description": "Info section content"
+  },
+  "shellyScriptsFabCreateFromTemplate": "Aus Vorlage erstellen",
+  "@shellyScriptsFabCreateFromTemplate": {
+    "description": "FAB label for creating from template"
+  },
+  "shellyScriptsStatusTitle": "Status",
+  "@shellyScriptsStatusTitle": {
+    "description": "Status section title"
+  },
+  "shellyScriptsAutostartTitle": "Autostart aktiviert",
+  "@shellyScriptsAutostartTitle": {
+    "description": "Autostart section title"
+  },
+  "shellyScriptsAutostartSubtitle": "Script startet automatisch bei konfigurierten Events",
+  "@shellyScriptsAutostartSubtitle": {
+    "description": "Autostart section subtitle"
+  },
+  "shellyScriptsControlTitle": "Steuerung:",
+  "@shellyScriptsControlTitle": {
+    "description": "Control section title"
+  },
+  "shellyScriptsControlInfo": "• Autostart: Script läuft automatisch bei Events\n• Start/Stop: Manuelles Starten/Stoppen des Scripts\n• Status wird automatisch aktualisiert",
+  "@shellyScriptsControlInfo": {
+    "description": "Control section info"
+  },
+  "shellyScriptsConfigInfoText": "Füllen Sie alle Parameter aus und tippen Sie auf \"Vorschau\", um den generierten Script-Code zu sehen.",
+  "@shellyScriptsConfigInfoText": {
+    "description": "Config screen info text"
+  },
+  "shellyScriptsPreviewSubtitle": "Prüfen Sie den generierten Code vor der Installation",
+  "@shellyScriptsPreviewSubtitle": {
+    "description": "Preview screen subtitle"
+  },
+  "shellyScriptsPreviewInfoText": "Das Script wird auf Ihrem Shelly-Gerät installiert, aktiviert und automatisch gestartet.",
+  "@shellyScriptsPreviewInfoText": {
+    "description": "Preview screen info text"
+  },
+  "shellyScriptsUpdateInfoText": "Aktualisieren Sie die Parameter. Das Script wird mit den neuen Werten neu generiert und hochgeladen.",
+  "@shellyScriptsUpdateInfoText": {
+    "description": "Update screen info text"
+  },
+  "shellyScriptsSearchPlaceholder": "Vorlagen durchsuchen...",
+  "@shellyScriptsSearchPlaceholder": {
+    "description": "Search field placeholder"
+  },
+  "shellyScriptsShowAllToggle": "Alle Scripte anzeigen",
+  "@shellyScriptsShowAllToggle": {
+    "description": "Toggle label for showing all scripts"
+  },
+  "shellyScriptsCurrentDevice": "Aktuelles Gerät:",
+  "@shellyScriptsCurrentDevice": {
+    "description": "Label for current device"
+  },
+  "shellyScriptsCompatibleDevices": "Kompatible Geräte:",
+  "@shellyScriptsCompatibleDevices": {
+    "description": "Label for compatible devices"
+  },
+  "shellyScriptsAllDevices": "Alle Geräte",
+  "@shellyScriptsAllDevices": {
+    "description": "Label for all devices"
+  },
+  "shellyScriptsNotCompatibleWarning": "Nicht für dieses Gerät vorgesehen",
+  "@shellyScriptsNotCompatibleWarning": {
+    "description": "Warning for incompatible device"
+  },
+  "shellyScriptsVersionDisplay": "Version {version}",
+  "@shellyScriptsVersionDisplay": {
+    "description": "Version display text",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsAuthorCredit": "von {author}",
+  "@shellyScriptsAuthorCredit": {
+    "description": "Author credit text",
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsRequiresDevices": "Benötigt: {devices}",
+  "@shellyScriptsRequiresDevices": {
+    "description": "Required devices text",
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsParamCount": "{count} Parameter",
+  "@shellyScriptsParamCount": {
+    "description": "Parameter count text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shellyScriptsFilterAll": "Alle",
+  "@shellyScriptsFilterAll": {
+    "description": "Filter option for all"
+  },
+  "shellyScriptsEmptyLibrary": "Keine Vorlagen gefunden",
+  "@shellyScriptsEmptyLibrary": {
+    "description": "Empty state for template library"
+  },
+  "shellyScriptsUnknownModel": "Unbekannt",
+  "@shellyScriptsUnknownModel": {
+    "description": "Unknown model label"
+  },
+  "shellyScriptsNoDevicesFound": "Keine passenden Geräte gefunden",
+  "@shellyScriptsNoDevicesFound": {
+    "description": "Message when no matching devices found"
+  },
+  "shellyScriptsAutoFilledFrom": "Auto-ausgefüllt von: {deviceName}",
+  "@shellyScriptsAutoFilledFrom": {
+    "description": "Auto-filled indicator text",
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsSelectDeviceCount": "Gerät auswählen ({count} gefunden)",
+  "@shellyScriptsSelectDeviceCount": {
+    "description": "Select device text with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shellyScriptsSourceProperty": "Quelle: {sourceProperty}",
+  "@shellyScriptsSourceProperty": {
+    "description": "Source property text",
+    "placeholders": {
+      "sourceProperty": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsFilterProperty": "Filter: {filter}",
+  "@shellyScriptsFilterProperty": {
+    "description": "Filter property text",
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsNoDevicesFoundHelper": "(keine Geräte gefunden)",
+  "@shellyScriptsNoDevicesFoundHelper": {
+    "description": "Helper text when no devices found"
+  },
+  "shellyScriptsAutoFilledHelper": "(automatisch ausgefüllt)",
+  "@shellyScriptsAutoFilledHelper": {
+    "description": "Helper text for auto-filled field"
+  },
+  "shellyScriptsDevicesFoundHelper": "({count} Geräte gefunden)",
+  "@shellyScriptsDevicesFoundHelper": {
+    "description": "Helper text for devices found",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shellyScriptsSelectDeviceModal": "Gerät auswählen für \"{label}\"",
+  "@shellyScriptsSelectDeviceModal": {
+    "description": "Modal title for selecting device",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsParamRequired": "(erforderlich)",
+  "@shellyScriptsParamRequired": {
+    "description": "Required parameter indicator"
+  },
+  "unknownUpdating": "Unknown (wird aktualisiert)",
+  "@unknownUpdating": {
+    "description": "Unknown status while updating"
+  },
+  "wifiConfigurationCompleted": "WiFi-Konfiguration abgeschlossen",
+  "@wifiConfigurationCompleted": {
+    "description": "Success message when WiFi configuration is completed"
+  },
+  "accessPointConfigured": "Access Point erfolgreich konfiguriert",
+  "@accessPointConfigured": {
+    "description": "Success message when access point is configured"
+  },
+  "powerLimitSet": "Leistungslimit erfolgreich gesetzt",
+  "@powerLimitSet": {
+    "description": "Success message when power limit is set"
+  },
+  "deviceRestarting": "Gerät wird neu gestartet",
+  "@deviceRestarting": {
+    "description": "Message indicating device is restarting"
+  },
+  "errorLoadingConfiguration": "Fehler beim Laden der Konfiguration: {error}",
+  "@errorLoadingConfiguration": {
+    "description": "Error message when loading configuration fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorRestartingDevice": "Fehler beim Neustarten des Geräts: {error}",
+  "@errorRestartingDevice": {
+    "description": "Error message when device restart fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorUnknownFirmware": "Nicht möglich da die aktuelle Firmware unbekannt ist, in einem Moment noch mal versuchen (warte noch auf Daten)",
+  "@errorUnknownFirmware": {
+    "description": "Error message when firmware version is unknown"
+  },
+  "loadingDeviceInfo": "Lade Geräteinformationen...",
+  "@loadingDeviceInfo": {
+    "description": "Loading message while fetching device information"
+  },
+  "loadingConfiguration": "Lade aktuelle Konfiguration...",
+  "@loadingConfiguration": {
+    "description": "Loading message while fetching configuration"
+  },
+  "menuDeviceInfo": "Geräteinformationen",
+  "@menuDeviceInfo": {
+    "description": "Menu item title for device information"
+  },
+  "menuConfigureWifi": "WiFi konfigurieren",
+  "@menuConfigureWifi": {
+    "description": "Menu item title for WiFi configuration"
+  },
+  "menuSetupApWifi": "AP WiFi einrichten",
+  "@menuSetupApWifi": {
+    "description": "Menu item title for setting up AP WiFi"
+  },
+  "menuConfigurePassword": "Passwort konfigurieren",
+  "@menuConfigurePassword": {
+    "description": "Menu item title for password configuration"
+  },
+  "menuSetupWlan": "WLAN-Verbindung einrichten",
+  "@menuSetupWlan": {
+    "description": "Menu item title for WLAN setup"
+  },
+  "menuOnlineMonitoring": "Online-Monitoring konfigurieren",
+  "@menuOnlineMonitoring": {
+    "description": "Menu item title for online monitoring configuration"
+  },
+  "menuGeneralSettings": "Allgemeine Einstellungen",
+  "@menuGeneralSettings": {
+    "description": "Menu item title for general settings"
+  },
+  "menuInverterPowerLimit": "Wechselrichterleistung begrenzen",
+  "@menuInverterPowerLimit": {
+    "description": "Menu item title for inverter power limit"
+  },
+  "menuOutputPowerLimit": "Ausgangsleistung begrenzen",
+  "@menuOutputPowerLimit": {
+    "description": "Menu item title for output power limit"
+  },
+  "menuRestartOpendtu": "OpenDTU neu starten",
+  "@menuRestartOpendtu": {
+    "description": "Menu item title for restarting OpenDTU"
+  },
+  "menuConfigureRpcPort": "RPC UDP Port konfigurieren",
+  "@menuConfigureRpcPort": {
+    "description": "Menu item title for RPC UDP port configuration"
+  },
+  "menuSubtitleSetupNetwork": "Netzwerkverbindung einrichten",
+  "@menuSubtitleSetupNetwork": {
+    "description": "Menu item subtitle for setting up network connection"
+  },
+  "menuSubtitleDeviceInfo": "Detaillierte Geräteinformationen anzeigen",
+  "@menuSubtitleDeviceInfo": {
+    "description": "Menu item subtitle for showing device information"
+  },
+  "menuSubtitleSetupAccessPoint": "AP WiFi einrichten",
+  "@menuSubtitleSetupAccessPoint": {
+    "description": "Menu item subtitle for setting up access point"
+  },
+  "menuSubtitlePowerLimit": "Wechselrichterleistung begrenzen",
+  "@menuSubtitlePowerLimit": {
+    "description": "Menu item subtitle for power limit"
+  },
+  "menuSubtitleMqttSetup": "MQTT-Broker Verbindung einrichten",
+  "@menuSubtitleMqttSetup": {
+    "description": "Menu item subtitle for MQTT setup"
+  },
+  "menuSubtitleGeneralSettings": "Grundlegende Geräteeinstellungen verwalten",
+  "@menuSubtitleGeneralSettings": {
+    "description": "Menu item subtitle for general settings"
+  },
+  "menuSubtitleOnlineMonitoring": "Server für Datenübertragung einrichten",
+  "@menuSubtitleOnlineMonitoring": {
+    "description": "Menu item subtitle for online monitoring"
+  },
+  "menuSubtitleRestartDevice": "Startet das Gerät neu",
+  "@menuSubtitleRestartDevice": {
+    "description": "Menu item subtitle for restarting device"
+  },
+  "menuSubtitleToggleAllInverters": "Schaltet alle Wechselrichter",
+  "@menuSubtitleToggleAllInverters": {
+    "description": "Menu item subtitle for toggling all inverters"
+  },
+  "deviceFallbackName": "Gerät",
+  "@deviceFallbackName": {
+    "description": "Fallback name for device when no specific name is available"
+  },
+  "labelPort": "Port",
+  "@labelPort": {
+    "description": "Label for port field"
+  },
+  "labelPowerInput": "Input (Netz → Gerät)",
+  "@labelPowerInput": {
+    "description": "Label for power input"
+  },
+  "labelPowerOutput": "Output (Gerät → Netz)",
+  "@labelPowerOutput": {
+    "description": "Label for power output"
+  },
+  "hintHostnameOrIp": "Hostname oder IP-Adresse",
+  "@hintHostnameOrIp": {
+    "description": "Hint text for hostname or IP address field"
+  },
+  "helpDevicePoweredOn": "• Stellen Sie sicher, dass Ihr Gerät eingeschaltet ist",
+  "@helpDevicePoweredOn": {
+    "description": "Help text reminding user to power on device"
+  },
+  "helpStrongPassword": "• Ein starkes Passwort schützt Ihr Netzwerk",
+  "@helpStrongPassword": {
+    "description": "Help text about using strong password"
+  },
+  "helpMqttPorts": "• Standard MQTT-Port ist 1883 (unverschlüsselt) oder 8883 (TLS)",
+  "@helpMqttPorts": {
+    "description": "Help text about MQTT ports"
+  },
+  "helpMqttAuthRecommended": "• Die Authentifizierung ist optional, wird aber empfohlen",
+  "@helpMqttAuthRecommended": {
+    "description": "Help text about MQTT authentication"
+  },
+  "helpMqttAutoConnect": "• Nach der Konfiguration verbindet sich das Gerät automatisch",
+  "@helpMqttAutoConnect": {
+    "description": "Help text about automatic MQTT connection"
+  },
+  "infoConfigureAccessPoint": "Konfigurieren Sie den WiFi Access Point Ihres Geräts",
+  "@infoConfigureAccessPoint": {
+    "description": "Information text for access point configuration"
+  },
+  "infoMqttAuthToggle": "Aktiviert Benutzername und Passwort für MQTT",
+  "@infoMqttAuthToggle": {
+    "description": "Information text for MQTT authentication toggle"
+  },
+  "infoMqttDisabled": "MQTT ist deaktiviert. Das Gerät wird nicht mit einem MQTT-Broker verbunden sein.",
+  "@infoMqttDisabled": {
+    "description": "Information text when MQTT is disabled"
+  },
+  "noRoleSupport": "Keine Rollen-Unterstützung",
+  "@noRoleSupport": {
+    "description": "Message when device has no role support"
+  },
+  "noDetailsAvailable": "Keine Details verfügbar",
+  "@noDetailsAvailable": {
+    "description": "Message when no details are available"
+  },
+  "onlineMonitoringConfigured": "Online-Monitoring erfolgreich konfiguriert",
+  "@onlineMonitoringConfigured": {
+    "description": "Success message when online monitoring is configured"
+  },
+  "authenticationConfigured": "Authentifizierung erfolgreich konfiguriert",
+  "@authenticationConfigured": {
+    "description": "Success message when authentication is configured"
+  },
+  "mqttConfigurationUpdated": "MQTT-Konfiguration erfolgreich aktualisiert",
+  "@mqttConfigurationUpdated": {
+    "description": "Success message when MQTT configuration is updated"
+  },
+
+  "@_FIELD_NAMES_SECTION": "===== Data Field Names =====",
+
+  "fieldDailyYield": "Tagesertrag",
+  "@fieldDailyYield": {
+    "description": "Data field: Daily energy yield"
+  },
+  "fieldTotalYield": "Gesamtertrag",
+  "@fieldTotalYield": {
+    "description": "Data field: Total energy yield"
+  },
+  "fieldCurrentPower": "Aktuelle Leistung",
+  "@fieldCurrentPower": {
+    "description": "Data field: Current power"
+  },
+  "fieldAcPower": "AC Leistung",
+  "@fieldAcPower": {
+    "description": "Data field: AC power"
+  },
+  "fieldDcPower": "DC Leistung",
+  "@fieldDcPower": {
+    "description": "Data field: DC power"
+  },
+  "fieldActivePower": "Wirkleistung",
+  "@fieldActivePower": {
+    "description": "Data field: Active power"
+  },
+  "fieldReactivePower": "Blindleistung",
+  "@fieldReactivePower": {
+    "description": "Data field: Reactive power"
+  },
+  "fieldApparentPower": "Scheinleistung",
+  "@fieldApparentPower": {
+    "description": "Data field: Apparent power"
+  },
+  "fieldPowerFactor": "Leistungsfaktor",
+  "@fieldPowerFactor": {
+    "description": "Data field: Power factor"
+  },
+  "fieldDcTotalPower": "DC Gesamtleistung",
+  "@fieldDcTotalPower": {
+    "description": "Data field: DC total power"
+  },
+  "fieldPvVoltage": "PV{num} Spannung",
+  "@fieldPvVoltage": {
+    "description": "Data field: PV string voltage with number",
+    "placeholders": {
+      "num": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "fieldPvCurrent": "PV{num} Strom",
+  "@fieldPvCurrent": {
+    "description": "Data field: PV string current with number",
+    "placeholders": {
+      "num": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "fieldPvPower": "PV{num} Leistung",
+  "@fieldPvPower": {
+    "description": "Data field: PV string power with number",
+    "placeholders": {
+      "num": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "fieldPvTotalYield": "PV{num} Gesamtertrag",
+  "@fieldPvTotalYield": {
+    "description": "Data field: PV string total yield with number",
+    "placeholders": {
+      "num": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "fieldPvDailyYield": "PV{num} Tagesertrag",
+  "@fieldPvDailyYield": {
+    "description": "Data field: PV string daily yield with number",
+    "placeholders": {
+      "num": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "fieldTotalEnergyImport": "Gesamtenergie Bezug",
+  "@fieldTotalEnergyImport": {
+    "description": "Data field: Total energy import"
+  },
+  "fieldTotalEnergyExport": "Gesamtenergie Einspeisung",
+  "@fieldTotalEnergyExport": {
+    "description": "Data field: Total energy export"
+  },
+  "fieldTotalEnergy": "Gesamtenergie",
+  "@fieldTotalEnergy": {
+    "description": "Data field: Total energy"
+  },
+  "fieldEnergyPerMinuteImport": "Energie pro Minute (Bezug)",
+  "@fieldEnergyPerMinuteImport": {
+    "description": "Data field: Energy per minute import"
+  },
+  "fieldEnergyPerMinuteExport": "Energie pro Minute (Einspeisung)",
+  "@fieldEnergyPerMinuteExport": {
+    "description": "Data field: Energy per minute export"
+  },
+  "fieldOutputLimit": "Ausgangsleistung Limit",
+  "@fieldOutputLimit": {
+    "description": "Data field: Output limit"
+  },
+  "fieldInputLimit": "Eingangsleistung Limit",
+  "@fieldInputLimit": {
+    "description": "Data field: Input limit"
+  },
+  "fieldGridVoltage": "Netzspannung",
+  "@fieldGridVoltage": {
+    "description": "Data field: Grid voltage"
+  },
+  "fieldGridCurrent": "Netzstrom",
+  "@fieldGridCurrent": {
+    "description": "Data field: Grid current"
+  },
+  "fieldGridFrequency": "Netzfrequenz",
+  "@fieldGridFrequency": {
+    "description": "Data field: Grid frequency"
+  },
+  "fieldVoltagePhase1": "Spannung Phase 1",
+  "@fieldVoltagePhase1": {
+    "description": "Data field: Voltage phase 1"
+  },
+  "fieldVoltagePhase2": "Spannung Phase 2",
+  "@fieldVoltagePhase2": {
+    "description": "Data field: Voltage phase 2"
+  },
+  "fieldVoltagePhase3": "Spannung Phase 3",
+  "@fieldVoltagePhase3": {
+    "description": "Data field: Voltage phase 3"
+  },
+  "fieldCurrentPhase1": "Strom Phase 1",
+  "@fieldCurrentPhase1": {
+    "description": "Data field: Current phase 1"
+  },
+  "fieldCurrentPhase2": "Strom Phase 2",
+  "@fieldCurrentPhase2": {
+    "description": "Data field: Current phase 2"
+  },
+  "fieldCurrentPhase3": "Strom Phase 3",
+  "@fieldCurrentPhase3": {
+    "description": "Data field: Current phase 3"
+  },
+  "fieldVoltageInstance": "Spannung {instanceNum}",
+  "@fieldVoltageInstance": {
+    "description": "Data field: Voltage with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldCurrentInstance": "Strom {instanceNum}",
+  "@fieldCurrentInstance": {
+    "description": "Data field: Current with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldDcVoltage": "DC Spannung",
+  "@fieldDcVoltage": {
+    "description": "Data field: DC voltage"
+  },
+  "fieldDcCurrent": "DC Strom",
+  "@fieldDcCurrent": {
+    "description": "Data field: DC current"
+  },
+  "fieldAcVoltage": "AC Spannung",
+  "@fieldAcVoltage": {
+    "description": "Data field: AC voltage"
+  },
+  "fieldAcCurrent": "AC Strom",
+  "@fieldAcCurrent": {
+    "description": "Data field: AC current"
+  },
+  "fieldBatteryLevel": "Batterie Level",
+  "@fieldBatteryLevel": {
+    "description": "Data field: Battery level"
+  },
+  "fieldBatteryPower": "Batterie Leistung",
+  "@fieldBatteryPower": {
+    "description": "Data field: Battery power"
+  },
+  "fieldBatterySoc": "Batterie SOC",
+  "@fieldBatterySoc": {
+    "description": "Data field: Battery state of charge"
+  },
+  "fieldBatteryState": "Batterie Status",
+  "@fieldBatteryState": {
+    "description": "Data field: Battery state"
+  },
+  "fieldChargeMaxLimit": "Maximale Ladeleistung",
+  "@fieldChargeMaxLimit": {
+    "description": "Data field: Charge max limit"
+  },
+  "fieldDischargeMaxLimit": "Maximale Entladeleistung",
+  "@fieldDischargeMaxLimit": {
+    "description": "Data field: Discharge max limit"
+  },
+  "fieldPackState": "Pack Status",
+  "@fieldPackState": {
+    "description": "Data field: Pack state"
+  },
+  "fieldCellVoltageMin": "Zellspannung Min",
+  "@fieldCellVoltageMin": {
+    "description": "Data field: Cell voltage min"
+  },
+  "fieldCellVoltageMax": "Zellspannung Max",
+  "@fieldCellVoltageMax": {
+    "description": "Data field: Cell voltage max"
+  },
+  "fieldCellTemperatureMax": "Zelltemperatur Max",
+  "@fieldCellTemperatureMax": {
+    "description": "Data field: Cell temperature max"
+  },
+  "fieldBatteryPackEmpty": "Keine Batteriepack-Daten verfügbar",
+  "@fieldBatteryPackEmpty": {
+    "description": "Data field: Message displayed when no battery pack data is available"
+  },
+  "fieldBatteryPackNumber": "Batterie #{num}",
+  "@fieldBatteryPackNumber": {
+    "description": "Data field: Battery pack number label with index (e.g., Batterie #1, Batterie #2)",
+    "placeholders": {
+      "num": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldBatteryStateIdle": "Idle",
+  "@fieldBatteryStateIdle": {
+    "description": "Data field: Battery pack state when idle (not charging or discharging)"
+  },
+  "fieldBatteryStateCharging": "Lädt",
+  "@fieldBatteryStateCharging": {
+    "description": "Data field: Battery pack state when charging"
+  },
+  "fieldBatteryStateDischarging": "Entlädt",
+  "@fieldBatteryStateDischarging": {
+    "description": "Data field: Battery pack state when discharging"
+  },
+  "fieldBatteryStateUnknown": "Unbekannt",
+  "@fieldBatteryStateUnknown": {
+    "description": "Data field: Battery pack state when status is unknown"
+  },
+  "fieldBatteryType": "Typ",
+  "@fieldBatteryType": {
+    "description": "Data field: Battery pack type identifier"
+  },
+  "fieldTemperature": "Temperatur",
+  "@fieldTemperature": {
+    "description": "Data field: Temperature"
+  },
+  "fieldUptime": "Betriebszeit",
+  "@fieldUptime": {
+    "description": "Data field: Uptime"
+  },
+  "fieldLimitStatus": "Limit-Status",
+  "@fieldLimitStatus": {
+    "description": "Data field: Limit status"
+  },
+  "fieldPowerLimit": "Leistungslimit",
+  "@fieldPowerLimit": {
+    "description": "Data field: Power limit"
+  },
+  "fieldModel": "Modell",
+  "@fieldModel": {
+    "description": "Data field: Model"
+  },
+  "fieldRatedPower": "Nennleistung",
+  "@fieldRatedPower": {
+    "description": "Data field: Rated power"
+  },
+  "fieldFirmwareVersion": "Firmware Version",
+  "@fieldFirmwareVersion": {
+    "description": "Data field: Firmware version"
+  },
+  "fieldSerialNumber": "Seriennummer",
+  "@fieldSerialNumber": {
+    "description": "Data field: Serial number"
+  },
+  "fieldArticleNumber": "Artikelnummer",
+  "@fieldArticleNumber": {
+    "description": "Data field: Article number"
+  },
+  "fieldManufacturer": "Hersteller",
+  "@fieldManufacturer": {
+    "description": "Data field: Manufacturer"
+  },
+  "fieldAverageTemperature": "Durchschnittstemperatur",
+  "@fieldAverageTemperature": {
+    "description": "Data field: Average temperature"
+  },
+  "fieldMaxTemperature": "Max. Temperatur",
+  "@fieldMaxTemperature": {
+    "description": "Data field: Max temperature"
+  },
+  "fieldMinTemperature": "Min. Temperatur",
+  "@fieldMinTemperature": {
+    "description": "Data field: Min temperature"
+  },
+  "fieldWifiSignal": "WiFi Signal",
+  "@fieldWifiSignal": {
+    "description": "Data field: WiFi signal"
+  },
+  "fieldWifiState": "WiFi Status",
+  "@fieldWifiState": {
+    "description": "Data field: WiFi state"
+  },
+  "fieldSwitchInstance": "Switch {instanceNum}",
+  "@fieldSwitchInstance": {
+    "description": "Data field: Switch with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldPowerInstance": "Leistung {instanceNum}",
+  "@fieldPowerInstance": {
+    "description": "Data field: Power with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldEnergyInstance": "Energie {instanceNum}",
+  "@fieldEnergyInstance": {
+    "description": "Data field: Energy with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldFrequencyInstance": "Frequenz {instanceNum}",
+  "@fieldFrequencyInstance": {
+    "description": "Data field: Frequency with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldPowerFactorInstance": "Leistungsfaktor {instanceNum}",
+  "@fieldPowerFactorInstance": {
+    "description": "Data field: Power factor with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldActivePowerInstance": "Wirkleistung {instanceNum}",
+  "@fieldActivePowerInstance": {
+    "description": "Data field: Active power with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldReactivePowerInstance": "Blindleistung {instanceNum}",
+  "@fieldReactivePowerInstance": {
+    "description": "Data field: Reactive power with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldApparentPowerInstance": "Scheinleistung {instanceNum}",
+  "@fieldApparentPowerInstance": {
+    "description": "Data field: Apparent power with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldTemperatureInstance": "Temperatur {instanceNum}",
+  "@fieldTemperatureInstance": {
+    "description": "Data field: Temperature with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldStatusInstance": "Status {instanceNum}",
+  "@fieldStatusInstance": {
+    "description": "Data field: Status with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldYieldInstance": "Ertrag {instanceNum}",
+  "@fieldYieldInstance": {
+    "description": "Data field: Yield with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldTotalPower": "Gesamtleistung",
+  "@fieldTotalPower": {
+    "description": "Data field: Total power"
+  },
+  "fieldTotalCurrent": "Gesamtstrom",
+  "@fieldTotalCurrent": {
+    "description": "Data field: Total current"
+  },
+  "fieldTotalVoltage": "Gesamtspannung",
+  "@fieldTotalVoltage": {
+    "description": "Data field: Total voltage"
+  },
+  "fieldActivePowerTotal": "Wirkleistung Gesamt",
+  "@fieldActivePowerTotal": {
+    "description": "Data field: Active power total"
+  },
+  "fieldReactivePowerTotal": "Blindleistung Gesamt",
+  "@fieldReactivePowerTotal": {
+    "description": "Data field: Reactive power total"
+  },
+  "fieldApparentPowerTotal": "Scheinleistung Gesamt",
+  "@fieldApparentPowerTotal": {
+    "description": "Data field: Apparent power total"
+  },
+  "fieldEnergyTotal": "Energie Gesamt",
+  "@fieldEnergyTotal": {
+    "description": "Data field: Energy total"
+  },
+  "fieldCombinedPower": "Kombinierte Leistung",
+  "@fieldCombinedPower": {
+    "description": "Data field: Combined power"
+  },
+  "fieldPowerPhase1": "Leistung Phase 1",
+  "@fieldPowerPhase1": {
+    "description": "Data field: Power phase 1"
+  },
+  "fieldPowerPhase2": "Leistung Phase 2",
+  "@fieldPowerPhase2": {
+    "description": "Data field: Power phase 2"
+  },
+  "fieldPowerPhase3": "Leistung Phase 3",
+  "@fieldPowerPhase3": {
+    "description": "Data field: Power phase 3"
+  },
+  "fieldActivePowerPhase1": "Wirkleistung Phase 1",
+  "@fieldActivePowerPhase1": {
+    "description": "Data field: Active power phase 1"
+  },
+  "fieldActivePowerPhase2": "Wirkleistung Phase 2",
+  "@fieldActivePowerPhase2": {
+    "description": "Data field: Active power phase 2"
+  },
+  "fieldActivePowerPhase3": "Wirkleistung Phase 3",
+  "@fieldActivePowerPhase3": {
+    "description": "Data field: Active power phase 3"
+  },
+  "fieldReactivePowerPhase1": "Blindleistung Phase 1",
+  "@fieldReactivePowerPhase1": {
+    "description": "Data field: Reactive power phase 1"
+  },
+  "fieldReactivePowerPhase2": "Blindleistung Phase 2",
+  "@fieldReactivePowerPhase2": {
+    "description": "Data field: Reactive power phase 2"
+  },
+  "fieldReactivePowerPhase3": "Blindleistung Phase 3",
+  "@fieldReactivePowerPhase3": {
+    "description": "Data field: Reactive power phase 3"
+  },
+  "fieldApparentPowerPhase1": "Scheinleistung Phase 1",
+  "@fieldApparentPowerPhase1": {
+    "description": "Data field: Apparent power phase 1"
+  },
+  "fieldApparentPowerPhase2": "Scheinleistung Phase 2",
+  "@fieldApparentPowerPhase2": {
+    "description": "Data field: Apparent power phase 2"
+  },
+  "fieldApparentPowerPhase3": "Scheinleistung Phase 3",
+  "@fieldApparentPowerPhase3": {
+    "description": "Data field: Apparent power phase 3"
+  },
+  "fieldFrequencyPhase1": "Frequenz Phase 1",
+  "@fieldFrequencyPhase1": {
+    "description": "Data field: Frequency phase 1"
+  },
+  "fieldFrequencyPhase2": "Frequenz Phase 2",
+  "@fieldFrequencyPhase2": {
+    "description": "Data field: Frequency phase 2"
+  },
+  "fieldFrequencyPhase3": "Frequenz Phase 3",
+  "@fieldFrequencyPhase3": {
+    "description": "Data field: Frequency phase 3"
+  },
+  "fieldInverterType": "Inverter Typ",
+  "@fieldInverterType": {
+    "description": "Data field: Inverter type"
+  },
+  "fieldAccessModel": "Zugriffsmodus",
+  "@fieldAccessModel": {
+    "description": "Data field: Access model"
+  },
+  "fieldDtuSerialNumber": "DTU Seriennummer",
+  "@fieldDtuSerialNumber": {
+    "description": "Data field: DTU serial number"
+  },
+  "fieldNetworkMode": "Netzwerkmodus",
+  "@fieldNetworkMode": {
+    "description": "Data field: Network mode"
+  },
+  "fieldServerDomain": "Server Domain",
+  "@fieldServerDomain": {
+    "description": "Data field: Server domain"
+  },
+  "fieldServerPort": "Server Port",
+  "@fieldServerPort": {
+    "description": "Data field: Server port"
+  },
+  "fieldSendInterval": "Sendeintervall",
+  "@fieldSendInterval": {
+    "description": "Data field: Send interval"
+  },
+  "fieldChannel": "Kanal",
+  "@fieldChannel": {
+    "description": "Data field: Channel"
+  },
+  "fieldMeterKind": "Zähler Art",
+  "@fieldMeterKind": {
+    "description": "Data field: Meter kind"
+  },
+  "fieldMeterInterface": "Zähler Schnittstelle",
+  "@fieldMeterInterface": {
+    "description": "Data field: Meter interface"
+  },
+  "fieldZeroExportEnabled": "Nulleinspeisung aktiviert",
+  "@fieldZeroExportEnabled": {
+    "description": "Data field: Zero export enabled"
+  },
+  "fieldZeroExportAddress": "Nulleinspeisung Adresse",
+  "@fieldZeroExportAddress": {
+    "description": "Data field: Zero export address"
+  },
+  "fieldLockPasswordSet": "Sperrpasswort gesetzt",
+  "@fieldLockPasswordSet": {
+    "description": "Data field: Lock password set"
+  },
+  "fieldLockTimeMinutes": "Sperrzeit Minuten",
+  "@fieldLockTimeMinutes": {
+    "description": "Data field: Lock time minutes"
+  },
+  "fieldInverter": "Wechselrichter",
+  "@fieldInverter": {
+    "description": "Data field: Inverter"
+  },
+  "fieldInverterToggleDescription": "Wechselrichter ein- oder ausschalten",
+  "@fieldInverterToggleDescription": {
+    "description": "Data field: Inverter toggle description"
+  },
+  "fieldNumberOfInverters": "Anzahl Wechselrichter",
+  "@fieldNumberOfInverters": {
+    "description": "Data field: Number of inverters"
+  },
+  "fieldCurrentPvPower": "Aktuelle Leistung PV",
+  "@fieldCurrentPvPower": {
+    "description": "Data field: Current PV power"
+  },
+  "fieldMonthlyYield": "Monatsertrag",
+  "@fieldMonthlyYield": {
+    "description": "Data field: Monthly energy yield"
+  },
+  "fieldYearlyYield": "Jahresertrag",
+  "@fieldYearlyYield": {
+    "description": "Data field: Yearly energy yield"
+  },
+  "fieldVoltage": "Spannung",
+  "@fieldVoltage": {
+    "description": "Data field: Voltage (generic)"
+  },
+  "fieldCurrent": "Strom",
+  "@fieldCurrent": {
+    "description": "Data field: Current (generic)"
+  },
+  "fieldBatteryCycles": "Zyklen",
+  "@fieldBatteryCycles": {
+    "description": "Data field: Battery cycles"
+  },
+  "fieldBatteryCapacityGross": "Kapazität (brutto)",
+  "@fieldBatteryCapacityGross": {
+    "description": "Data field: Battery capacity gross"
+  },
+  "fieldBatteryCapacityNet": "Kapazität (netto)",
+  "@fieldBatteryCapacityNet": {
+    "description": "Data field: Battery capacity net"
+  },
+  "fieldTotalConsumption": "Gesamtverbrauch",
+  "@fieldTotalConsumption": {
+    "description": "Data field: Total consumption"
+  },
+  "fieldConsumptionFromPv": "Verbrauch aus PV",
+  "@fieldConsumptionFromPv": {
+    "description": "Data field: Consumption from PV"
+  },
+  "fieldConsumptionFromGrid": "Verbrauch aus Netz",
+  "@fieldConsumptionFromGrid": {
+    "description": "Data field: Consumption from grid"
+  },
+  "fieldConsumptionFromBattery": "Verbrauch aus Batterie",
+  "@fieldConsumptionFromBattery": {
+    "description": "Data field: Consumption from battery"
+  },
+  "fieldFrequency": "Frequenz",
+  "@fieldFrequency": {
+    "description": "Data field: Frequency (generic)"
+  },
+  "fieldMaxInverterPower": "Max. Wechselrichterleistung",
+  "@fieldMaxInverterPower": {
+    "description": "Data field: Max inverter power"
+  },
+  "fieldInverterGenerationPower": "Wechselrichter-Erzeugungsleistung",
+  "@fieldInverterGenerationPower": {
+    "description": "Data field: Inverter generation power"
+  },
+  "fieldIsolationResistance": "Isolationswiderstand",
+  "@fieldIsolationResistance": {
+    "description": "Data field: Isolation resistance"
+  },
+
+  "@_CATEGORY_NAMES_SECTION": "===== Category Display Names =====",
+
+  "categoryPv1": "PV1",
+  "@categoryPv1": {
+    "description": "Category: PV1 string"
+  },
+  "categoryPv2": "PV2",
+  "@categoryPv2": {
+    "description": "Category: PV2 string"
+  },
+  "categoryPv3": "PV3",
+  "@categoryPv3": {
+    "description": "Category: PV3 string"
+  },
+  "categoryPv4": "PV4",
+  "@categoryPv4": {
+    "description": "Category: PV4 string"
+  },
+  "categoryAcGrid": "AC (Netz)",
+  "@categoryAcGrid": {
+    "description": "Category: AC (Grid)"
+  },
+  "categoryAcTotal": "AC Gesamt",
+  "@categoryAcTotal": {
+    "description": "Category: AC total"
+  },
+  "categoryPhase1": "Phase 1",
+  "@categoryPhase1": {
+    "description": "Category: Phase 1"
+  },
+  "categoryPhase2": "Phase 2",
+  "@categoryPhase2": {
+    "description": "Category: Phase 2"
+  },
+  "categoryPhase3": "Phase 3",
+  "@categoryPhase3": {
+    "description": "Category: Phase 3"
+  },
+  "categoryTotals": "Summen",
+  "@categoryTotals": {
+    "description": "Category: Totals"
+  },
+  "categoryAcPhase1": "AC Phase 1",
+  "@categoryAcPhase1": {
+    "description": "Category: AC phase 1"
+  },
+  "categoryAcPhase2": "AC Phase 2",
+  "@categoryAcPhase2": {
+    "description": "Category: AC phase 2"
+  },
+  "categoryAcPhase3": "AC Phase 3",
+  "@categoryAcPhase3": {
+    "description": "Category: AC phase 3"
+  },
+  "categoryDcString1": "DC String 1",
+  "@categoryDcString1": {
+    "description": "Category: DC string 1"
+  },
+  "categoryDcString2": "DC String 2",
+  "@categoryDcString2": {
+    "description": "Category: DC string 2"
+  },
+  "categoryDcString3": "DC String 3",
+  "@categoryDcString3": {
+    "description": "Category: DC string 3"
+  },
+  "categorySystem": "System",
+  "@categorySystem": {
+    "description": "Category: System"
+  },
+  "categoryDeviceInfo": "Geräteinformationen",
+  "@categoryDeviceInfo": {
+    "description": "Category: Device information"
+  },
+  "categoryBattery": "Batterie",
+  "@categoryBattery": {
+    "description": "Category: Battery"
+  },
+  "categoryInverter": "Wechselrichter",
+  "@categoryInverter": {
+    "description": "Category: Inverter"
+  },
+  "categoryMemory": "Speicher",
+  "@categoryMemory": {
+    "description": "Category: Memory"
+  },
+  "categoryStorage": "Lagerung",
+  "@categoryStorage": {
+    "description": "Category: Storage"
+  },
+  "categoryPowerMeter": "Stromzähler",
+  "@categoryPowerMeter": {
+    "description": "Category: Power meter"
+  },
+  "categoryHomeConsumption": "Hausverbrauch",
+  "@categoryHomeConsumption": {
+    "description": "Category: Home consumption"
+  },
+  "categoryMeasurementInstance": "Messung {instanceNum}",
+  "@categoryMeasurementInstance": {
+    "description": "Category: Measurement with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "categorySwitchInstance": "Switch {instanceNum}",
+  "@categorySwitchInstance": {
+    "description": "Category: Switch with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryPmMeasurementInstance": "PM Messung {instanceNum}",
+  "@categoryPmMeasurementInstance": {
+    "description": "Category: PM measurement with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryInverterInstance": "Wechselrichter {instanceNum}",
+  "@categoryInverterInstance": {
+    "description": "Category: Inverter with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryStringInstance": "String {instanceNum}",
+  "@categoryStringInstance": {
+    "description": "Category: String with instance number",
+    "placeholders": {
+      "instanceNum": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryEm1Combined": "Kombiniert",
+  "@categoryEm1Combined": {
+    "description": "Category: EM1 combined"
+  },
+  "categoryPm1Combined": "PM Kombiniert",
+  "@categoryPm1Combined": {
+    "description": "Category: PM1 combined"
+  },
+  "categorySwitchCombined": "Switch Kombiniert",
+  "@categorySwitchCombined": {
+    "description": "Category: Switch combined"
+  },
+  "categoryPowerMeterPhase1": "Stromzähler Phase 1",
+  "@categoryPowerMeterPhase1": {
+    "description": "Category: Power meter phase 1"
+  },
+  "categoryPowerMeterPhase2": "Stromzähler Phase 2",
+  "@categoryPowerMeterPhase2": {
+    "description": "Category: Power meter phase 2"
+  },
+  "categoryPowerMeterPhase3": "Stromzähler Phase 3",
+  "@categoryPowerMeterPhase3": {
+    "description": "Category: Power meter phase 3"
+  },
+
+  "fieldSolarPower": "Leistung Solar",
+  "@fieldSolarPower": {
+    "description": "Field: Solar power"
+  },
+  "fieldConsumption": "Verbrauch",
+  "@fieldConsumption": {
+    "description": "Field: Consumption"
+  },
+  "fieldGridImport": "Bezug Netz",
+  "@fieldGridImport": {
+    "description": "Field: Grid import"
+  },
+  "fieldBatteryChargeDischargePower": "Batterie Lade/Entladeleistung",
+  "@fieldBatteryChargeDischargePower": {
+    "description": "Field: Battery charge/discharge power"
+  },
+  "fieldSolarInputPower": "Solar Eingangsleistung",
+  "@fieldSolarInputPower": {
+    "description": "Field: Solar input power"
+  },
+  "fieldHomeOutputPower": "Ausgang Haus",
+  "@fieldHomeOutputPower": {
+    "description": "Field: Home output power"
+  },
+  "fieldAcMode": "AC Modus",
+  "@fieldAcMode": {
+    "description": "Field: AC mode"
+  },
+  "fieldPackCount": "Pack Anzahl",
+  "@fieldPackCount": {
+    "description": "Field: Pack count"
+  },
+
+  "menuWifiConfiguration": "WiFi konfigurieren",
+  "@menuWifiConfiguration": {
+    "description": "Menu: Configure WiFi"
+  },
+  "menuOnlineMonitoringConfiguration": "Online-Monitoring konfigurieren",
+  "@menuOnlineMonitoringConfiguration": {
+    "description": "Menu: Configure online monitoring"
+  },
+  "menuRestartDevice": "Gerät neustarten",
+  "@menuRestartDevice": {
+    "description": "Menu: Restart device"
+  },
+  "menuAccessPointConfiguration": "Access Point konfigurieren",
+  "@menuAccessPointConfiguration": {
+    "description": "Menu: Configure access point"
+  },
+  "menuPowerLimit": "Leistungsbegrenzung",
+  "@menuPowerLimit": {
+    "description": "Menu: Power limit"
+  },
+  "menuAuthentication": "Authentifizierung",
+  "@menuAuthentication": {
+    "description": "Menu: Authentication"
+  },
+  "menuAutomation": "Automatisierung",
+  "@menuAutomation": {
+    "description": "Menu: Automation"
+  },
+  "menuPowerSettings": "Leistungseinstellungen",
+  "@menuPowerSettings": {
+    "description": "Menu: Power settings"
+  },
+  "menuBatteryLimits": "Batterie-Limits",
+  "@menuBatteryLimits": {
+    "description": "Menu: Battery limits"
+  },
+  "menuAdvancedPowerSettings": "Erweiterte Leistungseinstellungen",
+  "@menuAdvancedPowerSettings": {
+    "description": "Menu: Advanced power settings"
+  },
+  "menuPortConfiguration": "Port konfigurieren",
+  "@menuPortConfiguration": {
+    "description": "Menu: Port configuration"
+  },
+
+  "menuSubtitleGeneralSettings": "Grundlegende Geräteeinstellungen verwalten",
+  "@menuSubtitleGeneralSettings": {
+    "description": "Menu subtitle: General settings"
+  },
+  "menuSubtitleWifiConfiguration": "Netzwerkverbindung einrichten",
+  "@menuSubtitleWifiConfiguration": {
+    "description": "Menu subtitle: WiFi configuration"
+  },
+  "menuSubtitleOnlineMonitoring": "Server für Datenübertragung einrichten",
+  "@menuSubtitleOnlineMonitoring": {
+    "description": "Menu subtitle: Online monitoring"
+  },
+  "menuSubtitleRestartDevice": "Startet das Gerät neu",
+  "@menuSubtitleRestartDevice": {
+    "description": "Menu subtitle: Restart device"
+  },
+  "menuSubtitleAccessPoint": "WiFi Access Point einrichten",
+  "@menuSubtitleAccessPoint": {
+    "description": "Menu subtitle: Access point"
+  },
+  "menuSubtitlePowerLimit": "Ausgangsleistung begrenzen",
+  "@menuSubtitlePowerLimit": {
+    "description": "Menu subtitle: Power limit"
+  },
+  "menuSubtitleAuthentication": "Zugangsdaten konfigurieren",
+  "@menuSubtitleAuthentication": {
+    "description": "Menu subtitle: Authentication"
+  },
+  "menuSubtitleDeviceInfo": "Geräteinformationen anzeigen",
+  "@menuSubtitleDeviceInfo": {
+    "description": "Menu subtitle: Device information"
+  },
+  "menuSubtitlePowerSettings": "Leistungsparameter einstellen",
+  "@menuSubtitlePowerSettings": {
+    "description": "Menu subtitle: Power settings"
+  },
+  "menuSubtitleBatteryLimits": "Batterie-Grenzwerte konfigurieren",
+  "@menuSubtitleBatteryLimits": {
+    "description": "Menu subtitle: Battery limits"
+  },
+  "menuSubtitleAdvancedPowerSettings": "Erweiterte Leistungsoptionen",
+  "@menuSubtitleAdvancedPowerSettings": {
+    "description": "Menu subtitle: Advanced power settings"
+  },
+  "menuSubtitlePortConfiguration": "RPC UDP Port konfigurieren",
+  "@menuSubtitlePortConfiguration": {
+    "description": "Menu subtitle: Port configuration"
+  },
+  "menuSubtitleAutomation": "Shelly Scripts verwalten",
+  "@menuSubtitleAutomation": {
+    "description": "Menu subtitle: Automation"
+  },
+
+  "menuPercentagePowerLimit": "Leistungslimit (Prozent)",
+  "@menuPercentagePowerLimit": {
+    "description": "Menu: Percentage power limit"
+  },
+  "menuSubtitlePercentagePowerLimit": "Wechselrichterleistung begrenzen",
+  "@menuSubtitlePercentagePowerLimit": {
+    "description": "Menu subtitle: Limit inverter power"
+  },
+  "menuInverterToggle": "Wechselrichter ein-/ausschalten",
+  "@menuInverterToggle": {
+    "description": "Menu: Toggle inverter on/off"
+  },
+  "menuSubtitleInverterToggle": "Schaltet alle Wechselrichter",
+  "@menuSubtitleInverterToggle": {
+    "description": "Menu subtitle: Toggles all inverters"
+  },
+  "menuMqttConfiguration": "MQTT konfigurieren",
+  "@menuMqttConfiguration": {
+    "description": "Menu: Configure MQTT"
+  },
+  "menuSubtitleMqttConfiguration": "MQTT-Broker Verbindung einrichten",
+  "@menuSubtitleMqttConfiguration": {
+    "description": "Menu subtitle: Setup MQTT broker connection"
+  },
+
+  "fieldChipModel": "Chip Modell",
+  "@fieldChipModel": {
+    "description": "Field: Chip model"
+  },
+  "fieldHeap": "Heap",
+  "@fieldHeap": {
+    "description": "Field: Heap memory"
+  },
+  "fieldSketch": "Sketch",
+  "@fieldSketch": {
+    "description": "Field: Sketch memory"
+  },
+  "fieldLittleFs": "LittleFS",
+  "@fieldLittleFs": {
+    "description": "Field: LittleFS filesystem"
+  },
+  "fieldSocSet": "SOC Set",
+  "@fieldSocSet": {
+    "description": "Field: SOC set target"
+  },
+  "fieldMinSoc": "Min SOC",
+  "@fieldMinSoc": {
+    "description": "Field: Minimum SOC"
+  },
+  "fieldGridReverse": "Netz Rückspeisung",
+  "@fieldGridReverse": {
+    "description": "Field: Grid reverse mode"
+  },
+  "fieldLampSwitch": "Lampe Schalter",
+  "@fieldLampSwitch": {
+    "description": "Field: Lamp switch"
+  },
+  "fieldGridOffMode": "Netz Aus Modus",
+  "@fieldGridOffMode": {
+    "description": "Field: Grid off mode"
+  },
+  "fieldFanMode": "Lüfter Modus",
+  "@fieldFanMode": {
+    "description": "Field: Fan mode"
+  },
+  "fieldFanSpeed": "Lüfter Geschwindigkeit",
+  "@fieldFanSpeed": {
+    "description": "Field: Fan speed"
+  },
+  "fieldSmartMode": "Smart Modus",
+  "@fieldSmartMode": {
+    "description": "Field: Smart mode"
+  },
+  "fieldTimestamp": "Zeitstempel",
+  "@fieldTimestamp": {
+    "description": "Field: Timestamp"
+  },
+  "fieldTimezone": "Zeitzone",
+  "@fieldTimezone": {
+    "description": "Field: Timezone"
+  },
+  "fieldBatteryPacks": "Batteriepacks",
+  "@fieldBatteryPacks": {
+    "description": "Field: Battery packs"
+  },
+  "fieldSolarInput": "Solar-Eingang",
+  "@fieldSolarInput": {
+    "description": "Field: Solar input"
+  },
+  "fieldOutputPower": "Ausgabeleistung",
+  "@fieldOutputPower": {
+    "description": "Field: Output power"
+  },
+  "fieldInputVoltage": "Eingangsspannung",
+  "@fieldInputVoltage": {
+    "description": "Field: Input voltage"
+  },
+  "fieldDcStringPower": "{name} - DC-String-Leistung",
+  "@fieldDcStringPower": {
+    "description": "Field: DC string power with inverter name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldDcStringVoltage": "{name} - DC-String-Spannung",
+  "@fieldDcStringVoltage": {
+    "description": "Field: DC string voltage with inverter name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldDcInputPower": "{prefix} - DC-Eingangsleistung",
+  "@fieldDcInputPower": {
+    "description": "Field: DC input power with prefix",
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldAcOutputPower": "{prefix} - AC-Ausgangsleistung",
+  "@fieldAcOutputPower": {
+    "description": "Field: AC output power with prefix",
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldAllInverters": "Alle Wechselrichter",
+  "@fieldAllInverters": {
+    "description": "Field: All inverters"
+  },
+  "fieldLamp": "Lampe",
+  "@fieldLamp": {
+    "description": "Field: Lamp"
+  },
+  "fieldEmergencyPowerSupply": "Notstromversorgung",
+  "@fieldEmergencyPowerSupply": {
+    "description": "Field: Emergency power supply"
+  },
+  "fieldDeviceLightingDescription": "Gerätebeleuchtung ein- oder ausschalten",
+  "@fieldDeviceLightingDescription": {
+    "description": "Field: Device lighting toggle description"
+  },
+  "fieldGridPowerModeDescription": "Netzstrom-Modus für das Gerät",
+  "@fieldGridPowerModeDescription": {
+    "description": "Field: Grid power mode description"
+  },
+  "fieldNoInverterData": "Keine Wechselrichter-Daten verfügbar",
+  "@fieldNoInverterData": {
+    "description": "Field: No inverter data available message"
+  },
+  "fieldStatusProducing": "Produziert",
+  "@fieldStatusProducing": {
+    "description": "Field: Inverter producing status"
+  },
+  "fieldStatusReachable": "Erreichbar",
+  "@fieldStatusReachable": {
+    "description": "Field: Inverter reachable status"
+  },
+  "fieldStatusNotReachable": "Nicht erreichbar",
+  "@fieldStatusNotReachable": {
+    "description": "Field: Inverter not reachable status"
+  },
+  "fieldAcFrequency": "AC Frequenz",
+  "@fieldAcFrequency": {
+    "description": "Field: AC frequency"
+  },
+  "fieldPower": "Leistung",
+  "@fieldPower": {
+    "description": "Field: Power (generic)"
+  },
+  "fieldInverterFallback": "Wechselrichter {num}",
+  "@fieldInverterFallback": {
+    "description": "Field: Fallback inverter name with number",
+    "placeholders": {
+      "num": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldStringFallback": "String {num}",
+  "@fieldStringFallback": {
+    "description": "Field: Fallback string name with number",
+    "placeholders": {
+      "num": {
+        "type": "String"
+      }
+    }
+  },
+  "errorLoadingAuthConfig": "Konnte Authentifizierungs-Konfiguration nicht laden: {error}",
+  "@errorLoadingAuthConfig": {
+    "description": "Error: Failed to load authentication configuration",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorLoadingWifiConfig": "Konnte WiFi-Konfiguration nicht laden: {error}",
+  "@errorLoadingWifiConfig": {
+    "description": "Error: Failed to load WiFi configuration",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "firmwareNotSupported": "Firmware nicht unterstützt",
+  "@firmwareNotSupported": {
+    "description": "Dialog: Firmware not supported title"
+  },
+  "firmwareNotSupportedMessage": "Diese Funktion wird von Ihrer OpenDTU-Firmware nicht unterstützt.\n\nBitte installieren Sie die modifizierte Firmware mit REST-API-Unterstützung.",
+  "@firmwareNotSupportedMessage": {
+    "description": "Dialog: Firmware not supported message"
+  },
+  "downloadFirmware": "Firmware herunterladen",
+  "@downloadFirmware": {
+    "description": "Button: Download firmware"
+  },
+  "noInvertersFound": "Keine Wechselrichter gefunden",
+  "@noInvertersFound": {
+    "description": "Warning: No inverters found"
+  },
+  "toggleInverters": "Wechselrichter schalten",
+  "@toggleInverters": {
+    "description": "Dialog: Toggle inverters title"
+  },
+  "toggleInvertersPrompt": "Möchten Sie alle Wechselrichter ein- oder ausschalten?",
+  "@toggleInvertersPrompt": {
+    "description": "Dialog: Toggle inverters prompt"
+  },
+  "selectInverterToToggle": "Wechselrichter auswählen",
+  "@selectInverterToToggle": {
+    "description": "Dialog: Select inverter to toggle title"
+  },
+  "inverterCurrentlyOn": "Wechselrichter ist aktuell AN. Ausschalten?",
+  "@inverterCurrentlyOn": {
+    "description": "Dialog: Inverter is currently on confirmation"
+  },
+  "inverterCurrentlyOff": "Wechselrichter ist aktuell AUS. Einschalten?",
+  "@inverterCurrentlyOff": {
+    "description": "Dialog: Inverter is currently off confirmation"
+  },
+  "turnOff": "Ausschalten",
+  "@turnOff": {
+    "description": "Button: Turn off"
+  },
+  "turnOn": "Einschalten",
+  "@turnOn": {
+    "description": "Button: Turn on"
+  },
+  "turningOnInverters": "Schalte Wechselrichter ein...",
+  "@turningOnInverters": {
+    "description": "Loading: Turning on inverters"
+  },
+  "turningOffInverters": "Schalte Wechselrichter aus...",
+  "@turningOffInverters": {
+    "description": "Loading: Turning off inverters"
+  },
+  "invertersTurnedOn": "Wechselrichter eingeschaltet",
+  "@invertersTurnedOn": {
+    "description": "Success: Inverters turned on"
+  },
+  "invertersTurnedOff": "Wechselrichter ausgeschaltet",
+  "@invertersTurnedOff": {
+    "description": "Success: Inverters turned off"
+  },
+  "restartDeviceConfirm": "Das Gerät wird neugestartet. Fortfahren?",
+  "@restartDeviceConfirm": {
+    "description": "Dialog: Restart device confirmation"
+  },
+  "menuRestartInverter": "Wechselrichter neustarten",
+  "@menuRestartInverter": {
+    "description": "Menu: Restart inverter"
+  },
+  "menuSubtitleRestartInverter": "Startet einen Wechselrichter neu",
+  "@menuSubtitleRestartInverter": {
+    "description": "Menu subtitle: Restart inverter"
+  },
+  "selectInverterToRestart": "Wechselrichter zum Neustarten auswählen",
+  "@selectInverterToRestart": {
+    "description": "Dialog: Select inverter to restart"
+  },
+  "selectInverterToSetLimit": "Wechselrichter für Leistungsbegrenzung auswählen",
+  "@selectInverterToSetLimit": {
+    "description": "Dialog: Select inverter to set power limit"
+  },
+  "restartInverterConfirm": "Wechselrichter neustarten?",
+  "@restartInverterConfirm": {
+    "description": "Dialog: Restart inverter confirmation"
+  },
+  "restartingInverter": "Starte Wechselrichter neu...",
+  "@restartingInverter": {
+    "description": "Loading: Restarting inverter"
+  },
+  "inverterRestarted": "Wechselrichter neu gestartet",
+  "@inverterRestarted": {
+    "description": "Success: Inverter restarted"
+  }
+}

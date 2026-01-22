@@ -1,0 +1,3 @@
+{"method":"write","timestamp":1768585118356,"messageId":24,"deviceId":"ABC123XYZ","properties":{"lampSwitch":0}} //off
+
+{"method":"write","timestamp":1768585163607,"messageId":25,"deviceId":"ABC123XYZ","properties":{"lampSwitch":1}} //on

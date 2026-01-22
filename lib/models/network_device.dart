@@ -1,3 +1,9 @@
+enum DeviceKnownStatus {
+  unknown,        // Device not in known devices list
+  knownSameIp,   // Device known with same IP address
+  knownNewIp,    // Device known but IP address changed
+}
+
 class NetworkDevice {
   final String ipAddress;
   final String? hostname;
@@ -8,6 +14,8 @@ class NetworkDevice {
   final int? additionalPort;
   final String ? username;
   final String ? password;
+  final DeviceKnownStatus knownStatus;
+  final String? previousIpAddress; // Only set when status is knownNewIp
 
   NetworkDevice({
     required this.ipAddress,
@@ -19,10 +27,12 @@ class NetworkDevice {
     this.additionalPort,
     this.username,
     this.password,
+    this.knownStatus = DeviceKnownStatus.unknown,
+    this.previousIpAddress,
   });
 
   @override
   String toString() {
-    return 'NetworkDevice(ip: $ipAddress, hostname: $hostname, manufacturer: $manufacturer, model: $deviceModel, sn: $serialNumber, port: $port, additionalPort: $additionalPort,username: $username,$additionalPort,password: $password)';
+    return 'NetworkDevice(ip: $ipAddress, hostname: $hostname, manufacturer: $manufacturer, model: $deviceModel, sn: $serialNumber, port: $port, additionalPort: $additionalPort, username: $username, password: $password, knownStatus: $knownStatus, previousIpAddress: $previousIpAddress)';
   }
 }

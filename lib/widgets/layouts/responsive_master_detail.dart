@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/localization_extension.dart';
 import '../../utils/responsive_breakpoints.dart';
 import 'collapsible_sidebar.dart';
 
@@ -195,7 +196,7 @@ class _ResponsiveMasterDetailState<T> extends State<ResponsiveMasterDetail<T>> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Kein Element ausgewählt',
+            context.l10n.noItemSelected,
             style: TextStyle(
               fontSize: 20,
               color: Colors.grey[600],
@@ -204,7 +205,7 @@ class _ResponsiveMasterDetailState<T> extends State<ResponsiveMasterDetail<T>> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Wählen Sie ein Element aus der Liste',
+            context.l10n.selectItemFromList,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[500],

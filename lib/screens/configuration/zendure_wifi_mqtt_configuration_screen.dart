@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 
 import '../../services/wifi_service.dart';
 import '../../utils/globals.dart';
@@ -71,10 +72,10 @@ class _ZendureWifiMqttConfigurationScreen
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('WiFi-Konfiguration erfolgreich gesendet!'),
+          SnackBar(
+            content: Text(context.l10n.messageWifiConfigSent),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
 
@@ -90,7 +91,7 @@ class _ZendureWifiMqttConfigurationScreen
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fehler beim Senden: $e'),
+            content: Text(context.l10n.errorWhileSending(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -102,8 +103,8 @@ class _ZendureWifiMqttConfigurationScreen
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'WiFi konfigurieren',
+      appBar: AppBarWidget(
+        title: context.l10n.screenZendureWifiMqtt,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -130,7 +131,7 @@ class _ZendureWifiMqttConfigurationScreen
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Netzwerk einrichten',
+                                context.l10n.sectionNetworkSetup,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -141,7 +142,7 @@ class _ZendureWifiMqttConfigurationScreen
                               const SizedBox(height: 4),
                               Text(
                                 widget.device.name.isEmpty
-                                    ? 'Gerät'
+                                    ? context.l10n.deviceFallbackName
                                     : widget.device.name,
                                 style: TextStyle(
                                   color: Colors.grey[600],
@@ -157,7 +158,7 @@ class _ZendureWifiMqttConfigurationScreen
                     const Divider(),
                     const SizedBox(height: 8),
                     Text(
-                      'Verbinden Sie Ihr Gerät mit Ihrem WLAN-Netzwerk, ',
+                      context.l10n.helpConnectDeviceToWifi,
                       style: TextStyle(
                         color: Colors.grey[700],
                         fontSize: 14,
@@ -183,7 +184,7 @@ class _ZendureWifiMqttConfigurationScreen
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Hinweis',
+                          context.l10n.sectionNote,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -193,9 +194,7 @@ class _ZendureWifiMqttConfigurationScreen
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Stellen Sie sicher, dass Ihr Gerät eingeschaltet ist\n'
-                      '• Das WLAN-Passwort wird sicher übertragen\n'
-                      '• Nach erfolgreicher Konfiguration kann es einige Sekunden dauern, bis das Gerät verbunden ist',
+                      context.l10n.helpWifiSetupInstructions,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.blue.shade900,
@@ -236,7 +235,7 @@ class _ZendureWifiMqttConfigurationScreen
                           Icon(Icons.info_outline, color: Colors.blue.shade700),
                           const SizedBox(width: 8),
                           Text(
-                            'Hinweis',
+                            context.l10n.sectionNote,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue.shade700,
@@ -246,7 +245,7 @@ class _ZendureWifiMqttConfigurationScreen
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Dies ist für die offizielle App Web-Kommunikation, nicht für lokales MQTT. Bei alten Versionen war es der einzige Weg, um Daten zu bekommen. Nur ändern, wenn Sie wissen, was Sie tun!',
+                        context.l10n.helpMqttExplanation,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.blue.shade900,
@@ -268,7 +267,7 @@ class _ZendureWifiMqttConfigurationScreen
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'MQTT Konfiguration',
+                        context.l10n.sectionMqttConfig,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -278,8 +277,8 @@ class _ZendureWifiMqttConfigurationScreen
                         controller: _mqttController,
                         enabled: !_isSendingWifi,
                         decoration: InputDecoration(
-                          labelText: 'MQTT Server',
-                          helperText: 'z.B. broker.example.com:1883',
+                          labelText: context.l10n.mqttServer,
+                          helperText: context.l10n.helpMqttServerExample,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -304,14 +303,14 @@ class _ZendureWifiMqttConfigurationScreen
 
                     if (ssid.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('SSID darf nicht leer sein')),
+                        SnackBar(content: Text(context.l10n.validationSsidRequired)),
                       );
                       return;
                     }
 
                     if (password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Passwort darf nicht leer sein')),
+                        SnackBar(content: Text(context.l10n.validationPasswordRequired)),
                       );
                       return;
                     }
@@ -319,7 +318,7 @@ class _ZendureWifiMqttConfigurationScreen
                     _sendWifiConfiguration(ssid, password, _mqttController.text);
                   },
                   icon: const Icon(Icons.send),
-                  label: const Text('WiFi konfigurieren'),
+                  label: Text(context.l10n.buttonConfigureWifi),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade100,
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -335,12 +334,12 @@ class _ZendureWifiMqttConfigurationScreen
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
                       Text(
-                        'WiFi-Konfiguration wird gesendet...',
+                        context.l10n.dialogWifiConfigSending,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Bitte warten Sie einen Moment',
+                        context.l10n.helpPleaseWait,
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ],

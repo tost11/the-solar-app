@@ -6,6 +6,7 @@ import 'package:the_solar_app/models/system_device_reference.dart';
 import 'package:the_solar_app/services/device_storage_service.dart';
 import 'package:the_solar_app/services/system_storage_service.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 
 /// Screen for editing a system
 ///
@@ -51,7 +52,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
 
     // Check if device has DeviceRoleConfig mixin
     if (selectedDevice is! DeviceRoleConfig) {
-      MessageUtils.showError(context, 'Gerät hat keine Rollen-Konfiguration');
+      MessageUtils.showError(context, context.l10n.messageDeviceHasNoRoleConfig);
       return;
     }
 
@@ -76,13 +77,13 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
     }
     // Case 3: No roles available
     else {
-      MessageUtils.showError(context, 'Gerät hat keine konfigurierbaren Rollen');
+      MessageUtils.showError(context, context.l10n.messageDeviceHasNoConfigurableRoles);
       return;
     }
 
     // Check if device already in system
     if (_system.deviceReferences.any((ref) => ref.deviceSn == selectedDevice.deviceSn)) {
-      MessageUtils.showWarning(context, 'Gerät bereits im System');
+      MessageUtils.showWarning(context, context.l10n.messageDeviceAlreadyInSystem);
       return;
     }
 
@@ -102,7 +103,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
     final roleNames = rolesToAdd.map((r) => r.displayName).join(', ');
     MessageUtils.showSuccess(
       context,
-      'Gerät "${selectedDevice.name}" hinzugefügt mit Rolle(n): $roleNames',
+      context.l10n.messageDeviceAddedWithRoles(selectedDevice.name, roleNames),
     );
   }
 
@@ -121,20 +122,20 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Gerät entfernen'),
+        title: Text(context.l10n.actionRemoveDevice),
         content: Text(
           device != null
-              ? 'Möchten Sie "${device.name}" mit ${ref.rolesInSystem.length} Rolle(n) ($roleNames) aus diesem System entfernen?'
-              : 'Möchten Sie dieses Gerät mit ${ref.rolesInSystem.length} Rolle(n) ($roleNames) aus dem System entfernen?',
+              ? context.l10n.confirmRemoveDeviceWithRoles(device.name, ref.rolesInSystem.length, roleNames)
+              : context.l10n.confirmRemoveUnknownDeviceWithRoles(ref.rolesInSystem.length, roleNames),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Entfernen'),
+            child: Text(context.l10n.remove),
           ),
         ],
       ),
@@ -148,7 +149,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
 
       await _systemStorage.saveSystem(_system);
 
-      MessageUtils.showSuccess(context, 'Gerät entfernt');
+      MessageUtils.showSuccess(context, context.l10n.messageDeviceRemoved);
     }
   }
 
@@ -156,7 +157,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
     return showDialog<DeviceBase>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Gerät hinzufügen'),
+        title: Text(context.l10n.actionAddDevice),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -185,7 +186,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
         ],
       ),
@@ -196,7 +197,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
     return showDialog<DeviceRole>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rolle wählen'),
+        title: Text(context.l10n.actionChooseRole),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: roles.map((role) {
@@ -209,7 +210,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
         ],
       ),
@@ -220,14 +221,14 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text('${_system.name} bearbeiten')),
+        appBar: AppBar(title: Text(context.l10n.screenEditSystem(_system.name))),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_system.name} bearbeiten'),
+        title: Text(context.l10n.screenEditSystem(_system.name)),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(8),
@@ -238,7 +239,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
             return Card(
               child: ListTile(
                 leading: const Icon(Icons.add, color: Colors.green),
-                title: const Text('Gerät hinzufügen'),
+                title: Text(context.l10n.actionAddDevice),
                 onTap: _addDevice,
               ),
             );
@@ -257,8 +258,8 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
           if (device == null) {
             return Card(
               child: ListTile(
-                title: Text('Gerät ${ref.deviceSn} nicht gefunden'),
-                subtitle: Text('Rollen: ${ref.rolesInSystem.map((r) => r.displayName).join(', ')}'),
+                title: Text(context.l10n.statusDeviceNotFoundWithSn(ref.deviceSn)),
+                subtitle: Text(context.l10n.labelRoles(ref.rolesInSystem.map((r) => r.displayName).join(', '))),
                 leading: const Icon(Icons.error_outline, color: Colors.red),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -272,7 +273,7 @@ class _SystemEditScreenState extends State<SystemEditScreen> {
             child: ListTile(
               leading: Icon(device.deviceIcon),
               title: Text(device.name),
-              subtitle: Text('Rollen: ${ref.rolesInSystem.map((r) => r.displayName).join(', ')}'),
+              subtitle: Text(context.l10n.labelRoles(ref.rolesInSystem.map((r) => r.displayName).join(', '))),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline),
                 onPressed: () => _removeDevice(ref),

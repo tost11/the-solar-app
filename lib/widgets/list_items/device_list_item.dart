@@ -57,8 +57,8 @@ class DeviceListItem extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Use compact layout if width is less than 250px
-          if (constraints.maxWidth < 250) {
+          // Use compact layout if width is less than 320px
+          if (constraints.maxWidth < 320) {
             return _buildCompactLayout(context);
           } else {
             return _buildStandardLayout(context);

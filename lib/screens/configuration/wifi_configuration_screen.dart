@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 
 import '../../services/wifi_service.dart';
+import '../../utils/localization_extension.dart';
 import '../../widgets/wifi_config_widget.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -36,10 +37,10 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('WiFi-Konfiguration erfolgreich gesendet!'),
+          SnackBar(
+            content: Text(context.l10n.messageWifiConfigSent),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
 
@@ -55,7 +56,7 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fehler beim Senden: $e'),
+            content: Text(context.l10n.errorWhileSending(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -67,8 +68,8 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'WiFi konfigurieren',
+      appBar: AppBarWidget(
+        title: context.l10n.screenWifiConfig,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -95,14 +96,14 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Netzwerk einrichten',
+                                context.l10n.formSelectOrEnterWifiNetwork,
                                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                widget.device.name.isEmpty ? 'Gerät' : widget.device.name,
+                                widget.device.name.isEmpty ? context.l10n.deviceFallbackName : widget.device.name,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -117,7 +118,7 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
                     const Divider(),
                     const SizedBox(height: 8),
                     Text(
-                      'Verbinden Sie Ihr Gerät mit Ihrem WLAN-Netzwerk, ',
+                      context.l10n.helpWifiSetupInstructions,
                       style: TextStyle(
                         color: Colors.grey[700],
                         fontSize: 14,
@@ -148,12 +149,12 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
                       Text(
-                        'WiFi-Konfiguration wird gesendet...',
+                        context.l10n.dialogWifiConfigSending,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Bitte warten Sie einen Moment',
+                        context.l10n.messageWifiConfigSent,
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ],
@@ -176,7 +177,7 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Hinweis',
+                          context.l10n.helpWifiSetupInstructions,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -186,9 +187,7 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Stellen Sie sicher, dass Ihr Gerät eingeschaltet ist\n'
-                      '• Das WLAN-Passwort wird sicher übertragen\n'
-                      '• Nach erfolgreicher Konfiguration kann es einige Sekunden dauern, bis das Gerät verbunden ist',
+                      context.l10n.helpWifiSetupInstructions,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.blue.shade900,

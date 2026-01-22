@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../utils/localization_extension.dart';
 import '../utils/url_utils.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -35,14 +36,14 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('In Zwischenablage kopiert')),
+      SnackBar(content: Text(context.l10n.messageCopiedToClipboard)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: AppBarWidget(title: 'App-Informationen'),
+      appBar: AppBarWidget(title: context.l10n.screenAppInfo),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -65,7 +66,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Version', style: Theme.of(context).textTheme.titleMedium),
+                  Text(context.l10n.version, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Text('${_packageInfo?.version ?? '...'} (Build ${_packageInfo?.buildNumber ?? '...'})'),
                 ],
@@ -94,7 +95,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                       IconButton(
                         icon: const Icon(Icons.copy, size: 20),
                         onPressed: () => _copyToClipboard(gitHash),
-                        tooltip: 'Kopieren',
+                        tooltip: context.l10n.buttonCopy,
                       ),
                     ],
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -105,18 +106,18 @@ class _OnlineMonitoringConfigurationScreenState
 
     if (ipA.isEmpty && domainA.isEmpty) {
       MessageUtils.showError(
-          context, 'Server A: IP-Adresse oder Domain muss angegeben werden');
+          context, context.l10n.validationServerAIpRequired);
       return;
     }
 
     if (ipA.isNotEmpty && !_isValidIpAddress(ipA)) {
-      MessageUtils.showError(context, 'Server A: Ungültige IP-Adresse');
+      MessageUtils.showError(context, context.l10n.validationServerAIpInvalid);
       return;
     }
 
     if (!_isValidPort(portA)) {
       MessageUtils.showError(
-          context, 'Server A: Port muss zwischen 1 und 65534 liegen');
+          context, context.l10n.validationServerAPortRange);
       return;
     }
 
@@ -127,18 +128,18 @@ class _OnlineMonitoringConfigurationScreenState
 
     if (ipB.isEmpty && domainB.isEmpty) {
       MessageUtils.showError(
-          context, 'Server B: IP-Adresse oder Domain muss angegeben werden');
+          context, context.l10n.validationServerBIpRequired);
       return;
     }
 
     if (ipB.isNotEmpty && !_isValidIpAddress(ipB)) {
-      MessageUtils.showError(context, 'Server B: Ungültige IP-Adresse');
+      MessageUtils.showError(context, context.l10n.validationServerBIpInvalid);
       return;
     }
 
     if (!_isValidPort(portB)) {
       MessageUtils.showError(
-          context, 'Server B: Port muss zwischen 1 und 65534 liegen');
+          context, context.l10n.validationServerBPortRange);
       return;
     }
 
@@ -165,7 +166,7 @@ class _OnlineMonitoringConfigurationScreenState
         // Show success message
         MessageUtils.showSuccess(
           context,
-          'Online-Monitoring erfolgreich konfiguriert',
+          context.l10n.messageOnlineMonitoringConfigured,
         );
 
         // Return to previous screen with result
@@ -174,7 +175,7 @@ class _OnlineMonitoringConfigurationScreenState
     } catch (e) {
       if (mounted) {
         MessageUtils.showError(
-            context, 'Fehler beim Konfigurieren des Online-Monitorings: $e');
+            context, context.l10n.errorConfiguringOnlineMonitoring(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -220,60 +221,68 @@ class _OnlineMonitoringConfigurationScreenState
             const SizedBox(height: 16),
 
             // IP Address Input
-            TextField(
-              controller: ipController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'IP-Adresse',
-                hintText: 'z.B. 192.168.1.100',
-                prefixIcon: Icon(Icons.computer),
+            Builder(
+              builder: (context) => TextField(
+                controller: ipController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: context.l10n.labelIpAddress,
+                  hintText: context.l10n.helpServerExampleIp,
+                  prefixIcon: const Icon(Icons.computer),
+                ),
+                keyboardType: TextInputType.number,
               ),
-              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
 
             // Domain Input
-            TextField(
-              controller: domainController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Domain',
-                hintText: 'z.B. monitoring.example.com',
-                prefixIcon: Icon(Icons.language),
+            Builder(
+              builder: (context) => TextField(
+                controller: domainController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: context.l10n.labelDomain,
+                  hintText: context.l10n.helpServerExampleDomain,
+                  prefixIcon: const Icon(Icons.language),
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
             // Port Input
-            TextField(
-              controller: portController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Port',
-                hintText: 'z.B. 10000',
-                prefixIcon: Icon(Icons.settings_ethernet),
+            Builder(
+              builder: (context) => TextField(
+                controller: portController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: context.l10n.labelPortField,
+                  hintText: context.l10n.helpPortExample,
+                  prefixIcon: const Icon(Icons.settings_ethernet),
+                ),
+                keyboardType: TextInputType.number,
               ),
-              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
 
             // Protocol Dropdown
-            DropdownButtonFormField<String>(
-              value: protocol,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Protokoll',
-                prefixIcon: Icon(Icons.sync_alt),
+            Builder(
+              builder: (context) => DropdownButtonFormField<String>(
+                value: protocol,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: context.l10n.labelProtocol(''),
+                  prefixIcon: const Icon(Icons.sync_alt),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'TCP', child: Text('TCP')),
+                  DropdownMenuItem(value: 'UDP', child: Text('UDP')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    onProtocolChanged(value);
+                  }
+                },
               ),
-              items: const [
-                DropdownMenuItem(value: 'TCP', child: Text('TCP')),
-                DropdownMenuItem(value: 'UDP', child: Text('UDP')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  onProtocolChanged(value);
-                }
-              },
             ),
           ],
         ),
@@ -284,8 +293,8 @@ class _OnlineMonitoringConfigurationScreenState
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Online-Monitoring konfigurieren',
+      appBar: AppBarWidget(
+        title: context.l10n.screenOnlineMonitoring,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -312,7 +321,7 @@ class _OnlineMonitoringConfigurationScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Online-Monitoring',
+                                context.l10n.sectionOnlineMonitoring,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -323,7 +332,7 @@ class _OnlineMonitoringConfigurationScreenState
                               const SizedBox(height: 4),
                               Text(
                                 widget.device.name.isEmpty
-                                    ? 'Gerät'
+                                    ? context.l10n.device
                                     : widget.device.name,
                                 style: TextStyle(
                                   color: Colors.grey[600],
@@ -339,7 +348,7 @@ class _OnlineMonitoringConfigurationScreenState
                     const Divider(),
                     const SizedBox(height: 8),
                     Text(
-                      'Konfigurieren Sie die Server für das Online-Monitoring',
+                      context.l10n.helpConfigureOnlineMonitoring,
                       style: TextStyle(
                         color: Colors.grey[700],
                         fontSize: 14,
@@ -354,7 +363,7 @@ class _OnlineMonitoringConfigurationScreenState
 
             // Server A Section
             _buildServerSection(
-              title: 'Server A (Hauptserver)',
+              title: context.l10n.sectionServerA,
               ipController: _ipAController,
               domainController: _domainAController,
               portController: _portAController,
@@ -372,7 +381,7 @@ class _OnlineMonitoringConfigurationScreenState
 
             // Server B Section
             _buildServerSection(
-              title: 'Server B (Sekundärserver)',
+              title: context.l10n.sectionServerB,
               ipController: _ipBController,
               domainController: _domainBController,
               portController: _portBController,
@@ -399,8 +408,8 @@ class _OnlineMonitoringConfigurationScreenState
                     )
                   : const Icon(Icons.save),
               label: Text(_isSaving
-                  ? 'Wird gespeichert...'
-                  : 'Einstellungen speichern'),
+                  ? context.l10n.messageSaving
+                  : context.l10n.buttonSavePowerLimit),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
@@ -421,7 +430,7 @@ class _OnlineMonitoringConfigurationScreenState
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Hinweis',
+                          context.l10n.sectionNote,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -431,10 +440,7 @@ class _OnlineMonitoringConfigurationScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Entweder IP-Adresse oder Domain muss pro Server angegeben werden\n'
-                      '• Server A ist der Hauptserver für die Datenübertragung\n'
-                      '• Server B dient als Backup-Server\n'
-                      '• Gültige Ports: 1-65534',
+                      context.l10n.helpOnlineMonitoringDescription,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.blue.shade900,

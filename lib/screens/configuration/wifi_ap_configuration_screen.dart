@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 
 import '../../utils/globals.dart';
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -68,13 +69,13 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
   Future<void> _saveSettings() async {
     // Validation
     if (widget.showSsidOption && _ssidController.text.trim().isEmpty) {
-      MessageUtils.showError(context, 'SSID darf nicht leer sein');
+      MessageUtils.showError(context, context.l10n.validationFieldCannotBeEmpty);
       return;
     }
 
     if (!_isOpen && _passwordController.text.trim().isEmpty) {
       MessageUtils.showError(
-          context, 'Passwort ist erforderlich wenn das Netzwerk nicht offen ist');
+          context, context.l10n.validationEnterSecurePassword);
       return;
     }
 
@@ -117,7 +118,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
         // Show success message
         MessageUtils.showSuccess(
           context,
-          'Access Point erfolgreich konfiguriert',
+          context.l10n.savedSuccessfully,
         );
 
         // Return to previous screen with result
@@ -126,7 +127,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
     } catch (e) {
       if (mounted) {
         MessageUtils.showError(
-            context, 'Fehler beim Konfigurieren des Access Points: $e');
+            context, context.l10n.errorWhileSaving(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -140,8 +141,8 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Access Point konfigurieren',
+      appBar: AppBarWidget(
+        title: context.l10n.screenAccessPointConfig,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -168,7 +169,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Access Point einrichten',
+                                context.l10n.actionSetupAccessPoint,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -179,7 +180,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 widget.device.name.isEmpty
-                                    ? 'Gerät'
+                                    ? context.l10n.deviceFallbackName
                                     : widget.device.name,
                                 style: TextStyle(
                                   color: Colors.grey[600],
@@ -195,7 +196,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                     const Divider(),
                     const SizedBox(height: 8),
                     Text(
-                      'Konfigurieren Sie den WiFi Access Point Ihres Geräts',
+                      context.l10n.infoConfigureAccessPoint,
                       style: TextStyle(
                         color: Colors.grey[700],
                         fontSize: 14,
@@ -234,11 +235,11 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _ssidController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'SSID',
-                          hintText: 'Geben Sie den SSID ein',
-                          prefixIcon: Icon(Icons.wifi, color: Colors.blue),
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          labelText: context.l10n.formSsid,
+                          hintText: context.l10n.formEnterSsid,
+                          prefixIcon: const Icon(Icons.wifi, color: Colors.blue),
                         ),
                       ),
                     ],
@@ -263,7 +264,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Access Point aktivieren',
+                              context.l10n.wifiEnableAccessPoint,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -284,7 +285,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Aktiviert oder deaktiviert den Access Point',
+                        context.l10n.helpEnableOrDisableAp,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -304,7 +305,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Warnung: Wenn deaktiviert, ist möglicherweise keine Interaktion mit dem Gerät mehr möglich. Vorsichtig verwenden!',
+                                context.l10n.helpApWarning,
                                 style: TextStyle(fontSize: 12, color: Colors.orange.shade900),
                               ),
                             ),
@@ -333,7 +334,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Offenes Netzwerk',
+                              context.l10n.wifiOpenNetwork,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -354,7 +355,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Netzwerk ohne Passwort (nicht empfohlen)',
+                        context.l10n.helpOpenNetwork,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -380,7 +381,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                           const Icon(Icons.lock, color: Colors.red),
                           const SizedBox(width: 8),
                           Text(
-                            'Passwort',
+                            context.l10n.formPassword,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -396,8 +397,8 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           border: const OutlineInputBorder(),
-                          labelText: 'Passwort',
-                          hintText: 'Geben Sie das Passwort ein',
+                          labelText: context.l10n.formPassword,
+                          hintText: context.l10n.formEnterPassword,
                           prefixIcon: const Icon(Icons.lock, color: Colors.red),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -490,8 +491,8 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                     )
                   : const Icon(Icons.save),
               label: Text(_isSaving
-                  ? 'Wird gespeichert...'
-                  : 'Einstellungen speichern'),
+                  ? context.l10n.messageSaving
+                  : context.l10n.save),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
@@ -522,9 +523,9 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Stellen Sie sicher, dass Ihr Gerät eingeschaltet ist\n'
+                      '${context.l10n.helpDevicePoweredOn}\n'
                       '• Nach der Konfiguration wird der Access Point neu gestartet\n'
-                      '• Ein starkes Passwort schützt Ihr Netzwerk',
+                      '${context.l10n.helpStrongPassword}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.blue.shade900,

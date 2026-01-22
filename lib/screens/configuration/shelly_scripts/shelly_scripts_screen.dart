@@ -6,6 +6,7 @@ import '../../../models/shelly_script_parameter.dart';
 import '../../../services/script_template_service.dart';
 import '../../../utils/message_utils.dart';
 import '../../../utils/dialog_utils.dart';
+import '../../../utils/localization_extension.dart';
 import '../../../utils/script_parameter_extractor.dart';
 import '../../../utils/script_template_utils.dart';
 import '../../../widgets/app_bar_widget.dart';
@@ -141,7 +142,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     // Step 1: Fetch current script code
     final codeResult = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Lade Script-Code...',
+      loadingMessage: context.l10n.shellyScriptsLoadingCode,
       operation: () => widget.sendCommandToDevice(
         COMMAND_GET_SCRIPT_CODE,
         {"id": script.id},
@@ -154,7 +155,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     final code = codeResult['code'] as String?;
     if (code == null) {
       if (mounted) {
-        MessageUtils.showError(context, 'Konnte Script-Code nicht abrufen');
+        MessageUtils.showError(context, context.l10n.shellyScriptsErrorLoadingCode);
       }
       return;
     }
@@ -164,7 +165,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     if (metadata == null) {
       if (mounted) {
         MessageUtils.showError(
-            context, 'Konnte Template-Metadaten nicht extrahieren');
+            context, context.l10n.shellyScriptsErrorNoMetadata);
       }
       return;
     }
@@ -175,7 +176,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     final templateId = metadata['template_id'] as String?;
     if (templateId == null) {
       if (mounted) {
-        MessageUtils.showError(context, 'Template-ID fehlt in Metadaten');
+        MessageUtils.showError(context, context.l10n.shellyScriptsErrorNoTemplateId);
       }
       return;
     }
@@ -193,7 +194,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       if (mounted) {
         MessageUtils.showError(
           context,
-          'Vorlage nicht gefunden: $templateId${deployedVersion != null ? " v$deployedVersion" : ""}',
+          context.l10n.shellyScriptsErrorTemplateNotFound('$templateId${deployedVersion != null ? " v$deployedVersion" : ""}'),
         );
       }
       return;
@@ -227,7 +228,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     final latestTemplate = await ScriptTemplateService.getLatestTemplateVersion(templateId);
     if (latestTemplate == null) {
       if (mounted) {
-        MessageUtils.showError(context, 'Konnte neueste Version nicht laden');
+        MessageUtils.showError(context, context.l10n.shellyScriptsErrorLoadingCode);
       }
       return;
     }
@@ -237,7 +238,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     // Fetch current script code to extract parameters
     final codeResult = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Lade aktuelles Script...',
+      loadingMessage: context.l10n.shellyScriptsLoadingCurrent,
       operation: () => widget.sendCommandToDevice(
         COMMAND_GET_SCRIPT_CODE,
         {"id": script.id},
@@ -250,7 +251,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     final code = codeResult['code'] as String?;
     if (code == null) {
       if (mounted) {
-        MessageUtils.showError(context, 'Konnte Script-Code nicht abrufen');
+        MessageUtils.showError(context, context.l10n.shellyScriptsErrorLoadingCode);
       }
       return;
     }
@@ -272,15 +273,19 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       final shouldEdit = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Neue Parameter verfügbar'),
+          title: Text(context.l10n.shellyScriptsDialogNewParamsTitle),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Die neue Version ${latestTemplate.version} enthält neue Parameter, '
-                  'die konfiguriert werden müssen:\n',
+                  context.l10n.shellyScriptsDialogNewParamsMessage(
+                    latestTemplate.version,
+                    newParameters.map((p) => p.label).join(', '),
+                    currentVersion,
+                    latestTemplate.version,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 ...newParameters.map((param) => Padding(
@@ -291,7 +296,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                       const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
                       Expanded(
                         child: Text(
-                          '${param.label}${param.required ? ' (erforderlich)' : ''}\n${param.description}',
+                          '${param.label}${param.required ? ' ${context.l10n.shellyScriptsParamRequired}' : ''}\n${param.description}',
                           style: const TextStyle(fontSize: 13),
                         ),
                       ),
@@ -310,12 +315,12 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Abbrechen'),
+              child: Text(context.l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               style: TextButton.styleFrom(foregroundColor: Colors.orange),
-              child: const Text('Parameter konfigurieren'),
+              child: Text(context.l10n.shellyScriptsConfigureParams),
             ),
           ],
         ),
@@ -367,22 +372,19 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Auf neue Version aktualisieren?'),
+        title: Text(context.l10n.shellyScriptsDialogUpgradeTitle),
         content: Text(
-          'Möchten Sie das Script auf Version ${latestTemplate.version} aktualisieren?\n\n'
-          'Aktuelle Version: $currentVersion\n'
-          'Neue Version: ${latestTemplate.version}\n\n'
-          'Ihre aktuellen Parameter werden beibehalten.',
+          context.l10n.shellyScriptsDialogUpgradeMessage(latestTemplate.version),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('Aktualisieren'),
+            child: Text(context.l10n.update),
           ),
         ],
       ),
@@ -395,7 +397,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     if (wasRunning) {
       await DialogUtils.executeWithLoading(
         context,
-        loadingMessage: 'Stoppe Script...',
+        loadingMessage: context.l10n.shellyScriptsStoppingScript,
         operation: () => widget.sendCommandToDevice(
           COMMAND_STOP_SCRIPT,
           {"id": script.id},
@@ -421,7 +423,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
 
     await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Bereite Update vor...',
+      loadingMessage: context.l10n.shellyScriptsPreparingUpdate,
       operation: () => widget.sendCommandToDevice(
         COMMAND_RENAME_SCRIPT,
         {"id": script.id, "name": stagingName},
@@ -444,7 +446,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
 
     await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Aktualisiere Script...',
+      loadingMessage: context.l10n.shellyScriptsUpdatingScript,
       operation: () => widget.sendCommandToDevice(
         COMMAND_PUT_SCRIPT_CODE,
         {
@@ -459,7 +461,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       onError: (e) {
         MessageUtils.showError(
           context,
-          'Fehler beim Aktualisieren: $e\nScript bleibt im Staging-Status (0.0.0).',
+          context.l10n.shellyScriptsErrorUpdatingStaging(e.toString()),
         );
       },
     );
@@ -474,7 +476,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
 
       await DialogUtils.executeWithLoading(
         context,
-        loadingMessage: 'Finalisiere Update...',
+        loadingMessage: context.l10n.shellyScriptsFinalizingUpdate,
         operation: () => widget.sendCommandToDevice(
           COMMAND_RENAME_SCRIPT,
           {"id": script.id, "name": finalName},
@@ -485,7 +487,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       if (mounted) {
         MessageUtils.showSuccess(
           context,
-          'Script erfolgreich auf Version ${latestTemplate.version} aktualisiert',
+          context.l10n.shellyScriptsScriptUpdated(latestTemplate.version),
         );
       }
     }
@@ -513,20 +515,19 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Script löschen?'),
+        title: Text(context.l10n.shellyScriptsDialogDeleteTitle),
         content: Text(
-          'Möchten Sie das Script "${script.name}" wirklich löschen? '
-          'Diese Aktion kann nicht rückgängig gemacht werden.',
+          context.l10n.shellyScriptsDialogDeleteMessage(script.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -537,7 +538,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     // Execute delete with loading dialog
     final result = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Lösche Script...',
+      loadingMessage: context.l10n.shellyScriptsDeletingScript,
       operation: () => widget.sendCommandToDevice(
         COMMAND_DELETE_SCRIPT,
         {"id": script.id},
@@ -549,7 +550,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       setState(() {
         _scriptsData.remove(script.id);
       });
-      MessageUtils.showSuccess(context, 'Script gelöscht');
+      MessageUtils.showSuccess(context, context.l10n.shellyScriptsScriptDeleted);
     }
   }
 
@@ -601,7 +602,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                       border: Border.all(color: Colors.purple.shade300),
                     ),
                     child: Text(
-                      'Automatisierung',
+                      context.l10n.shellyScriptsInfoAutomation,
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -621,7 +622,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                       border: Border.all(color: Colors.red.shade300),
                     ),
                     child: Text(
-                      'Fehlgeschlagen',
+                      context.l10n.shellyScriptsInfoFailed,
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -638,7 +639,10 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
             // Version and Script ID info
             if (isTemplateScript && scriptMeta != null) ...[
               Text(
-                'Version: ${scriptMeta['version'] == '0.0.0' ? 'Unknown (wird aktualisiert)' : scriptMeta['version']} • ID: ${scriptMeta['deployment_id']?.substring(0, 8)}',
+                context.l10n.shellyScriptsInfoVersion(
+                  scriptMeta['version'] == '0.0.0' ? context.l10n.unknownUpdating : scriptMeta['version']!,
+                  scriptMeta['deployment_id']?.substring(0, 8) ?? '',
+                ),
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[700],
@@ -648,7 +652,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
               const SizedBox(height: 4),
             ],
             Text(
-              'Script ID: ${script.id}',
+              context.l10n.shellyScriptsInfoScriptId(script.id.toString()),
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey[600],
@@ -664,7 +668,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
               children: [
                 Chip(
                   label: Text(
-                    script.enable ? 'Aktiviert' : 'Deaktiviert',
+                    script.enable ? context.l10n.statusActivated : context.l10n.statusDeactivated,
                     style: const TextStyle(fontSize: 11),
                   ),
                   backgroundColor: script.enable
@@ -679,7 +683,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                 ),
                 Chip(
                   label: Text(
-                    script.running ? 'Läuft' : 'Gestoppt',
+                    script.running ? context.l10n.statusRunning : context.l10n.statusStopped,
                     style: const TextStyle(fontSize: 11),
                   ),
                   backgroundColor: script.running
@@ -725,8 +729,8 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
             onPressed: () => _upgradeTemplateScript(script, scriptMeta),
             icon: Icon(isStaging ? Icons.build : Icons.system_update),
             label: Text(isStaging
-                ? 'Script reparieren (fehlgeschlagenes Update)'
-                : 'Auf neue Version aktualisieren'),
+                ? context.l10n.shellyScriptsRepairScript
+                : context.l10n.shellyScriptsUpgradeVersion),
             style: ElevatedButton.styleFrom(
               backgroundColor: isStaging ? Colors.red : Colors.orange,
               foregroundColor: Colors.white,
@@ -752,7 +756,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _editScript(script),
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Bearbeiten', style: TextStyle(fontSize: 13)),
+                  label: Text(context.l10n.edit, style: const TextStyle(fontSize: 13)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -763,7 +767,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _deleteScript(script),
                   icon: const Icon(Icons.delete, size: 18),
-                  label: const Text('Löschen', style: TextStyle(fontSize: 13)),
+                  label: Text(context.l10n.delete, style: const TextStyle(fontSize: 13)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -795,7 +799,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
             child: OutlinedButton.icon(
               onPressed: () => _editScript(script),
               icon: const Icon(Icons.edit, size: 18),
-              label: const Text('Bearbeiten', style: TextStyle(fontSize: 13)),
+              label: Text(context.l10n.edit, style: const TextStyle(fontSize: 13)),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -806,7 +810,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
             child: OutlinedButton.icon(
               onPressed: () => _deleteScript(script),
               icon: const Icon(Icons.delete, size: 18),
-              label: const Text('Löschen', style: TextStyle(fontSize: 13)),
+              label: Text(context.l10n.delete, style: const TextStyle(fontSize: 13)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.red,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -824,7 +828,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
           child: OutlinedButton.icon(
             onPressed: () => _editScript(script),
             icon: const Icon(Icons.edit, size: 18),
-            label: const Text('Bearbeiten', style: TextStyle(fontSize: 13)),
+            label: Text(context.l10n.edit, style: const TextStyle(fontSize: 13)),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
@@ -835,7 +839,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
           child: OutlinedButton.icon(
             onPressed: () => _deleteScript(script),
             icon: const Icon(Icons.delete, size: 18),
-            label: const Text('Löschen', style: TextStyle(fontSize: 13)),
+            label: Text(context.l10n.delete, style: const TextStyle(fontSize: 13)),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.red,
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -853,8 +857,8 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       ..sort((a, b) => a.id.compareTo(b.id));  // Sort by ID for consistent order
 
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Automatisierung',
+      appBar: AppBarWidget(
+        title: context.l10n.shellyScriptsScreenTitle,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -882,7 +886,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Scripts & Automationen',
+                                context.l10n.shellyScriptsScreenTitle,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -902,7 +906,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tippen Sie auf Bearbeiten um ein Script zu öffnen.',
+                      context.l10n.shellyScriptsHelpEditTip,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -927,7 +931,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Keine Scripts verfügbar',
+                          context.l10n.shellyScriptsEmptyStateTitle,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -935,7 +939,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Auf diesem Gerät sind aktuell keine Scripts konfiguriert.',
+                          context.l10n.shellyScriptsEmptyStateMessage,
                           style: TextStyle(
                             color: Colors.grey[500],
                             fontSize: 12,
@@ -974,7 +978,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hinweise:',
+                          context.l10n.shellyScriptsInfoTitle,
                           style: TextStyle(
                             color: Colors.blue[900],
                             fontSize: 13,
@@ -983,10 +987,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '• Aktiviert: Script läuft automatisch bei Events\n'
-                          '• Läuft: Script wird gerade ausgeführt\n'
-                          '• Status wird alle 10 Sekunden aktualisiert\n'
-                          '• Bearbeiten: Öffnet Detailansicht mit Steuerung',
+                          context.l10n.shellyScriptsInfoContent,
                           style: TextStyle(
                             color: Colors.blue[900],
                             fontSize: 12,

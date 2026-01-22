@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/models/devices/capabilities/inverter_capability.dart';
 import 'package:the_solar_app/screens/configuration/percentage_power_limit_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_ap_configuration_screen.dart';
 import 'package:the_solar_app/screens/device_info_screen.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
@@ -35,8 +38,8 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     connectionType: ConnectionType.wifi,
     menuItems: [
       DeviceMenuItem(
-        name: 'Geräteinformationen',
-        subtitle: 'Detaillierte Geräteinformationen anzeigen',
+        name: TO(key: MenuTranslationKeys.deviceInfo),
+        subtitle: TO(key: MenuSubtitleKeys.deviceInfoSubtitle),
         icon: Icons.info_outline,
         iconColor: Colors.blue,
         onTap: (ctx) async {
@@ -45,9 +48,9 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
 
           final info = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade Geräteinformationen...',
+            loadingMessage: context.l10n.loadingDeviceInfo,
             operation: () => device.sendCommand(COMMAND_FETCH_DEVICE_INFO, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler: $e'),
+            onError: (e) => MessageUtils.showError(context, '${context.l10n.error}: $e'),
           );
 
           if (info != null && context.mounted) {
@@ -61,8 +64,8 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
         },
       ),
       DeviceMenuItem(
-        name: 'WiFi konfigurieren',
-        subtitle: 'Netzwerkverbindung einrichten',
+        name: TO(key: MenuTranslationKeys.wifiConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.wifiConfigurationSubtitle),
         icon: Icons.wifi,
         iconColor: Colors.green,
         onTap: (ctx) async {
@@ -71,9 +74,9 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
 
           final wifiConfig = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_SYS_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (wifiConfig == null || !context.mounted) return;
@@ -90,7 +93,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'WiFi-Konfiguration abgeschlossen');
+            MessageUtils.showSuccess(context, context.l10n.wifiConfigurationCompleted);
           }
         },
       ),
@@ -138,8 +141,8 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
         },
       ),*/
       DeviceMenuItem(
-        name: 'Leistungslimit',
-        subtitle: 'Wechselrichterleistung begrenzen',
+        name: TO(key: MenuTranslationKeys.powerLimit),
+        subtitle: TO(key: MenuSubtitleKeys.powerLimitSubtitle),
         icon: Icons.speed,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -148,9 +151,9 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
 
           final config = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_SYS_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (config == null || !context.mounted) return;
@@ -171,7 +174,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
           );
 
           if (result == true && context.mounted) {
-            MessageUtils.showSuccess(context, 'Leistungslimit erfolgreich gesetzt');
+            MessageUtils.showSuccess(context, context.l10n.powerLimitSet);
           }
         },
       ),
@@ -180,52 +183,57 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
       const DeviceCategoryConfig(
         category: 'ac',
         displayName: 'AC (Netz)',
+        displayNameKey: CategoryTranslationKeys.acGrid,
         layout: CategoryLayout.standard,
         order: 10,
       ),
       const DeviceCategoryConfig(
         category: 'pv1',
         displayName: 'PV1',
+        displayNameKey: CategoryTranslationKeys.pv1,
         layout: CategoryLayout.standard,
         order: 20,
       ),
       const DeviceCategoryConfig(
         category: 'pv2',
         displayName: 'PV2',
+        displayNameKey: CategoryTranslationKeys.pv2,
         layout: CategoryLayout.standard,
         order: 30,
       ),
       const DeviceCategoryConfig(
         category: 'pv3',
         displayName: 'PV3',
+        displayNameKey: CategoryTranslationKeys.pv3,
         layout: CategoryLayout.standard,
         order: 40,
       ),
       const DeviceCategoryConfig(
         category: 'pv4',
         displayName: 'PV4',
+        displayNameKey: CategoryTranslationKeys.pv4,
         layout: CategoryLayout.standard,
         order: 50,
       ),
     ],
     timeSeriesFields: [
       TimeSeriesFieldConfig(
-        name: 'Pv Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': ''}),
         type: DataFieldType.watt,
         mapping:  ['inverter', 'pv', 'power'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Aktuelle Leistung',
+        name: TO(key: FieldTranslationKeys.activePower),
         type: DataFieldType.watt,
         mapping:  ['inverter', 'sgs', 'active_power'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Netzfrequenz',
+        name: TO(key: FieldTranslationKeys.gridFrequency),
         type: DataFieldType.none,
         mapping: ['inverter', 'sgs', 'frequency'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Netzspannung',
+        name: TO(key: FieldTranslationKeys.gridVoltage),
         type: DataFieldType.voltage,
         mapping: ['inverter', 'sgs', 'voltage'],
         formatter: (value) => value,
@@ -243,7 +251,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
   List<DeviceDataField> get dataFields => [
     // Current power from SGSMO
     DeviceDataField(
-      name: 'Aktuelle Leistung',
+      name: TO(key: FieldTranslationKeys.currentPower),
       type: DataFieldType.watt,
       valueExtractor: (data) =>
           MapUtils.OM(data, ['data', 'inverter', 'sgs', 'active_power']),
@@ -251,7 +259,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
       expertMode: false,
     ),
     DeviceDataField(
-      name: 'Aktuelle Leistung PV',
+      name: TO(key: FieldTranslationKeys.currentPvPower),
       type: DataFieldType.watt,
       valueExtractor: (data) =>
           MapUtils.OM(data, ['data', 'inverter', 'pv', 'power']),
@@ -260,7 +268,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     ),
     // Daily energy
     DeviceDataField(
-      name: 'Tagesertrag',
+      name: TO(key: FieldTranslationKeys.dailyYield),
       type: DataFieldType.energy,
       valueExtractor: (data) => MapUtils.OM(data, ['data', 'dtu_daily_energy']),
       icon: Icons.wb_sunny,
@@ -269,7 +277,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     ),
     // Grid voltage
     DeviceDataField(
-      name: 'Netzspannung',
+      name: TO(key: FieldTranslationKeys.gridVoltage),
       type: DataFieldType.voltage,
       valueExtractor: (data) =>
           MapUtils.OM(data, ['data', 'inverter', 'sgs', 'voltage']),
@@ -279,7 +287,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     ),
     // Grid frequency
     DeviceDataField(
-      name: 'Netzfrequenz',
+      name: TO(key: FieldTranslationKeys.gridFrequency),
       type: DataFieldType.frequency,
       valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'sgs', 'frequency']),
       icon: Icons.waves,
@@ -288,7 +296,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     ),
     // Temperature
     DeviceDataField(
-      name: 'Temperatur',
+      name: TO(key: FieldTranslationKeys.temperature),
       type: DataFieldType.temperature,
       valueExtractor: (data) =>
           MapUtils.OM(data, ['data', 'inverter', 'sgs', 'temperature']),
@@ -298,7 +306,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     ),
     for (var i = 1; i <= 4; i++) ...[
       DeviceDataField(
-        name: 'PV$i Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': i}),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'power']),
@@ -307,7 +315,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
         category: 'pv$i',
       ),
       DeviceDataField(
-        name: 'PV$i Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': i}),
         type: DataFieldType.voltage,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'voltage']),
@@ -316,7 +324,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
         category: 'pv$i',
       ),
       DeviceDataField(
-        name: 'PV$i Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': i}),
         type: DataFieldType.current,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'current']),
@@ -326,7 +334,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
       ),
       // Total energy
       DeviceDataField(
-        name: 'PV$i Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.pvTotalYield, params: {'num': i}),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_total']),
         icon: Icons.analytics,
@@ -336,7 +344,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
       ),
       // Daily energy
       DeviceDataField(
-        name: 'PV$i Tagesertrag',
+        name: TO(key: FieldTranslationKeys.pvDailyYield, params: {'num': i}),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter', 'pv', i.toString(), 'energy_daily']),
         icon: Icons.analytics,
@@ -352,6 +360,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     const DeviceCategoryConfig(
       category: 'pv1',
       displayName: 'PV1',
+      displayNameKey: CategoryTranslationKeys.pv1,
       layout: CategoryLayout.standard,
       order: 10,
       // PV1 always shown - use defaults (both false)
@@ -359,6 +368,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     const DeviceCategoryConfig(
       category: 'pv2',
       displayName: 'PV2',
+      displayNameKey: CategoryTranslationKeys.pv2,
       layout: CategoryLayout.standard,
       order: 20,
       hideWhenAllNull: true,
@@ -367,6 +377,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     const DeviceCategoryConfig(
       category: 'pv3',
       displayName: 'PV3',
+      displayNameKey: CategoryTranslationKeys.pv3,
       layout: CategoryLayout.standard,
       order: 30,
       hideWhenAllNull: true,
@@ -375,6 +386,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     const DeviceCategoryConfig(
       category: 'pv4',
       displayName: 'PV4',
+      displayNameKey: CategoryTranslationKeys.pv4,
       layout: CategoryLayout.standard,
       order: 40,
       hideWhenAllNull: true,
@@ -383,6 +395,7 @@ class HoymilesInverterDevice extends HoymilesDevice with DeviceRoleConfig, Inver
     const DeviceCategoryConfig(
       category: 'ac',
       displayName: 'AC (Netz)',
+      displayNameKey: CategoryTranslationKeys.acGrid,
       layout: CategoryLayout.standard,
       order: 50,
       hideWhenAllNull: true,

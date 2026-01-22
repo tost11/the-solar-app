@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -117,9 +118,7 @@ class _PowerScreenState extends State<PowerScreen> {
         // Show success message
         MessageUtils.showSuccess(
           context,
-          _selectedMode == LimitMode.input
-              ? 'Input-Limit auf $_currentValue W gesetzt'
-              : 'Output-Limit auf $_currentValue W gesetzt',
+          context.l10n.messagePowerLimitSetWithValue(_currentValue.toString()),
         );
 
         // Return to previous screen with result
@@ -127,7 +126,7 @@ class _PowerScreenState extends State<PowerScreen> {
       }
     } catch (e) {
       if (mounted) {
-        MessageUtils.showError(context, 'Fehler beim Setzen des Limits: $e');
+        MessageUtils.showError(context, context.l10n.errorSettingPowerLimit(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -141,8 +140,8 @@ class _PowerScreenState extends State<PowerScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Leistungslimit einstellen',
+      appBar: AppBarWidget(
+        title: context.l10n.screenPower,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -157,7 +156,7 @@ class _PowerScreenState extends State<PowerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Limit-Typ',
+                      context.l10n.sectionAdjustLimit,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -167,14 +166,14 @@ class _PowerScreenState extends State<PowerScreen> {
                       segments: [
                         ButtonSegment<LimitMode>(
                           value: LimitMode.input,
-                          label: const Text('Input (Netz → Gerät)'),
+                          label: Text(context.l10n.labelPowerInput),
                           icon: const Icon(Icons.arrow_downward),
                           enabled: !_isInputDisabled,
                         ),
-                        const ButtonSegment<LimitMode>(
+                        ButtonSegment<LimitMode>(
                           value: LimitMode.output,
-                          label: Text('Output (Gerät → Netz)'),
-                          icon: Icon(Icons.arrow_upward),
+                          label: Text(context.l10n.labelPowerOutput),
+                          icon: const Icon(Icons.arrow_upward),
                         ),
                       ],
                       selected: {_selectedMode},
@@ -186,7 +185,7 @@ class _PowerScreenState extends State<PowerScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Input-Limit ist nicht verfügbar',
+                          context.l10n.sectionAdjustLimit,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,
@@ -207,7 +206,7 @@ class _PowerScreenState extends State<PowerScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Aktueller Wert',
+                      context.l10n.sectionCurrentValue,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -249,7 +248,7 @@ class _PowerScreenState extends State<PowerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Limit anpassen',
+                      context.l10n.sectionAdjustLimit,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -291,7 +290,7 @@ class _PowerScreenState extends State<PowerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Präzise Eingabe',
+                      context.l10n.sectionAdjustLimit,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -305,9 +304,9 @@ class _PowerScreenState extends State<PowerScreen> {
                       ],
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        labelText: 'Leistung in Watt',
+                        labelText: context.l10n.labelPowerInWatts,
                         suffixText: 'W',
-                        helperText: 'Bereich: 0 - $_maxValue W',
+                        helperText: '${context.l10n.helpPowerRange}: 0 - $_maxValue W',
                       ),
                       onChanged: _onTextChanged,
                     ),
@@ -328,7 +327,7 @@ class _PowerScreenState extends State<PowerScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save),
-              label: Text(_isSaving ? 'Wird gespeichert...' : 'Limit speichern'),
+              label: Text(_isSaving ? context.l10n.messageSaving : context.l10n.buttonSavePowerLimit),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),

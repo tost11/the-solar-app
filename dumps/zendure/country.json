@@ -1,0 +1,61 @@
+//deutschlang
+{
+  "method": "write",
+  "timestamp": 1768585217674,
+  "messageId": 26,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridStandard": 0,
+    "phaseSwitch": 1
+  }
+}
+
+//frankreich
+{
+  "method": "write",
+  "timestamp": 1768585300140,
+  "messageId": 27,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridStandard": 1,
+    "phaseSwitch": 1
+  }
+}
+
+//frankreich
+{
+  "method": "write",
+  "timestamp": 1768585300140,
+  "messageId": 27,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridStandard": 1,
+    "phaseSwitch": 1
+  }
+}
+
+//niederlande
+{
+  "method": "write",
+  "timestamp": 1768585364278,
+  "messageId": 28,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridStandard": 4,
+    "phaseSwitch": 1
+  }
+}
+
+//schweitz
+{
+  "method": "write",
+  "timestamp": 1768585427585,
+  "messageId": 29,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridStandard": 3,
+    "inverseMaxPower": 600,
+    "id": 999999,
+    "type": 3
+  }
+}

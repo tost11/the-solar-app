@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/device.dart';
 import '../models/devices/generic_rendering/device_menu_item_context.dart';
+import '../utils/localization_extension.dart';
 
 /// Reusable bottom sheet widget that displays device menu items
 ///
@@ -73,8 +74,8 @@ class DeviceMenuBottomSheet extends StatelessWidget {
                         menuItem.icon,
                         color: menuItem.iconColor,
                       ),
-                      title: Text(menuItem.name),
-                      subtitle: menuItem.subtitle != null ? Text(menuItem.subtitle!) : null,
+                      title: Text(menuItem.getName(context)),
+                      subtitle: menuItem.getSubtitle(context) != null ? Text(menuItem.getSubtitle(context)!) : null,
                       enabled: !isDisabled,
                       onTap: isDisabled
                           ? null
@@ -100,5 +101,27 @@ class DeviceMenuBottomSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Translate subtitle if it's a translation key, otherwise return as-is
+  String _translateSubtitle(BuildContext context, String subtitle) {
+    final l10n = context.l10n;
+
+    // Map of known translation keys to their translations
+    final translations = {
+      'menuGeneralSettings': l10n.menuGeneralSettings,
+      'menuSetupNetwork': l10n.menuSetupNetwork,
+      'menuSetupAccessPoint': l10n.menuSetupAccessPoint,
+      'menuSetupAuth': l10n.menuSetupAuth,
+      'menuLimitPower': l10n.menuLimitPower,
+      'menuLampAndEmergency': l10n.menuLampAndEmergency,
+      'menuToggleInverters': l10n.menuToggleInverters,
+      'menuConfigureDevice': l10n.menuConfigureDevice,
+      'screenAutomation': l10n.screenAutomation,
+      'actionRestart': l10n.actionRestart,
+    };
+
+    // Return translation if key exists, otherwise return original string
+    return translations[subtitle] ?? subtitle;
   }
 }

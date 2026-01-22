@@ -1,0 +1,21 @@
+//enable
+{
+  "method": "write",
+  "timestamp": 1768585607961,
+  "messageId": 31,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridReverse": 1
+  }
+}
+
+//disable
+{
+  "method": "write",
+  "timestamp": 1768585693709,
+  "messageId": 32,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "gridReverse": 2
+  }
+}

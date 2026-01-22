@@ -14,7 +14,7 @@ return {
   headers: { 'Content-Type': ['application/json'] },
   body: JSON.stringify({
     id: 1768255378,
-    src: 'shellypmg3-ddeeff112233',
+    src: 'shellypmg3-445566778899',
     dst: 'flutter_app',
     result: {
       ble: {},
@@ -55,7 +55,7 @@ return {
         cpu: 0
       },
       sys: {
-        mac: 'DDEEFF112233',
+        mac: '445566778899',
         restart_required: false,
         time: new Date().toTimeString().substring(0, 5),
         unixtime: Math.floor(Date.now() / 1000),

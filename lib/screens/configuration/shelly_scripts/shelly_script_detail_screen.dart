@@ -4,6 +4,7 @@ import '../../../constants/command_constants.dart';
 import '../../../models/shelly_script.dart';
 import '../../../utils/message_utils.dart';
 import '../../../utils/dialog_utils.dart';
+import '../../../utils/localization_extension.dart';
 import '../../../widgets/app_bar_widget.dart';
 import '../../../widgets/app_scaffold.dart';
 import '../base_command_screen.dart';
@@ -30,20 +31,6 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   late ShellyScript _currentScript;
   StreamSubscription<Map<String, dynamic>>? _dataSubscription;
 
-  /// Error type translations from English to German
-  static const Map<String, String> _errorTranslations = {
-    'crashed': 'Absturz',
-    'syntax_error': 'Syntaxfehler',
-    'reference_error': 'Referenzfehler',
-    'type_error': 'Typfehler',
-    'out_of_memory': 'Speicher voll',
-    'out_of_codespace': 'Code-Speicher voll',
-    'internal_error': 'Interner Fehler',
-    'not_implemented': 'Nicht implementiert',
-    'file_read_error': 'Datei-Lesefehler',
-    'bad_arguments': 'Ungültige Parameter',
-  };
-
   @override
   void initState() {
     super.initState();
@@ -62,6 +49,34 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   void dispose() {
     _dataSubscription?.cancel();
     super.dispose();
+  }
+
+  /// Get localized error translation for script error types
+  String _getErrorTranslation(BuildContext context, String errorType) {
+    switch (errorType) {
+      case 'crashed':
+        return context.l10n.shellyScriptErrorCrashed;
+      case 'syntax_error':
+        return context.l10n.shellyScriptErrorSyntax;
+      case 'reference_error':
+        return context.l10n.shellyScriptErrorReference;
+      case 'type_error':
+        return context.l10n.shellyScriptErrorType;
+      case 'out_of_memory':
+        return context.l10n.shellyScriptErrorMemory;
+      case 'out_of_codespace':
+        return context.l10n.shellyScriptErrorCodespace;
+      case 'internal_error':
+        return context.l10n.shellyScriptErrorInternal;
+      case 'not_implemented':
+        return context.l10n.shellyScriptErrorNotImplemented;
+      case 'file_read_error':
+        return context.l10n.shellyScriptErrorFileRead;
+      case 'bad_arguments':
+        return context.l10n.shellyScriptErrorBadArgs;
+      default:
+        return errorType;
+    }
   }
 
   /// Update script status from device data stream
@@ -88,7 +103,9 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   Future<void> _toggleScriptEnable(bool enable) async {
     final result = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: enable ? 'Aktiviere Script...' : 'Deaktiviere Script...',
+      loadingMessage: enable
+          ? context.l10n.shellyScriptsActivatingScript
+          : context.l10n.shellyScriptsDeactivatingScript,
       operation: () => widget.sendCommandToDevice(
         COMMAND_SET_SCRIPT_ENABLE,
         {"id": _currentScript.id, "enable": enable},
@@ -102,7 +119,9 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
       });
       MessageUtils.showSuccess(
         context,
-        enable ? 'Script aktiviert' : 'Script deaktiviert',
+        enable
+            ? context.l10n.shellyScriptsScriptActivated
+            : context.l10n.shellyScriptsScriptDeactivated,
       );
     }
   }
@@ -111,7 +130,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   Future<void> _startScript() async {
     final result = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Starte Script...',
+      loadingMessage: context.l10n.shellyScriptsStartingScript,
       operation: () => widget.sendCommandToDevice(
         COMMAND_START_SCRIPT,
         {"id": _currentScript.id},
@@ -123,7 +142,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
       setState(() {
         _currentScript = _currentScript.copyWith(running: true);
       });
-      MessageUtils.showSuccess(context, 'Script gestartet');
+      MessageUtils.showSuccess(context, context.l10n.shellyScriptsScriptStarted);
     }
   }
 
@@ -131,7 +150,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
   Future<void> _stopScript() async {
     final result = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Stoppe Script...',
+      loadingMessage: context.l10n.shellyScriptsStoppingScript,
       operation: () => widget.sendCommandToDevice(
         COMMAND_STOP_SCRIPT,
         {"id": _currentScript.id},
@@ -143,7 +162,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
       setState(() {
         _currentScript = _currentScript.copyWith(running: false);
       });
-      MessageUtils.showSuccess(context, 'Script gestoppt');
+      MessageUtils.showSuccess(context, context.l10n.shellyScriptsScriptStopped);
     }
   }
 
@@ -212,9 +231,9 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Status',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.shellyScriptsStatusTitle,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -224,7 +243,9 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                       children: [
                         Chip(
                           label: Text(
-                            _currentScript.enable ? 'Aktiviert' : 'Deaktiviert',
+                            _currentScript.enable
+                                ? context.l10n.statusActivated
+                                : context.l10n.statusDeactivated,
                             style: const TextStyle(fontSize: 11),
                           ),
                           backgroundColor: _currentScript.enable
@@ -241,7 +262,9 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                         const SizedBox(width: 8),
                         Chip(
                           label: Text(
-                            _currentScript.running ? 'Läuft' : 'Gestoppt',
+                            _currentScript.running
+                                ? context.l10n.statusRunning
+                                : context.l10n.statusStopped,
                             style: const TextStyle(fontSize: 11),
                           ),
                           backgroundColor: _currentScript.running
@@ -267,9 +290,8 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
             // Enable/Disable Switch
             Card(
               child: SwitchListTile(
-                title: const Text('Autostart aktiviert'),
-                subtitle: const Text(
-                    'Script startet automatisch bei konfigurierten Events'),
+                title: Text(context.l10n.shellyScriptsAutostartTitle),
+                subtitle: Text(context.l10n.shellyScriptsAutostartSubtitle),
                 value: _currentScript.enable,
                 onChanged: _toggleScriptEnable,
                 secondary: Icon(
@@ -293,8 +315,8 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
               icon: Icon(
                   _currentScript.running ? Icons.stop : Icons.play_arrow),
               label: Text(_currentScript.running
-                  ? 'Script stoppen'
-                  : 'Script starten'),
+                  ? context.l10n.shellyScriptsStopScript
+                  : context.l10n.shellyScriptsStartScript),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     _currentScript.running ? Colors.orange : Colors.green,
@@ -326,7 +348,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Fehler',
+                          context.l10n.shellyScriptsErrorSectionTitle,
                           style: TextStyle(
                             color: Colors.red.shade900,
                             fontWeight: FontWeight.bold,
@@ -339,7 +361,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                     ..._currentScript.errors!.map((error) => Padding(
                           padding: const EdgeInsets.only(left: 28, top: 4),
                           child: Text(
-                            '• ${_errorTranslations[error] ?? error}',
+                            '• ${_getErrorTranslation(context, error)}',
                             style: TextStyle(
                               color: Colors.red.shade900,
                               fontSize: 13,
@@ -375,7 +397,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Steuerung:',
+                          context.l10n.shellyScriptsControlTitle,
                           style: TextStyle(
                             color: Colors.blue[900],
                             fontSize: 13,
@@ -384,9 +406,7 @@ class _ShellyScriptDetailScreenState extends State<ShellyScriptDetailScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '• Autostart: Script läuft automatisch bei Events\n'
-                          '• Start/Stop: Manuelles Starten/Stoppen des Scripts\n'
-                          '• Status wird automatisch aktualisiert',
+                          context.l10n.shellyScriptsControlInfo,
                           style: TextStyle(
                             color: Colors.blue[900],
                             fontSize: 12,

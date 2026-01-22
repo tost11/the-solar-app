@@ -6,6 +6,8 @@ import '../models/system.dart';
 import '../services/device_storage_service.dart';
 import '../services/system_storage_service.dart';
 import '../utils/device_connection_utils.dart';
+import '../utils/localization_extension.dart';
+import '../utils/navigation_utils.dart';
 import '../utils/responsive_breakpoints.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -144,6 +146,12 @@ class _DeviceListScreenState extends State<DeviceListScreen>
           // Force rebuild to update graph icon visibility
         });
       });
+
+      // Force immediate rebuild to reflect current state
+      // (in case device already has data/field groups)
+      setState(() {
+        // Update graph icon visibility with current device state
+      });
     }
   }
 
@@ -151,16 +159,16 @@ class _DeviceListScreenState extends State<DeviceListScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Gerät entfernen'),
-        content: Text('Möchten Sie "${device.name}" wirklich entfernen?'),
+        title: Text(context.l10n.actionRemoveDevice),
+        content: Text(context.l10n.confirmRemoveDevice(device.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Entfernen'),
+            child: Text(context.l10n.actionRemove),
           ),
         ],
       ),
@@ -175,8 +183,8 @@ class _DeviceListScreenState extends State<DeviceListScreen>
           _connectionSubscriptions.remove(device.id);
         }
 
-        // Disconnect and dispose service connection to prevent memory leak
-        await device.removeServiceConnection();
+        // Cleanup all device resources (service + StreamControllers)
+        await device.dispose();
 
         // Remove from storage
         await _storageService.removeDevice(device.id);
@@ -202,7 +210,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Fehler beim Entfernen: $e'),
+              content: Text(context.l10n.errorWhileRemoving(e.toString())),
               backgroundColor: Colors.red,
             ),
           );
@@ -302,23 +310,23 @@ class _DeviceListScreenState extends State<DeviceListScreen>
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Neues System erstellen'),
+        title: Text(context.l10n.actionCreateNewSystem),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'System-Name',
-            labelText: 'Name',
+          decoration: InputDecoration(
+            hintText: context.l10n.formSystemName,
+            labelText: context.l10n.name,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Erstellen'),
+            child: Text(context.l10n.actionCreate),
           ),
         ],
       ),
@@ -341,13 +349,13 @@ class _DeviceListScreenState extends State<DeviceListScreen>
   Widget _buildMobileLayout() {
     return AppScaffold(
       appBar: AppBarWidget(
-        title: _tabController.index == 0 ? 'Meine Geräte' : 'Systeme',
+        title: _tabController.index == 0 ? context.l10n.screenMyDevices : context.l10n.screenSystems,
         bottom: TabBar(
           controller: _tabController,
           onTap: (_) => setState(() {}),
-          tabs: const [
-            Tab(icon: Icon(Icons.devices), text: 'Geräte'),
-            Tab(icon: Icon(Icons.dashboard), text: 'Systeme'),
+          tabs: [
+            Tab(icon: const Icon(Icons.devices), text: context.l10n.devices),
+            Tab(icon: const Icon(Icons.dashboard), text: context.l10n.screenSystems),
           ],
         ),
       ),
@@ -366,12 +374,13 @@ class _DeviceListScreenState extends State<DeviceListScreen>
   Widget _buildMasterDetailLayout() {
     return AppScaffold(
       appBar: AppBarWidget(
-        title: 'Meine Geräte',
+        title: context.l10n.screenMyDevices,
         actions: [
           // Device-specific actions (when device is selected)
           if (_selectedDeviceForActions != null) ...[
-            // Graph icon
-            if (_selectedDeviceForActions!.timeSeriesFields.isNotEmpty)
+            // Graph icon (show if device has time series fields OR field groups)
+            if (_selectedDeviceForActions!.timeSeriesFields.isNotEmpty ||
+                _selectedDeviceForActions!.timeSeriesFieldGroups.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.show_chart),
                 onPressed: () {
@@ -384,24 +393,22 @@ class _DeviceListScreenState extends State<DeviceListScreen>
                     ),
                   );
                 },
-                tooltip: 'Live-Diagramme',
+                tooltip: context.l10n.actionLiveCharts,
               ),
             // Functions menu icon
             IconButton(
               icon: const Icon(Icons.app_registration),
               onPressed: () => _showDeviceMoreFunctions(context, _selectedDeviceForActions!),
-              tooltip: 'Weitere Funktionen',
+              tooltip: context.l10n.actionMoreFunctions,
             ),
             // Settings icon
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () async {
-                final result = await Navigator.push(
+                final result = await NavigationUtils.pushConfigurationScreen(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => DeviceSettingsScreen(
-                      device: _selectedDeviceForActions!,
-                    ),
+                  DeviceSettingsScreen(
+                    device: _selectedDeviceForActions!,
                   ),
                 );
                 if (result == true) {
@@ -409,7 +416,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
                   _loadDevices();
                 }
               },
-              tooltip: 'Geräteeinstellungen',
+              tooltip: context.l10n.screenDeviceSettings,
             ),
             // Divider between device actions and general actions
             const SizedBox(width: 8),
@@ -424,9 +431,9 @@ class _DeviceListScreenState extends State<DeviceListScreen>
       ),
       body: ResponsiveMasterDetail<Device>(
         initialSelectedItem: _selectedDevice,
-        tabs: const [
-          SidebarTab(label: 'Geräte', icon: Icons.devices),
-          SidebarTab(label: 'Systeme', icon: Icons.dashboard),
+        tabs: [
+          SidebarTab(label: context.l10n.devices, icon: Icons.devices),
+          SidebarTab(label: context.l10n.screenSystems, icon: Icons.dashboard),
         ],
         masterBuilder: (context, tabIndex, isExpanded, onItemSelected) {
           // Track tab changes
@@ -497,9 +504,9 @@ class _DeviceListScreenState extends State<DeviceListScreen>
       if (isExpanded) {
         return EmptyStateWidget(
           icon: Icons.solar_power_outlined,
-          title: 'Keine Geräte',
-          message: 'Fügen Sie Ihr erstes Gerät hinzu',
-          actionLabel: 'Gerät hinzufügen',
+          title: context.l10n.emptyStateNoDevices,
+          message: context.l10n.emptyStateAddFirstDevice,
+          actionLabel: context.l10n.actionAddDevice,
           onActionPressed: () => _navigateToDevice(null),
         );
       } else {
@@ -518,7 +525,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
           final isSelected = _selectedDevice?.id == device.id;
 
           return Tooltip(
-            message: device.name.isEmpty ? 'Gerät' : device.name,
+            message: device.name.isEmpty ? context.l10n.labelDevice : device.name,
             child: Container(
               height: 48, // Fixed height for icon button
               margin: const EdgeInsets.symmetric(vertical: 2),
@@ -604,7 +611,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'Kein Gerät ausgewählt',
+            context.l10n.emptyStateNoDeviceSelected,
             style: TextStyle(
               fontSize: 20,
               color: Colors.grey[600],
@@ -613,7 +620,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Wählen Sie ein Gerät aus der Liste',
+            context.l10n.selectItemFromList,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[500],
@@ -628,7 +635,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
   Widget _buildBottomBar() {
     final currentTab = _tabController.index;
     final isDevicesTab = currentTab == 0;
-    final buttonText = isDevicesTab ? 'Gerät hinzufügen' : 'System hinzufügen';
+    final buttonText = isDevicesTab ? context.l10n.actionAddDevice : context.l10n.actionAddSystem;
     final buttonAction = isDevicesTab
         ? () => _navigateToDevice(null)
         : () => _navigateToSystem();
@@ -656,8 +663,8 @@ class _DeviceListScreenState extends State<DeviceListScreen>
   /// Build bottom bar for sidebar (master-detail layout)
   Widget _buildSidebarBottomBar(bool isExpanded) {
     final isDevicesTab = _currentMasterDetailTab == 0;
-    final buttonText = isDevicesTab ? 'Gerät hinzufügen' : 'System hinzufügen';
-    final tooltipText = isDevicesTab ? 'Gerät hinzufügen' : 'System hinzufügen';
+    final buttonText = isDevicesTab ? context.l10n.actionAddDevice : context.l10n.actionAddSystem;
+    final tooltipText = buttonText;
     final buttonAction = isDevicesTab
         ? () => _navigateToDevice(null)
         : () => _navigateToSystem();

@@ -50,6 +50,9 @@ class WiFiZendureDevice extends GenericWiFiDevice<
   String get deviceType => DEVICE_MANUFACTURER_ZENDURE;
 
   @override
+  String getManufacturer() => DEVICE_MANUFACTURER_ZENDURE;
+
+  @override
   ZendureWifiService createService() {
     return ZendureWifiService(this);
   }

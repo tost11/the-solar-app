@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../to.dart';
 
 /// Enum defining different types of data fields with their units
 enum DataFieldType {
@@ -23,8 +24,8 @@ enum DataFieldType {
 /// This class defines how a specific property should be displayed,
 /// including its name, type, data extraction logic, and formatting.
 class DeviceDataField {
-  /// Display name shown to the user
-  final String name;
+  /// Display name shown to the user (Translation Object)
+  final TO name;
 
   /// Type of data field (determines unit and formatting)
   final DataFieldType type;
@@ -70,6 +71,9 @@ class DeviceDataField {
     this.disableAutoConversion = false,
     this.hideIfEmpty = false,
   });
+
+  /// Get localized name
+  String getName(BuildContext context) => name.getText(context);
 
   /// Get the unit string based on the field type
   /// Note: For auto-converting types, use getUnit(value) instead for dynamic units

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/command_constants.dart';
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -54,12 +55,12 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     // Validation when enabled
     if (_enabled) {
       if (_usernameController.text.trim().isEmpty) {
-        MessageUtils.showError(context, 'Benutzername darf nicht leer sein');
+        MessageUtils.showError(context, context.l10n.validationUsernameRequired);
         return;
       }
 
       if (_passwordController.text.trim().isEmpty) {
-        MessageUtils.showError(context, 'Passwort darf nicht leer sein');
+        MessageUtils.showError(context, context.l10n.validationPasswordEmpty);
         return;
       }
     }
@@ -69,19 +70,18 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Authentifizierung deaktivieren?'),
-          content: const Text(
-            'Möchten Sie die Authentifizierung wirklich deaktivieren? '
-            'Das Gerät wird danach ohne Passwortschutz zugänglich sein.',
+          title: Text(context.l10n.dialogDisableAuthTitle),
+          content: Text(
+            context.l10n.dialogDisableAuthMessage,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Abbrechen'),
+              child: Text(context.l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Deaktivieren'),
+              child: Text(context.l10n.buttonDeactivate),
             ),
           ],
         ),
@@ -111,8 +111,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
         MessageUtils.showSuccess(
           context,
           _enabled
-            ? 'Authentifizierung wurde aktiviert'
-            : 'Authentifizierung wurde deaktiviert',
+            ? context.l10n.messageAuthEnabled
+            : context.l10n.messageAuthDisabled,
         );
         Navigator.pop(context, true);
       }
@@ -120,8 +120,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
       if (mounted) {
         MessageUtils.showError(
           context,
-          'Fehler beim Speichern der Authentifizierung: $e',
-          title: 'Fehler',
+          context.l10n.errorSavingAuth(e.toString()),
+          title: context.l10n.error,
         );
       }
     } finally {
@@ -136,8 +136,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Authentifizierung',
+      appBar: AppBarWidget(
+        title: context.l10n.screenAuthentication,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -165,7 +165,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Authentifizierung konfigurieren',
+                                context.l10n.sectionAuthConfig,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -185,7 +185,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Schützen Sie Ihr Gerät mit Benutzername und Passwort.',
+                      context.l10n.helpProtectDevice,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -210,7 +210,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Authentifizierung aktivieren',
+                            context.l10n.helpAuthToggle,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -231,7 +231,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Aktiviert oder deaktiviert die Passwortabfrage für das Gerät',
+                      context.l10n.helpAuthToggle,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -258,7 +258,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                           const Icon(Icons.person, color: Colors.blue),
                           const SizedBox(width: 8),
                           Text(
-                            'Benutzername',
+                            context.l10n.sectionUsername,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -273,13 +273,13 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                         controller: _usernameController,
                         enabled: widget.usernameEditable,
                         decoration: InputDecoration(
-                          labelText: 'Benutzername',
+                          labelText: context.l10n.labelUsername,
                           hintText: 'admin',
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.person),
                           helperText: widget.usernameEditable
                             ? null
-                            : 'Benutzername kann nicht geändert werden',
+                            : context.l10n.helpUsernameCannotChange,
                         ),
                       ),
                     ],
@@ -301,7 +301,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                           const Icon(Icons.key, color: Colors.orange),
                           const SizedBox(width: 8),
                           Text(
-                            'Passwort',
+                            context.l10n.sectionPassword,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -316,8 +316,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          labelText: 'Passwort',
-                          hintText: 'Geben Sie ein sicheres Passwort ein',
+                          labelText: context.l10n.labelPassword,
+                          hintText: context.l10n.helpEnterSecurePassword,
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.key),
                           suffixIcon: IconButton(
@@ -352,7 +352,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save),
-              label: Text(_isSaving ? 'Wird gespeichert...' : 'Speichern'),
+              label: Text(_isSaving ? context.l10n.messageSaving : context.l10n.save),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
@@ -378,8 +378,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Warnung: Wenn die Authentifizierung deaktiviert ist, '
-                        'kann jeder im Netzwerk auf das Gerät zugreifen.',
+                        context.l10n.helpAuthWarning,
                         style: TextStyle(
                           color: Colors.orange[900],
                           fontSize: 13,

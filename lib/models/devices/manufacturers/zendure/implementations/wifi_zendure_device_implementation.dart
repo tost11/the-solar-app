@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_menu_item.dart';
 import 'package:the_solar_app/models/devices/manufacturers/zendure/implementations/zendure_device_implementation.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/screens/configuration/mqtt_configuration_screen.dart';
 import 'package:the_solar_app/services/devices/zendure/zendure_wifi_service.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
 
@@ -23,8 +26,8 @@ class WifiZendureDeviceImplementation extends ZendureDeviceImplementation {
     final baseItems = super.getMenuItems(); // Get shared menu items
 
     baseItems.add(DeviceMenuItem(
-      name: 'Mqtt konfigurieren',
-      subtitle: 'MQTT-Broker Verbindung einrichten',
+      name: TO(key: MenuTranslationKeys.mqttConfiguration),
+      subtitle: TO(key: MenuSubtitleKeys.mqttConfigurationSubtitle),
       icon: Icons.storage,
       iconColor: Colors.green,
       onTap: (ctx) async {
@@ -34,9 +37,9 @@ class WifiZendureDeviceImplementation extends ZendureDeviceImplementation {
         // Fetch current MQTT configuration
         final mqttConfig = await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: 'Lade aktuelle Konfiguration...',
+          loadingMessage: context.l10n.loadingConfiguration,
           operation: () => device.sendCommand(COMMAND_FETCH_MQTT, {}),
-          onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+          onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
         );
 
         if (mqttConfig == null || !context.mounted) return;
@@ -68,7 +71,7 @@ class WifiZendureDeviceImplementation extends ZendureDeviceImplementation {
         );
 
         if (result == true && context.mounted) {
-          MessageUtils.showSuccess(context, 'MQTT-Konfiguration erfolgreich aktualisiert');
+          MessageUtils.showSuccess(context, context.l10n.mqttConfigurationUpdated);
         }
       },
     ));

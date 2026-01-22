@@ -40,6 +40,9 @@ class WiFiOpenDTUDevice extends GenericWiFiAuthDevice<
   String get deviceType => DEVICE_MANUFACTURER_OPENDTU;
 
   @override
+  String getManufacturer() => DEVICE_MANUFACTURER_OPENDTU;
+
+  @override
   OpenDTUWifiService createService() {
     return OpenDTUWifiService(this);
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../device_base.dart';
+import '../../to.dart';
 
 /// Enum defining different types of control widgets
 enum ControlType {
@@ -15,7 +16,7 @@ enum ControlType {
 /// modify device settings or trigger actions directly from the device detail screen.
 class DeviceControlItem {
   /// Display name shown to the user (left side)
-  final String name;
+  final TO name;
 
   /// Type of control widget to display (right side)
   final ControlType type;
@@ -51,4 +52,7 @@ class DeviceControlItem {
     this.max,
     this.divisions,
   });
+
+  /// Get localized name
+  String getName(BuildContext context) => name.getText(context);
 }

@@ -97,7 +97,8 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
       // Expanded width (30% of screen, max 400px)
       final screenWidth = ResponsiveBreakpoints.getScreenWidth(context);
       final calculatedWidth = screenWidth * 0.3;
-      return calculatedWidth > 400 ? 400 : calculatedWidth;
+      final finalWidth = calculatedWidth > 400.0 ? 400.0 : calculatedWidth;
+      return finalWidth;
     }
   }
 
@@ -105,10 +106,8 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar> {
   Widget build(BuildContext context) {
     final sidebarWidth = _getSidebarWidth(context);
 
-    return AnimatedContainer(
+    return Container(
       key: const ValueKey('collapsible_sidebar'),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
       width: sidebarWidth,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(

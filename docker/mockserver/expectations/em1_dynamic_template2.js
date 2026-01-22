@@ -55,7 +55,7 @@ return {
       temperature: { tC: 29.4, tF: 85.0 }
     },
     sys: {
-      mac: 'AABBCCDDEEFF',
+      mac: '001122334455',
       restart_required: false,
       time: new Date().toTimeString().substring(0, 5),
       unixtime: Math.floor(Date.now() / 1000),

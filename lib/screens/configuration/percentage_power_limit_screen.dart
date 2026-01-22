@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import '../../constants/command_constants.dart';
 import '../../utils/message_utils.dart';
 import '../../utils/dialog_utils.dart';
@@ -108,12 +109,12 @@ class _PercentagePowerLimitScreenState
   Future<void> _savePowerLimit() async {
     final result = await DialogUtils.executeWithLoading(
       context,
-      loadingMessage: 'Setze Leistungsbegrenzung auf $_percentage%...',
+      loadingMessage: context.l10n.dialogPowerLimitSetting(_percentage.toString()),
       operation: () => widget.sendCommandToDevice(COMMAND_SET_LIMIT, {
         'limit': _percentage,
       }),
       onError: (e) => MessageUtils.showError(
-          context, 'Fehler beim Setzen der Leistungsbegrenzung: $e'),
+          context, context.l10n.errorSettingPercentageLimit(e.toString())),
     );
 
     if (result != null && mounted) {
@@ -127,7 +128,7 @@ class _PercentagePowerLimitScreenState
     final maxWatt = widget.totalPower ?? 0;
 
     return AppScaffold(
-      appBar: AppBarWidget(title: 'Leistungsbegrenzung'),
+      appBar: AppBarWidget(title: context.l10n.screenPercentagePowerLimit),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -143,7 +144,7 @@ class _PercentagePowerLimitScreenState
                       const Icon(Icons.info_outline, color: Colors.blue),
                       const SizedBox(width: 12),
                       Text(
-                        'Aktuelle Begrenzung: ${widget.currentLimit}%',
+                        context.l10n.helpCurrentPercentageLimit(widget.currentLimit.toString()),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
@@ -154,9 +155,9 @@ class _PercentagePowerLimitScreenState
             const SizedBox(height: 24),
 
             // Percentage section
-            const Text(
-              'Leistungsbegrenzung in Prozent',
-              style: TextStyle(
+            Text(
+              context.l10n.sectionPercentageLimit,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -196,11 +197,11 @@ class _PercentagePowerLimitScreenState
             // Percentage text input
             TextFormField(
               controller: _percentageController,
-              decoration: const InputDecoration(
-                labelText: 'Prozent',
+              decoration: InputDecoration(
+                labelText: context.l10n.labelPercent,
                 suffixText: '%',
-                border: OutlineInputBorder(),
-                helperText: 'Wert zwischen 1 und 100',
+                border: const OutlineInputBorder(),
+                helperText: context.l10n.helpWattValue,
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [
@@ -220,9 +221,9 @@ class _PercentagePowerLimitScreenState
             if (hasWattControl) ...[
               const SizedBox(height: 32),
 
-              const Text(
-                'Leistungsbegrenzung in Watt',
-                style: TextStyle(
+              Text(
+                context.l10n.sectionWattLimit,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -233,10 +234,10 @@ class _PercentagePowerLimitScreenState
               TextFormField(
                 controller: _wattController,
                 decoration: InputDecoration(
-                  labelText: 'Watt',
+                  labelText: context.l10n.labelWatt,
                   suffixText: 'W',
                   border: const OutlineInputBorder(),
-                  helperText: 'Max: $maxWatt W (entspricht 100%)',
+                  helperText: context.l10n.helpMaxWatt(maxWatt.toString()),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -277,7 +278,7 @@ class _PercentagePowerLimitScreenState
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Watt-Werte werden auf volle Prozentschritte gerundet',
+                          context.l10n.infoWattRoundingNote,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.blue.shade900,
@@ -300,17 +301,16 @@ class _PercentagePowerLimitScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Geräteinformationen',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.sectionDeviceInfo,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text('Nennleistung: $maxWatt W'),
-                      Text(
-                          'Aktuelle Begrenzung: $_watt W ($_percentage%)'),
+                      Text(context.l10n.helpNominalPower(maxWatt.toString())),
+                      Text(context.l10n.helpCurrentLimit(_watt.toString(), _percentage.toString())),
                     ],
                   ),
                 ),
@@ -325,9 +325,9 @@ class _PercentagePowerLimitScreenState
               child: ElevatedButton.icon(
                 onPressed: _savePowerLimit,
                 icon: const Icon(Icons.save),
-                label: const Text(
-                  'Leistungsbegrenzung speichern',
-                  style: TextStyle(fontSize: 16),
+                label: Text(
+                  context.l10n.buttonSavePowerLimit,
+                  style: const TextStyle(fontSize: 16),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
@@ -344,9 +344,9 @@ class _PercentagePowerLimitScreenState
               height: 50,
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Abbrechen',
-                  style: TextStyle(fontSize: 16),
+                child: Text(
+                  context.l10n.cancel,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),

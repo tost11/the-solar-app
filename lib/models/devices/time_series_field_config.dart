@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_data_field.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'time_series_data_point.dart';
 
 /// Configuration for a time series field to track for graphing
@@ -7,8 +9,8 @@ import 'time_series_data_point.dart';
 /// and how to transform/format the values. Stores historical data points
 /// for the last 5 minutes.
 class TimeSeriesFieldConfig {
-  /// Display name for the graph
-  final String name;
+  /// Display name for the graph (Translation Object)
+  final TO name;
 
   /// Type of data field (determines unit and formatting)
   final DataFieldType type;
@@ -45,6 +47,11 @@ class TimeSeriesFieldConfig {
     this.hideIfEmpty = false,
   });
 
+  /// Get the localized name for this field
+  String getLocalizedName(BuildContext context) {
+    return name.getText(context);
+  }
+
   /// Get the unit string based on the field type
   String get unit {
     switch (type) {
@@ -79,6 +86,9 @@ class TimeSeriesFieldConfig {
     }
   }
 
+  /// Get localized name
+  String getName(BuildContext context) => name.getText(context);
+
   /// Add a new data point to the time series
   void addValue(DateTime timestamp, num value) {
     values.add(TimeSeriesDataPoint(
@@ -102,10 +112,18 @@ class TimeSeriesFieldConfig {
     try {
       dynamic value = data;
 
-      // Navigate through nested map using mapping path
+      // Navigate through nested map/list structure using mapping path
       for (var key in mapping) {
         if (value is Map<String, dynamic>) {
+          // Navigate through map
           value = value[key];
+        } else if (value is List) {
+          // Navigate through list using integer index
+          final index = int.tryParse(key);
+          if (index == null || index < 0 || index >= value.length) {
+            return null; // Invalid list index
+          }
+          value = value[index];
         } else {
           return null; // Path doesn't exist
         }

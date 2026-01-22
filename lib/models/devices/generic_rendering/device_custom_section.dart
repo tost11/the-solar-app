@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../to.dart';
 import '../device_base.dart';
 
 /// Position where the custom section should be rendered
@@ -18,7 +19,8 @@ enum CustomSectionPosition {
 /// Represents a custom UI section that a device can inject into the detail screen
 class DeviceCustomSection {
   /// Title of the section (optional, if null no title is shown)
-  final String? title;
+  /// Can be either a String or a TO (TranslationObject) for localization
+  final dynamic title;  // String? or TO?
 
   /// Widget builder function that receives context, device, and current data
   final Widget Function(BuildContext context, DeviceBase device, Map<String, Map<String, dynamic>> data) builder;

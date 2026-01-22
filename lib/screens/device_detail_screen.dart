@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import '../utils/localization_extension.dart';
 import '../models/device.dart';
 import '../models/devices/device_base.dart';  // For DeviceError class
+import '../models/to.dart';
 import '../models/devices/generic_rendering/device_category_config.dart';
 import '../models/devices/generic_rendering/device_control_item.dart';
 import '../models/devices/generic_rendering/device_custom_section.dart';
 import '../models/devices/generic_rendering/device_data_field.dart';
 import '../models/devices/generic_rendering/device_menu_item_context.dart';
 import '../models/devices/time_series_field_config.dart';
+import '../models/devices/time_series_field_group.dart';
 import '../services/device_storage_service.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -22,6 +25,7 @@ import '../widgets/layouts/responsive_data_grid.dart';
 import '../utils/device_connection_utils.dart';
 import '../utils/globals.dart';
 import '../utils/message_utils.dart';
+import '../utils/navigation_utils.dart';
 import '../utils/responsive_breakpoints.dart';
 import 'device_settings_screen.dart';
 import 'device_graph_screen.dart';
@@ -71,16 +75,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     final service = widget.device.getServiceConnection();
     final isConnected = service?.isConnected() ?? false;
     final isInitialized = service?.isInitialized ?? false;
-
-    // Determine initial status
-    if (!isConnected) {
-      _connectionStatus = 'Nicht verbunden';
-      _isAutoReconnecting = service?.autoReconnect ?? false;
-    } else if (!isInitialized) {
-      _connectionStatus = 'Lade Gerätedaten...';
-    } else {
-      _connectionStatus = 'Verbunden';
-    }
+    _isAutoReconnecting = !isConnected && (service?.autoReconnect ?? false);
 
     // Load cached data if device is already initialized
     if (isConnected && isInitialized) {
@@ -100,6 +95,46 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
     // Add listener for expert mode changes
     Globals.expertModeNotifier.addListener(_onExpertModeChanged);
+
+    // Add listener for language changes
+    Globals.languageNotifier.addListener(_onLanguageChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update connection status with localized strings
+    // This is called after initState and whenever dependencies (like locale) change
+    _updateConnectionStatus();
+  }
+
+  // Callback when language changes
+  void _onLanguageChanged() {
+    if (mounted) {
+      _updateConnectionStatus();
+    }
+  }
+
+  /// Update connection status with localized strings based on current state
+  void _updateConnectionStatus() {
+    final service = widget.device.getServiceConnection();
+    final isConnected = service?.isConnected() ?? false;
+    final isInitialized = service?.isInitialized ?? false;
+
+    String newStatus;
+    if (!isConnected) {
+      newStatus = context.l10n.notConnected;
+    } else if (!isInitialized) {
+      newStatus = context.l10n.loadingDeviceData;
+    } else {
+      newStatus = context.l10n.connected;
+    }
+
+    if (_connectionStatus != newStatus) {
+      setState(() {
+        _connectionStatus = newStatus;
+      });
+    }
   }
 
   // Callback when expert mode changes
@@ -107,7 +142,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     if (mounted) {
       setState(() {
         // Update cached count when expert mode changes
-        _visibleTimeSeriesCount = _getVisibleTimeSeriesFields().length;
+        _visibleTimeSeriesCount = _getTotalVisibleGraphCount();
       });
     }
   }
@@ -130,28 +165,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       final isConnected = service?.isConnected() ?? false;
       final isInitialized = service?.isInitialized ?? false;
 
-      // 3. Determine initial status based on connection and initialization state
-      String initialStatus;
-      if (!isConnected) {
-        initialStatus = 'Nicht verbunden';
-      } else if (!isInitialized) {
-        initialStatus = 'Lade Gerätedaten...';
-      } else {
-        initialStatus = 'Verbunden';
-      }
-
-      // 4. Reset local state (load cached data if device is initialized)
+      // 3. Reset local state (load cached data if device is initialized)
       setState(() {
-        // Initialize status based on actual connection state
-        _connectionStatus = initialStatus;
+        // Status will be updated via _updateConnectionStatus() call below
+        _connectionStatus = '';
 
         // If device is initialized, load existing data. Otherwise reset to empty.
         if (isConnected && isInitialized) {
-          final cachedData = widget.device.data['data'];
-          if (cachedData is Map<String, Map<String, dynamic>>) {
+          final cachedData = widget.device.data;
+          if (cachedData.isNotEmpty) {
             _receivedData = cachedData;
-          } else {
-            _receivedData = {};
           }
         } else {
           _receivedData = {};
@@ -169,6 +192,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       // Cancel error timer
       _errorDismissTimer?.cancel();
 
+      // Update connection status with localized strings
+      _updateConnectionStatus();
+
       // 5. DO NOT disconnect old device - let user manage connections explicitly
       // Users can now connect/disconnect devices from the list view
       // This allows multiple devices to stay connected while switching views
@@ -185,8 +211,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   @override
   void dispose() {
-    // IMPORTANT: Remove listener to prevent memory leaks
+    // IMPORTANT: Remove listeners to prevent memory leaks
     Globals.expertModeNotifier.removeListener(_onExpertModeChanged);
+    Globals.languageNotifier.removeListener(_onLanguageChanged);
 
     _statusSubscription?.cancel();
     _dataSubscription?.cancel();
@@ -226,7 +253,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         setState(() {
           _receivedData = widget.device.data;
           // Update cached visible time series count
-          _visibleTimeSeriesCount = _getVisibleTimeSeriesFields().length;
+          _visibleTimeSeriesCount = _getTotalVisibleGraphCount();
         });
       }
     });
@@ -287,15 +314,26 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Future<void> _tryAutoConnect() async {
+    final wasAlreadyConnected = widget.device.getServiceConnection()?.isConnected() ?? false;
+
     await DeviceConnectionUtils.connectDevice(context, widget.device, showMessages: false);
+
+    // If device was already connected, force an immediate data refresh
+    if (wasAlreadyConnected) {
+      try {
+        await widget.device.getServiceConnection()?.fetchData();
+      } catch (e) {
+        // Ignore fetch errors - periodic fetch will retry
+        debugPrint('[DeviceDetailScreen] Force refresh failed: $e');
+      }
+    }
   }
 
   Future<void> _disconnectDevice() async {
     await DeviceConnectionUtils.disconnectDevice(context, widget.device, showMessages: false);
 
-    setState(() {
-      _connectionStatus = 'Nicht verbunden';
-    });
+    // Update connection status with localized string
+    _updateConnectionStatus();
   }
 
   void _showMoreFunctions(BuildContext screenContext) {
@@ -366,7 +404,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           const SizedBox(height: 24),
           if (section.title != null) ...[
             Text(
-              section.title!,
+              section.title is TO
+                ? (section.title as TO).getText(context)
+                : section.title as String,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -432,14 +472,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       itemBuilder: (context, index) {
         final field = visibleFields[index];
         final value = field.valueExtractor(_receivedData);
+        final localizedName = field.name.getText(context);
         return DeviceDataCard(
-          title: field.name,
+          title: localizedName,
           value: field.formatValue(value),
           unit: field.getUnit(value),
           icon: field.icon,
           showDetailButton: field.showDetailButton,
           onDetailTap: field.showDetailButton
-              ? () => _showFieldDetailDialog(field.name, field.formatValue(value), field.getUnit(value))
+              ? () => _showFieldDetailDialog(localizedName, field.formatValue(value), field.getUnit(value))
               : null,
         );
       },
@@ -459,6 +500,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       children: visibleFields.map((field) {
         final value = field.valueExtractor(_receivedData);
         final formattedValue = field.formatValue(value);
+        final localizedName = field.name.getText(context);
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
@@ -481,7 +523,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      field.name,
+                      localizedName,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[700],
@@ -522,7 +564,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                           const SizedBox(width: 8),
                           InkWell(
                             onTap: () => _showFieldDetailDialog(
-                              field.name,
+                              localizedName,
                               formattedValue,
                               field.getUnit(value),
                             ),
@@ -681,7 +723,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                     // Control name (left side)
                     Expanded(
                       child: Text(
-                        controlItem.name,
+                        controlItem.getName(context),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -716,6 +758,20 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           return field.values.isNotEmpty;
         })
         .toList();
+  }
+
+  /// Get time series field groups visible based on expert mode
+  List<TimeSeriesFieldGroup> _getVisibleTimeSeriesFieldGroups() {
+    return widget.device.timeSeriesFieldGroups
+        .where((group) => !group.expertMode || Globals.expertMode)
+        .toList();
+  }
+
+  /// Get total count of visible graphs (fields + groups with data)
+  int _getTotalVisibleGraphCount() {
+    final fields = _getVisibleTimeSeriesFields().length;
+    final groups = _getVisibleTimeSeriesFieldGroups().where((g) => g.hasData).length;
+    return fields + groups;
   }
 
   /// Build data fields section only
@@ -769,7 +825,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             children: [
               const SizedBox(height: 24),
               _buildCategoryHeader(
-                config?.displayName ?? category,
+                config?.getLocalizedDisplayName(context.l10n) ?? category,
               ),
               const SizedBox(height: 12),
               _buildCategoryGrid(
@@ -789,12 +845,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // LEFT COLUMN: Controls + Data (60% width)
+        // LEFT COLUMN: Custom sections + Controls + Data (60% width)
         Expanded(
           flex: 6,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Custom sections at afterConnectionControls position
+              ..._buildCustomSections(CustomSectionPosition.afterConnectionControls, true),
+
               // Controls section (if any exist)
               if (widget.device.controlItems.isNotEmpty) ...[
                 _buildControlsSection(),
@@ -833,6 +892,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               const SizedBox(height: 16),
 
               // Graphs vertically stacked (filtered by expert mode)
+              // First render field groups (multi-series), then single fields
+              ..._getVisibleTimeSeriesFieldGroups().where((g) => g.hasData).map((group) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: TimeSeriesChartCard(group: group),
+                );
+              }),
               ..._getVisibleTimeSeriesFields().map((field) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -851,10 +917,19 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // LEFT COLUMN: Data fields (70% width)
+        // LEFT COLUMN: Custom sections + Data fields (70% width)
         Expanded(
           flex: 7,
-          child: _buildDataFieldsSection(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Custom sections at afterConnectionControls position
+              ..._buildCustomSections(CustomSectionPosition.afterConnectionControls, true),
+
+              // Data fields
+              _buildDataFieldsSection(),
+            ],
+          ),
         ),
 
         const SizedBox(width: 16),
@@ -1029,12 +1104,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       IconButton(
         icon: const Icon(Icons.settings),
         onPressed: () async {
-          final result = await Navigator.push(
+          final result = await NavigationUtils.pushConfigurationScreen(
             context,
-            MaterialPageRoute(
-              builder: (context) => DeviceSettingsScreen(
-                device: widget.device,
-              ),
+            DeviceSettingsScreen(
+              device: widget.device,
             ),
           );
 
@@ -1052,15 +1125,24 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   /// Build body content for device detail screen
   Widget _buildBody(BuildContext context, bool isConnected) {
-    return Column(
-      children: [
-        // Scrollable content area
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        // Determine if we should use mobile layout based on available width
+        final useMobileLayout = availableWidth < ResponsiveBreakpoints.mobileMax;
+
+        // Recalculate visible graph count on every build to handle window resize
+        final visibleTimeSeriesCount = _getTotalVisibleGraphCount();
+
+        return Column(
+          children: [
+            // Scrollable content area
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
             // Custom sections before device info
             ..._buildCustomSections(CustomSectionPosition.beforeDeviceInfo, isConnected),
 
@@ -1180,9 +1262,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               ),
 
             if (isConnected) ...[
-              // Custom sections after connection controls
-              ..._buildCustomSections(CustomSectionPosition.afterConnectionControls, isConnected),
-
               // Custom sections after controls (moved before Live Data section)
               ..._buildCustomSections(CustomSectionPosition.afterControls, isConnected),
 
@@ -1196,22 +1275,28 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               const SizedBox(height: 12),
 
               if (_receivedData.isNotEmpty) ...[
-                // Responsive layout logic
-                if (ResponsiveBreakpoints.isMobile(context)) ...[
-                  // MOBILE: Vertical stacking (controls -> data)
+                // Responsive layout logic based on available width
+                if (useMobileLayout) ...[
+                  // MOBILE: Vertical stacking (custom sections -> controls -> data)
+                  // Custom sections at afterConnectionControls position
+                  ..._buildCustomSections(CustomSectionPosition.afterConnectionControls, isConnected),
+
                   if (widget.device.controlItems.isNotEmpty) ...[
                     _buildControlsSection(),
                     const SizedBox(height: 24),
                   ],
                   _buildDataFieldsSection(),
-                ] else if (_visibleTimeSeriesCount > 0) ...[
+                ] else if (visibleTimeSeriesCount > 0) ...[
                   // TABLET/DESKTOP WITH GRAPHS: (controls+data) | graphs
                   _buildControlsDataAndGraphsLayout(),
                 ] else if (widget.device.controlItems.isNotEmpty) ...[
                   // TABLET/DESKTOP WITHOUT GRAPHS BUT WITH CONTROLS: data | controls
                   _buildDataAndControlsLayout(),
                 ] else ...[
-                  // TABLET/DESKTOP WITHOUT GRAPHS AND WITHOUT CONTROLS: full-width data
+                  // TABLET/DESKTOP WITHOUT GRAPHS AND WITHOUT CONTROLS: full-width custom sections + data
+                  // Custom sections at afterConnectionControls position
+                  ..._buildCustomSections(CustomSectionPosition.afterConnectionControls, isConnected),
+
                   _buildDataFieldsSection(),
                 ],
               ] else
@@ -1232,7 +1317,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
         // Static error footer at bottom (outside scroll area)
         if (_buildErrorFooter() != null) _buildErrorFooter()!,
-      ],
+          ],
+        );
+      },
     );
   }
 

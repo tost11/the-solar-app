@@ -14,7 +14,7 @@ import 'opendtu_websocket_connection.dart';
 
 class OpenDTUWifiService extends BaseDeviceService {
   // Connection timeout - if no data received within this time, consider disconnected
-  static const int CONNECTION_TIMEOUT_MS = 60000;  // 60 seconds (1 minute)
+  static const int CONNECTION_TIMEOUT_MS = 40000;  // 60 seconds (1 minute)
 
   // WebSocket connection for real-time data
   OpenDtuWebSocketConnection? _websocketConnection;
@@ -33,39 +33,54 @@ class OpenDTUWifiService extends BaseDeviceService {
       // Check if initial response indicates we should probe further
       // (e.g., 404 means root endpoint doesn't exist, which is expected for OpenDTU devices)
       if (initialResponse != null && (initialResponse.statusCode == 404 || initialResponse.statusCode == 200)) {
-        // Make request to OpenDTU-specific endpoint
-        final response = await http.get(
+        // Step 1: Fetch system status for hostname and chipmodel
+        final systemResponse = await http.get(
           Uri.parse('http://$ipAddress:$port/api/system/status'),
           headers: {'Accept': 'application/json'},
         ).timeout(connectionInfo.timeout);
 
-        if (response.statusCode == 200) {
+        if (systemResponse.statusCode == 200) {
           // Parse JSON response
-          final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+          final systemData = jsonDecode(systemResponse.body) as Map<String, dynamic>;
 
           // Check for OpenDTU-specific keys
-          if (responseData.containsKey('hostname') &&
-              responseData.containsKey('chipmodel') &&
-              responseData.containsKey('git_hash')) {
+          if (systemData.containsKey('hostname') &&
+              systemData.containsKey('chipmodel') &&
+              systemData.containsKey('git_hash')) {
 
-            final hostname = responseData['hostname'] as String?;
-            final chipModel = responseData['chipmodel'] as String?;
+            final hostname = systemData['hostname'] as String?;
+            final chipModel = systemData['chipmodel'] as String?;
 
-            //real serial not possible (find a way to get chip number of device)
-            var fakeSerial = "";
-            if(hostname != null){
-              fakeSerial += '${hostname}_';
+            // Step 2: Fetch network status for ap_mac (persistent hardware serial)
+            final networkResponse = await http.get(
+              Uri.parse('http://$ipAddress:$port/api/network/status'),
+              headers: {'Accept': 'application/json'},
+            ).timeout(connectionInfo.timeout);
+
+            if (networkResponse.statusCode == 200) {
+              final networkData = jsonDecode(networkResponse.body) as Map<String, dynamic>;
+
+              // Extract ap_mac as the persistent serial number
+              final apMac = networkData['ap_mac'] as String?;
+              if (apMac == null || apMac.isEmpty) {
+                debugPrint('OpenDTU device found but ap_mac is missing or empty');
+                return null;
+              }
+
+              // Remove colons from MAC address for cleaner serial number
+              final serialNumber = apMac.replaceAll(':', '');
+
+              return NetworkDevice(
+                ipAddress: ipAddress,
+                hostname: hostname,
+                manufacturer: DEVICE_MANUFACTURER_OPENDTU,
+                deviceModel: chipModel ?? 'Unknown',
+                serialNumber: serialNumber,  // Use MAC address without colons
+                port: port
+              );
+            } else {
+              debugPrint('OpenDTU network status endpoint returned ${networkResponse.statusCode}');
             }
-            fakeSerial += ipAddress;
-
-            return NetworkDevice(
-              ipAddress: ipAddress,
-              hostname: hostname ?? 'OpenDTU',
-              manufacturer: DEVICE_MANUFACTURER_OPENDTU,
-              deviceModel: chipModel ?? 'Unknown',
-              serialNumber: fakeSerial,
-              port: port
-            );
           }
         }
       }
@@ -89,6 +104,37 @@ class OpenDTUWifiService extends BaseDeviceService {
 
   /// Handle WebSocket data callback
   void _handleWebSocketData(Map<String, dynamic> parsedData) {
+    // Calculate total DC input power from all inverters
+    double totalDcPower = 0.0;
+    final inverters = parsedData['inverters'] as Map<String, dynamic>?;
+    if (inverters != null) {
+      for (var inverter in inverters.values) {
+        // Access dc_strings from the parsed inverter data
+        final dcStrings = inverter['dc_strings'] as List?;
+        if (dcStrings != null) {
+          for (var string in dcStrings) {
+            final power = string['power'];
+            if (power != null && power is num) {
+              totalDcPower += power.toDouble();
+            }
+          }
+        }
+      }
+    }
+
+    // Add calculated DC total to data structure for time series tracking
+    if (!parsedData.containsKey('total')) {
+      parsedData['total'] = {};
+    }
+    parsedData['total']['DC_Power_Total'] = totalDcPower;
+
+    // Generate field groups from inverter data (only regenerates if inverters changed)
+    final impl = wifiDevice.deviceImpl;
+    impl.generateFieldGroupsFromData(parsedData);
+
+    // Update device's field groups list so tracking can find them
+    wifiDevice.timeSeriesFieldGroups = impl.getTimeSeriesFieldGroups();
+
     device.data["data"] = parsedData;
     device.emitData(parsedData);
   }
@@ -113,22 +159,39 @@ class OpenDTUWifiService extends BaseDeviceService {
 
   @override
   Future<bool> internalConnect() async {
-    device.emitStatus("Verbindungsaufbau...");
-
     bool httpConnected = false;
     bool wsConnected = false;
 
-    //this throws exception if not working
+    // This throws exception if either endpoint fails
     await wifiDevice.connectIpOrHostname((ip,port) async {
-      await fetchSystemInfo();
+      // Both endpoints must succeed - both throw on failure
+      await fetchSystemInfo();      // Throws if system status fails
+      await fetchNetworkStatus();   // Throws if network status fails
+
+      // Only reached if both succeed
       httpConnected = true;
     });
 
-    isInitialized = true;
+    device.data["data"] = {};
+    device.emitData({});
 
-    //todo maybe retry if http not working
+    return true;//directly fetch data
+  }
+
+  @override
+  Future<bool> internalInitializeDevice() async {
+    // Fetch initial live data from HTTP endpoint before WebSocket takes over
     try {
-      wsConnected = await _websocketConnection?.connect(
+      await fetchLiveDataStatus();
+      debugPrint('[OpenDTU] Initial live data fetched successfully');
+    } catch (e) {
+      debugPrint('[OpenDTU] Failed to fetch initial live data: $e');
+      // Don't throw - WebSocket will provide data later
+    }
+
+    // WebSocket connection (even when fails it will retry itself)
+    try {
+      await _websocketConnection?.connect(
         wifiDevice.getCurrenHostOrIp(),
         wifiDevice.netPort!,
         _buildHeaders(),
@@ -137,22 +200,7 @@ class OpenDTUWifiService extends BaseDeviceService {
       debugPrint('OpenDTU WebSocket connection failed: $e');
     }
 
-    // Report connection status
-    if (!httpConnected && !wsConnected) {
-      device.emitStatus("nicht Verbunden");
-      throw Exception('Failed to connect via HTTP or WebSocket');
-    }
-
-    final connectedWith = [
-      if (wsConnected) 'WebSocket',
-      if (httpConnected) 'http',
-    ].join(',');
-
-    device.emitStatus("Verbunden ($connectedWith)");
-    device.data["data"] = {};
-    device.emitData({});
-
-    return true;//directly fetch data
+    return true;
   }
 
   /// Build HTTP headers with optional authentication
@@ -174,6 +222,7 @@ class OpenDTUWifiService extends BaseDeviceService {
 
   @override
   Future<void> internalFetchData() async {
+
     String connectedWith = "";
 
     // 1. Check WebSocket health (data comes via callback)
@@ -184,6 +233,7 @@ class OpenDTUWifiService extends BaseDeviceService {
     // 2. HTTP configuration data (always fetch for system info)
     try {
       await fetchSystemInfo();
+      connectedWith += " http";
     } catch (e) {
       debugPrint('Error fetching OpenDTU HTTP data: $e');
     }
@@ -217,8 +267,70 @@ class OpenDTUWifiService extends BaseDeviceService {
       }
       device.data["config"] = data;
       device.emitDeviceInfo(data);
+      return data;
     } catch (e) {
       debugPrint('Error fetching system info: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch network information from OpenDTU device via HTTP
+  ///
+  /// This method must succeed during connection - throws exception on failure
+  /// Returns the network status data including ap_mac (used as persistent serial)
+  Future<Map<String, dynamic>> fetchNetworkStatus() async {
+    try {
+      var data = await sendGetCommand("/api/network/status");
+      debugPrint("OpenDTU received network status: $data");
+
+      if (data == null) {
+        throw Exception("Network status from OpenDTU null when fetching");
+      }
+
+      // Verify ap_mac exists
+      final apMac = data['ap_mac'] as String?;
+      if (apMac == null || apMac.isEmpty) {
+        throw Exception("ap_mac field missing or empty in network status");
+      }
+
+      return data;
+    } catch (e) {
+      debugPrint('Error fetching network status: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch initial live data from HTTP endpoint
+  ///
+  /// Called during initialization before WebSocket provides updates
+  /// Returns parsed data in same format as WebSocket updates
+  Future<Map<String, dynamic>?> fetchLiveDataStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${getBaseUri()}/api/livedata/status'),
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final rawData = jsonDecode(response.body) as Map<String, dynamic>;
+        debugPrint('OpenDTU received initial live data: $rawData');
+
+        // Parse using WebSocket connection's parser
+        final parsedData = _websocketConnection?.parseRawLiveData(rawData);
+
+        if (parsedData != null) {
+          // Emit to device using same handler as WebSocket
+          _handleWebSocketData(parsedData);
+        }
+
+        return parsedData;
+      } else if (response.statusCode == 401) {
+        throw Exception('Authentication required or invalid');
+      } else {
+        throw Exception('HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching initial live data: $e');
       rethrow;
     }
   }
@@ -308,29 +420,20 @@ class OpenDTUWifiService extends BaseDeviceService {
     }
   }
 
-  /// Set inverter power state (on/off) - mock/stub for future implementation
-  /// Returns true on success
-  Future<bool> setPowerState(bool powerOn) async {
-    // TODO: Implement actual power control API when available
-    debugPrint('OpenDTU setPowerState called with powerOn=$powerOn (mock implementation)');
-
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Mock success response
-    return true;
-  }
-
-  /// Restart device (mock/stub for future implementation)
+  /// Restart device using OpenDTU's maintenance API
   /// Returns true on success
   Future<bool> restartDevice() async {
-    // TODO: Implement actual restart API when available
-    debugPrint('OpenDTU restartDevice called (mock implementation)');
+    try {
+      final response = await sendCommand('/api/maintenance/reboot', {
+        'reboot': true,
+      });
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Mock success response
-    return true;
+      // sendCommand() already checks response.type == 'success'
+      // and throws on errors, so if we get here it succeeded
+      return response != null;
+    } catch (e) {
+      debugPrint('OpenDTU restart failed: $e');
+      rethrow;
+    }
   }
 }

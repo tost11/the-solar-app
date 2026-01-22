@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -48,14 +49,14 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
     // Validation
     final portText = _portController.text.trim();
     if (portText.isEmpty) {
-      MessageUtils.showError(context, 'Port darf nicht leer sein');
+      MessageUtils.showError(context, context.l10n.validationPortRequired);
       return;
     }
 
     final port = int.tryParse(portText);
     if (port == null || port < 1 || port > 65535) {
       MessageUtils.showError(
-          context, 'Port muss eine Zahl zwischen 1 und 65535 sein');
+          context, context.l10n.validationPortRange);
       return;
     }
 
@@ -75,7 +76,7 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
         // Show success message
         MessageUtils.showSuccess(
           context,
-          '${widget.portName} erfolgreich konfiguriert',
+          context.l10n.messagePortConfigured(widget.portName),
         );
 
         // Return to previous screen with result
@@ -84,7 +85,7 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
     } catch (e) {
       if (mounted) {
         MessageUtils.showError(
-            context, 'Fehler beim Konfigurieren des Ports: $e');
+            context, context.l10n.errorConfiguringPort(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -126,7 +127,7 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.portName,
+                                context.l10n.screenPortConfiguration(widget.portName),
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -178,7 +179,7 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
                         const Icon(Icons.input, color: Colors.blue),
                         const SizedBox(width: 8),
                         Text(
-                          'Port-Nummer',
+                          context.l10n.sectionPortNumber,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -195,16 +196,16 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Port',
-                        hintText: 'Geben Sie die Port-Nummer ein',
-                        prefixIcon: Icon(Icons.input, color: Colors.blue),
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: context.l10n.labelPortField,
+                        hintText: context.l10n.formEnterPort,
+                        prefixIcon: const Icon(Icons.input, color: Colors.blue),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Port muss zwischen 1 und 65535 liegen',
+                      context.l10n.helpPortRange,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -228,8 +229,8 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
                     )
                   : const Icon(Icons.save),
               label: Text(_isSaving
-                  ? 'Wird gespeichert...'
-                  : 'Einstellungen speichern'),
+                  ? context.l10n.messageSaving
+                  : context.l10n.buttonSavePowerLimit),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
@@ -250,7 +251,7 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Hinweis',
+                          context.l10n.sectionNote,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -260,9 +261,7 @@ class _PortConfigurationScreenState extends State<PortConfigurationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Stellen Sie sicher, dass der Port nicht von anderen Diensten verwendet wird\n'
-                      '• Nach der Konfiguration wird das Gerät möglicherweise neu gestartet\n'
-                      '• Standard-Ports sollten nur geändert werden, wenn notwendig',
+                      context.l10n.helpPortWarning,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.blue.shade900,

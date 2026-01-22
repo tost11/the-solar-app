@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_data_field.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_control_item.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
+import 'package:the_solar_app/models/to.dart';
 
 /// Template for data field configuration
 class FieldTemplate {
-  final String name;                 // Display name (e.g., "Phase 1 Spannung")
+  final TO name;                     // Translation object for field name
+  final bool needsInstanceParam;     // Whether to add {instanceNum} parameter at runtime
   final String path;                 // JSON path (e.g., "a_voltage")
   final DataFieldType type;          // voltage, current, watt, etc.
   final IconData icon;
@@ -16,6 +19,7 @@ class FieldTemplate {
 
   const FieldTemplate({
     required this.name,
+    this.needsInstanceParam = false,
     required this.path,
     required this.type,
     required this.icon,
@@ -28,7 +32,9 @@ class FieldTemplate {
 
 /// Template for control item configuration
 class ControlTemplate {
-  final String name;                 // Display name (e.g., "Steckdose")
+  final String name;                 // Display name (e.g., "Steckdose") - legacy field
+  final String? nameKey;             // Translation key (e.g., FieldTranslationKeys.socket)
+  final bool needsInstanceParam;     // Whether name needs {instanceNum} param
   final ControlType type;            // switchToggle, slider, etc.
   final String commandName;          // RPC method (e.g., "Switch.Set")
   final String statePath;            // JSON path for current value
@@ -38,6 +44,8 @@ class ControlTemplate {
 
   const ControlTemplate({
     required this.name,
+    this.nameKey,
+    this.needsInstanceParam = false,
     required this.type,
     required this.commandName,
     required this.statePath,
@@ -74,7 +82,7 @@ class ShellyModuleRegistry {
     fields: [
       // Phase A
       FieldTemplate(
-        name: 'Phase 1 Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase1),
         path: 'a_voltage',
         type: DataFieldType.voltage,
         icon: Icons.electric_bolt,
@@ -82,7 +90,7 @@ class ShellyModuleRegistry {
         category: 'phase1',
       ),
       FieldTemplate(
-        name: 'Phase 1 Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase1),
         path: 'a_current',
         type: DataFieldType.current,
         icon: Icons.flash_on,
@@ -90,7 +98,7 @@ class ShellyModuleRegistry {
         category: 'phase1',
       ),
       FieldTemplate(
-        name: 'Phase 1 Leistung',
+        name: TO(key: FieldTranslationKeys.powerPhase1),
         path: 'a_act_power',
         type: DataFieldType.watt,
         icon: Icons.power,
@@ -100,7 +108,7 @@ class ShellyModuleRegistry {
 
       // Phase B
       FieldTemplate(
-        name: 'Phase 2 Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase2),
         path: 'b_voltage',
         type: DataFieldType.voltage,
         icon: Icons.electric_bolt,
@@ -108,7 +116,7 @@ class ShellyModuleRegistry {
         category: 'phase2',
       ),
       FieldTemplate(
-        name: 'Phase 2 Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase2),
         path: 'b_current',
         type: DataFieldType.current,
         icon: Icons.flash_on,
@@ -116,7 +124,7 @@ class ShellyModuleRegistry {
         category: 'phase2',
       ),
       FieldTemplate(
-        name: 'Phase 2 Leistung',
+        name: TO(key: FieldTranslationKeys.powerPhase2),
         path: 'b_act_power',
         type: DataFieldType.watt,
         icon: Icons.power,
@@ -126,7 +134,7 @@ class ShellyModuleRegistry {
 
       // Phase C
       FieldTemplate(
-        name: 'Phase 3 Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase3),
         path: 'c_voltage',
         type: DataFieldType.voltage,
         icon: Icons.electric_bolt,
@@ -134,7 +142,7 @@ class ShellyModuleRegistry {
         category: 'phase3',
       ),
       FieldTemplate(
-        name: 'Phase 3 Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase3),
         path: 'c_current',
         type: DataFieldType.current,
         icon: Icons.flash_on,
@@ -142,7 +150,7 @@ class ShellyModuleRegistry {
         category: 'phase3',
       ),
       FieldTemplate(
-        name: 'Phase 3 Leistung',
+        name: TO(key: FieldTranslationKeys.powerPhase3),
         path: 'c_act_power',
         type: DataFieldType.watt,
         icon: Icons.power,
@@ -152,7 +160,7 @@ class ShellyModuleRegistry {
 
       // Totals
       FieldTemplate(
-        name: 'Gesamt Leistung',
+        name: TO(key: FieldTranslationKeys.totalPower),
         path: 'total_act_power',
         type: DataFieldType.watt,
         icon: Icons.power_settings_new,
@@ -170,7 +178,8 @@ class ShellyModuleRegistry {
     icon: Icons.power,
     fields: const [
       FieldTemplate(
-        name: 'Status',
+        name: TO(key: FieldTranslationKeys.statusInstance),
+        needsInstanceParam: true,
         path: 'output',
         type: DataFieldType.none,
         icon: Icons.power_settings_new,
@@ -179,7 +188,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.powerInstance),
+        needsInstanceParam: true,
         path: 'apower',
         type: DataFieldType.watt,
         icon: Icons.power,
@@ -188,7 +198,8 @@ class ShellyModuleRegistry {
         hideIfEmpty: true,
       ),
       FieldTemplate(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltageInstance),
+        needsInstanceParam: true,
         path: 'voltage',
         type: DataFieldType.voltage,
         icon: Icons.electric_bolt,
@@ -197,7 +208,8 @@ class ShellyModuleRegistry {
         hideIfEmpty: true,
       ),
       FieldTemplate(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentInstance),
+        needsInstanceParam: true,
         path: 'current',
         type: DataFieldType.current,
         icon: Icons.flash_on,
@@ -206,7 +218,8 @@ class ShellyModuleRegistry {
         hideIfEmpty: true,
       ),
       FieldTemplate(
-        name: 'Temperatur',
+        name: TO(key: FieldTranslationKeys.temperatureInstance),
+        needsInstanceParam: true,
         path: 'temperature.tC',
         type: DataFieldType.temperature,
         icon: Icons.thermostat,
@@ -215,7 +228,7 @@ class ShellyModuleRegistry {
         hideIfEmpty: true,
       ),
       FieldTemplate(
-        name: 'Gesamt Energie',
+        name: TO(key: FieldTranslationKeys.totalEnergy),
         path: 'aenergy.total',
         type: DataFieldType.watt,
         icon: Icons.bar_chart,
@@ -245,7 +258,8 @@ class ShellyModuleRegistry {
     icon: Icons.electric_meter,
     fields: [
       FieldTemplate(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltageInstance),
+        needsInstanceParam: true,
         path: 'voltage',
         type: DataFieldType.voltage,
         icon: Icons.electric_bolt,
@@ -253,7 +267,8 @@ class ShellyModuleRegistry {
         category: 'instance',  // Will be converted to messung_X
       ),
       FieldTemplate(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentInstance),
+        needsInstanceParam: true,
         path: 'current',
         type: DataFieldType.current,
         icon: Icons.flash_on,
@@ -261,7 +276,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Wirkleistung',
+        name: TO(key: FieldTranslationKeys.activePowerInstance),
+        needsInstanceParam: true,
         path: 'act_power',
         type: DataFieldType.watt,
         icon: Icons.power,
@@ -269,7 +285,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Scheinleistung',
+        name: TO(key: FieldTranslationKeys.apparentPowerInstance),
+        needsInstanceParam: true,
         path: 'aprt_power',
         type: DataFieldType.watt,
         icon: Icons.power_outlined,
@@ -277,7 +294,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Leistungsfaktor',
+        name: TO(key: FieldTranslationKeys.powerFactorInstance),
+        needsInstanceParam: true,
         path: 'pf',
         type: DataFieldType.none,
         icon: Icons.analytics,
@@ -285,7 +303,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Frequenz',
+        name: TO(key: FieldTranslationKeys.frequencyInstance),
+        needsInstanceParam: true,
         path: 'freq',
         type: DataFieldType.none,
         icon: Icons.waves,
@@ -303,7 +322,8 @@ class ShellyModuleRegistry {
     icon: Icons.bar_chart,
     fields: [
       FieldTemplate(
-        name: 'Gesamt Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
+        needsInstanceParam: true,
         path: 'total_act_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_downward,
@@ -311,7 +331,8 @@ class ShellyModuleRegistry {
         category: 'instance',  // Will be converted to messung_X
       ),
       FieldTemplate(
-        name: 'Gesamt Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
+        needsInstanceParam: true,
         path: 'total_act_ret_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_upward,
@@ -330,7 +351,7 @@ class ShellyModuleRegistry {
     fields: [
       // Phase A Energy
       FieldTemplate(
-        name: 'Phase 1 Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
         path: 'a_total_act_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_downward,
@@ -338,7 +359,7 @@ class ShellyModuleRegistry {
         category: 'phase1',
       ),
       FieldTemplate(
-        name: 'Phase 1 Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
         path: 'a_total_act_ret_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_upward,
@@ -348,7 +369,7 @@ class ShellyModuleRegistry {
 
       // Phase B Energy
       FieldTemplate(
-        name: 'Phase 2 Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
         path: 'b_total_act_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_downward,
@@ -356,7 +377,7 @@ class ShellyModuleRegistry {
         category: 'phase2',
       ),
       FieldTemplate(
-        name: 'Phase 2 Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
         path: 'b_total_act_ret_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_upward,
@@ -366,7 +387,7 @@ class ShellyModuleRegistry {
 
       // Phase C Energy
       FieldTemplate(
-        name: 'Phase 3 Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
         path: 'c_total_act_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_downward,
@@ -374,7 +395,7 @@ class ShellyModuleRegistry {
         category: 'phase3',
       ),
       FieldTemplate(
-        name: 'Phase 3 Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
         path: 'c_total_act_ret_energy',
         type: DataFieldType.energy,
         icon: Icons.arrow_upward,
@@ -384,7 +405,7 @@ class ShellyModuleRegistry {
 
       // Total Energy
       FieldTemplate(
-        name: 'Gesamt Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
         path: 'total_act',
         type: DataFieldType.energy,
         icon: Icons.energy_savings_leaf,
@@ -392,7 +413,7 @@ class ShellyModuleRegistry {
         category: 'totals',
       ),
       FieldTemplate(
-        name: 'Gesamt Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
         path: 'total_act_ret',
         type: DataFieldType.energy,
         icon: Icons.arrow_circle_up,
@@ -410,7 +431,7 @@ class ShellyModuleRegistry {
     icon: Icons.thermostat,
     fields: [
       FieldTemplate(
-        name: 'Temperatur',
+        name: TO(key: FieldTranslationKeys.temperature),
         path: 'tC',
         type: DataFieldType.temperature,
         icon: Icons.thermostat,
@@ -427,7 +448,8 @@ class ShellyModuleRegistry {
     icon: Icons.electric_meter,
     fields: [
       FieldTemplate(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltageInstance),
+        needsInstanceParam: true,
         path: 'voltage',
         type: DataFieldType.voltage,
         icon: Icons.bolt,
@@ -435,7 +457,8 @@ class ShellyModuleRegistry {
         category: 'instance',  // Will be converted to pm_messung_X
       ),
       FieldTemplate(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentInstance),
+        needsInstanceParam: true,
         path: 'current',
         type: DataFieldType.current,
         icon: Icons.flash_on,
@@ -443,7 +466,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Wirkleistung',
+        name: TO(key: FieldTranslationKeys.powerInstance),
+        needsInstanceParam: true,
         path: 'apower',
         type: DataFieldType.watt,
         icon: Icons.power,
@@ -451,7 +475,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Frequenz',
+        name: TO(key: FieldTranslationKeys.frequencyInstance),
+        needsInstanceParam: true,
         path: 'freq',
         type: DataFieldType.frequency,
         icon: Icons.waves,
@@ -459,7 +484,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Gesamtenergie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
+        needsInstanceParam: true,
         path: 'aenergy.total',
         type: DataFieldType.energy,
         icon: Icons.energy_savings_leaf,
@@ -467,7 +493,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Gesamtenergie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
+        needsInstanceParam: true,
         path: 'ret_aenergy.total',
         type: DataFieldType.energy,
         icon: Icons.arrow_circle_up,
@@ -475,7 +502,8 @@ class ShellyModuleRegistry {
         category: 'instance',
       ),
       FieldTemplate(
-        name: 'Energie pro Minute (Bezug)',
+        name: TO(key: FieldTranslationKeys.energyPerMinuteImport),
+        needsInstanceParam: true,
         path: 'aenergy.by_minute',
         type: DataFieldType.none,
         icon: Icons.show_chart,
@@ -490,7 +518,8 @@ class ShellyModuleRegistry {
         },
       ),
       FieldTemplate(
-        name: 'Energie pro Minute (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.energyPerMinuteExport),
+        needsInstanceParam: true,
         path: 'ret_aenergy.by_minute',
         type: DataFieldType.none,
         icon: Icons.show_chart,

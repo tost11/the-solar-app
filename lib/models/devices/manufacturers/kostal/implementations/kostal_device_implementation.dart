@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import '../../../generic_rendering/device_category_config.dart';
 import '../../../generic_rendering/device_control_item.dart';
@@ -33,22 +35,22 @@ class KostalDeviceImplementation extends DeviceImplementation {
   List<TimeSeriesFieldConfig> getTimeSeriesFields() {
     return [
       TimeSeriesFieldConfig(
-        name: 'Leistung Solar',
+        name: TO(key: FieldTranslationKeys.solarPower),
         type: DataFieldType.watt,
         mapping: ['dc_power_total'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Verbrauch',
+        name: TO(key: FieldTranslationKeys.consumption),
         type: DataFieldType.watt,
         mapping: ['ac_power_total'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Bezug Netz',
+        name: TO(key: FieldTranslationKeys.gridImport),
         type: DataFieldType.watt,
         mapping: ['consumption_grid'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Battery Lade/Entladeleistung',
+        name: TO(key: FieldTranslationKeys.batteryChargeDischargePower),
         type: DataFieldType.watt,
         mapping: ['battery_charge_discharge_power'],
       ),
@@ -61,7 +63,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== Main Data (no category, always visible) =====
 
       DeviceDataField(
-        name: 'DC Gesamtleistung',
+        name: TO(key: FieldTranslationKeys.dcTotalPower),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc_power_total']),
         icon: Icons.electrical_services,
@@ -70,7 +72,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'AC Gesamtleistung',
+        name: TO(key: FieldTranslationKeys.acPower),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_power_total']),
         icon: Icons.bolt,
@@ -79,7 +81,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Tagesertrag',
+        name: TO(key: FieldTranslationKeys.dailyYield),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'yield_daily']),
         icon: Icons.wb_sunny,
@@ -87,7 +89,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Monatsertrag',
+        name: TO(key: FieldTranslationKeys.monthlyYield),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'yield_monthly']),
         icon: Icons.calendar_month,
@@ -95,7 +97,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Jahresertrag',
+        name: TO(key: FieldTranslationKeys.yearlyYield),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'yield_yearly']),
         icon: Icons.calendar_today,
@@ -103,7 +105,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.totalYield),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'yield_total']),
         icon: Icons.show_chart,
@@ -111,7 +113,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Netzfrequenz',
+        name: TO(key: FieldTranslationKeys.gridFrequency),
         type: DataFieldType.frequency,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'grid_frequency']),
         icon: Icons.waves,
@@ -121,7 +123,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== DC String 1 =====
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 1}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc1_voltage']),
         icon: Icons.solar_power,
@@ -130,7 +132,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 1}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc1_current']),
         icon: Icons.solar_power,
@@ -139,7 +141,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 1}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc1_power']),
         icon: Icons.solar_power,
@@ -151,7 +153,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== DC String 2 =====
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 2}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc2_voltage']),
         icon: Icons.solar_power,
@@ -160,7 +162,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 2}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc2_current']),
         icon: Icons.solar_power,
@@ -169,7 +171,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 2}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc2_power']),
         icon: Icons.solar_power,
@@ -181,7 +183,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== DC String 3 =====
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 3}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc3_voltage']),
         icon: Icons.solar_power,
@@ -190,7 +192,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 3}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc3_current']),
         icon: Icons.solar_power,
@@ -199,7 +201,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 3}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc3_power']),
         icon: Icons.solar_power,
@@ -211,7 +213,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== AC Phase 1 =====
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase1),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase1_voltage']),
         icon: Icons.electric_bolt,
@@ -220,7 +222,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase1),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase1_current']),
         icon: Icons.flash_on,
@@ -229,7 +231,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.activePowerPhase1),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase1_power']),
         icon: Icons.bolt,
@@ -241,7 +243,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== AC Phase 2 =====
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase2),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase2_voltage']),
         icon: Icons.electric_bolt,
@@ -250,7 +252,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase2),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase2_current']),
         icon: Icons.flash_on,
@@ -259,7 +261,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.activePowerPhase2),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase2_power']),
         icon: Icons.bolt,
@@ -271,7 +273,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== AC Phase 3 =====
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase3),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase3_voltage']),
         icon: Icons.electric_bolt,
@@ -280,7 +282,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase3),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase3_current']),
         icon: Icons.flash_on,
@@ -289,7 +291,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Leistung',
+        name: TO(key: FieldTranslationKeys.activePowerPhase3),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_phase3_power']),
         icon: Icons.bolt,
@@ -301,7 +303,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== AC Totals (expert mode) =====
 
       DeviceDataField(
-        name: 'Blindleistung gesamt',
+        name: TO(key: FieldTranslationKeys.reactivePowerTotal),
         type: DataFieldType.reactivePower,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_reactive_power_total']),
         icon: Icons.bolt_outlined,
@@ -311,7 +313,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Scheinleistung gesamt',
+        name: TO(key: FieldTranslationKeys.apparentPowerTotal),
         type: DataFieldType.apparentPower,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_apparent_power_total']),
         icon: Icons.bolt_outlined,
@@ -323,7 +325,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== Battery =====
 
       DeviceDataField(
-        name: 'Ladezustand',
+        name: TO(key: FieldTranslationKeys.batterySoc),
         type: DataFieldType.percentage,
         valueExtractor: (data) {
           // Try both SOC fields
@@ -338,7 +340,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltage),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_voltage']),
         icon: Icons.battery_std,
@@ -347,7 +349,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.current),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_current']),
         icon: Icons.flash_on,
@@ -356,7 +358,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Lade-/Entladeleistung',
+        name: TO(key: FieldTranslationKeys.batteryPower),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_charge_discharge_power']),
         icon: Icons.power,
@@ -366,7 +368,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Temperatur',
+        name: TO(key: FieldTranslationKeys.temperature),
         type: DataFieldType.temperature,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_temperature']),
         icon: Icons.thermostat,
@@ -375,7 +377,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Zyklen',
+        name: TO(key: FieldTranslationKeys.batteryCycles),
         type: DataFieldType.count,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_cycles']),
         icon: Icons.loop,
@@ -384,7 +386,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Kapazität (brutto)',
+        name: TO(key: FieldTranslationKeys.batteryCapacityGross),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_capacity_gross']),
         icon: Icons.battery_full,
@@ -393,7 +395,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Kapazität (netto)',
+        name: TO(key: FieldTranslationKeys.batteryCapacityNet),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_capacity_net']),
         icon: Icons.battery_full,
@@ -402,7 +404,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Hersteller',
+        name: TO(key: FieldTranslationKeys.manufacturer),
         type: DataFieldType.none,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'battery_manufacturer']),
         icon: Icons.business,
@@ -414,7 +416,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== Home Consumption =====
 
       DeviceDataField(
-        name: 'Gesamtverbrauch',
+        name: TO(key: FieldTranslationKeys.totalConsumption),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'consumption_total']),
         icon: Icons.home,
@@ -424,7 +426,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Verbrauch aus PV',
+        name: TO(key: FieldTranslationKeys.consumptionFromPv),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'consumption_pv']),
         icon: Icons.solar_power,
@@ -434,7 +436,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Verbrauch aus Netz',
+        name: TO(key: FieldTranslationKeys.consumptionFromGrid),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'consumption_grid']),
         icon: Icons.grid_on,
@@ -444,7 +446,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Verbrauch aus Batterie',
+        name: TO(key: FieldTranslationKeys.consumptionFromBattery),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'consumption_battery']),
         icon: Icons.battery_charging_full,
@@ -456,7 +458,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== Powermeter =====
 
       DeviceDataField(
-        name: 'Wirkleistung gesamt',
+        name: TO(key: FieldTranslationKeys.activePowerTotal),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_active_power_total']),
         icon: Icons.bolt,
@@ -466,7 +468,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Blindleistung gesamt',
+        name: TO(key: FieldTranslationKeys.reactivePowerTotal),
         type: DataFieldType.reactivePower,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_reactive_power_total']),
         icon: Icons.bolt_outlined,
@@ -476,7 +478,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Scheinleistung gesamt',
+        name: TO(key: FieldTranslationKeys.apparentPowerTotal),
         type: DataFieldType.apparentPower,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_apparent_power_total']),
         icon: Icons.bolt_outlined,
@@ -486,7 +488,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Frequenz',
+        name: TO(key: FieldTranslationKeys.frequency),
         type: DataFieldType.frequency,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_frequency']),
         icon: Icons.waves,
@@ -495,7 +497,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Cos Phi',
+        name: TO(key: FieldTranslationKeys.powerFactor),
         type: DataFieldType.powerFactor,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_cos_phi']),
         icon: Icons.functions,
@@ -505,7 +507,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
 
       // Powermeter Phase 1
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltage),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase1_voltage']),
         icon: Icons.electric_bolt,
@@ -514,7 +516,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.current),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase1_current']),
         icon: Icons.flash_on,
@@ -523,7 +525,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Wirkleistung',
+        name: TO(key: FieldTranslationKeys.activePowerPhase1),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase1_active_power']),
         icon: Icons.bolt,
@@ -534,7 +536,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
 
       // Powermeter Phase 2
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase2),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase2_voltage']),
         icon: Icons.electric_bolt,
@@ -543,7 +545,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase2),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase2_current']),
         icon: Icons.flash_on,
@@ -552,7 +554,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Wirkleistung',
+        name: TO(key: FieldTranslationKeys.activePowerPhase2),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase2_active_power']),
         icon: Icons.bolt,
@@ -563,7 +565,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
 
       // Powermeter Phase 3
       DeviceDataField(
-        name: 'Spannung',
+        name: TO(key: FieldTranslationKeys.voltagePhase3),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase3_voltage']),
         icon: Icons.electric_bolt,
@@ -572,7 +574,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Strom',
+        name: TO(key: FieldTranslationKeys.currentPhase3),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase3_current']),
         icon: Icons.flash_on,
@@ -581,7 +583,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Wirkleistung',
+        name: TO(key: FieldTranslationKeys.activePowerPhase3),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'powermeter_phase3_active_power']),
         icon: Icons.bolt,
@@ -593,7 +595,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       // ===== System Info =====
 
       DeviceDataField(
-        name: 'Artikelnummer',
+        name: TO(key: FieldTranslationKeys.articleNumber),
         type: DataFieldType.none,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'article_number']),
         icon: Icons.tag,
@@ -603,7 +605,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Max. Wechselrichterleistung',
+        name: TO(key: FieldTranslationKeys.maxInverterPower),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter_max_power']),
         icon: Icons.power,
@@ -612,7 +614,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Wechselrichter-Erzeugungsleistung',
+        name: TO(key: FieldTranslationKeys.inverterGenerationPower),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'inverter_generation_power']),
         icon: Icons.bolt,
@@ -622,7 +624,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Betriebszeit',
+        name: TO(key: FieldTranslationKeys.uptime),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'work_time']);
@@ -636,7 +638,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Isolationswiderstand',
+        name: TO(key: FieldTranslationKeys.isolationResistance),
         type: DataFieldType.resistance,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'isolation_resistance']),
         icon: Icons.shield,
@@ -645,7 +647,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Cos Phi (aktuell)',
+        name: TO(key: FieldTranslationKeys.powerFactor),
         type: DataFieldType.powerFactor,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'cos_phi_actual']),
         icon: Icons.functions,
@@ -654,7 +656,7 @@ class KostalDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'EVU Leistungslimit',
+        name: TO(key: FieldTranslationKeys.powerLimit),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'power_limit_evu']),
         icon: Icons.speed,
@@ -674,92 +676,103 @@ class KostalDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'dc1',
         displayName: 'DC String 1',
+        displayNameKey: CategoryTranslationKeys.dcString1,
         layout: CategoryLayout.standard,
         order: 10,
       ),
       const DeviceCategoryConfig(
         category: 'dc2',
         displayName: 'DC String 2',
+        displayNameKey: CategoryTranslationKeys.dcString2,
         layout: CategoryLayout.standard,
         order: 20,
       ),
       const DeviceCategoryConfig(
         category: 'dc3',
         displayName: 'DC String 3',
+        displayNameKey: CategoryTranslationKeys.dcString3,
         layout: CategoryLayout.standard,
         order: 30,
       ),
       const DeviceCategoryConfig(
         category: 'ac1',
         displayName: 'AC Phase 1',
+        displayNameKey: CategoryTranslationKeys.acPhase1,
         layout: CategoryLayout.standard,
         order: 40,
       ),
       const DeviceCategoryConfig(
         category: 'ac2',
         displayName: 'AC Phase 2',
+        displayNameKey: CategoryTranslationKeys.acPhase2,
         layout: CategoryLayout.standard,
         order: 50,
       ),
       const DeviceCategoryConfig(
         category: 'ac3',
         displayName: 'AC Phase 3',
+        displayNameKey: CategoryTranslationKeys.acPhase3,
         layout: CategoryLayout.standard,
         order: 60,
       ),
       const DeviceCategoryConfig(
         category: 'ac_totals',
         displayName: 'AC Gesamt',
+        displayNameKey: CategoryTranslationKeys.acTotal,
         layout: CategoryLayout.standard,
         order: 65,
       ),
       const DeviceCategoryConfig(
         category: 'battery',
         displayName: 'Batterie',
+        displayNameKey: CategoryTranslationKeys.battery,
         layout: CategoryLayout.standard,
         order: 70,
       ),
       const DeviceCategoryConfig(
         category: 'consumption',
         displayName: 'Hausverbrauch',
+        displayNameKey: CategoryTranslationKeys.homeConsumption,
         layout: CategoryLayout.standard,
         order: 80,
       ),
       const DeviceCategoryConfig(
         category: 'powermeter',
         displayName: 'Leistungsmesser',
+        displayNameKey: CategoryTranslationKeys.powerMeter,
         layout: CategoryLayout.standard,
         order: 90,
       ),
       const DeviceCategoryConfig(
         category: 'powermeter_phase1',
         displayName: 'Leistungsmesser Phase 1',
+        displayNameKey: CategoryTranslationKeys.powerMeterPhase1,
         layout: CategoryLayout.standard,
         order: 91,
       ),
       const DeviceCategoryConfig(
         category: 'powermeter_phase2',
         displayName: 'Leistungsmesser Phase 2',
+        displayNameKey: CategoryTranslationKeys.powerMeterPhase2,
         layout: CategoryLayout.standard,
         order: 92,
       ),
       const DeviceCategoryConfig(
         category: 'powermeter_phase3',
         displayName: 'Leistungsmesser Phase 3',
+        displayNameKey: CategoryTranslationKeys.powerMeterPhase3,
         layout: CategoryLayout.standard,
         order: 93,
       ),
       const DeviceCategoryConfig(
         category: 'system',
         displayName: 'System',
+        displayNameKey: CategoryTranslationKeys.system,
         layout: CategoryLayout.oneLine,
         order: 100,
       ),
     ];
   }
-
-  @override
-  IconData getDeviceIcon() => Icons.solar_power;
 
   @override
   String getFetchCommand() => COMMAND_FETCH_DATA;

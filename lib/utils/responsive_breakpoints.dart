@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Screen size categories based on Material Design 3 breakpoints
 enum ScreenSize {
-  /// Mobile devices (< 600px width)
+  /// Mobile devices (< 650px width)
   mobile,
 
-  /// Tablet devices (600-840px width)
+  /// Tablet devices (650-840px width)
   tablet,
 
   /// Desktop devices (>= 840px width)
@@ -15,11 +15,11 @@ enum ScreenSize {
 /// Responsive breakpoint utility class
 ///
 /// Provides breakpoint definitions and helper methods for responsive design
-/// based on Material Design 3 breakpoint system.
+/// based on Material Design 3 breakpoint system (with adjustments for master-detail layout).
 ///
 /// Breakpoints:
-/// - Mobile: < 600px
-/// - Tablet: 600-840px
+/// - Mobile: < 650px
+/// - Tablet: 650-840px
 /// - Desktop: >= 840px
 ///
 /// Example usage:
@@ -31,9 +31,11 @@ enum ScreenSize {
 /// }
 /// ```
 class ResponsiveBreakpoints {
-  // Breakpoint values (Material Design 3)
-  static const double mobileMax = 600.0;
+  // Breakpoint values (adjusted from Material Design 3 for master-detail layout)
+  static const double mobileMax = 650.0;
   static const double tabletMax = 840.0;
+  static const double tabletMin = 650.0;
+  static const double desktopMin = 840.0;
 
   /// Get the current screen size category
   static ScreenSize getScreenSize(BuildContext context) {
@@ -65,17 +67,30 @@ class ResponsiveBreakpoints {
     }
   }
 
+  /// Get adaptive number of columns for graph grid based on explicit width
+  ///
+  /// This method is useful when you want to make responsive decisions based on
+  /// available width (from LayoutBuilder constraints) rather than screen width.
+  ///
+  /// Returns:
+  /// - < 650px: 1 column (mobile)
+  /// - 650-1100px: 2 columns (tablet and small desktop)
+  /// - >= 1100px: 3 columns (large desktop)
+  static int getGraphColumnsFromWidth(double width) {
+    if (width < mobileMax) return 1;        // < 650px: mobile
+    if (width < 1100.0) return 2;            // 650-1100px: tablet/small desktop
+    return 3;                                 // >= 1100px: large desktop
+  }
+
   /// Get adaptive number of columns for graph grid
   ///
   /// Returns:
-  /// - < 600px: 1 column (mobile)
-  /// - 600-1100px: 2 columns (tablet and small desktop)
+  /// - < 650px: 1 column (mobile)
+  /// - 650-1100px: 2 columns (tablet and small desktop)
   /// - >= 1100px: 3 columns (large desktop)
   static int getGraphColumns(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < mobileMax) return 1;        // < 600px: mobile
-    if (width < 1100.0) return 2;            // 600-1100px: tablet/small desktop
-    return 3;                                 // >= 1100px: large desktop
+    return getGraphColumnsFromWidth(width);
   }
 
   /// Whether to use master-detail navigation pattern
@@ -102,6 +117,21 @@ class ResponsiveBreakpoints {
     }
   }
 
+  /// Get adaptive card spacing based on explicit width
+  ///
+  /// This method is useful when you want to make responsive decisions based on
+  /// available width (from LayoutBuilder constraints) rather than screen width.
+  ///
+  /// Returns:
+  /// - Mobile (< 650px): 8.0
+  /// - Tablet (650-840px): 12.0
+  /// - Desktop (>= 840px): 16.0
+  static double getCardSpacingFromWidth(double width) {
+    if (width < tabletMin) return 8.0;
+    if (width < desktopMin) return 12.0;
+    return 16.0;
+  }
+
   /// Get adaptive card spacing
   ///
   /// Returns:
@@ -109,14 +139,8 @@ class ResponsiveBreakpoints {
   /// - Tablet: 12.0
   /// - Desktop: 16.0
   static double getCardSpacing(BuildContext context) {
-    switch (getScreenSize(context)) {
-      case ScreenSize.mobile:
-        return 8.0;
-      case ScreenSize.tablet:
-        return 12.0;
-      case ScreenSize.desktop:
-        return 16.0;
-    }
+    final width = MediaQuery.of(context).size.width;
+    return getCardSpacingFromWidth(width);
   }
 
   /// Get adaptive aspect ratio for data cards

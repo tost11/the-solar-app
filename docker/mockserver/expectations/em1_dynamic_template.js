@@ -15,7 +15,7 @@ return {
   },
   body: JSON.stringify({
     id: 1768255378,
-    src: 'shelly-emg3-aabbccddeeff',
+    src: 'shelly-emg3-001122334455',
     dst: 'flutter_app',
     result: {
       ble: {},
@@ -60,7 +60,7 @@ return {
         temperature: { tC: 29.4, tF: 85.0 }
       },
       sys: {
-        mac: 'AABBCCDDEEFF',
+        mac: '001122334455',
         restart_required: false,
         time: new Date().toTimeString().substring(0, 5),
         unixtime: Math.floor(Date.now() / 1000),

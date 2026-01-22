@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import '../../models/devices/generic_rendering/general_setting_item.dart';
 import '../../utils/dialog_utils.dart';
 import '../../utils/message_utils.dart';
@@ -55,13 +56,13 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
 
     // Mark this setting as changing
     setState(() {
-      _changingSettings.add(setting.name);
+      _changingSettings.add(setting.name.key);
     });
 
     try {
       await DialogUtils.executeWithLoading(
         context,
-        loadingMessage: 'Einstellung wird geändert...',
+        loadingMessage: context.l10n.dialogSettingChanging,
         operation: () async {
           await widget.sendCommandToDevice(
             COMMAND_SET_GENERAL_SETTING,
@@ -78,28 +79,30 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
         },
         onSuccess: (_) => MessageUtils.showSuccess(
           context,
-          '${setting.name} wurde aktualisiert',
+          context.l10n.messageSettingUpdated(setting.name.getText(context)),
         ),
         onError: (e) => MessageUtils.showError(
           context,
-          'Fehler beim Ändern der Einstellung: $e',
-          title: 'Fehler',
+          context.l10n.errorChangingSetting(e.toString()),
+          title: context.l10n.error,
         ),
       );
     } finally {
       // Remove from changing set
       setState(() {
-        _changingSettings.remove(setting.name);
+        _changingSettings.remove(setting.name.key);
       });
     }
   }
 
   Future<bool?> _showConfirmationDialog(
       GeneralSettingItem setting, dynamic newValue) async {
+    final action = newValue == true ? context.l10n.dialogActionEnable : context.l10n.dialogActionDisable;
+    final settingName = setting.name.getText(context);
     final title = setting.confirmationTitle ??
-        '${setting.name} ${newValue == true ? "aktivieren" : "deaktivieren"}?';
+        context.l10n.dialogConfirmToggleSetting(settingName, action);
     final message = setting.confirmationMessage ??
-        'Möchten Sie ${setting.name} wirklich ${newValue == true ? "aktivieren" : "deaktivieren"}?';
+        context.l10n.dialogConfirmToggleMessage(settingName, action);
 
     return showDialog<bool>(
       context: context,
@@ -109,11 +112,11 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Bestätigen'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -122,7 +125,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
 
   Widget _buildSettingCard(GeneralSettingItem setting) {
     final currentValue = _settingsState[setting.commandName];
-    final isChanging = _changingSettings.contains(setting.name);
+    final isChanging = _changingSettings.contains(setting.name.key);
 
     // Determine icon color based on setting type
     Color iconColor = Colors.grey;
@@ -148,7 +151,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                 ],
                 Expanded(
                   child: Text(
-                    setting.name,
+                    setting.name.getText(context),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -204,7 +207,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
             if (setting.description != null) ...[
               const SizedBox(height: 8),
               Text(
-                setting.description!,
+                setting.description!.getText(context),
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,
@@ -222,7 +225,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Bestätigung erforderlich',
+                    context.l10n.helpConfirmationRequired,
                     style: TextStyle(
                       color: Colors.blue[700],
                       fontSize: 11,
@@ -241,8 +244,8 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Allgemeine Einstellungen',
+      appBar: AppBarWidget(
+        title: context.l10n.sectionGeneralSettings,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -270,7 +273,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Allgemeine Einstellungen',
+                                context.l10n.sectionGeneralSettings,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -290,7 +293,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Verwalten Sie die grundlegenden Einstellungen Ihres Geräts.',
+                      context.l10n.helpManageDeviceSettings,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -315,7 +318,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Keine Einstellungen verfügbar',
+                          context.l10n.helpNoSettingsAvailable,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -353,9 +356,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Änderungen werden sofort auf das Gerät übertragen. '
-                      'Einstellungen mit Bestätigungsanforderung zeigen einen '
-                      'Dialog vor der Änderung an.',
+                      context.l10n.helpSettingsApplyImmediately,
                       style: TextStyle(
                         color: Colors.blue[900],
                         fontSize: 13,

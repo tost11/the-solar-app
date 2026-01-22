@@ -10,6 +10,7 @@ import 'generic_rendering/device_menu_item.dart';
 import 'generic_rendering/device_control_item.dart';
 import 'generic_rendering/device_custom_section.dart';
 import 'time_series_field_config.dart';
+import 'time_series_field_group.dart';
 
 /// Error payload with background/foreground routing flag
 class DeviceError {
@@ -67,6 +68,7 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   late List<DeviceCustomSection> customSections;
   late List<DeviceCategoryConfig> categoryConfigs;
   late List<TimeSeriesFieldConfig> timeSeriesFields;  // Removed final to allow dynamic updates
+  late List<TimeSeriesFieldGroup> timeSeriesFieldGroups;  // Multi-series graph support
   Map<String,Map<String,dynamic>> data = {};
   ServiceType ? connectionService;
 
@@ -119,22 +121,35 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   void _trackTimeSeriesData(Map<String, dynamic> receivedData) {
     final now = DateTime.now();
 
+    // Track individual fields
     for (var field in timeSeriesFields) {
-      try {
-        // Extract value using the field's built-in extraction method
-        final numValue = field.extractValue(receivedData);
+      _trackSingleField(field, receivedData, now);
+    }
 
-        if (numValue != null) {
-          // Add to time series
-          field.addValue(now, numValue);
-
-          // Prune old data (>5 minutes)
-          field.pruneOldData();
-        }
-      } catch (e) {
-        // Silently skip if field extraction fails
-        debugPrint('Failed to track field ${field.name}: $e');
+    // Track fields inside groups
+    for (var group in timeSeriesFieldGroups) {
+      for (var field in group.fields) {
+        _trackSingleField(field, receivedData, now);
       }
+    }
+  }
+
+  /// Track a single time series field
+  void _trackSingleField(TimeSeriesFieldConfig field, Map<String, dynamic> receivedData, DateTime timestamp) {
+    try {
+      // Extract value using the field's built-in extraction method
+      final numValue = field.extractValue(receivedData);
+
+      if (numValue != null) {
+        // Add to time series
+        field.addValue(timestamp, numValue);
+
+        // Prune old data (>5 minutes)
+        field.pruneOldData();
+      }
+    } catch (e) {
+      // Silently skip if field extraction fails
+      debugPrint('[Track] Error for ${field.name}: $e');
     }
   }
 
@@ -145,6 +160,12 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   // Device-specific icon for display in lists
   // Override in subclasses to provide custom icons
   IconData get deviceIcon => Icons.solar_power;
+
+  /// Get the manufacturer identifier for this device
+  ///
+  /// Returns manufacturer constant (e.g., DEVICE_MANUFACTURER_ZENDURE)
+  /// Used for manufacturer-based icon lookup when implementation doesn't provide custom icon.
+  String getManufacturer();
 
   DeviceBase({
     required this.id,
@@ -157,6 +178,7 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     this.customSections = const [],
     this.categoryConfigs = const [],
     this.timeSeriesFields = const [],
+    this.timeSeriesFieldGroups = const [],
     this.deviceModel,
   });
 
@@ -195,6 +217,33 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
     }
 
     connectionService = null;
+  }
+
+  /// Cleanup all device resources including StreamControllers
+  ///
+  /// This method should be called when a device is being permanently removed
+  /// (e.g., deleted from storage). It ensures complete cleanup of all resources:
+  /// - Disconnects and disposes service connection
+  /// - Closes all StreamControllers to prevent memory leaks
+  ///
+  /// Safe to call multiple times (defensive programming)
+  Future<void> dispose() async {
+    // Disconnect and dispose service first
+    await removeServiceConnection();
+
+    // Close all StreamControllers (defensive - check if not already closed)
+    if (!_connectionStatusController.isClosed) {
+      await _connectionStatusController.close();
+    }
+    if (!_dataController.isClosed) {
+      await _dataController.close();
+    }
+    if (!_errorController.isClosed) {
+      await _errorController.close();
+    }
+    if (!_deviceInfoController.isClosed) {
+      await _deviceInfoController.close();
+    }
   }
 
   //this function sets generic commands into specific device commands

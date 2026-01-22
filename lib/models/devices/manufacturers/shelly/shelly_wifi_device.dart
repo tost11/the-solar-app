@@ -4,6 +4,7 @@ import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/models/devices/generic_wifi_auth_device.dart';
 import 'package:the_solar_app/models/devices/mixins/fetch_data_timeout_mixin.dart';
+import 'package:the_solar_app/models/devices/generic_rendering/device_category_config.dart';
 import 'implementations/shelly_device_base_implementation.dart';
 import 'package:the_solar_app/services/device_storage_service.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
@@ -52,6 +53,14 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
 
   @override
   String get deviceType => DEVICE_MANUFACTURER_SHELLY;
+
+  @override
+  String getManufacturer() => DEVICE_MANUFACTURER_SHELLY;
+
+  /// Override to compute category configs dynamically
+  /// This ensures category configs are updated when device data changes
+  @override
+  List<DeviceCategoryConfig> get categoryConfigs => deviceImpl.getCategoryConfigs();
 
   @override
   ShellyWifiService createService() {

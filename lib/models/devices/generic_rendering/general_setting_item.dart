@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../to.dart';
 
 /// Type of general setting input
 enum SettingType {
@@ -21,8 +22,8 @@ class SettingOption {
 
 /// Represents a general setting item with a toggle (on/off) behavior
 class GeneralSettingItem {
-  /// The name/identifier of the setting (used both for display and command)
-  final String name;
+  /// The name/identifier of the setting (Translation Object)
+  final TO name;
 
   /// The command name to send to device
   final String commandName;
@@ -30,8 +31,8 @@ class GeneralSettingItem {
   /// Optional icon shown next to the setting name
   final IconData? icon;
 
-  /// Optional description text shown below the setting name
-  final String? description;
+  /// Optional description text shown below the setting name (Translation Object)
+  final TO? description;
 
   /// Whether to show a confirmation popup before changing the value
   final bool popUpOnChange;
@@ -70,10 +71,10 @@ class GeneralSettingItem {
 
   /// Creates a copy of this item with updated values
   GeneralSettingItem copyWith({
-    String? name,
+    TO? name,
     String? commandName,
     IconData? icon,
-    String? description,
+    TO? description,
     bool? popUpOnChange,
     String? confirmationTitle,
     String? confirmationMessage,
@@ -96,4 +97,10 @@ class GeneralSettingItem {
       options: options ?? this.options,
     );
   }
+
+  /// Get localized name
+  String getName(BuildContext context) => name.getText(context);
+
+  /// Get localized description
+  String? getDescription(BuildContext context) => description?.getText(context);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -58,7 +59,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
   void _validateValues() {
     setState(() {
       if (_minSocValue >= _maxSocValue) {
-        _validationError = 'Minimum SOC muss kleiner als Maximum SOC sein';
+        _validationError = context.l10n.validationMinSocLessThanMax;
       } else {
         _validationError = null;
       }
@@ -129,7 +130,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
         // Show success message
         MessageUtils.showSuccess(
           context,
-          'Batterie-Limits erfolgreich gesetzt: Min $_minSocValue%, Max $_maxSocValue%',
+          context.l10n.messageBatteryLimitsSet(_minSocValue.toString(), _maxSocValue.toString()),
         );
 
         // Return to previous screen with result
@@ -137,7 +138,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
       }
     } catch (e) {
       if (mounted) {
-        MessageUtils.showError(context, 'Fehler beim Setzen der Batterie-Limits: $e');
+        MessageUtils.showError(context, context.l10n.errorSettingBatteryLimits(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -151,8 +152,8 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Batterie-Limits einstellen',
+      appBar: AppBarWidget(
+        title: context.l10n.screenBatterySoc,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -166,7 +167,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Aktuelle Werte',
+                      context.l10n.sectionCurrentValues,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -185,7 +186,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Minimum',
+                              context.l10n.labelMinimum,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.grey[600],
                                   ),
@@ -216,7 +217,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Maximum',
+                              context.l10n.labelMaximum,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.grey[600],
                                   ),
@@ -275,7 +276,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                         const Icon(Icons.battery_alert, color: Colors.orange),
                         const SizedBox(width: 8),
                         Text(
-                          'Minimum SOC',
+                          context.l10n.sectionMinSoc,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -323,7 +324,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                         const Icon(Icons.battery_charging_full, color: Colors.green),
                         const SizedBox(width: 8),
                         Text(
-                          'Maximum SOC',
+                          context.l10n.sectionMaxSoc,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -367,7 +368,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Präzise Eingabe',
+                      context.l10n.sectionPreciseInput,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -385,7 +386,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                             ],
                             decoration: InputDecoration(
                               border: const OutlineInputBorder(),
-                              labelText: 'Min SOC',
+                              labelText: context.l10n.labelMinSoc,
                               suffixText: '%',
                               helperText: '${widget.minSocRangeMin}-${widget.minSocRangeMax}%',
                               prefixIcon: const Icon(Icons.battery_alert, color: Colors.orange),
@@ -404,7 +405,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                             ],
                             decoration: InputDecoration(
                               border: const OutlineInputBorder(),
-                              labelText: 'Max SOC',
+                              labelText: context.l10n.labelMaxSoc,
                               suffixText: '%',
                               helperText: '${widget.maxSocRangeMin}-${widget.maxSocRangeMax}%',
                               prefixIcon: const Icon(Icons.battery_charging_full, color: Colors.green),
@@ -431,7 +432,7 @@ class _BatterySocScreenState extends State<BatterySocScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save),
-              label: Text(_isSaving ? 'Wird gespeichert...' : 'Limits speichern'),
+              label: Text(_isSaving ? context.l10n.messageSaving : context.l10n.buttonSavePowerLimit),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),

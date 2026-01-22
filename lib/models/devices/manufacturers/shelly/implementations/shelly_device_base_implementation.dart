@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
 import 'package:the_solar_app/models/devices/device_base.dart';
+import 'package:the_solar_app/models/to.dart';
 
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/constants/shelly_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/shelly_script.dart';
 import 'package:the_solar_app/screens/configuration/authentication_screen.dart';
 import 'package:the_solar_app/screens/configuration/general_settings_screen.dart';
@@ -15,6 +17,7 @@ import 'package:the_solar_app/services/devices/shelly/shelly_service.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_bluetooth_service.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
@@ -49,8 +52,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
   List<DeviceMenuItem> getMenuItems(){
     return [
       DeviceMenuItem(
-        name: 'Allgemeine Einstellungen',
-        subtitle: 'Grundlegende Geräteeinstellungen verwalten',
+        name: TO(key: MenuTranslationKeys.generalSettings),
+        subtitle: TO(key: MenuSubtitleKeys.generalSettingsSubtitle),
         icon: Icons.settings,
         iconColor: Colors.purple,
         onTap: (ctx) async {
@@ -80,8 +83,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'WiFi konfigurieren',
-        subtitle: 'Netzwerkverbindung einrichten',
+        name: TO(key: MenuTranslationKeys.wifiConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.wifiConfigurationSubtitle),
         icon: Icons.wifi,
         iconColor: Colors.green,
         onTap: (ctx) async {
@@ -92,7 +95,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
             context,
             loadingMessage: 'Lade aktuelle Konfiguration...',
             operation: () => device.sendCommand(COMMAND_FETCH_WIFI_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Konnte WiFi-Konfiguration nicht laden: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorWhileLoadingConfig(e.toString())),
           );
 
           if (resp == null || !context.mounted) return;
@@ -119,8 +122,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'Access Point konfigurieren',
-        subtitle: 'WiFi Access Point einrichten',
+        name: TO(key: MenuTranslationKeys.accessPointConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.accessPointSubtitle),
         icon: Icons.router,
         iconColor: Colors.blue,
         onTap: (ctx) async {
@@ -131,7 +134,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
             context,
             loadingMessage: 'Lade Gerätedaten...',
             operation: () => device.sendCommand(COMMAND_FETCH_WIFI_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Konnte Gerätedaten nicht abrufen: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorWhileLoading(e.toString())),
           );
 
           if (resp == null || !context.mounted) return;
@@ -151,13 +154,13 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'Access Point erfolgreich konfiguriert');
+            MessageUtils.showSuccess(context, context.l10n.savedSuccessfully);
           }
         },
       ),
       DeviceMenuItem(
-        name: 'Configure rpc Port',
-        subtitle: 'RPC UDP Port konfigurieren',
+        name: TO(key: MenuTranslationKeys.portConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.portConfigurationSubtitle),
         icon: Icons.settings_ethernet,
         iconColor: Colors.purple,
         onTap: (ctx) async {
@@ -168,7 +171,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
             context,
             loadingMessage: 'Lade Systemkonfiguration...',
             operation: () => device.sendCommand(COMMAND_FETCH_SYS_CONFIG, {}),
-            onError: (e) => MessageUtils.showError( context, 'Konnte Systemkonfiguration nicht laden: $e'),
+            onError: (e) => MessageUtils.showError( context, context.l10n.errorWhileLoadingConfig(e.toString())),
           );
 
           if (resp == null || !context.mounted) return;
@@ -188,13 +191,13 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           );
 
           if (result == true && context.mounted) {
-            MessageUtils.showSuccess(context, 'RPC Port erfolgreich konfiguriert');
+            MessageUtils.showSuccess(context, context.l10n.savedSuccessfully);
           }
         },
       ),
       DeviceMenuItem(
-        name: 'Gerät neustarten',
-        subtitle: 'Startet das Gerät neu',
+        name: TO(key: MenuTranslationKeys.restartDevice),
+        subtitle: TO(key: MenuSubtitleKeys.restartDeviceSubtitle),
         icon: Icons.restart_alt,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -231,14 +234,14 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
               await Future.delayed(const Duration(seconds: 1));
               return true;
             },
-            onSuccess: (_) => MessageUtils.showSuccess( context, 'Gerät wird neu gestartet'),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Neustarten des Geräts: $e'),
+            onSuccess: (_) => MessageUtils.showSuccess( context, context.l10n.messageDeviceRestarting),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorWhileRestarting(e.toString())),
           );
         },
       ),
       DeviceMenuItem(
-        name: 'Authentifizierung konfigurieren',
-        subtitle: 'Benutzername und Passwort einrichten',
+        name: TO(key: MenuTranslationKeys.authentication),
+        subtitle: TO(key: MenuSubtitleKeys.authenticationSubtitle),
         icon: Icons.lock,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -269,8 +272,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'Automatisierung konfigurieren',
-        subtitle: 'Scripts und Automationen verwalten',
+        name: TO(key: MenuTranslationKeys.automation),
+        subtitle: TO(key: MenuSubtitleKeys.automationSubtitle),
         icon: Icons.auto_awesome,
         iconColor: Colors.teal,
         onTap: (ctx) async {
@@ -282,7 +285,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
             context,
             loadingMessage: 'Lade Scripts...',
             operation: () => device.sendCommand(COMMAND_FETCH_SCRIPTS, {}),
-            onError: (e) => MessageUtils.showError(context, 'Konnte Scripts nicht laden: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorCouldNotRetrieveScripts(e.toString())),
           );
 
           if (resp == null || !context.mounted) return;
@@ -290,7 +293,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           // Parse scripts array from response
           final scriptsData = resp['scripts'] as List<dynamic>?;
           if (scriptsData == null || scriptsData.isEmpty) {
-            MessageUtils.showWarning(context, 'Keine Scripts gefunden');
+            MessageUtils.showWarning(context, context.l10n.statusNoScriptsFound);
             return;
           }
 
@@ -372,9 +375,9 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     if (modules.containsKey('em1') && modules['em1']!.length > 1) {
       final em1Instances = modules['em1']!;
 
-      // Total Active Power (Gesamt Wirkleistung)
+      // Total Active Power (Gesamt Leistung)
       fields.add(DeviceDataField(
-        name: 'Gesamt Wirkleistung',
+        name: TO(key: FieldTranslationKeys.totalPower),
         type: DataFieldType.watt,
         valueExtractor: (data) {
           double total = 0.0;
@@ -393,7 +396,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Apparent Power (Gesamt Scheinleistung)
       fields.add(DeviceDataField(
-        name: 'Gesamt Scheinleistung',
+        name: TO(key: FieldTranslationKeys.apparentPower),
         type: DataFieldType.watt,
         valueExtractor: (data) {
           double total = 0.0;
@@ -417,7 +420,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Energy Consumption (Gesamt Energie Bezug)
       fields.add(DeviceDataField(
-        name: 'EM1 Gesamt Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           double total = 0.0;
@@ -436,7 +439,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Energy Return/Export (Gesamt Energie Einspeisung)
       fields.add(DeviceDataField(
-        name: 'EM1 Gesamt Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           double total = 0.0;
@@ -458,9 +461,9 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     if (modules.containsKey('pm1') && modules['pm1']!.length > 1) {
       final pm1Instances = modules['pm1']!;
 
-      // Total Active Power (Gesamt Wirkleistung)
+      // Total Active Power (Gesamt Leistung)
       fields.add(DeviceDataField(
-        name: 'PM Gesamt Wirkleistung',
+        name: TO(key: FieldTranslationKeys.totalPower),
         type: DataFieldType.watt,
         valueExtractor: (data) {
           double total = 0.0;
@@ -479,7 +482,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Current (Gesamt Strom)
       fields.add(DeviceDataField(
-        name: 'PM Gesamt Strom',
+        name: TO(key: FieldTranslationKeys.totalCurrent),
         type: DataFieldType.current,
         valueExtractor: (data) {
           double total = 0.0;
@@ -498,7 +501,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Energy Import (Gesamt Energie Bezug)
       fields.add(DeviceDataField(
-        name: 'PM Gesamt Energie (Bezug)',
+        name: TO(key: FieldTranslationKeys.totalEnergyImport),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           double total = 0.0;
@@ -517,7 +520,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Energy Export (Gesamt Energie Einspeisung)
       fields.add(DeviceDataField(
-        name: 'PM Gesamt Energie (Einspeisung)',
+        name: TO(key: FieldTranslationKeys.totalEnergyExport),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           double total = 0.0;
@@ -541,7 +544,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Active Power (Gesamt Leistung)
       fields.add(DeviceDataField(
-        name: 'Switch Gesamt Leistung',
+        name: TO(key: FieldTranslationKeys.totalPower),
         type: DataFieldType.watt,
         valueExtractor: (data) {
           double total = 0.0;
@@ -560,7 +563,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Energy (Gesamt Energie)
       fields.add(DeviceDataField(
-        name: 'Switch Gesamt Energie',
+        name: TO(key: FieldTranslationKeys.totalEnergy),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           double total = 0.0;
@@ -579,7 +582,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Average Temperature (Durchschnitts Temperatur)
       fields.add(DeviceDataField(
-        name: 'Switch Durchschnitts Temperatur',
+        name: TO(key: FieldTranslationKeys.averageTemperature),
         type: DataFieldType.temperature,
         valueExtractor: (data) {
           double sum = 0.0;
@@ -600,7 +603,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
       // Total Current (Gesamt Strom)
       fields.add(DeviceDataField(
-        name: 'Switch Gesamt Strom',
+        name: TO(key: FieldTranslationKeys.totalCurrent),
         type: DataFieldType.current,
         valueExtractor: (data) {
           double total = 0.0;
@@ -625,7 +628,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
   List<DeviceCustomSection> getCustomSections() => [];
 
   @override
-  IconData getDeviceIcon() {
+  IconData? getDeviceIcon() {
     final modules = _getDetectedModules();
 
     // Priority: em > em1 > pm1 > switch > cover > default
@@ -645,24 +648,25 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     // Auto-configure time series for switch modules
     if (modules.containsKey('switch')) {
       for (final id in modules['switch']!) {
-        final suffix = modules['switch']!.length > 1 ? ' ${id + 1}' : '';
+        final hasMultiple = modules['switch']!.length > 1;
+        final params = hasMultiple ? {'instanceNum': id + 1} : null;
         fields.addAll([
           TimeSeriesFieldConfig(
-            name: 'Leistung$suffix',
+            name: TO(key: FieldTranslationKeys.powerInstance, params: params),
             type: DataFieldType.watt,
             mapping: ['switch:$id', 'apower'],
             expertMode: false,
             hideIfEmpty: true,
           ),
           TimeSeriesFieldConfig(
-            name: 'Spannung$suffix',
+            name: TO(key: FieldTranslationKeys.voltageInstance, params: params),
             type: DataFieldType.voltage,
             mapping: ['switch:$id', 'voltage'],
             expertMode: true,
             hideIfEmpty: true,
           ),
           TimeSeriesFieldConfig(
-            name: 'Strom$suffix',
+            name: TO(key: FieldTranslationKeys.currentInstance, params: params),
             type: DataFieldType.current,
             mapping: ['switch:$id', 'current'],
             expertMode: true,
@@ -677,19 +681,19 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       fields.addAll([
         // Phase A
         TimeSeriesFieldConfig(
-          name: 'Phase 1 Leistung',
+          name: TO(key: FieldTranslationKeys.powerPhase1),
           type: DataFieldType.watt,
           mapping: ['em:0', 'a_act_power'],
           expertMode: false,
         ),
         TimeSeriesFieldConfig(
-          name: 'Phase 1 Spannung',
+          name: TO(key: FieldTranslationKeys.voltagePhase1),
           type: DataFieldType.voltage,
           mapping: ['em:0', 'a_voltage'],
           expertMode: true,
         ),
         TimeSeriesFieldConfig(
-          name: 'Phase 1 Strom',
+          name: TO(key: FieldTranslationKeys.currentPhase1),
           type: DataFieldType.current,
           mapping: ['em:0', 'a_current'],
           expertMode: true,
@@ -697,19 +701,19 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
         // Phase B
         TimeSeriesFieldConfig(
-          name: 'Phase 2 Leistung',
+          name: TO(key: FieldTranslationKeys.powerPhase2),
           type: DataFieldType.watt,
           mapping: ['em:0', 'b_act_power'],
           expertMode: false,
         ),
         TimeSeriesFieldConfig(
-          name: 'Phase 2 Spannung',
+          name: TO(key: FieldTranslationKeys.voltagePhase2),
           type: DataFieldType.voltage,
           mapping: ['em:0', 'b_voltage'],
           expertMode: true,
         ),
         TimeSeriesFieldConfig(
-          name: 'Phase 2 Strom',
+          name: TO(key: FieldTranslationKeys.currentPhase2),
           type: DataFieldType.current,
           mapping: ['em:0', 'b_current'],
           expertMode: true,
@@ -717,19 +721,19 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
         // Phase C
         TimeSeriesFieldConfig(
-          name: 'Phase 3 Leistung',
+          name: TO(key: FieldTranslationKeys.powerPhase3),
           type: DataFieldType.watt,
           mapping: ['em:0', 'c_act_power'],
           expertMode: false,
         ),
         TimeSeriesFieldConfig(
-          name: 'Phase 3 Spannung',
+          name: TO(key: FieldTranslationKeys.voltagePhase3),
           type: DataFieldType.voltage,
           mapping: ['em:0', 'c_voltage'],
           expertMode: true,
         ),
         TimeSeriesFieldConfig(
-          name: 'Phase 3 Strom',
+          name: TO(key: FieldTranslationKeys.currentPhase3),
           type: DataFieldType.current,
           mapping: ['em:0', 'c_current'],
           expertMode: true,
@@ -737,7 +741,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
         // Total
         TimeSeriesFieldConfig(
-          name: 'Gesamt Leistung',
+          name: TO(key: FieldTranslationKeys.totalPower),
           type: DataFieldType.watt,
           mapping: ['em:0', 'total_act_power'],
           expertMode: false,
@@ -748,22 +752,23 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     // Auto-configure time series for EM1 modules (single-phase, multi-instance)
     if (modules.containsKey('em1')) {
       for (final id in modules['em1']!) {
-        final suffix = modules['em1']!.length > 1 ? ' ${id + 1}' : '';
+        final hasMultiple = modules['em1']!.length > 1;
+        final params = hasMultiple ? {'instanceNum': id + 1} : null;
         fields.addAll([
           TimeSeriesFieldConfig(
-            name: 'EM1 Wirkleistung$suffix',
+            name: TO(key: FieldTranslationKeys.activePowerInstance, params: params),
             type: DataFieldType.watt,
             mapping: ['em1:$id', 'act_power'],
             expertMode: false,
           ),
           TimeSeriesFieldConfig(
-            name: 'EM1 Spannung$suffix',
+            name: TO(key: FieldTranslationKeys.voltageInstance, params: params),
             type: DataFieldType.voltage,
             mapping: ['em1:$id', 'voltage'],
             expertMode: true,
           ),
           TimeSeriesFieldConfig(
-            name: 'EM1 Strom$suffix',
+            name: TO(key: FieldTranslationKeys.currentInstance, params: params),
             type: DataFieldType.current,
             mapping: ['em1:$id', 'current'],
             expertMode: true,
@@ -775,28 +780,29 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     // Auto-configure time series for PM1 modules (power meter Gen3, multi-instance)
     if (modules.containsKey('pm1')) {
       for (final id in modules['pm1']!) {
-        final suffix = modules['pm1']!.length > 1 ? ' ${id + 1}' : '';
+        final hasMultiple = modules['pm1']!.length > 1;
+        final params = hasMultiple ? {'instanceNum': id + 1} : null;
         fields.addAll([
           TimeSeriesFieldConfig(
-            name: 'PM1 Wirkleistung$suffix',
+            name: TO(key: FieldTranslationKeys.powerInstance, params: params),
             type: DataFieldType.watt,
             mapping: ['pm1:$id', 'apower'],
             expertMode: false,
           ),
           TimeSeriesFieldConfig(
-            name: 'PM1 Spannung$suffix',
+            name: TO(key: FieldTranslationKeys.voltageInstance, params: params),
             type: DataFieldType.voltage,
             mapping: ['pm1:$id', 'voltage'],
             expertMode: true,
           ),
           TimeSeriesFieldConfig(
-            name: 'PM1 Strom$suffix',
+            name: TO(key: FieldTranslationKeys.currentInstance, params: params),
             type: DataFieldType.current,
             mapping: ['pm1:$id', 'current'],
             expertMode: true,
           ),
           TimeSeriesFieldConfig(
-            name: 'PM1 Frequenz$suffix',
+            name: TO(key: FieldTranslationKeys.frequencyInstance, params: params),
             type: DataFieldType.frequency,
             mapping: ['pm1:$id', 'freq'],
             expertMode: true,
@@ -819,24 +825,28 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         DeviceCategoryConfig(
           category: 'phase1',
           displayName: 'Phase 1',
+          displayNameKey: CategoryTranslationKeys.phase1,
           order: 10,
           layout: CategoryLayout.standard,
         ),
         DeviceCategoryConfig(
           category: 'phase2',
           displayName: 'Phase 2',
+          displayNameKey: CategoryTranslationKeys.phase2,
           order: 20,
           layout: CategoryLayout.standard,
         ),
         DeviceCategoryConfig(
           category: 'phase3',
           displayName: 'Phase 3',
+          displayNameKey: CategoryTranslationKeys.phase3,
           order: 30,
           layout: CategoryLayout.standard,
         ),
         DeviceCategoryConfig(
           category: 'totals',
           displayName: 'Totals',
+          displayNameKey: CategoryTranslationKeys.totals,
           order: 40,
           layout: CategoryLayout.standard,
         ),
@@ -851,6 +861,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         configs.add(DeviceCategoryConfig(
           category: 'messung_$instanceNum',
           displayName: 'Messung $instanceNum',
+          displayNameKey: CategoryTranslationKeys.measurementInstance,
+          displayNameParams: {'instanceNum': '$instanceNum'},
           order: 50 + i,
           layout: CategoryLayout.standard,
           hideWhenAllZero: i > 0,  // Hide Messung 2, Messung 3 if all values are zero
@@ -862,6 +874,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         configs.add(DeviceCategoryConfig(
           category: 'em1_kombiniert',
           displayName: 'Kombiniert',
+          displayNameKey: CategoryTranslationKeys.em1Combined,
           order: 50 + instances.length,
           layout: CategoryLayout.standard,
         ));
@@ -876,6 +889,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         configs.add(DeviceCategoryConfig(
           category: 'pm_messung_$instanceNum',
           displayName: 'PM Messung $instanceNum',
+          displayNameKey: CategoryTranslationKeys.pmMeasurementInstance,
+          displayNameParams: {'instanceNum': '$instanceNum'},
           order: 70 + i,
           layout: CategoryLayout.standard,
           hideWhenAllZero: i > 0,
@@ -886,6 +901,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         configs.add(DeviceCategoryConfig(
           category: 'pm1_kombiniert',
           displayName: 'PM Kombiniert',
+          displayNameKey: CategoryTranslationKeys.pm1Combined,
           order: 70 + instances.length,
           layout: CategoryLayout.standard,
         ));
@@ -900,6 +916,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         configs.add(DeviceCategoryConfig(
           category: 'switch_$instanceNum',
           displayName: 'Switch $instanceNum',
+          displayNameKey: CategoryTranslationKeys.switchInstance,
+          displayNameParams: {'instanceNum': '$instanceNum'},
           order: 90 + i,
           layout: CategoryLayout.standard,
           hideWhenAllZero: i > 0,
@@ -911,6 +929,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         configs.add(DeviceCategoryConfig(
           category: 'switch_kombiniert',
           displayName: 'Switch Kombiniert',
+          displayNameKey: CategoryTranslationKeys.switchCombined,
           order: 90 + instances.length,
           layout: CategoryLayout.standard,
         ));
@@ -928,40 +947,40 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     print(config.toString());
     return [
       GeneralSettingItem(
-        name: 'Eco Mode',
+        name: TO(key: 'settingEcoMode'),
         commandName: GENERAL_SETTGINS_ECO_MODE,
         currentStatus: MapUtils.OM(config,['device','eco_mode']) as bool? ?? false,
         popUpOnChange: true,
-        description: 'Energiesparmodus für das Gerät',
+        description: TO(key: 'settingEcoModeDesc'),
         icon: Icons.eco,
         confirmationTitle: 'Eco Mode ändern?',
         confirmationMessage: 'Möchten Sie den Eco Mode wirklich ändern? Dies kann die Geräteleistung beeinflussen.',
       ),
       GeneralSettingItem(
-        name: 'Sichtbar',
+        name: TO(key: 'settingDiscoverable'),
         commandName: GENERAL_SETTINGS_DISCOVERABLE,
         currentStatus: MapUtils.OM(config,['device','discoverable']) as bool? ?? true,
         popUpOnChange: true,
-        description: 'Gerät ist sichtbar',
+        description: TO(key: 'settingDiscoverableDesc'),
         icon: Icons.visibility,
         confirmationMessage: 'Möchten Sie den Sichtbarkeit wirklich ändern?',
       ),
       GeneralSettingItem(
-        name: 'Debug MQTT',
+        name: TO(key: 'settingDebugMqtt'),
         commandName: GENERAL_SETTINGS_DEBUG_MQTT,
         currentStatus: MapUtils.OM(config,['debug','mqtt','enable']) as bool? ?? false,
         popUpOnChange: true,
-        description: 'MQTT Debug-Protokollierung aktivieren',
+        description: TO(key: 'settingDebugMqttDesc'),
         icon: Icons.bug_report,
         confirmationTitle: 'Debug MQTT ändern?',
         confirmationMessage: 'Möchten Sie MQTT Debug-Protokollierung wirklich ändern? Dies kann die Leistung beeinflussen und zusätzliche Logs erzeugen.',
       ),
       GeneralSettingItem(
-        name: 'Debug Websocket',
+        name: TO(key: 'settingDebugWebsocket'),
         commandName: GENERAL_SETTINGS_DEBUG_WEBSOCKET,
         currentStatus: MapUtils.OM(config,['debug','websocket','enable']) as bool? ?? false,
         popUpOnChange: true,
-        description: 'Websocket Debug-Protokollierung aktivieren',
+        description: TO(key: 'settingDebugWebsocketDesc'),
         icon: Icons.bug_report,
         confirmationTitle: 'Debug Websocket ändern?',
         confirmationMessage: 'Möchten Sie Websocket Debug-Protokollierung wirklich ändern? Dies kann die Leistung beeinflussen und zusätzliche Logs erzeugen.',
@@ -1226,8 +1245,6 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     required int instanceId,
     required int instanceCount,
   }) {
-    final suffix = instanceCount > 1 ? ' ${instanceId + 1}' : '';
-
     // Determine category based on template and instance
     String? category;
     if (template.category != null) {
@@ -1257,8 +1274,31 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       }
     }
 
+    // Determine if this is an instance-specific category that provides context
+    final isInstanceCategory = category != null &&
+        (category.contains('messung_') ||
+         category.contains('switch_') ||
+         category.contains('pm_messung_') ||
+         RegExp(r'_\d+$').hasMatch(category)); // Ends with underscore + digit
+
+    // Only add suffix if NOT in an instance-specific category AND multiple instances exist
+    final suffix = (!isInstanceCategory && instanceCount > 1) ? ' ${instanceId + 1}' : '';
+
+    // Build TO from template, adding instance parameter if needed
+    final TO nameTO;
+    if (template.needsInstanceParam && !isInstanceCategory && instanceCount > 1) {
+      // Clone template TO with added instance parameter
+      nameTO = TO(
+        key: template.name.key,
+        params: {'instanceNum': instanceId + 1},
+      );
+    } else {
+      // Use template TO as-is
+      nameTO = template.name;
+    }
+
     return DeviceDataField(
-      name: '${template.name}$suffix',
+      name: nameTO,
       type: template.type,
       valueExtractor: (data) {
         // Split path by '.' for nested fields (e.g., "temperature.tC")
@@ -1289,10 +1329,22 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     required int instanceId,
     required int instanceCount,
   }) {
-    final suffix = instanceCount > 1 ? ' ${instanceId + 1}' : '';
+    // Use template's translation key if available
+    String? nameKey = template.nameKey;
+    Map<String, dynamic>? nameParams;
+
+    // Add instance parameter if template requires it and multiple instances exist
+    if (template.needsInstanceParam && instanceCount > 1) {
+      nameParams = {'instanceNum': instanceId + 1};
+    }
+
+    // Create TO object with translation key and optional parameters
+    final TO nameTO = nameKey != null
+        ? TO(key: nameKey, params: nameParams)
+        : TO(key: 'unknown'); // Fallback for templates without translation key
 
     return DeviceControlItem(
-      name: '${template.name}$suffix',
+      name: nameTO,
       type: template.type,
       icon: template.icon,
       valueExtractor: (data) => MapUtils.OM(data,

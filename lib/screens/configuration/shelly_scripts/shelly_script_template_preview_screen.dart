@@ -4,6 +4,7 @@ import '../../../constants/command_constants.dart';
 import '../../../models/device.dart';
 import '../../../models/shelly_script_template.dart';
 import '../../../utils/dialog_utils.dart';
+import '../../../utils/localization_extension.dart';
 import '../../../utils/message_utils.dart';
 import '../../../utils/script_template_utils.dart';
 import '../../../widgets/app_bar_widget.dart';
@@ -60,19 +61,19 @@ class _ShellyScriptTemplatePreviewScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Script auf Gerät installieren?'),
+        title: Text(dialogContext.l10n.shellyScriptsDialogInstallConfirmTitle),
         content: Text(
-          'Möchten Sie das Script "${widget.template.name}" wirklich auf Ihrem Shelly-Gerät installieren?',
+          dialogContext.l10n.shellyScriptsDialogInstallConfirmMessage(widget.template.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Abbrechen'),
+            child: Text(dialogContext.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(foregroundColor: Colors.green),
-            child: const Text('Installieren'),
+            child: Text(dialogContext.l10n.install),
           ),
         ],
       ),
@@ -85,7 +86,7 @@ class _ShellyScriptTemplatePreviewScreenState
       // Step 1: Create script on device with template naming convention
       final createResult = await DialogUtils.executeWithLoading(
         context,
-        loadingMessage: 'Erstelle Script auf Gerät...',
+        loadingMessage: context.l10n.shellyScriptsCreatingScript,
         operation: () => widget.device.sendCommand(
           COMMAND_CREATE_SCRIPT,
           {"name": _scriptName},
@@ -100,7 +101,7 @@ class _ShellyScriptTemplatePreviewScreenState
       if (scriptId == null) {
         if (mounted) {
           MessageUtils.showError(
-              context, 'Fehler: Konnte Script-ID nicht abrufen');
+              context, context.l10n.shellyScriptsErrorNoScriptId);
         }
         return;
       }
@@ -108,7 +109,7 @@ class _ShellyScriptTemplatePreviewScreenState
       // Step 2: Upload code to device
       final uploadResult = await DialogUtils.executeWithLoading(
         context,
-        loadingMessage: 'Lade Script-Code hoch...',
+        loadingMessage: context.l10n.shellyScriptsUploadingCode,
         operation: () => widget.device.sendCommand(
           COMMAND_PUT_SCRIPT_CODE,
           {
@@ -121,7 +122,7 @@ class _ShellyScriptTemplatePreviewScreenState
       );
 
       if (uploadResult == null && mounted) {
-        MessageUtils.showError(context, 'Fehler beim Hochladen des Codes');
+        MessageUtils.showError(context, context.l10n.shellyScriptsErrorCodeUploadFailed);
         return;
       }
 
@@ -140,7 +141,7 @@ class _ShellyScriptTemplatePreviewScreenState
       if (mounted) {
         MessageUtils.showSuccess(
           context,
-          'Script erfolgreich installiert und gestartet',
+          context.l10n.shellyScriptsScriptInstalled,
         );
 
         // Navigate back to scripts list (pop all the way back)
@@ -150,7 +151,7 @@ class _ShellyScriptTemplatePreviewScreenState
       if (mounted) {
         MessageUtils.showError(
           context,
-          'Fehler beim Installieren des Scripts: $e',
+          context.l10n.shellyScriptsErrorInstalling(e.toString()),
         );
       }
     }
@@ -181,7 +182,7 @@ class _ShellyScriptTemplatePreviewScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Code-Vorschau',
+                        context.l10n.shellyScriptPreviewTitle,
                         style:
                             Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -189,7 +190,7 @@ class _ShellyScriptTemplatePreviewScreenState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Prüfen Sie den generierten Code vor der Installation',
+                        context.l10n.shellyScriptsPreviewSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
@@ -258,8 +259,7 @@ class _ShellyScriptTemplatePreviewScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Das Script wird auf Ihrem Shelly-Gerät installiert, '
-                          'aktiviert und automatisch gestartet.',
+                          context.l10n.shellyScriptsPreviewInfoText,
                           style: TextStyle(
                             color: Colors.blue[900],
                             fontSize: 12,
@@ -276,7 +276,7 @@ class _ShellyScriptTemplatePreviewScreenState
                 ElevatedButton.icon(
                   onPressed: _deployScript,
                   icon: const Icon(Icons.rocket_launch),
-                  label: const Text('Auf Gerät installieren'),
+                  label: Text(context.l10n.install),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,

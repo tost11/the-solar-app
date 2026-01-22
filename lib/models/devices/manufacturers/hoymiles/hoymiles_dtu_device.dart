@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_ap_configuration_screen.dart';
 import 'package:the_solar_app/screens/device_info_screen.dart';
 import 'package:the_solar_app/services/devices/hoymiles/hoymiles_protocol.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
@@ -32,8 +35,8 @@ class HoymilesDTUDevice extends HoymilesDevice {
     connectionType: ConnectionType.wifi,
     menuItems: [
       DeviceMenuItem(
-        name: 'Geräteinformationen',
-        subtitle: 'Detaillierte Geräteinformationen anzeigen',
+        name: TO(key: MenuTranslationKeys.deviceInfo),
+        subtitle: TO(key: MenuSubtitleKeys.deviceInfoSubtitle),
         icon: Icons.info_outline,
         iconColor: Colors.blue,
         onTap: (ctx) async {
@@ -42,9 +45,9 @@ class HoymilesDTUDevice extends HoymilesDevice {
 
           final info = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade Geräteinformationen...',
+            loadingMessage: context.l10n.loadingDeviceInfo,
             operation: () => device.sendCommand(COMMAND_FETCH_DEVICE_INFO, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler: $e'),
+            onError: (e) => MessageUtils.showError(context, '${context.l10n.error}: $e'),
           );
 
           if (info != null && context.mounted) {
@@ -58,8 +61,8 @@ class HoymilesDTUDevice extends HoymilesDevice {
         },
       ),
       DeviceMenuItem(
-        name: 'WiFi konfigurieren',
-        subtitle: 'Netzwerkverbindung einrichten',
+        name: TO(key: MenuTranslationKeys.wifiConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.wifiConfigurationSubtitle),
         icon: Icons.wifi,
         iconColor: Colors.green,
         onTap: (ctx) async {
@@ -68,9 +71,9 @@ class HoymilesDTUDevice extends HoymilesDevice {
 
           final wifiConfig = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_SYS_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (wifiConfig == null || !context.mounted) return;
@@ -87,13 +90,13 @@ class HoymilesDTUDevice extends HoymilesDevice {
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'WiFi-Konfiguration abgeschlossen');
+            MessageUtils.showSuccess(context, context.l10n.wifiConfigurationCompleted);
           }
         },
       ),
       DeviceMenuItem(
-        name: 'Access Point konfigurieren',
-        subtitle: 'AP WiFi einrichten',
+        name: TO(key: MenuTranslationKeys.accessPointConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.accessPointSubtitle),
         icon: Icons.router,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -102,9 +105,9 @@ class HoymilesDTUDevice extends HoymilesDevice {
 
           final apConfig = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_SYS_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (apConfig == null || !context.mounted) return;
@@ -125,7 +128,7 @@ class HoymilesDTUDevice extends HoymilesDevice {
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'Access Point erfolgreich konfiguriert');
+            MessageUtils.showSuccess(context, context.l10n.accessPointConfigured);
           }
         },
       ),
@@ -153,7 +156,7 @@ class HoymilesDTUDevice extends HoymilesDevice {
   List<DeviceDataField> get dataFields => [
     // Aggregate power
     DeviceDataField(
-      name: 'Gesamtleistung',
+      name: TO(key: FieldTranslationKeys.totalPower),
       type: DataFieldType.watt,
       valueExtractor: (data) {
         final power = MapUtils.OM(data, ['realtime', 'dtu_power']);
@@ -167,7 +170,7 @@ class HoymilesDTUDevice extends HoymilesDevice {
     ),
     // Daily energy
     DeviceDataField(
-      name: 'Tagesertrag',
+      name: TO(key: FieldTranslationKeys.dailyYield),
       type: DataFieldType.energy,
       valueExtractor: (data) => MapUtils.OM(data, ['realtime', 'dtu_daily_energy']),
       icon: Icons.wb_sunny,
@@ -176,7 +179,7 @@ class HoymilesDTUDevice extends HoymilesDevice {
     ),
     // Number of inverters
     DeviceDataField(
-      name: 'Anzahl Wechselrichter',
+      name: TO(key: FieldTranslationKeys.numberOfInverters),
       type: DataFieldType.none,
       valueExtractor: (data) {
         final inverters = MapUtils.OM(data, ['realtime', 'inverters']) as Map?;
@@ -187,7 +190,7 @@ class HoymilesDTUDevice extends HoymilesDevice {
     ),
     // Device serial number
     DeviceDataField(
-      name: 'Seriennummer',
+      name: TO(key: FieldTranslationKeys.serialNumber),
       type: DataFieldType.none,
       valueExtractor: (data) =>
           MapUtils.OM(data, ['realtime', 'device_serial_number']),
@@ -196,7 +199,7 @@ class HoymilesDTUDevice extends HoymilesDevice {
     ),
     // Firmware version
     DeviceDataField(
-      name: 'Firmware-Version',
+      name: TO(key: FieldTranslationKeys.firmwareVersion),
       type: DataFieldType.none,
       valueExtractor: (data) {
         final version = MapUtils.OM(data, ['realtime', 'firmware_version']);

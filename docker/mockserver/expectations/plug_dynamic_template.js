@@ -19,7 +19,7 @@ return {
   headers: { 'Content-Type': ['application/json'] },
   body: JSON.stringify({
     id: 1768255378,
-    src: 'shellyplusplugs-778899aabbcc',
+    src: 'shellyplusplugs-aabbccddeeff',
     dst: 'flutter_app',
     result: {
       ble: {},
@@ -85,7 +85,7 @@ return {
         }
       },
       sys: {
-        mac: '778899AABBCC',
+        mac: 'AABBCCDDEEFF',
         restart_required: false,
         time: new Date().toTimeString().substring(0, 5),
         unixtime: Math.floor(Date.now() / 1000),

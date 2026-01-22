@@ -5,6 +5,7 @@ import '../models/devices/mixins/device_authentication_mixin.dart';
 import '../models/devices/mixins/device_wifi_mixin.dart';
 import '../models/devices/mixins/fetch_data_timeout_mixin.dart';
 import '../services/device_storage_service.dart';
+import '../utils/localization_extension.dart';
 import '../utils/message_utils.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -111,7 +112,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   Future<void> _saveName() async {
     // Validate name
     if (_nameController.text.trim().isEmpty) {
-      MessageUtils.showError(context, 'Gerätename darf nicht leer sein');
+      MessageUtils.showError(context, context.l10n.validationDeviceNameCannotBeEmpty);
       return;
     }
 
@@ -127,11 +128,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       await DeviceStorageService().saveDevice(widget.device);
 
       if (context.mounted) {
-        MessageUtils.showSuccess(context, 'Gerätename gespeichert');
+        MessageUtils.showSuccess(context, context.l10n.messageDeviceNameSaved);
       }
     } catch (e) {
       if (context.mounted) {
-        MessageUtils.showError(context, 'Fehler beim Speichern: $e');
+        MessageUtils.showError(context, context.l10n.errorWhileSaving(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -161,11 +162,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       await DeviceStorageService().saveDevice(widget.device);
 
       if (context.mounted) {
-        MessageUtils.showSuccess(context, 'Authentifizierung gespeichert');
+        MessageUtils.showSuccess(context, context.l10n.messageAuthSaved);
       }
     } catch (e) {
       if (context.mounted) {
-        MessageUtils.showError(context, 'Fehler beim Speichern: $e');
+        MessageUtils.showError(context, context.l10n.errorWhileSaving(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -228,7 +229,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
 
       // Validate at least one connection method
       if (wifiDevice.netIpAddress == null && wifiDevice.netHostname == null) {
-        MessageUtils.showError(context, 'Bitte IP-Adresse oder Hostname eingeben');
+        MessageUtils.showError(context, context.l10n.validationEnterIpOrHostname);
         setState(() {
           _isSavingNetwork = false;
         });
@@ -239,11 +240,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       await DeviceStorageService().saveDevice(widget.device);
 
       if (context.mounted) {
-        MessageUtils.showSuccess(context, 'Netzwerkkonfiguration gespeichert');
+        MessageUtils.showSuccess(context, context.l10n.messageNetworkSaved);
       }
     } catch (e) {
       if (context.mounted) {
-        MessageUtils.showError(context, 'Fehler beim Speichern: $e');
+        MessageUtils.showError(context, context.l10n.errorWhileSaving(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -286,11 +287,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       await DeviceStorageService().saveDevice(widget.device);
 
       if (context.mounted) {
-        MessageUtils.showSuccess(context, 'Aktualisierungsintervall gespeichert');
+        MessageUtils.showSuccess(context, context.l10n.messageIntervalSaved);
       }
     } catch (e) {
       if (context.mounted) {
-        MessageUtils.showError(context, 'Fehler beim Speichern: $e');
+        MessageUtils.showError(context, context.l10n.errorWhileSaving(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -304,8 +305,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Geräteeinstellungen',
+      appBar: AppBarWidget(
+        title: context.l10n.screenDeviceSettings,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -333,7 +334,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Geräteeinstellungen',
+                                context.l10n.screenDeviceSettings,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -348,7 +349,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Konfigurieren Sie den Namen und die Authentifizierung für dieses Gerät.',
+                      context.l10n.helpDeviceSettingsDescription,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -370,7 +371,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         const Icon(Icons.edit, color: Colors.blue),
                         const SizedBox(width: 8),
                         Text(
-                          'Gerätename',
+                          context.l10n.deviceName,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -383,11 +384,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.name,
                         hintText: 'z.B. Wohnzimmer Steckdose',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.label),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.label),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -400,7 +401,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.save),
-                      label: Text(_isSavingName ? 'Wird gespeichert...' : 'Name speichern'),
+                      label: Text(_isSavingName ? context.l10n.messageSaving : context.l10n.save),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(12),
                       ),
@@ -424,7 +425,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         const Icon(Icons.info, color: Colors.blue),
                         const SizedBox(width: 8),
                         Text(
-                          'Geräteinformationen',
+                          context.l10n.deviceInfo,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -462,7 +463,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                     if (widget.device.deviceModel != null)
                       ListTile(
                         leading: const Icon(Icons.devices, color: Colors.grey),
-                        title: const Text('Gerätetyp'),
+                        title: Text(context.l10n.deviceType),
                         subtitle: Text(widget.device.deviceModel!),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -506,11 +507,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _ipAddressController,
-                        decoration: const InputDecoration(
-                          labelText: 'IP-Adresse',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.formIpAddress,
                           hintText: '192.168.1.100',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.computer),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.computer),
                           helperText: 'Optional: Direkte IP-Verbindung',
                         ),
                         keyboardType: TextInputType.number,
@@ -518,22 +519,22 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _hostnameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Hostname',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.formHostname,
                           hintText: 'device.local',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.dns),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.dns),
                           helperText: 'Optional: mDNS/DNS Hostname',
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _portController,
-                        decoration: const InputDecoration(
-                          labelText: 'Port',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.formPort,
                           hintText: '80',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.settings_ethernet),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.settings_ethernet),
                           helperText: 'Standard: 80',
                         ),
                         keyboardType: TextInputType.number,
@@ -542,12 +543,12 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       if (_hasAdditionalPortSupport) ...[
                         TextField(
                           controller: _additionalPortController,
-                          decoration: const InputDecoration(
-                            labelText: 'Protokoll-Port (z.B. Modbus)',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.formProtocolPort,
                             hintText: '1502',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.cable),
-                            helperText: 'Zusätzlicher Port für Protokollkommunikation',
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.cable),
+                            helperText: context.l10n.formAdditionalPortHelper,
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -562,7 +563,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.save),
-                        label: Text(_isSavingNetwork ? 'Wird gespeichert...' : 'Netzwerk speichern'),
+                        label: Text(_isSavingNetwork ? context.l10n.messageSaving : context.l10n.actionSaveNetwork),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(12),
                         ),
@@ -587,7 +588,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           const Icon(Icons.update, color: Colors.purple),
                           const SizedBox(width: 8),
                           Text(
-                            'Aktualisierungsintervall',
+                            context.l10n.intervalUpdateInterval,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -599,7 +600,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Zeitintervall zwischen Datenabrufen vom Gerät',
+                        context.l10n.helpUpdateIntervalDescription,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -608,12 +609,12 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _fetchDataIntervalController,
-                        decoration: const InputDecoration(
-                          labelText: 'Intervall (Sekunden)',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.intervalEnterInterval,
                           hintText: '30',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.timer),
-                          helperText: 'Standard: 30 Sekunden (Bereich: 1-300)',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.timer),
+                          helperText: context.l10n.helpIntervalDefault,
                         ),
                         keyboardType: TextInputType.number,
                       ),
@@ -628,8 +629,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                               )
                             : const Icon(Icons.save),
                         label: Text(_isSavingFetchDataInterval
-                            ? 'Wird gespeichert...'
-                            : 'Intervall speichern'),
+                            ? context.l10n.messageSaving
+                            : context.l10n.actionSaveInterval),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(12),
                         ),
@@ -654,7 +655,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           const Icon(Icons.lock, color: Colors.orange),
                           const SizedBox(width: 8),
                           Text(
-                            'Authentifizierung',
+                            context.l10n.screenAuthentication,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -666,7 +667,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Benutzername und Passwort für die Geräteauthentifizierung',
+                        context.l10n.helpAuthDescription,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -677,12 +678,12 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         controller: _usernameController,
                         enabled: !(widget.device as DeviceAuthenticationMixin).fixedUserName,
                         decoration: InputDecoration(
-                          labelText: 'Benutzername',
+                          labelText: context.l10n.formUsername,
                           hintText: 'admin',
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.person),
                           helperText: (widget.device as DeviceAuthenticationMixin).fixedUserName
-                              ? 'Benutzername kann nicht geändert werden'
+                              ? context.l10n.authUsernameCannotBeChanged
                               : null,
                         ),
                       ),
@@ -691,8 +692,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          labelText: 'Passwort',
-                          hintText: 'Passwort eingeben',
+                          labelText: context.l10n.formPassword,
+                          hintText: context.l10n.formEnterPassword,
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.key),
                           suffixIcon: IconButton(
@@ -719,7 +720,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.save),
-                        label: Text(_isSavingAuth ? 'Wird gespeichert...' : 'Authentifizierung speichern'),
+                        label: Text(_isSavingAuth ? context.l10n.messageSaving : context.l10n.actionSaveAuth),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(12),
                         ),

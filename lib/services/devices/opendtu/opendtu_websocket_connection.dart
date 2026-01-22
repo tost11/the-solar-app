@@ -141,7 +141,7 @@ class OpenDtuWebSocketConnection {
         final data = jsonDecode(message) as Map<String, dynamic>;
         _lastSuccessfulRead = DateTime.now();
 
-        debugPrint('[OpenDTU-WS] Received data update');
+        //debugPrint('[OpenDTU-WS] Received data update');
 
         // Parse the data immediately and invoke callback
         final parsedData = _parseInverterData(data);
@@ -199,8 +199,12 @@ class OpenDtuWebSocketConnection {
             final dcStrings = <Map<String, dynamic>>[];
             for (var entry in dc.entries) {
               final stringData = entry.value as Map<String, dynamic>;
+              // Try both 'Name' (PascalCase) and 'name' (lowercase) for compatibility
+              final stringName = _extractValue(stringData, 'Name') ??
+                                 _extractValue(stringData, 'name') ??
+                                 'String ${entry.key}';
               dcStrings.add({
-                'name': _extractValue(stringData, 'name') ?? 'String ${entry.key}',
+                'name': stringName,
                 'power': _extractValue(stringData, 'Power'),
                 'voltage': _extractValue(stringData, 'Voltage'),
                 'current': _extractValue(stringData, 'Current'),
@@ -350,15 +354,30 @@ class OpenDtuWebSocketConnection {
     return elapsed < HEALTH_THRESHOLD_MS;
   }
 
+  /// Parse raw livedata response (from HTTP or WebSocket)
+  ///
+  /// Public method to allow parsing of HTTP-fetched data using same logic as WebSocket
+  /// Returns transformed data structure with inverters as map
+  Map<String, dynamic>? parseRawLiveData(Map<String, dynamic> rawData) {
+    return _parseInverterData(rawData);
+  }
+
   /// Extract value from OpenDTU data structure
   dynamic _extractValue(Map<String, dynamic> obj, String key) {
     if (!obj.containsKey(key)) return null;
 
     final data = obj[key];
-    if (data is Map<String, dynamic> && data.containsKey('v')) {
-      return data['v'];
+
+    // Handle OpenDTU's {v: value, u: unit, d: decimals} structure
+    if (data is Map<String, dynamic>) {
+      if (data.containsKey('v')) {
+        return data['v'];
+      }
+      // If it's a Map but doesn't have 'v', return null to avoid type errors
+      return null;
     }
 
+    // Return primitive values directly
     return data;
   }
 }

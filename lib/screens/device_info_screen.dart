@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 
 /// Generic screen to display device information in a structured way
 class DeviceInfoScreen extends StatelessWidget {
@@ -10,11 +11,11 @@ class DeviceInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Geräteinformationen'),
+        title: Text(context.l10n.screenDeviceInfo),
       ),
       body: data.isEmpty
-          ? const Center(
-              child: Text('Keine Informationen verfügbar'),
+          ? Center(
+              child: Text(context.l10n.messageNoInformationAvailable),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -47,9 +48,9 @@ class DeviceInfoScreen extends StatelessWidget {
             const SizedBox(height: 12),
             // Section content
             if (value is Map<String, dynamic>)
-              ..._buildMapContent(value)
+              ..._buildMapContent(context, value)
             else
-              _buildValueWidget(value),
+              _buildValueWidget(context, value),
           ],
         ),
       ),
@@ -57,16 +58,16 @@ class DeviceInfoScreen extends StatelessWidget {
   }
 
   /// Build content for a map (nested key-value pairs)
-  List<Widget> _buildMapContent(Map<String, dynamic> map) {
+  List<Widget> _buildMapContent(BuildContext context, Map<String, dynamic> map) {
     final widgets = <Widget>[];
     for (final entry in map.entries) {
-      widgets.add(_buildKeyValuePair(entry.key, entry.value));
+      widgets.add(_buildKeyValuePair(context, entry.key, entry.value));
     }
     return widgets;
   }
 
   /// Build a single key-value pair
-  Widget _buildKeyValuePair(String key, dynamic value) {
+  Widget _buildKeyValuePair(BuildContext context, String key, dynamic value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -86,7 +87,7 @@ class DeviceInfoScreen extends StatelessWidget {
           // Value
           Expanded(
             flex: 3,
-            child: _buildValueWidget(value),
+            child: _buildValueWidget(context, value),
           ),
         ],
       ),
@@ -94,7 +95,7 @@ class DeviceInfoScreen extends StatelessWidget {
   }
 
   /// Build widget for a value based on its type
-  Widget _buildValueWidget(dynamic value) {
+  Widget _buildValueWidget(BuildContext context, dynamic value) {
     if (value == null) {
       return const SelectableText(
         '-',
@@ -111,7 +112,7 @@ class DeviceInfoScreen extends StatelessWidget {
     } else if (value is int || value is double) {
       displayText = value.toString();
     } else if (value is bool) {
-      displayText = value ? 'Ja' : 'Nein';
+      displayText = value ? context.l10n.yes : context.l10n.no;
     } else if (value is List) {
       displayText = value.join(', ');
     } else if (value is Map) {

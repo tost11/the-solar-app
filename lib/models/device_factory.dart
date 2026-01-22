@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'devices/device_base.dart';
@@ -215,5 +216,45 @@ class DeviceFactory {
       );
     }
     throw Exception("could not create netowrk device $deviceType doese not exist");
+  }
+
+  /// Get default device icon based on manufacturer
+  ///
+  /// Returns IconData for the device type based on manufacturer name.
+  /// Used as fallback when device implementations don't override getDeviceIcon().
+  ///
+  /// Device purpose mappings:
+  /// - Solar inverters/modules: DeyeSun, Kostal, Hoymiles → Icons.solar_power
+  /// - Battery/power stations: Zendure → Icons.battery_charging_full
+  /// - Smart meters: Shelly → Icons.electric_meter
+  /// - Gateway/display devices: OpenDTU → Icons.smartphone
+  ///
+  /// Returns Icons.help_outline for unknown manufacturers.
+  static IconData getDefaultIconByManufacturer(String manufacturer) {
+    final mfg = manufacturer.toLowerCase();
+
+    switch (mfg) {
+      // Battery and power stations
+      case DEVICE_MANUFACTURER_ZENDURE:
+        return Icons.battery_charging_full;
+
+      // Smart meters and energy monitoring
+      case DEVICE_MANUFACTURER_SHELLY:
+        return Icons.electric_meter;
+
+      // Solar inverters and modules
+      case DEVICE_MANUFACTURER_DEYE_SUN:
+      case DEVICE_MANUFACTURER_KOSTAL:
+      case DEVICE_MANUFACTURER_HOYMILES:
+        return Icons.solar_power;
+
+      // Gateway and display devices
+      case DEVICE_MANUFACTURER_OPENDTU:
+        return Icons.router;
+
+      // Fallback for unknown manufacturers
+      default:
+        return Icons.help_outline;
+    }
   }
 }

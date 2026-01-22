@@ -89,6 +89,9 @@ abstract class HoymilesDevice extends DeviceBase<HoymilesWifiService> with Devic
   IconData get deviceIcon => Icons.solar_power;
 
   @override
+  String getManufacturer() => DEVICE_MANUFACTURER_HOYMILES;
+
+  @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     json['deviceType'] = DEVICE_MANUFACTURER_HOYMILES;

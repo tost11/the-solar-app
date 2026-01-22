@@ -51,6 +51,9 @@ class WiFiKostalDevice extends GenericWiFiDevice<KostalWifiService, KostalDevice
   String get deviceType => DEVICE_MANUFACTURER_KOSTAL;
 
   @override
+  String getManufacturer() => DEVICE_MANUFACTURER_KOSTAL;
+
+  @override
   KostalWifiService createService() {
     return KostalWifiService(this);
   }

@@ -81,15 +81,15 @@ class DeviceDataCard extends StatelessWidget {
 
                 // Optional detail button
                 if (showDetailButton) ...[
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 2),
                   InkWell(
                     onTap: onDetailTap,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     child: Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(2.0),
                       child: Icon(
                         Icons.visibility,
-                        size: 16,
+                        size: 14,
                         color: Colors.grey[600],
                       ),
                     ),

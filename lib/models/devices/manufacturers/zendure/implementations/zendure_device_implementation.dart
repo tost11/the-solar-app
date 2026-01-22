@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/screens/configuration/battery_soc_screen.dart';
 import 'package:the_solar_app/screens/configuration/general_settings_screen.dart';
 import 'package:the_solar_app/screens/configuration/power_limit_screen.dart';
@@ -26,8 +28,8 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   List<DeviceMenuItem> getMenuItems() {
     return [
       DeviceMenuItem(
-        name: 'Leistungseinstellungen',
-        subtitle: 'Aktuelle Leistungsabgabe/aufnahme einstellen',
+        name: TO(key: MenuTranslationKeys.powerSettings),
+        subtitle: TO(key: MenuSubtitleKeys.powerSettingsSubtitle),
         icon: Icons.power_settings_new,
         iconColor: Colors.blue,
         onTap: (ctx) async {
@@ -73,8 +75,8 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'Batterie-Limits',
-        subtitle: 'Min/Max SOC einstellen',
+        name: TO(key: MenuTranslationKeys.batteryLimits),
+        subtitle: TO(key: MenuSubtitleKeys.batteryLimitsSubtitle),
         icon: Icons.battery_std,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -124,8 +126,8 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'Erweiterte Leistungseinstellungen',
-        subtitle: 'Wechselrichter, Netzeinspeisung & Standard',
+        name: TO(key: MenuTranslationKeys.advancedPowerSettings),
+        subtitle: TO(key: MenuSubtitleKeys.advancedPowerSettingsSubtitle),
         icon: Icons.settings_suggest,
         iconColor: Colors.purple,
         onTap: (ctx) async {
@@ -169,8 +171,8 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'Allgemeine Einstellungen',
-        subtitle: 'Lampe und Notstromsteckdose',
+        name: TO(key: MenuTranslationKeys.generalSettings),
+        subtitle: TO(key: MenuSubtitleKeys.generalSettingsSubtitle),
         icon: Icons.settings,
         iconColor: Colors.purple,
         onTap: (ctx) async {
@@ -258,7 +260,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   List<DeviceDataField> getDataFields() {
     return [
       DeviceDataField(
-        name: 'Solar Input',
+        name: TO(key: FieldTranslationKeys.solarInputPower),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'solarInputPower']),
@@ -266,7 +268,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'AC Mode',
+        name: TO(key: FieldTranslationKeys.acMode),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state = MapUtils.OM(data, ['data', 'properties', 'acMode']);
@@ -278,7 +280,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Output Home',
+        name: TO(key: FieldTranslationKeys.homeOutputPower),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'outputHomePower']),
@@ -286,7 +288,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Batteriestand',
+        name: TO(key: FieldTranslationKeys.batteryLevel),
         type: DataFieldType.percentage,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'electricLevel']),
@@ -294,7 +296,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Output Limit',
+        name: TO(key: FieldTranslationKeys.outputLimit),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'outputLimit']),
@@ -302,7 +304,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Pack Input',
+        name: TO(key: FieldTranslationKeys.batteryPower),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'packInputPower']),
@@ -310,7 +312,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Output Pack',
+        name: TO(key: FieldTranslationKeys.batteryPower),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'outputPackPower']),
@@ -318,7 +320,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Pack State',
+        name: TO(key: FieldTranslationKeys.packState),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state = MapUtils.OM(data, ['data', 'properties', 'packState']);
@@ -331,7 +333,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Pack Anzahl',
+        name: TO(key: FieldTranslationKeys.packCount),
         type: DataFieldType.none,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'packNum']),
@@ -340,7 +342,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
       ),
       // Additional properties from device
       DeviceDataField(
-        name: 'Input Limit',
+        name: TO(key: FieldTranslationKeys.inputLimit),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'inputLimit']),
@@ -348,7 +350,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'SOC Set',
+        name: TO(key: FieldTranslationKeys.socSet),
         type: DataFieldType.percentage,
         valueExtractor: (data) {
           final socSet = MapUtils.OM(data, ['data', 'properties', 'socSet']);
@@ -360,7 +362,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Min SOC',
+        name: TO(key: FieldTranslationKeys.minSoc),
         type: DataFieldType.percentage,
         valueExtractor: (data) {
           final minSoc = MapUtils.OM(data, ['data', 'properties', 'minSoc']);
@@ -372,7 +374,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Grid Reverse',
+        name: TO(key: FieldTranslationKeys.gridReverse),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state =
@@ -383,7 +385,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Max Inverter Power',
+        name: TO(key: FieldTranslationKeys.maxInverterPower),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'inverseMaxPower']),
@@ -391,7 +393,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Lamp Switch',
+        name: TO(key: FieldTranslationKeys.lampSwitch),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state = MapUtils.OM(data, ['data', 'properties', 'lampSwitch']);
@@ -401,7 +403,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Grid Off Mode',
+        name: TO(key: FieldTranslationKeys.gridOffMode),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state =
@@ -412,7 +414,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'IOT State',
+        name: TO(key: FieldTranslationKeys.wifiState),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state = MapUtils.OM(data, ['data', 'properties', 'IOTState']);
@@ -425,7 +427,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Fan Mode',
+        name: TO(key: FieldTranslationKeys.fanMode),
         type: DataFieldType.none,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'Fanmode']),
@@ -433,7 +435,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Fan Speed',
+        name: TO(key: FieldTranslationKeys.fanSpeed),
         type: DataFieldType.none,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'Fanspeed']),
@@ -441,7 +443,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Smart Mode',
+        name: TO(key: FieldTranslationKeys.smartMode),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final state = MapUtils.OM(data, ['data', 'properties', 'smartMode']);
@@ -451,7 +453,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Charge Max Limit',
+        name: TO(key: FieldTranslationKeys.chargeMaxLimit),
         type: DataFieldType.watt,
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'chargeMaxLimit']),
@@ -459,7 +461,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Timestamp',
+        name: TO(key: FieldTranslationKeys.timestamp),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final ts = MapUtils.OM(data, ['data', 'properties', 'ts']);
@@ -474,7 +476,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: true,
       ),
       DeviceDataField(
-        name: 'Timezone',
+        name: TO(key: FieldTranslationKeys.timezone),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final zone = MapUtils.OM(data, ['data', 'properties', 'tsZone']);
@@ -498,18 +500,18 @@ class ZendureDeviceImplementation extends DeviceImplementation {
     return [
       // Existing lamp toggle
       GeneralSettingItem(
-        name: 'Lampe',
+        name: TO(key: FieldTranslationKeys.lamp),
         commandName: GENERAL_SETTINGS_LAMP_SWITCH,
         type: SettingType.toggle,
         currentStatus: lampStatus,
         popUpOnChange: false,
-        description: 'Gerätebeleuchtung ein- oder ausschalten',
+        description: TO(key: FieldTranslationKeys.deviceLightingDescription),
         icon: Icons.lightbulb,
       ),
 
       // NEW: Grid power supply dropdown
       GeneralSettingItem(
-        name: 'Notstromversorgung',
+        name: TO(key: FieldTranslationKeys.emergencyPowerSupply),
         commandName: GENERAL_SETTINGS_GRID_OFF_MODE,
         type: SettingType.dropdown,
         currentValue: gridOffMode,
@@ -531,7 +533,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
           ),
         ],
         popUpOnChange: false,
-        description: 'Netzstrom-Modus für das Gerät',
+        description: TO(key: FieldTranslationKeys.gridPowerModeDescription),
         icon: Icons.power,
       ),
     ];
@@ -541,7 +543,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   List<DeviceCustomSection> getCustomSections() {
     return [
       DeviceCustomSection(
-        title: 'Batteriepacks',
+        title: TO(key: FieldTranslationKeys.batteryPacks),
         position: CustomSectionPosition.afterLiveData,
         requiresConnection: true,
         builder: (context, device, data) {
@@ -556,11 +558,6 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   }
 
   @override
-  IconData getDeviceIcon() {
-    return Icons.battery_charging_full;
-  }
-
-  @override
   String getFetchCommand() {
     return 'getData'; // Zendure devices don't use named commands
   }
@@ -569,22 +566,22 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   List<TimeSeriesFieldConfig> getTimeSeriesFields() {
     return [
       TimeSeriesFieldConfig(
-        name: 'Solar-Eingang',
+        name: TO(key: FieldTranslationKeys.solarInput),
         type: DataFieldType.watt,
         mapping: ['properties', 'solarInputPower'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Batterie',
+        name: TO(key: CategoryTranslationKeys.battery),
         type: DataFieldType.percentage,
         mapping: ['properties', 'electricLevel'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Ausgabeleistung',
+        name: TO(key: FieldTranslationKeys.outputPower),
         type: DataFieldType.watt,
         mapping: ['properties', 'outputHomePower'],
       ),
       TimeSeriesFieldConfig(
-        name: 'Eingangsspannung',
+        name: TO(key: FieldTranslationKeys.inputVoltage),
         type: DataFieldType.voltage,
         mapping: ['properties', 'inputVolt'],
         formatter: (value) => value / 10, // Convert from 0.1V to V

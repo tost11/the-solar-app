@@ -1,0 +1,9 @@
+{
+  "method": "write",
+  "timestamp": 1768585760477,
+  "messageId": 34,
+  "deviceId": "ABC123XYZ",
+  "properties": {
+    "inverseMaxPower": 400
+  }
+}

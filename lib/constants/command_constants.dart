@@ -10,6 +10,7 @@ const String COMMAND_FETCH_WIFI_CONFIG = "fetch-wifi-config";
 const String COMMAND_FETCH_SYS_CONFIG = "fetch-sys-config";
 const String COMMAND_CONFIG_PORT = "config-port";
 const String COMMAND_RESTART = "restart";
+const String COMMAND_RESTART_INVERTER = "restart-inverter";
 const String COMMAND_SET_ONLINE_MONITORING = "set-online-monitoring";
 const String COMMAND_FETCH_ONLINE_MONITORING = "fetch-online-monitoring";
 const String COMMAND_SET_MAIN_POWER = "set-main-power";

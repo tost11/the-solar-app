@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/device.dart';
 import '../models/devices/time_series_field_config.dart';
+import '../models/devices/time_series_field_group.dart';
 import '../utils/globals.dart';
+import '../utils/localization_extension.dart';
 import '../utils/responsive_breakpoints.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
@@ -51,10 +53,25 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
         });
       }
     });
+
+    // Add listener for expert mode changes
+    Globals.expertModeNotifier.addListener(_onExpertModeChanged);
+  }
+
+  // Callback when expert mode changes
+  void _onExpertModeChanged() {
+    if (mounted) {
+      setState(() {
+        // Force rebuild to show/hide expert-only graphs
+      });
+    }
   }
 
   @override
   void dispose() {
+    // IMPORTANT: Remove listener to prevent memory leaks
+    Globals.expertModeNotifier.removeListener(_onExpertModeChanged);
+
     _updateTimer?.cancel();
     _dataSubscription?.cancel();
     super.dispose();
@@ -67,26 +84,40 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
         .toList();
   }
 
+  /// Get time series field groups visible based on expert mode
+  List<TimeSeriesFieldGroup> _getVisibleTimeSeriesFieldGroups() {
+    return widget.device.timeSeriesFieldGroups
+            .where((group) => !group.expertMode || Globals.expertMode)
+            .toList();
+  }
+
+  /// Get total count of visible graphs (fields + groups with data)
+  int _getVisibleGraphCount() {
+    final fields = _getVisibleTimeSeriesFields();
+    final groups = _getVisibleTimeSeriesFieldGroups().where((g) => g.hasData).toList();
+    return fields.length + groups.length;
+  }
+
   // Removed: _buildChart - now using TimeSeriesChartCard widget
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBarWidget(
-        title: 'Live-Diagramme',
+        title: context.l10n.screenLiveGraphs,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _getVisibleTimeSeriesFields().isEmpty
-          ? const Center(
+      body: _getVisibleGraphCount() == 0
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Text(
-                  'Dieses Gerät hat keine sichtbaren Diagrammfelder.',
+                  context.l10n.infoNoGraphFields,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
                   ),
@@ -100,7 +131,7 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
                 children: [
                   // Info text
                   Text(
-                    'Datenbereich: Letzte 5 Minuten | Aktualisierung: alle 5 Sekunden',
+                    context.l10n.infoDataRange,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -112,12 +143,12 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
                   // Responsive graph grid (mobile: 1 col, tablet: 2 cols, desktop: 3 cols)
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final screenWidth = constraints.maxWidth;
-                      final columns = ResponsiveBreakpoints.getGraphColumns(context);
-                      final spacing = ResponsiveBreakpoints.getCardSpacing(context);
+                      final availableWidth = constraints.maxWidth;
+                      final columns = ResponsiveBreakpoints.getGraphColumnsFromWidth(availableWidth);
+                      final spacing = ResponsiveBreakpoints.getCardSpacingFromWidth(availableWidth);
 
                       // Calculate width per column
-                      final columnWidth = (screenWidth - (spacing * (columns - 1))) / columns;
+                      final columnWidth = (availableWidth - (spacing * (columns - 1))) / columns;
 
                       // Calculate aspect ratio to ensure minimum 200px height
                       // aspectRatio = width / height, so for minHeight = 200:
@@ -129,15 +160,30 @@ class _DeviceGraphScreenState extends State<DeviceGraphScreen> {
                       final aspectRatio = calculatedRatio.clamp(1.2, 2.5);
 
                       // Get visible graphs (filtered by expert mode)
-                      final visibleGraphs = _getVisibleTimeSeriesFields();
+                      final visibleFields = _getVisibleTimeSeriesFields();
+                      final visibleGroups = _getVisibleTimeSeriesFieldGroups()
+                          .where((g) => g.hasData)
+                          .toList();
+
+                      // Combine fields and groups into a single list
+                      // Groups first, then single fields
+                      final totalGraphs = visibleGroups.length + visibleFields.length;
 
                       return ResponsiveGraphGrid(
-                        itemCount: visibleGraphs.length,
+                        itemCount: totalGraphs,
                         aspectRatio: aspectRatio,
                         itemBuilder: (context, index) {
-                          return TimeSeriesChartCard(
-                            field: visibleGraphs[index],
-                          );
+                          // First render all groups, then single fields
+                          if (index < visibleGroups.length) {
+                            return TimeSeriesChartCard(
+                              group: visibleGroups[index],
+                            );
+                          } else {
+                            final fieldIndex = index - visibleGroups.length;
+                            return TimeSeriesChartCard(
+                              field: visibleFields[fieldIndex],
+                            );
+                          }
                         },
                       );
                     },

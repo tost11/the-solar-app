@@ -3,6 +3,7 @@ import 'package:the_solar_app/models/system.dart';
 import 'package:the_solar_app/services/system_storage_service.dart';
 import 'package:the_solar_app/screens/system_detail_screen.dart';
 import 'package:the_solar_app/screens/system_edit_screen.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:uuid/uuid.dart';
 
 /// System list screen showing all configured systems
@@ -43,7 +44,7 @@ class _SystemListScreenState extends State<SystemListScreen> {
 
   Future<void> _createNewSystem() async {
     // Show dialog to enter system name
-    final name = await _showNameDialog(context, 'Neues System erstellen');
+    final name = await _showNameDialog(context, context.l10n.screenCreateNewSystem);
     if (name == null || name.isEmpty) return;
 
     // Create new system
@@ -73,16 +74,16 @@ class _SystemListScreenState extends State<SystemListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('System löschen'),
-        content: Text('Möchten Sie "${system.name}" wirklich löschen?'),
+        title: Text(context.l10n.actionDeleteSystem),
+        content: Text(context.l10n.confirmDeleteSystem(system.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Löschen'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -120,7 +121,7 @@ class _SystemListScreenState extends State<SystemListScreen> {
             child: ListTile(
               leading: const Icon(Icons.dashboard),
               title: Text(system.name),
-              subtitle: Text('${system.deviceReferences.length} Geräte'),
+              subtitle: Text(context.l10n.labelDevicesCount(system.deviceReferences.length)),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline),
                 onPressed: () => _deleteSystem(system),
@@ -147,14 +148,14 @@ class _SystemListScreenState extends State<SystemListScreen> {
         children: [
           Icon(Icons.dashboard, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
-          const Text('Keine Systeme', style: TextStyle(fontSize: 20)),
+          Text(context.l10n.messageNoSystems, style: const TextStyle(fontSize: 20)),
           const SizedBox(height: 8),
-          const Text('Erstellen Sie Ihr erstes System'),
+          Text(context.l10n.messageCreateYourFirstSystem),
           const SizedBox(height: 32),
           ElevatedButton.icon(
             onPressed: _createNewSystem,
             icon: const Icon(Icons.add),
-            label: const Text('System erstellen'),
+            label: Text(context.l10n.actionCreateSystem),
           ),
         ],
       ),
@@ -170,19 +171,19 @@ class _SystemListScreenState extends State<SystemListScreen> {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'System-Name',
-            labelText: 'Name',
+          decoration: InputDecoration(
+            hintText: context.l10n.formSystemName,
+            labelText: context.l10n.name,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Erstellen'),
+            child: Text(context.l10n.create),
           ),
         ],
       ),

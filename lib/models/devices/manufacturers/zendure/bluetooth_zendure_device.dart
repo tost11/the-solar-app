@@ -41,6 +41,9 @@ class BluetoothZendureDevice extends GenericBluetoothDevice<
   String get deviceType => DEVICE_MANUFACTURER_ZENDURE;
 
   @override
+  String getManufacturer() => DEVICE_MANUFACTURER_ZENDURE;
+
+  @override
   ZendureBluetoothService createService(BluetoothDevice device) {
     return ZendureBluetoothService(device: this, bluetoothDvice: device);
   }
@@ -66,7 +69,7 @@ class BluetoothZendureDevice extends GenericBluetoothDevice<
       if (firmware == null) {
         throw Exception("could not set wifi current firmware is unknown");
       }
-
+      //{"AM":3,"homeId":00000,"iotUrl":"mqtteu.zen-iot.com","messageId":1002,"method":"token","password":"ggccvnggh","ssid":"Zentrum der Macht","timeZone":"GMT+08:00","token":"8fS62qPRd07127HC"}
       var wifiParams = {
         'iotUrl': mqtt,
         'messageId': 1002,

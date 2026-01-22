@@ -295,7 +295,7 @@ class KostalModbusConnection {
         registers.add(value);
       }
 
-      debugPrint('[KostalModbus] Read ${registers.length} registers successfully');
+      //debugPrint('[KostalModbus] Read ${registers.length} registers successfully');
       return registers;
     } else if (functionCode >= 0x80) {
       // Error response
@@ -311,7 +311,7 @@ class KostalModbusConnection {
   /// Parse write register response
   bool _parseWriteResponse(Uint8List data) {
     if (data.length < 12) {
-      debugPrint('[KostalModbus] Write response too short: ${data.length} bytes');
+      //debugPrint('[KostalModbus] Write response too short: ${data.length} bytes');
       return false;
     }
 

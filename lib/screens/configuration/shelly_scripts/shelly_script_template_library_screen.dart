@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/device.dart';
 import '../../../models/shelly_script_template.dart';
 import '../../../services/script_template_service.dart';
+import '../../../utils/localization_extension.dart';
 import '../../../utils/version_utils.dart';
 import '../../../widgets/app_bar_widget.dart';
 import '../../../widgets/app_scaffold.dart';
@@ -82,7 +83,7 @@ class _ShellyScriptTemplateLibraryScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fehler beim Laden der Vorlagen: $e'),
+            content: Text(context.l10n.shellyScriptsErrorLoadingTemplates(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -147,31 +148,31 @@ class _ShellyScriptTemplateLibraryScreenState
           children: [
             Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 8),
-            const Text('Kompatibilitäts-Information'),
+            Text(dialogContext.l10n.shellyScriptsDialogCompatibilityTitle),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Aktuelles Gerät:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            Text(
+              dialogContext.l10n.shellyScriptsCurrentDevice,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 4),
             Text(
-              widget.device.deviceModel ?? 'Unbekannt',
+              widget.device.deviceModel ?? dialogContext.l10n.shellyScriptsUnknownModel,
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Kompatible Geräte:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            Text(
+              dialogContext.l10n.shellyScriptsCompatibleDevices,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 4),
             Text(
               template.compatibleDevices.isEmpty
-                  ? 'Alle Geräte'
+                  ? dialogContext.l10n.shellyScriptsAllDevices
                   : template.compatibleDevices.join(', '),
               style: const TextStyle(fontSize: 14),
             ),
@@ -180,7 +181,7 @@ class _ShellyScriptTemplateLibraryScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Schließen'),
+            child: Text(dialogContext.l10n.close),
           ),
         ],
       ),
@@ -213,7 +214,7 @@ class _ShellyScriptTemplateLibraryScreenState
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Nicht für dieses Gerät vorgesehen',
+                        context.l10n.shellyScriptsNotCompatibleWarning,
                         style: TextStyle(
                           color: Colors.orange.shade900,
                           fontWeight: FontWeight.w500,
@@ -257,7 +258,7 @@ class _ShellyScriptTemplateLibraryScreenState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Version ${template.version}',
+                          context.l10n.shellyScriptsVersionDisplay(template.version),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -279,7 +280,7 @@ class _ShellyScriptTemplateLibraryScreenState
               if (template.author != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'von ${template.author}',
+                  context.l10n.shellyScriptsAuthorCredit(template.author!),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -295,7 +296,7 @@ class _ShellyScriptTemplateLibraryScreenState
                   children: [
                     Chip(
                       label: Text(
-                        'Benötigt: ${template.requiredDevices.join(", ")}',
+                        context.l10n.shellyScriptsRequiresDevices(template.requiredDevices.join(", ")),
                         style: const TextStyle(fontSize: 11),
                       ),
                       backgroundColor: Colors.orange.shade100,
@@ -336,7 +337,7 @@ class _ShellyScriptTemplateLibraryScreenState
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${template.parameters.length} Parameter',
+                    context.l10n.shellyScriptsParamCount(template.parameters.length),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -356,8 +357,8 @@ class _ShellyScriptTemplateLibraryScreenState
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Script-Vorlagen',
+      appBar: AppBarWidget(
+        title: context.l10n.shellyScriptLibraryTitle,
       ),
       body: Column(
         children: [
@@ -366,7 +367,7 @@ class _ShellyScriptTemplateLibraryScreenState
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Vorlagen durchsuchen...',
+                hintText: context.l10n.shellyScriptsSearchPlaceholder,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -386,7 +387,7 @@ class _ShellyScriptTemplateLibraryScreenState
               children: [
                 const Icon(Icons.filter_alt, size: 20),
                 const SizedBox(width: 8),
-                const Text('Alle Scripte anzeigen'),
+                Text(context.l10n.shellyScriptsShowAllToggle),
                 const Spacer(),
                 Switch(
                   value: _showAllScripts,
@@ -407,7 +408,7 @@ class _ShellyScriptTemplateLibraryScreenState
               child: Row(
                 children: [
                   FilterChip(
-                    label: const Text('Alle'),
+                    label: Text(context.l10n.shellyScriptsFilterAll),
                     selected: _selectedTag == null,
                     onSelected: (selected) {
                       setState(() => _selectedTag = null);
@@ -448,7 +449,7 @@ class _ShellyScriptTemplateLibraryScreenState
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Keine Vorlagen gefunden',
+                              context.l10n.shellyScriptsEmptyLibrary,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],

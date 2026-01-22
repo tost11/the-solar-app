@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/devices/time_series_field_config.dart';
+import '../../models/devices/time_series_field_group.dart';
 
 /// A card widget displaying a time-series line chart
 ///
-/// Shows a line chart for a single time series field with automatic scaling,
-/// time axis labels, and interactive tooltips. Displays data from the last 5 minutes.
+/// Supports both single-field and multi-series charts:
+/// - Single field: Shows one line chart (legacy behavior)
+/// - Field group: Shows multiple colored lines with legend
 ///
 /// Example usage:
 /// ```dart
+/// // Single field (legacy)
 /// TimeSeriesChartCard(
 ///   field: TimeSeriesFieldConfig(
 ///     name: 'Solar Power',
@@ -17,46 +21,132 @@ import '../../models/devices/time_series_field_config.dart';
 ///     values: [...],
 ///   ),
 /// )
+///
+/// // Multi-series group
+/// TimeSeriesChartCard(
+///   group: TimeSeriesFieldGroup(
+///     name: 'DC String Power',
+///     fields: [field1, field2, field3, field4],
+///   ),
+/// )
 /// ```
 class TimeSeriesChartCard extends StatelessWidget {
-  /// The time series field configuration containing name, unit, and data points
-  final TimeSeriesFieldConfig field;
+  /// The time series field configuration (for single-line charts)
+  final TimeSeriesFieldConfig? field;
+
+  /// The time series field group (for multi-line charts)
+  final TimeSeriesFieldGroup? group;
 
   /// Optional fixed height for the chart (default: 200)
   final double chartHeight;
 
   const TimeSeriesChartCard({
-    required this.field,
+    this.field,
+    this.group,
     this.chartHeight = 200,
     super.key,
-  });
+  }) : assert(field != null || group != null, 'Either field or group must be provided'),
+       assert(field == null || group == null, 'Cannot provide both field and group');
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Determine if we're rendering a single field or a group
+    final isGroup = group != null;
+    final displayName = isGroup ? group!.getName(context) : field!.getLocalizedName(context);
+    final displayUnit = isGroup ? group!.unit : field!.unit;
+
     // Check if we have data
-    if (field.values.isEmpty) {
-      return _buildEmptyCard('Keine Daten verfügbar');
+    if (isGroup) {
+      if (!group!.hasData) {
+        return _buildEmptyCard(displayName, 'Keine Daten verfügbar');
+      }
+    } else {
+      if (field!.values.isEmpty) {
+        return _buildEmptyCard(displayName, 'Keine Daten verfügbar');
+      }
     }
 
     // Find min and max time for the chart
     final now = DateTime.now();
     final fiveMinutesAgo = now.subtract(const Duration(minutes: 5));
 
-    // Convert data points to FlSpot (x = seconds from start, y = value)
-    final spots = field.values.map((point) {
-      final secondsFromStart = point.timestamp.difference(fiveMinutesAgo).inSeconds.toDouble();
-      return FlSpot(secondsFromStart, point.value.toDouble());
-    }).toList();
+    // Build line data for single field or multiple fields
+    final List<LineChartBarData> lineBarsData;
+    final double minY;
+    final double maxY;
 
-    // Check if spots list is empty (can happen even if field.values has data)
-    if (spots.isEmpty) {
-      return _buildEmptyCard('Keine Daten im Zeitfenster');
+    if (isGroup) {
+      // Multi-series rendering
+      final lineDataList = <LineChartBarData>[];
+      final allYValues = <double>[];
+
+      for (int i = 0; i < group!.fields.length; i++) {
+        final fieldConfig = group!.fields[i];
+        if (fieldConfig.values.isEmpty) continue;
+
+        final spots = fieldConfig.values.map((point) {
+          final secondsFromStart = point.timestamp.difference(fiveMinutesAgo).inSeconds.toDouble();
+          return FlSpot(secondsFromStart, point.value.toDouble());
+        }).toList();
+
+        if (spots.isEmpty) continue;
+
+        // Collect all Y values for min/max calculation
+        allYValues.addAll(spots.map((spot) => spot.y));
+
+        // Create line with color from group
+        lineDataList.add(LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          color: group!.colors[i],
+          barWidth: 2.5,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(show: false), // No fill for multi-series
+        ));
+      }
+
+      lineBarsData = lineDataList;
+
+      // Calculate min/max across all series
+      if (allYValues.isEmpty) {
+        return _buildEmptyCard(displayName, 'Keine Daten im Zeitfenster');
+      }
+      minY = allYValues.reduce((a, b) => a < b ? a : b);
+      maxY = allYValues.reduce((a, b) => a > b ? a : b);
+    } else {
+      // Single-series rendering (legacy)
+      final spots = field!.values.map((point) {
+        final secondsFromStart = point.timestamp.difference(fiveMinutesAgo).inSeconds.toDouble();
+        return FlSpot(secondsFromStart, point.value.toDouble());
+      }).toList();
+
+      if (spots.isEmpty) {
+        return _buildEmptyCard(displayName, 'Keine Daten im Zeitfenster');
+      }
+
+      lineBarsData = [
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          color: Colors.blue,
+          barWidth: 3,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(
+            show: true,
+            color: Colors.blue.withOpacity(0.1),
+          ),
+        ),
+      ];
+
+      // Calculate min/max for single series
+      final values = spots.map((spot) => spot.y).toList();
+      minY = values.reduce((a, b) => a < b ? a : b);
+      maxY = values.reduce((a, b) => a > b ? a : b);
     }
-
-    // Find min and max values for Y axis (safe version)
-    final values = spots.map((spot) => spot.y).toList();
-    final minY = values.reduce((a, b) => a < b ? a : b);
-    final maxY = values.reduce((a, b) => a > b ? a : b);
 
     // Handle constant value case (minY == maxY)
     final yRange = maxY - minY;
@@ -75,16 +165,18 @@ class TimeSeriesChartCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  field.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    displayName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                if (field.unit.isNotEmpty)
+                if (displayUnit.isNotEmpty)
                   Text(
-                    field.unit,
+                    displayUnit,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -115,20 +207,7 @@ class TimeSeriesChartCard extends StatelessWidget {
                   maxX: 300, // 5 minutes = 300 seconds
                   minY: safeMinY.isFinite ? safeMinY : 0,
                   maxY: safeMaxY.isFinite ? safeMaxY : 100,
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: spots,
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 3,
-                      isStrokeCapRound: true,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Colors.blue.withOpacity(0.1),
-                      ),
-                    ),
-                  ],
+                  lineBarsData: lineBarsData,
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
@@ -197,10 +276,17 @@ class TimeSeriesChartCard extends StatelessWidget {
                       getTooltipItems: (touchedSpots) {
                         return touchedSpots.map((spot) {
                           final time = fiveMinutesAgo.add(Duration(seconds: spot.x.toInt()));
+
+                          // For multi-series, show the field name
+                          String label = '';
+                          if (isGroup && spot.barIndex < group!.fields.length) {
+                            label = '${group!.fields[spot.barIndex].getLocalizedName(context)}\n';
+                          }
+
                           return LineTooltipItem(
-                            '${DateFormat('HH:mm:ss').format(time)}\n${spot.y.toStringAsFixed(1)} ${field.unit}',
-                            const TextStyle(
-                              color: Colors.white,
+                            '$label${DateFormat('HH:mm:ss').format(time)}\n${spot.y.toStringAsFixed(1)} $displayUnit',
+                            TextStyle(
+                              color: isGroup ? group!.colors[spot.barIndex] : Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -216,8 +302,11 @@ class TimeSeriesChartCard extends StatelessWidget {
               ),
             ),
 
-            // Current value display
-            if (field.values.isNotEmpty) ...[
+            // Legend for multi-series or current value for single series
+            if (isGroup) ...[
+              const SizedBox(height: 12),
+              _buildLegend(context, group!),
+            ] else if (field!.values.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -230,7 +319,7 @@ class TimeSeriesChartCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${field.values.last.value.toStringAsFixed(1)} ${field.unit}',
+                    '${field!.values.last.value.toStringAsFixed(1)} ${field!.unit}',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -246,7 +335,7 @@ class TimeSeriesChartCard extends StatelessWidget {
   }
 
   /// Build an empty card with a message
-  Widget _buildEmptyCard(String message) {
+  Widget _buildEmptyCard(String name, String message) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -254,7 +343,7 @@ class TimeSeriesChartCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              field.name,
+              name,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -273,6 +362,40 @@ class TimeSeriesChartCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Build legend for multi-series graphs
+  Widget _buildLegend(BuildContext context, TimeSeriesFieldGroup group) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: List.generate(group.fields.length, (i) {
+        final fieldConfig = group.fields[i];
+        final color = group.colors[i];
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 16,
+              height: 3,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              fieldConfig.getLocalizedName(context),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        );
+      }),
     );
   }
 }

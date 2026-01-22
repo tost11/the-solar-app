@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -95,7 +96,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
         // Show success message
         MessageUtils.showSuccess(
           context,
-          'Leistungseinstellungen erfolgreich gesetzt: $_inverseMaxPower W',
+          context.l10n.messagePowerLimitSetWithValue(_inverseMaxPower.toString()),
         );
 
         // Return to previous screen with result
@@ -103,9 +104,9 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
       }
     } catch (e) {
       if (mounted) {
-        MessageUtils.showError(context, 'Fehler beim Setzen der Einstellungen: $e');
+        MessageUtils.showError(context, context.l10n.errorSettingPowerLimit(e.toString()));
       }
-    } finally {
+    } finally{
       if (mounted) {
         setState(() {
           _isSaving = false;
@@ -114,37 +115,37 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
     }
   }
 
-  String _getGridReverseLabel(int value) {
+  String _getGridReverseLabel(BuildContext context, int value) {
     switch (value) {
       case 0:
-        return 'Deaktiviert';
+        return context.l10n.segmentDisabled;
       case 1:
-        return 'Erlaubt';
+        return context.l10n.segmentAllowed;
       case 2:
-        return 'Verboten';
+        return context.l10n.segmentForbidden;
       default:
-        return 'Unbekannt';
+        return context.l10n.labelUnknown;
     }
   }
 
-  String _getGridStandardLabel(int value) {
+  String _getGridStandardLabel(BuildContext context, int value) {
     switch (value) {
       case 0:
-        return 'Deutschland';
+        return context.l10n.segmentGermany;
       case 1:
-        return 'Frankreich';
+        return context.l10n.segmentFrance;
       case 2:
-        return 'Österreich';
+        return context.l10n.segmentAustria;
       default:
-        return 'Unbekannt';
+        return context.l10n.labelUnknown;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Erweiterte Leistungseinstellungen',
+      appBar: AppBarWidget(
+        title: context.l10n.screenPowerLimit,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -158,7 +159,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Aktuelle Einstellungen',
+                      context.l10n.sectionCurrentValue,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -178,7 +179,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Max Wechselrichter Leistung',
+                              context.l10n.labelMaxInverterPower,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.grey[600],
                                   ),
@@ -208,14 +209,14 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                             const Icon(Icons.sync_alt, color: Colors.orange),
                             const SizedBox(height: 4),
                             Text(
-                              'Rückspeisung',
+                              context.l10n.labelGridFeedback,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.grey[600],
                                   ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _getGridReverseLabel(_gridReverse),
+                              _getGridReverseLabel(context, _gridReverse),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -226,14 +227,14 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                             const Icon(Icons.public, color: Colors.green),
                             const SizedBox(height: 4),
                             Text(
-                              'Netzstandard',
+                              context.l10n.labelGridStandard,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.grey[600],
                                   ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _getGridStandardLabel(_gridStandard),
+                              _getGridStandardLabel(context, _gridStandard),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -259,7 +260,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                         const Icon(Icons.power_settings_new, color: Colors.blue),
                         const SizedBox(width: 8),
                         Text(
-                          'Max Wechselrichter Leistung',
+                          context.l10n.labelMaxInverterPower,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -303,7 +304,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Präzise Eingabe',
+                      context.l10n.sectionPreciseInput,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -317,9 +318,9 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                       ],
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        labelText: 'Leistung',
+                        labelText: context.l10n.power,
                         suffixText: 'W',
-                        helperText: '0-${widget.maxInverseMaxPower} W',
+                        helperText: context.l10n.helpPowerRange(widget.maxInverseMaxPower.toString()),
                         prefixIcon: const Icon(Icons.power_settings_new, color: Colors.blue),
                       ),
                       onChanged: _onPowerTextChanged,
@@ -343,7 +344,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                         const Icon(Icons.sync_alt, color: Colors.orange),
                         const SizedBox(width: 8),
                         Text(
-                          'Netzrückspeisung',
+                          context.l10n.sectionGridFeedback,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -352,21 +353,21 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                     ),
                     const SizedBox(height: 12),
                     SegmentedButton<int>(
-                      segments: const [
+                      segments: [
                         ButtonSegment<int>(
                           value: 0,
-                          label: Text('Deaktiviert'),
-                          icon: Icon(Icons.block),
+                          label: Text(context.l10n.segmentDisabled),
+                          icon: const Icon(Icons.block),
                         ),
                         ButtonSegment<int>(
                           value: 1,
-                          label: Text('Erlaubt'),
-                          icon: Icon(Icons.check_circle),
+                          label: Text(context.l10n.segmentAllowed),
+                          icon: const Icon(Icons.check_circle),
                         ),
                         ButtonSegment<int>(
                           value: 2,
-                          label: Text('Verboten'),
-                          icon: Icon(Icons.cancel),
+                          label: Text(context.l10n.segmentForbidden),
+                          icon: const Icon(Icons.cancel),
                         ),
                       ],
                       selected: {_gridReverse},
@@ -376,7 +377,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Bestimmt, ob Energie ins Netz eingespeist werden darf',
+                      context.l10n.helpGridFeedbackDescription,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -401,7 +402,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                         const Icon(Icons.public, color: Colors.green),
                         const SizedBox(width: 8),
                         Text(
-                          'Netzstandard',
+                          context.l10n.sectionGridStandard,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -410,18 +411,18 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                     ),
                     const SizedBox(height: 12),
                     SegmentedButton<int>(
-                      segments: const [
+                      segments: [
                         ButtonSegment<int>(
                           value: 0,
-                          label: Text('Deutschland'),
+                          label: Text(context.l10n.segmentGermany),
                         ),
                         ButtonSegment<int>(
                           value: 1,
-                          label: Text('Frankreich'),
+                          label: Text(context.l10n.segmentFrance),
                         ),
                         ButtonSegment<int>(
                           value: 2,
-                          label: Text('Österreich'),
+                          label: Text(context.l10n.segmentAustria),
                         ),
                       ],
                       selected: {_gridStandard},
@@ -431,7 +432,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Netzanschluss-Standard für Ihr Land',
+                      context.l10n.helpGridStandardDescription,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -454,7 +455,7 @@ class _PowerLimitScreenState extends State<PowerLimitScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save),
-              label: Text(_isSaving ? 'Wird gespeichert...' : 'Einstellungen speichern'),
+              label: Text(_isSaving ? context.l10n.messageSaving : context.l10n.buttonSavePowerLimit),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),

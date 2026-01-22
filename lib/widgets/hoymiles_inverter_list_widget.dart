@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 
 /// Widget to display list of inverters connected to Hoymiles DTU
@@ -112,9 +113,9 @@ class _HoymilesInverterListWidgetState
     } else if (type == 'three-phase') {
       return _buildThreePhaseDetails(data);
     }
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Text('Keine Details verfügbar'),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Text(context.l10n.noDetailsAvailable),
     );
   }
 

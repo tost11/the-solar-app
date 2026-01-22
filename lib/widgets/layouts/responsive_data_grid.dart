@@ -70,14 +70,14 @@ class ResponsiveDataGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get responsive values
-    final spacing = crossAxisSpacing ?? ResponsiveBreakpoints.getCardSpacing(context);
-    final mainSpacing = mainAxisSpacing ?? spacing;
-
     // Use LayoutBuilder to calculate optimal column count based on min/max constraints
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
+
+        // Get responsive values based on available width
+        final spacing = crossAxisSpacing ?? ResponsiveBreakpoints.getCardSpacingFromWidth(availableWidth);
+        final mainSpacing = mainAxisSpacing ?? spacing;
         final minWidth = minCardWidth ?? 130.0;
         final maxWidth = maxCardWidth ?? 180.0;
 
@@ -169,24 +169,31 @@ class ResponsiveGraphGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get responsive values
-    final columns = columnCount ?? ResponsiveBreakpoints.getGraphColumns(context);
-    final ratio = aspectRatio ?? ResponsiveBreakpoints.getGraphAspectRatio(context);
-    final spacing = crossAxisSpacing ?? ResponsiveBreakpoints.getCardSpacing(context);
-    final mainSpacing = mainAxisSpacing ?? spacing;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use available width instead of screen width for responsive decisions
+        final availableWidth = constraints.maxWidth;
 
-    return GridView.builder(
-      shrinkWrap: shrinkWrap,
-      physics: physics,
-      padding: padding,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        childAspectRatio: ratio,
-        crossAxisSpacing: spacing,
-        mainAxisSpacing: mainSpacing,
-      ),
-      itemCount: itemCount,
-      itemBuilder: itemBuilder,
+        // Get responsive values based on available width
+        final columns = columnCount ?? ResponsiveBreakpoints.getGraphColumnsFromWidth(availableWidth);
+        final ratio = aspectRatio ?? ResponsiveBreakpoints.getGraphAspectRatio(context);
+        final spacing = crossAxisSpacing ?? ResponsiveBreakpoints.getCardSpacingFromWidth(availableWidth);
+        final mainSpacing = mainAxisSpacing ?? spacing;
+
+        return GridView.builder(
+          shrinkWrap: shrinkWrap,
+          physics: physics,
+          padding: padding,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            childAspectRatio: ratio,
+            crossAxisSpacing: spacing,
+            mainAxisSpacing: mainSpacing,
+          ),
+          itemCount: itemCount,
+          itemBuilder: itemBuilder,
+        );
+      },
     );
   }
 }

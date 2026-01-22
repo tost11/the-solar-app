@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/map_utils.dart';
+import '../utils/globals.dart';
+import '../models/to.dart';
+import '../constants/translation_keys.dart';
 
 /// Custom widget for displaying OpenDTU inverter list
 /// Supports both single inverter and multiple inverter configurations
@@ -20,6 +23,27 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
   final Set<int> _expandedInverters = {};
 
   @override
+  void initState() {
+    super.initState();
+    // Listen for expert mode changes
+    Globals.expertModeNotifier.addListener(_onExpertModeChanged);
+  }
+
+  @override
+  void dispose() {
+    Globals.expertModeNotifier.removeListener(_onExpertModeChanged);
+    super.dispose();
+  }
+
+  void _onExpertModeChanged() {
+    if (mounted) {
+      setState(() {
+        // Rebuild widget when expert mode changes
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Extract inverters from data
     // OpenDTU WebSocket sends inverter data in 'data' -> 'inverters' array
@@ -31,7 +55,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
           padding: const EdgeInsets.all(16.0),
           child: Center(
             child: Text(
-              'Keine Wechselrichter-Daten verfügbar',
+              TO(key: FieldTranslationKeys.noInverterData).getText(context),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -59,14 +83,14 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
                   size: 32,
                 ),
                 title: Text(
-                  inverter['name'] ?? 'Wechselrichter ${index + 1}',
+                  inverter['name'] ?? TO(key: FieldTranslationKeys.inverterFallback, params: {'num': '${index + 1}'}).getText(context),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
                 subtitle: Text(
-                  '${_formatPower(inverter['power'])} • ${_getStatusText(inverter)}',
+                  '${_formatPower(inverter['power'])} • ${_getStatusText(inverter, context)}',
                   style: TextStyle(
                     color: Colors.grey[600],
                   ),
@@ -153,16 +177,16 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
   }
 
   /// Get status text
-  String _getStatusText(Map<String, dynamic> inverter) {
+  String _getStatusText(Map<String, dynamic> inverter, BuildContext context) {
     final reachable = inverter['reachable'] as bool?;
     final producing = inverter['producing'] as bool?;
 
     if (reachable == true && producing == true) {
-      return 'Produziert';
+      return TO(key: FieldTranslationKeys.statusProducing).getText(context);
     } else if (reachable == true) {
-      return 'Erreichbar';
+      return TO(key: FieldTranslationKeys.statusReachable).getText(context);
     } else {
-      return 'Nicht erreichbar';
+      return TO(key: FieldTranslationKeys.statusNotReachable).getText(context);
     }
   }
 
@@ -184,7 +208,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['serial'] != null)
           _buildDetailRow(
             Icons.qr_code,
-            'Seriennummer',
+            TO(key: FieldTranslationKeys.serialNumber).getText(context),
             inverter['serial'].toString(),
           ),
 
@@ -192,7 +216,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['power'] != null)
           _buildDetailRow(
             Icons.bolt,
-            'Aktuelle Leistung',
+            TO(key: FieldTranslationKeys.currentPower).getText(context),
             _formatPower(inverter['power']),
           ),
 
@@ -200,7 +224,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['dc_power'] != null)
           _buildDetailRow(
             Icons.solar_power,
-            'DC Leistung',
+            TO(key: FieldTranslationKeys.dcPower).getText(context),
             _formatPower(inverter['dc_power']),
           ),
 
@@ -208,7 +232,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['yield_day'] != null)
           _buildDetailRow(
             Icons.wb_sunny,
-            'Tagesertrag',
+            TO(key: FieldTranslationKeys.dailyYield).getText(context),
             '${inverter['yield_day']} Wh',
           ),
 
@@ -216,7 +240,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['yield_total'] != null)
           _buildDetailRow(
             Icons.solar_power,
-            'Gesamtertrag',
+            TO(key: FieldTranslationKeys.totalYield).getText(context),
             '${inverter['yield_total']} kWh',
           ),
 
@@ -224,7 +248,7 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['limit_relative'] != null && inverter['limit_absolute'] != null)
           _buildDetailRow(
             Icons.speed,
-            'Leistungsgrenze',
+            TO(key: FieldTranslationKeys.powerLimit).getText(context),
             '${inverter['limit_relative']}% (${inverter['limit_absolute']} W)',
           ),
 
@@ -232,35 +256,164 @@ class _OpenDTUInverterListWidgetState extends State<OpenDTUInverterListWidget> {
         if (inverter['temperature'] != null)
           _buildDetailRow(
             Icons.thermostat,
-            'Temperatur',
+            TO(key: FieldTranslationKeys.temperature).getText(context),
             '${inverter['temperature']} °C',
           ),
 
-        // AC Voltage
-        if (inverter['ac_voltage'] != null)
+        // AC Voltage - EXPERT MODE ONLY
+        if (Globals.expertMode && inverter['ac_voltage'] != null)
           _buildDetailRow(
             Icons.electrical_services,
-            'AC Spannung',
-            '${inverter['ac_voltage']} V',
+            TO(key: FieldTranslationKeys.acVoltage).getText(context),
+            _formatNumericValue(inverter['ac_voltage'], 'V'),
           ),
 
-        // AC Current
-        if (inverter['ac_current'] != null)
+        // AC Current - EXPERT MODE ONLY
+        if (Globals.expertMode && inverter['ac_current'] != null)
           _buildDetailRow(
             Icons.electric_bolt,
-            'AC Strom',
-            '${inverter['ac_current']} A',
+            TO(key: FieldTranslationKeys.acCurrent).getText(context),
+            _formatNumericValue(inverter['ac_current'], 'A'),
           ),
 
-        // AC Frequency
-        if (inverter['ac_frequency'] != null)
+        // AC Frequency - EXPERT MODE ONLY
+        if (Globals.expertMode && inverter['ac_frequency'] != null)
           _buildDetailRow(
             Icons.graphic_eq,
-            'AC Frequenz',
-            '${inverter['ac_frequency']} Hz',
+            TO(key: FieldTranslationKeys.acFrequency).getText(context),
+            _formatNumericValue(inverter['ac_frequency'], 'Hz'),
           ),
+
+        // DC Strings Section
+        if (inverter['dc_strings'] != null && inverter['dc_strings'] is List)
+          ..._buildDCStringsSection(inverter['dc_strings'] as List, context),
       ],
     );
+  }
+
+  /// Build DC strings section with dividers and expert mode support
+  List<Widget> _buildDCStringsSection(List<dynamic> dcStrings, BuildContext context) {
+    if (dcStrings.isEmpty) return [];
+
+    final widgets = <Widget>[];
+
+    // Section divider
+    widgets.add(
+      const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.0),
+        child: Divider(thickness: 2),
+      ),
+    );
+
+    // Loop through each DC string
+    for (int i = 0; i < dcStrings.length; i++) {
+      final string = dcStrings[i];
+      if (string is! Map<String, dynamic>) continue;
+
+      // String divider (before each string except first)
+      if (i > 0) {
+        widgets.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Divider(thickness: 1, indent: 20, endIndent: 20),
+          ),
+        );
+      }
+
+      // String name header
+      String stringName = MapUtils.OMas(string,["name","u"],"");
+      if(stringName == ""){
+        stringName = TO(key: FieldTranslationKeys.stringFallback, params: {'num': '${i+1}'}).getText(context);
+      }
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+          child: Text(
+            stringName,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      );
+
+
+      // Power - ALWAYS VISIBLE
+      if (string['power'] != null) {
+        widgets.add(_buildDetailRow(
+          Icons.bolt,
+          TO(key: FieldTranslationKeys.power).getText(context),
+          _formatPower(string['power']),
+        ));
+      }
+
+      // Voltage - EXPERT MODE ONLY
+      if (Globals.expertMode && string['voltage'] != null) {
+        widgets.add(_buildDetailRow(
+          Icons.electrical_services,
+          TO(key: FieldTranslationKeys.voltage).getText(context),
+          _formatNumericValue(string['voltage'], 'V'),
+        ));
+      }
+
+      // Current - EXPERT MODE ONLY
+      if (Globals.expertMode && string['current'] != null) {
+        widgets.add(_buildDetailRow(
+          Icons.electric_bolt,
+          TO(key: FieldTranslationKeys.current).getText(context),
+          _formatNumericValue(string['current'], 'A'),
+        ));
+      }
+
+      // Yield Day - ALWAYS VISIBLE
+      if (string['yield_day'] != null) {
+        widgets.add(_buildDetailRow(
+          Icons.wb_sunny,
+          TO(key: FieldTranslationKeys.dailyYield).getText(context),
+          '${string['yield_day']} Wh',
+        ));
+      }
+
+      // Yield Total - ALWAYS VISIBLE
+      if (string['yield_total'] != null) {
+        widgets.add(_buildDetailRow(
+          Icons.solar_power,
+          TO(key: FieldTranslationKeys.totalYield).getText(context),
+          '${string['yield_total']} kWh',
+        ));
+      }
+
+      // Note: Irradiation field is available in data but NOT displayed per user request
+    }
+
+    return widgets;
+  }
+
+  /// Format numeric value with unit
+  /// Handles OpenDTU data format which can be: number or {v: value, u: unit, d: decimals}
+  String _formatNumericValue(dynamic value, String defaultUnit) {
+    if (value == null) return '-- $defaultUnit';
+
+    // If value is a Map (OpenDTU format: {v: value, u: unit, d: decimals})
+    if (value is Map<String, dynamic>) {
+      final numValue = value['v'];
+      if (numValue == null) return '-- $defaultUnit';
+
+      if (numValue is num) {
+        return '${numValue.toStringAsFixed(1)} $defaultUnit';
+      }
+      return '$numValue $defaultUnit';
+    }
+
+    // If value is already a number
+    if (value is num) {
+      return '${value.toStringAsFixed(1)} $defaultUnit';
+    }
+
+    // Fallback: convert to string
+    return '$value $defaultUnit';
   }
 
   /// Build a detail row with icon, label, and value

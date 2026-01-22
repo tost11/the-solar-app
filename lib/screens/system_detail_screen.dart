@@ -7,6 +7,7 @@ import 'package:the_solar_app/services/system_aggregator_service.dart';
 import 'package:the_solar_app/screens/device_detail_screen.dart';
 import 'package:the_solar_app/screens/system_edit_screen.dart';
 import 'package:the_solar_app/utils/device_connection_utils.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/widgets/system_metric_card.dart';
 
 /// System detail screen showing aggregated metrics for ONE system
@@ -198,13 +199,13 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Keine Geräte im System',
+          context.l10n.messageNoDevicesInSystem,
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
         Text(
-          'Fügen Sie Geräte hinzu, um Metriken zu sehen.',
+          context.l10n.messageAddDevicesToSeeMetrics,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.textTheme.bodySmall?.color,
@@ -215,7 +216,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
           child: ElevatedButton.icon(
             onPressed: _editSystem,
             icon: const Icon(Icons.add),
-            label: const Text('Geräte hinzufügen'),
+            label: Text(context.l10n.actionAddDevices),
           ),
         ),
       ],
@@ -240,7 +241,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Keine aktiven Geräte mit Daten',
+                        context.l10n.messageNoActiveDevicesWithData,
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -252,21 +253,21 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
 
         // Metric cards
         SystemMetricCard(
-          title: 'Solar-Produktion',
+          title: context.l10n.systemSolarProduction,
           value: metrics.totalSolarPower,
           unit: 'W',
           icon: Icons.wb_sunny,
           color: Colors.orange,
         ),
         SystemMetricCard(
-          title: 'Solar ins Netz',
+          title: context.l10n.systemSolarToGrid,
           value: metrics.totalSolarGridPower,
           unit: 'W',
           icon: Icons.grid_4x4,
           color: Colors.amber,
         ),
         SystemMetricCard(
-          title: 'Batterie',
+          title: context.l10n.systemBattery,
           value: metrics.totalBatteryPower,
           secondaryValue: metrics.averageBatterySOC,
           unit: 'W',
@@ -275,7 +276,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
           color: Colors.green,
         ),
         SystemMetricCard(
-          title: 'Netz',
+          title: context.l10n.systemGrid,
           value: metrics.totalGridPower,
           unit: 'W',
           icon: Icons.electric_bolt,
@@ -284,14 +285,14 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
               : Colors.red,
         ),
         SystemMetricCard(
-          title: 'Verbraucher',
+          title: context.l10n.systemConsumer,
           value: metrics.totalLoadPower,
           unit: 'W',
           icon: Icons.power,
           color: Colors.purple,
         ),
         SystemMetricCard(
-          title: 'Zusätzliche Last',
+          title: context.l10n.systemAdditionalLoad,
           value: metrics.totalAdditionalLoadPower,
           unit: 'W',
           icon: Icons.power_settings_new,
@@ -309,9 +310,9 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
               Icons.devices,
               color: theme.colorScheme.primary,
             ),
-            title: Text('Geräte (${metrics.deviceCount})'),
+            title: Text(context.l10n.labelDevicesWithCount(metrics.deviceCount)),
             subtitle: Text(
-              '${metrics.activeDeviceCount} aktiv',
+              '${metrics.activeDeviceCount} ${context.l10n.active}',
               style: theme.textTheme.bodySmall,
             ),
             initiallyExpanded: true,
@@ -326,17 +327,17 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
               }
               if (device == null) {
                 return ListTile(
-                  title: Text('Gerät ${ref.deviceSn} nicht gefunden'),
+                  title: Text(context.l10n.statusDeviceNotFoundWithSn(ref.deviceSn)),
                   leading: const Icon(Icons.error_outline, color: Colors.red),
                 );
               }
               return ListTile(
                 leading: Icon(device.deviceIcon),
                 title: Text(device.name),
-                subtitle: Text('Rollen: ${ref.rolesInSystem.map((r) => r.displayName).join(', ')}'),
+                subtitle: Text(context.l10n.labelRoles(ref.rolesInSystem.map((r) => r.displayName).join(', '))),
                 trailing: IconButton(
                   icon: const Icon(Icons.open_in_new),
-                  tooltip: 'Gerät inspizieren',
+                  tooltip: context.l10n.actionInspectDevice,
                   onPressed: () => _navigateToDeviceDetail(device!),
                 ),
               );

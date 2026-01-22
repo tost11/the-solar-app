@@ -9,6 +9,7 @@ import '../../../models/shelly_script_parameter.dart';
 import '../../../services/resource_resolver_service.dart';
 import '../../../utils/dialog_utils.dart';
 import '../../../utils/globals.dart';
+import '../../../utils/localization_extension.dart';
 import '../../../utils/message_utils.dart';
 import '../../../utils/script_template_utils.dart';
 import '../../../widgets/app_bar_widget.dart';
@@ -200,19 +201,19 @@ class _ShellyScriptTemplateConfigScreenState
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Script installieren?'),
+          title: Text(context.l10n.shellyScriptsDialogInstallTitle),
           content: Text(
-            'Möchten Sie das Script "${widget.template.name}" ohne Vorschau installieren?',
+            context.l10n.shellyScriptsDialogInstallMessage(widget.template.name),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Abbrechen'),
+              child: Text(context.l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               style: TextButton.styleFrom(foregroundColor: Colors.green),
-              child: const Text('Installieren'),
+              child: Text(context.l10n.install),
             ),
           ],
         ),
@@ -236,7 +237,7 @@ class _ShellyScriptTemplateConfigScreenState
         // Step 1: Create script on device with staging name
         final createResult = await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: 'Erstelle Script auf Gerät...',
+          loadingMessage: context.l10n.shellyScriptsCreatingScript,
           operation: () => widget.device.sendCommand(
             COMMAND_CREATE_SCRIPT,
             {"name": stagingName},
@@ -251,7 +252,7 @@ class _ShellyScriptTemplateConfigScreenState
         if (scriptId == null) {
           if (mounted) {
             MessageUtils.showError(
-                context, 'Fehler: Konnte Script-ID nicht abrufen');
+                context, context.l10n.shellyScriptsErrorNoScriptId);
           }
           return;
         }
@@ -261,7 +262,7 @@ class _ShellyScriptTemplateConfigScreenState
 
         await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: 'Lade Script-Code hoch...',
+          loadingMessage: context.l10n.shellyScriptsUploadingCode,
           operation: () => widget.device.sendCommand(
             COMMAND_PUT_SCRIPT_CODE,
             {
@@ -276,7 +277,7 @@ class _ShellyScriptTemplateConfigScreenState
           onError: (e) {
             MessageUtils.showError(
               context,
-              'Fehler beim Hochladen: $e\nScript bleibt im Staging-Status (0.0.0).',
+              context.l10n.shellyScriptsErrorUploadingCode(e.toString()),
             );
           },
         );
@@ -288,7 +289,7 @@ class _ShellyScriptTemplateConfigScreenState
 
           await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Finalisiere Installation...',
+            loadingMessage: context.l10n.shellyScriptsFinalizingInstall,
             operation: () => widget.device.sendCommand(
               COMMAND_RENAME_SCRIPT,
               {"id": scriptId, "name": finalName},
@@ -314,7 +315,7 @@ class _ShellyScriptTemplateConfigScreenState
         if (uploadSuccess && mounted) {
           MessageUtils.showSuccess(
             context,
-            'Script erfolgreich installiert und gestartet',
+            context.l10n.shellyScriptsScriptInstalled,
           );
 
           // Navigate back to scripts list (pop all the way back)
@@ -324,7 +325,7 @@ class _ShellyScriptTemplateConfigScreenState
         if (mounted) {
           MessageUtils.showError(
             context,
-            'Fehler beim Installieren des Scripts: $e',
+            context.l10n.shellyScriptsErrorInstalling(e.toString()),
           );
         }
       }
@@ -364,7 +365,7 @@ class _ShellyScriptTemplateConfigScreenState
           : TextInputType.text,
       validator: (value) {
         if (param.required && (value == null || value.isEmpty)) {
-          return '${param.label} ist erforderlich';
+          return context.l10n.shellyScriptsValidationRequired(param.label);
         }
         return null;
       },
@@ -390,22 +391,22 @@ class _ShellyScriptTemplateConfigScreenState
       ],
       validator: (value) {
         if (param.required && (value == null || value.isEmpty)) {
-          return '${param.label} ist erforderlich';
+          return context.l10n.shellyScriptsValidationRequired(param.label);
         }
         if (value != null && value.isNotEmpty) {
           final numValue = int.tryParse(value);
           if (numValue == null) {
-            return '${param.label} muss eine Zahl sein';
+            return context.l10n.shellyScriptsValidationMustBeNumber(param.label);
           }
           if (param.minValue != null && numValue < param.minValue!) {
-            return '${param.label} muss mindestens ${param.minValue} sein';
+            return context.l10n.shellyScriptsValidationMinValue(param.label, param.minValue!.toString());
           }
           if (param.maxValue != null && numValue > param.maxValue!) {
-            return '${param.label} darf höchstens ${param.maxValue} sein';
+            return context.l10n.shellyScriptsValidationMaxValue(param.label, param.maxValue!.toString());
           }
           if (param.type == ScriptParameterType.port &&
               (numValue < 1 || numValue > 65535)) {
-            return 'Port muss zwischen 1 und 65535 liegen';
+            return context.l10n.shellyScriptsValidationPortRange;
           }
         }
         return null;
@@ -475,7 +476,7 @@ class _ShellyScriptTemplateConfigScreenState
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Parameter konfigurieren',
+                                        context.l10n.shellyScriptsConfigureParams,
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleLarge
@@ -540,8 +541,7 @@ class _ShellyScriptTemplateConfigScreenState
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Füllen Sie alle Parameter aus und tippen Sie auf "Vorschau", '
-                              'um den generierten Script-Code zu sehen.',
+                              context.l10n.shellyScriptsConfigInfoText,
                               style: TextStyle(
                                 color: Colors.blue[900],
                                 fontSize: 13,
@@ -575,7 +575,7 @@ class _ShellyScriptTemplateConfigScreenState
                     child: ElevatedButton.icon(
                       onPressed: _onPreview,
                       icon: const Icon(Icons.visibility),
-                      label: const Text('Vorschau'),
+                      label: Text(context.l10n.preview),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -586,7 +586,7 @@ class _ShellyScriptTemplateConfigScreenState
                     child: ElevatedButton.icon(
                       onPressed: _onDirectDeploy,
                       icon: const Icon(Icons.rocket_launch),
-                      label: const Text('Direkt installieren'),
+                      label: Text(context.l10n.shellyScriptsDirectInstall),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -618,18 +618,18 @@ class _ShellyScriptTemplateConfigScreenState
         height: 20,
         child: CircularProgressIndicator(strokeWidth: 2),
       );
-      suffixTooltip = 'Suche Geräte...';
+      suffixTooltip = context.l10n.shellyScriptsSearchingDevices;
     } else if (resources.isEmpty) {
       suffixIcon = Icon(Icons.info_outline, color: Colors.orange[700]);
-      suffixTooltip = 'Keine passenden Geräte gefunden';
+      suffixTooltip = context.l10n.shellyScriptsNoDevicesFound;
     } else if (resources.length == 1) {
       suffixIcon = Icon(Icons.check_circle, color: Colors.green[600]);
-      suffixTooltip = 'Auto-ausgefüllt von: ${resources.first.device.name}';
+      suffixTooltip = context.l10n.shellyScriptsAutoFilledFrom(resources.first.device.name);
     } else {
       // Multiple results - show select button
       suffixIcon = IconButton(
         icon: const Icon(Icons.search),
-        tooltip: 'Gerät auswählen (${resources.length} gefunden)',
+        tooltip: context.l10n.shellyScriptsSelectDeviceCount(resources.length),
         onPressed: () => _showResourcePicker(param, resources),
       );
     }
@@ -650,13 +650,13 @@ class _ShellyScriptTemplateConfigScreenState
         ),
         validator: (value) {
           if (param.required && (value == null || value.isEmpty)) {
-            return 'Dieses Feld ist erforderlich';
+            return context.l10n.shellyScriptsValidationFieldRequired;
           }
           // Apply additional validation if specified
           if (param.validationPattern != null && value != null) {
             final regex = RegExp(param.validationPattern!);
             if (!regex.hasMatch(value)) {
-              return param.validationErrorMessage ?? 'Ungültiger Wert';
+              return param.validationErrorMessage ?? context.l10n.shellyScriptsValidationInvalidValue;
             }
           }
           return null;
@@ -672,20 +672,20 @@ class _ShellyScriptTemplateConfigScreenState
 
     // Source description
     if (param.sourceConfig != null) {
-      parts.add('Quelle: ${param.sourceConfig!.sourceProperty}');
+      parts.add(context.l10n.shellyScriptsSourceProperty(param.sourceConfig!.sourceProperty));
       if (param.sourceConfig!.sourceFilter != null) {
-        parts.add('Filter: ${param.sourceConfig!.sourceFilter}');
+        parts.add(context.l10n.shellyScriptsFilterProperty(param.sourceConfig!.sourceFilter!));
       }
     }
 
     // Result count
     if (!_isResolvingResources) {
       if (resources.isEmpty) {
-        parts.add('(keine Geräte gefunden)');
+        parts.add(context.l10n.shellyScriptsNoDevicesFoundHelper);
       } else if (resources.length == 1) {
-        parts.add('(automatisch ausgefüllt)');
+        parts.add(context.l10n.shellyScriptsAutoFilledHelper);
       } else {
-        parts.add('(${resources.length} Geräte gefunden)');
+        parts.add(context.l10n.shellyScriptsDevicesFoundHelper(resources.length));
       }
     }
 
@@ -709,7 +709,7 @@ class _ShellyScriptTemplateConfigScreenState
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Gerät auswählen für "${param.label}"',
+                  context.l10n.shellyScriptsSelectDeviceModal(param.label),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),

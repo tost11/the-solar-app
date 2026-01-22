@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
+import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/screens/configuration/percentage_power_limit_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_ap_configuration_screen.dart';
 import 'package:the_solar_app/screens/configuration/online_monitoring_configuration_screen.dart';
 import 'package:the_solar_app/services/devices/deyesun/deyesun_wifi_service.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
@@ -26,8 +29,8 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
   List<DeviceMenuItem> getMenuItems() {
     return [
       DeviceMenuItem(
-        name: 'Allgemeine Einstellungen',
-        subtitle: 'Grundlegende Geräteeinstellungen verwalten',
+        name: TO(key: MenuTranslationKeys.generalSettings),
+        subtitle: TO(key: MenuSubtitleKeys.generalSettingsSubtitle),
         icon: Icons.settings,
         iconColor: Colors.purple,
         onTap: (ctx) async {
@@ -48,8 +51,8 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         },
       ),
       DeviceMenuItem(
-        name: 'WiFi konfigurieren',
-        subtitle: 'Netzwerkverbindung einrichten',
+        name: TO(key: MenuTranslationKeys.wifiConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.wifiConfigurationSubtitle),
         icon: Icons.wifi,
         iconColor: Colors.green,
         onTap: (ctx) async {
@@ -58,9 +61,9 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
           final wifiConfig = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_WIFI_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (wifiConfig == null || !context.mounted) return;
@@ -77,13 +80,13 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'WiFi-Konfiguration abgeschlossen');
+            MessageUtils.showSuccess(context, context.l10n.wifiConfigurationCompleted);
           }
         },
       ),
       DeviceMenuItem(
-        name: 'Online-Monitoring konfigurieren',
-        subtitle: 'Server für Datenübertragung einrichten',
+        name: TO(key: MenuTranslationKeys.onlineMonitoringConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.onlineMonitoringSubtitle),
         icon: Icons.cloud_upload,
         iconColor: Colors.blue,
         onTap: (ctx) async {
@@ -92,9 +95,9 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
           final monitoringConfig = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_ONLINE_MONITORING, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (monitoringConfig == null || !context.mounted) return;
@@ -141,13 +144,13 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'Online-Monitoring erfolgreich konfiguriert');
+            MessageUtils.showSuccess(context, context.l10n.onlineMonitoringConfigured);
           }
         },
       ),
       DeviceMenuItem(
-        name: 'Gerät neustarten',
-        subtitle: 'Startet das Gerät neu',
+        name: TO(key: MenuTranslationKeys.restartDevice),
+        subtitle: TO(key: MenuSubtitleKeys.restartDeviceSubtitle),
         icon: Icons.restart_alt,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -177,20 +180,20 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
           await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Gerät wird neu gestartet...',
+            loadingMessage: context.l10n.deviceRestarting,
             operation: () async {
               await device.sendCommand(COMMAND_RESTART, {});
               await Future.delayed(const Duration(seconds: 1));
               return true;
             },
-            onSuccess: (_) => MessageUtils.showSuccess(context, 'Gerät wird neu gestartet'),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Neustarten des Geräts: $e'),
+            onSuccess: (_) => MessageUtils.showSuccess(context, context.l10n.deviceRestarting),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorRestartingDevice(e.toString())),
           );
         },
       ),
       DeviceMenuItem(
-        name: 'Access Point konfigurieren',
-        subtitle: 'WiFi Access Point einrichten',
+        name: TO(key: MenuTranslationKeys.accessPointConfiguration),
+        subtitle: TO(key: MenuSubtitleKeys.accessPointSubtitle),
         icon: Icons.router,
         iconColor: Colors.blue,
         onTap: (ctx) async {
@@ -199,9 +202,9 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
           final apConfig = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingConfiguration,
             operation: () => device.sendCommand(COMMAND_FETCH_AP_CONFIG, {}),
-            onError: (e) => MessageUtils.showError(context, 'Fehler beim Laden der Konfiguration: $e'),
+            onError: (e) => MessageUtils.showError(context, context.l10n.errorLoadingConfiguration(e.toString())),
           );
 
           if (apConfig == null || !context.mounted) return;
@@ -231,13 +234,13 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
           );
 
           if (result == true) {
-            MessageUtils.showSuccess(context, 'Access Point erfolgreich konfiguriert');
+            MessageUtils.showSuccess(context, context.l10n.accessPointConfigured);
           }
         },
       ),
       DeviceMenuItem(
-        name: 'Leistungsbegrenzung',
-        subtitle: 'Ausgangsleistung begrenzen',
+        name: TO(key: MenuTranslationKeys.powerLimit),
+        subtitle: TO(key: MenuSubtitleKeys.powerLimitSubtitle),
         icon: Icons.speed,
         iconColor: Colors.orange,
         onTap: (ctx) async {
@@ -270,12 +273,12 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
               );
 
               if (result == true && context.mounted) {
-                MessageUtils.showSuccess(context, 'Leistungsbegrenzung erfolgreich gesetzt');
+                MessageUtils.showSuccess(context, context.l10n.powerLimitSet);
               }
             }
           } catch (e) {
             if (context.mounted) {
-              MessageUtils.showError(context, 'Fehler: $e');
+              MessageUtils.showError(context, '${context.l10n.error}: $e');
             }
           }
         },
@@ -297,11 +300,11 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
     return [
       GeneralSettingItem(
-        name: 'Wechselrichter',
+        name: TO(key: FieldTranslationKeys.inverter),
         commandName: GENERAL_SETTINGS_INVERTER_POWER,
         currentStatus: currentStatus,
         popUpOnChange: true,
-        description: 'Wechselrichter ein- oder ausschalten',
+        description: TO(key: FieldTranslationKeys.inverterToggleDescription),
         icon: Icons.power_settings_new,
       ),
     ];
@@ -331,7 +334,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         precision: 1,
       ),*/
       DeviceDataField(
-        name: 'Tagesertrag',
+        name: TO(key: FieldTranslationKeys.dailyYield),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'day_energy']) ??
@@ -342,7 +345,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         expertMode: false,
       ),
       DeviceDataField(
-        name: 'Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.totalYield),
         type: DataFieldType.energy,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'total_energy']) ??
@@ -356,7 +359,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // Grid AC data
       DeviceDataField(
-        name: 'Netzspannung',
+        name: TO(key: FieldTranslationKeys.gridVoltage),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_voltage']),
         icon: Icons.electric_bolt,
@@ -364,7 +367,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'ac',
       ),
       DeviceDataField(
-        name: 'Netzstrom',
+        name: TO(key: FieldTranslationKeys.gridCurrent),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_current']),
         icon: Icons.flash_on,
@@ -372,7 +375,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'ac',
       ),
       DeviceDataField(
-        name: 'Netzfrequenz',
+        name: TO(key: FieldTranslationKeys.gridFrequency),
         type: DataFieldType.frequency,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'ac_frequency']),
         icon: Icons.waves,
@@ -380,7 +383,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'ac',
       ),
       DeviceDataField(
-        name: 'AC Leistung',
+        name: TO(key: FieldTranslationKeys.acPower),
         type: DataFieldType.watt,
         valueExtractor: (data) {
           var value = MapUtils.OM(data, ['data', 'ac_power']);
@@ -397,7 +400,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // PV1 String
       DeviceDataField(
-        name: 'PV1 Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 1}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_voltage']),
         icon: Icons.solar_power,
@@ -405,7 +408,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv1',
       ),
       DeviceDataField(
-        name: 'PV1 Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 1}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_current']),
         icon: Icons.solar_power,
@@ -413,7 +416,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv1',
       ),
       DeviceDataField(
-        name: 'PV1 Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 1}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_power']),
         icon: Icons.solar_power,
@@ -422,7 +425,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         precision: 1,
       ),
       DeviceDataField(
-        name: 'PV1 Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.pvTotalYield, params: {'num': 1}),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv1_total_energy']),
         divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
@@ -433,7 +436,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // PV2 String
       DeviceDataField(
-        name: 'PV2 Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 2}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_voltage']),
         icon: Icons.solar_power,
@@ -441,7 +444,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv2',
       ),
       DeviceDataField(
-        name: 'PV2 Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 2}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_current']),
         icon: Icons.solar_power,
@@ -449,7 +452,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv2',
       ),
       DeviceDataField(
-        name: 'PV2 Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 2}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_power']),
         icon: Icons.solar_power,
@@ -458,7 +461,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         precision: 1,
       ),
       DeviceDataField(
-        name: 'PV2 Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.pvTotalYield, params: {'num': 2}),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv2_total_energy']),
         divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
@@ -469,7 +472,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // PV3 String
       DeviceDataField(
-        name: 'PV3 Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 3}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_voltage']),
         icon: Icons.solar_power,
@@ -477,7 +480,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv3',
       ),
       DeviceDataField(
-        name: 'PV3 Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 3}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_current']),
         icon: Icons.solar_power,
@@ -485,7 +488,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv3',
       ),
       DeviceDataField(
-        name: 'PV3 Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 3}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_power']),
         icon: Icons.solar_power,
@@ -494,7 +497,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         precision: 1,
       ),
       DeviceDataField(
-        name: 'PV3 Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.pvTotalYield, params: {'num': 3}),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv3_total_energy']),
         divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
@@ -505,7 +508,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // PV4 String
       DeviceDataField(
-        name: 'PV4 Spannung',
+        name: TO(key: FieldTranslationKeys.pvVoltage, params: {'num': 4}),
         type: DataFieldType.voltage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_voltage']),
         icon: Icons.solar_power,
@@ -513,7 +516,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv4',
       ),
       DeviceDataField(
-        name: 'PV4 Strom',
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 4}),
         type: DataFieldType.current,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_current']),
         icon: Icons.solar_power,
@@ -521,7 +524,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'pv4',
       ),
       DeviceDataField(
-        name: 'PV4 Leistung',
+        name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 4}),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_power']),
         icon: Icons.solar_power,
@@ -530,7 +533,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         precision: 1,
       ),
       DeviceDataField(
-        name: 'PV4 Gesamtertrag',
+        name: TO(key: FieldTranslationKeys.pvTotalYield, params: {'num': 4}),
         type: DataFieldType.energy,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'pv4_total_energy']),
         divisor: 0.001,  // Convert kWh to Wh (divide by 0.001 = multiply by 1000)
@@ -541,7 +544,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // Total DC Power
       DeviceDataField(
-        name: 'DC Gesamtleistung',
+        name: TO(key: FieldTranslationKeys.dcTotalPower),
         type: DataFieldType.watt,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'dc_total_power']),
         icon: Icons.electrical_services,
@@ -551,7 +554,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // System information
       DeviceDataField(
-        name: 'Temperatur',
+        name: TO(key: FieldTranslationKeys.temperature),
         type: DataFieldType.temperature,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'radiator_temp']),
         icon: Icons.thermostat,
@@ -559,7 +562,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'system',
       ),
       DeviceDataField(
-        name: 'Betriebszeit',
+        name: TO(key: FieldTranslationKeys.uptime),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'uptime']);
@@ -575,7 +578,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       ),
 
       DeviceDataField(
-        name: 'Limit-Status',
+        name: TO(key: FieldTranslationKeys.limitStatus),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'limit_status']);
@@ -591,7 +594,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // Power Limit Control - Percentage
       DeviceDataField(
-        name: 'Leistungsbegrenzung',
+        name: TO(key: FieldTranslationKeys.powerLimit),
         type: DataFieldType.percentage,
         valueExtractor: (data) => MapUtils.OM(data, ['data', 'limit_percentage']),
         icon: Icons.speed,
@@ -600,7 +603,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // Power Limit Control - Watt
       DeviceDataField(
-        name: 'Leistungsbegrenzung',
+        name: TO(key: FieldTranslationKeys.powerLimit),
         type: DataFieldType.watt,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['data', 'limit_percentage']) as num?;
@@ -614,7 +617,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // Device information
       DeviceDataField(
-        name: 'Modell',
+        name: TO(key: FieldTranslationKeys.model),
         type: DataFieldType.none,
         valueExtractor: (data) => MapUtils.OM(data, ['config', 'model']),
         icon: Icons.device_hub,
@@ -623,7 +626,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
         category: 'device_info',
       ),
       DeviceDataField(
-        name: 'Nennleistung',
+        name: TO(key: FieldTranslationKeys.ratedPower),
         type: DataFieldType.none,
         valueExtractor: (data) {
           final value = MapUtils.OM(data, ['config', 'power_rating']);
@@ -636,7 +639,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
 
       // HTTP-only configuration fields
       DeviceDataField(
-        name: 'Firmware Version',
+        name: TO(key: FieldTranslationKeys.firmwareVersion),
         type: DataFieldType.none,
         valueExtractor: (data) => MapUtils.OM(data, ['config', 'cover_ver']),
         icon: Icons.info,
@@ -656,6 +659,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'pv1',
         displayName: 'PV1',
+        displayNameKey: CategoryTranslationKeys.pv1,
         layout: CategoryLayout.standard,
         order: 10,
         // PV1 always shown - use defaults (both false)
@@ -663,6 +667,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'pv2',
         displayName: 'PV2',
+        displayNameKey: CategoryTranslationKeys.pv2,
         layout: CategoryLayout.standard,
         order: 20,
         hideWhenAllNull: true,
@@ -671,6 +676,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'pv3',
         displayName: 'PV3',
+        displayNameKey: CategoryTranslationKeys.pv3,
         layout: CategoryLayout.standard,
         order: 30,
         hideWhenAllNull: true,
@@ -679,6 +685,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'pv4',
         displayName: 'PV4',
+        displayNameKey: CategoryTranslationKeys.pv4,
         layout: CategoryLayout.standard,
         order: 40,
         hideWhenAllNull: true,
@@ -687,6 +694,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'ac',
         displayName: 'AC (Netz)',
+        displayNameKey: CategoryTranslationKeys.acGrid,
         layout: CategoryLayout.standard,
         order: 50,
         hideWhenAllNull: true,
@@ -695,6 +703,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'system',
         displayName: 'System',
+        displayNameKey: CategoryTranslationKeys.system,
         layout: CategoryLayout.standard,
         order: 60,
         hideWhenAllNull: true,
@@ -703,6 +712,7 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       const DeviceCategoryConfig(
         category: 'device_info',
         displayName: 'Geräteinformationen',
+        displayNameKey: CategoryTranslationKeys.deviceInfo,
         layout: CategoryLayout.oneLine,
         order: 70,
         hideWhenAllNull: true,
@@ -710,9 +720,6 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
       ),
     ];
   }
-
-  @override
-  IconData getDeviceIcon() => Icons.solar_power;
 
   @override
   String getFetchCommand() => 'fetchStatus';

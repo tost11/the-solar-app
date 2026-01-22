@@ -147,9 +147,6 @@ abstract class BaseDeviceService {
       return Future.value(true);
     }
 
-    //isn definey any more because of differnt type of command handlers
-    //Future<void> sendCommand(String command, Map<String, dynamic> params);
-
     /// Template method for data fetching - handles standard fetch flow
     /// Subclasses should override internalFetchData() for device-specific logic
     Future<void> fetchData() async {

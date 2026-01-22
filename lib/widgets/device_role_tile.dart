@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/capabilities/device_role_config.dart';
 import 'package:the_solar_app/models/devices/device_base.dart';
 import 'package:the_solar_app/services/device_storage_service.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 
 /// A list tile widget for displaying a device with its roles
@@ -114,7 +115,7 @@ class _DeviceRoleTileState extends State<DeviceRoleTile> {
       return ListTile(
         leading: Icon(widget.device.deviceIcon),
         title: Text(widget.device.name),
-        subtitle: const Text('Keine Rollen-Unterstützung'),
+        subtitle: Text(context.l10n.noRoleSupport),
       );
     }
 

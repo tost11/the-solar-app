@@ -4,6 +4,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:lan_scanner/lan_scanner.dart';
 import 'package:the_solar_app/models/devices/mixins/additional_port_mixin.dart';
 import 'package:the_solar_app/models/devices/mixins/device_authentication_mixin.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import '../models/authentication_mode.dart';
 import '../models/device.dart';
@@ -200,9 +201,28 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
   Future<String?> _resolveHostnameToIp(String hostname) async {
     try {
       final addresses = await InternetAddress.lookup(hostname);
-      if (addresses.isNotEmpty) {
-        return addresses.first.address;
+      if (addresses.isEmpty) {
+        return null;
       }
+
+      // Separate IPv4 and IPv6 addresses
+      final ipv4Addresses = addresses
+          .where((addr) => addr.type == InternetAddressType.IPv4)
+          .toList();
+      final ipv6Addresses = addresses
+          .where((addr) => addr.type == InternetAddressType.IPv6)
+          .toList();
+
+      // Prefer IPv4, fallback to IPv6
+      if (ipv4Addresses.isNotEmpty) {
+        debugPrint('Resolved $hostname to IPv4: ${ipv4Addresses.first.address}');
+        return ipv4Addresses.first.address;
+      } else if (ipv6Addresses.isNotEmpty) {
+        debugPrint('Resolved $hostname to IPv6 (no IPv4 available): ${ipv6Addresses.first.address}');
+        return ipv6Addresses.first.address;
+      }
+
+      return null;
     } catch (e) {
       debugPrint('Failed to resolve hostname $hostname: $e');
     }
@@ -242,7 +262,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
           if (mounted) {
             MessageUtils.showError(
               context,
-              'Konnte Hostname "$inputValue" nicht auflösen.',
+              context.l10n.errorWhileLoading('Hostname'),
               title: 'DNS-Fehler',
             );
           }
@@ -290,8 +310,8 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
       } else if (mounted) {
         MessageUtils.showError(
           context,
-          'Konnte kein ${_currentDetectorInfo!.manufacturerName}-Gerät unter $inputValue finden.',
-          title: 'Gerät nicht gefunden',
+          context.l10n.statusDeviceNotFound,
+          title: context.l10n.error,
         );
       }
     } catch (e) {
@@ -351,7 +371,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppBarWidget(title: 'Gerät manuell hinzufügen'),
+      appBar: AppBarWidget(title: context.l10n.screenManualDeviceAdd),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -361,7 +381,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
               // Manufacturer dropdown
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  labelText: 'Hersteller',
+                  labelText: context.l10n.formManufacturer,
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
                       color: _selectedManufacturer == null
@@ -409,7 +429,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
                     })
                     .toList(),
                 onChanged: _onManufacturerChanged,
-                validator: (value) => value == null ? 'Bitte Hersteller wählen' : null,
+                validator: (value) => value == null ? context.l10n.validationFieldCannotBeEmpty : null,
               ),
               const SizedBox(height: 16),
 
@@ -417,7 +437,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
               TextFormField(
                 controller: _ipController,
                 decoration: InputDecoration(
-                  labelText: 'IP-Adresse oder Hostname',
+                  labelText: context.l10n.validationEnterIpOrHostname,
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
                       color: _ipController.text.isEmpty
@@ -456,7 +476,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
                         ),
                 ),
                 keyboardType: TextInputType.text,
-                validator: (value) => value?.isEmpty ?? true ? 'Bitte IP-Adresse oder Hostname eingeben' : null,
+                validator: (value) => value?.isEmpty ?? true ? context.l10n.validationEnterIpOrHostname : null,
               ),
               const SizedBox(height: 16),
 
@@ -464,7 +484,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
               TextFormField(
                 controller: _portController,
                 decoration: InputDecoration(
-                  labelText: 'Port',
+                  labelText: context.l10n.formPort,
                   border: OutlineInputBorder(
                     borderSide: BorderSide(
                       color: _portController.text.isEmpty

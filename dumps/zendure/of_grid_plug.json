@@ -1,0 +1,5 @@
+{"method":"write","timestamp":1768584736664,"messageId":20,"deviceId":"ABC123XYZ","properties":{"gridOffMode":2}} // off
+
+{"method":"write","timestamp":1768584922498,"messageId":21,"deviceId":"ABC123XYZ","properties":{"gridOffMode":1}} //on - power save move
+
+{"method":"write","timestamp":1768584968728,"messageId":22,"deviceId":"ABC123XYZ","properties":{"gridOffMode":0}} //on - normal mode

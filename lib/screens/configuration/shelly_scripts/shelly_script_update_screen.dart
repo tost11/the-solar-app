@@ -7,6 +7,7 @@ import '../../../models/shelly_script_template.dart';
 import '../../../models/shelly_script_parameter.dart';
 import '../../../utils/dialog_utils.dart';
 import '../../../utils/globals.dart';
+import '../../../utils/localization_extension.dart';
 import '../../../utils/message_utils.dart';
 import '../../../utils/script_parameter_extractor.dart';
 import '../../../utils/script_template_utils.dart';
@@ -108,20 +109,17 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Parameter aktualisieren?'),
-          content: const Text(
-            'Möchten Sie die Parameter wirklich aktualisieren? '
-            'Das Script wird mit den neuen Werten neu generiert.',
-          ),
+          title: Text(dialogContext.l10n.shellyScriptsDialogUpdateParamsTitle),
+          content: Text(dialogContext.l10n.shellyScriptsDialogUpdateParamsMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Abbrechen'),
+              child: Text(dialogContext.l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               style: TextButton.styleFrom(foregroundColor: Colors.green),
-              child: const Text('Aktualisieren'),
+              child: Text(dialogContext.l10n.update),
             ),
           ],
         ),
@@ -149,7 +147,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
         if (wasRunning) {
           await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Stoppe Script...',
+            loadingMessage: context.l10n.shellyScriptsStoppingScript,
             operation: () => widget.device.sendCommand(
               COMMAND_STOP_SCRIPT,
               {"id": widget.script.id},
@@ -170,7 +168,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
 
         await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: 'Bereite Update vor...',
+          loadingMessage: context.l10n.shellyScriptsPreparingUpdate,
           operation: () => widget.device.sendCommand(
             COMMAND_RENAME_SCRIPT,
             {"id": widget.script.id, "name": stagingName},
@@ -185,7 +183,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
 
         await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: 'Aktualisiere Script...',
+          loadingMessage: context.l10n.shellyScriptsUpdatingScript,
           operation: () => widget.device.sendCommand(
             COMMAND_PUT_SCRIPT_CODE,
             {
@@ -200,7 +198,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
           onError: (e) {
             MessageUtils.showError(
               context,
-              'Fehler beim Aktualisieren: $e\nScript bleibt im Staging-Status (0.0.0).',
+              context.l10n.shellyScriptsErrorUpdatingStaging(e.toString()),
             );
           },
         );
@@ -211,7 +209,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
 
           await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Finalisiere Update...',
+            loadingMessage: context.l10n.shellyScriptsFinalizingUpdate,
             operation: () => widget.device.sendCommand(
               COMMAND_RENAME_SCRIPT,
               {"id": widget.script.id, "name": finalName},
@@ -222,7 +220,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
           if (mounted) {
             MessageUtils.showSuccess(
               context,
-              'Parameter erfolgreich aktualisiert',
+              context.l10n.shellyScriptsParamsUpdated,
             );
           }
         }
@@ -243,7 +241,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
         if (mounted) {
           MessageUtils.showError(
             context,
-            'Fehler beim Aktualisieren der Parameter: $e',
+            context.l10n.shellyScriptsErrorInstalling(e.toString()),
           );
         }
       }
@@ -278,7 +276,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
           : TextInputType.text,
       validator: (value) {
         if (param.required && (value == null || value.isEmpty)) {
-          return '${param.label} ist erforderlich';
+          return context.l10n.shellyScriptsValidationRequired(param.label);
         }
         return null;
       },
@@ -304,22 +302,22 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
       ],
       validator: (value) {
         if (param.required && (value == null || value.isEmpty)) {
-          return '${param.label} ist erforderlich';
+          return context.l10n.shellyScriptsValidationRequired(param.label);
         }
         if (value != null && value.isNotEmpty) {
           final numValue = int.tryParse(value);
           if (numValue == null) {
-            return '${param.label} muss eine Zahl sein';
+            return context.l10n.shellyScriptsValidationMustBeNumber(param.label);
           }
           if (param.minValue != null && numValue < param.minValue!) {
-            return '${param.label} muss mindestens ${param.minValue} sein';
+            return context.l10n.shellyScriptsValidationMinValue(param.label, param.minValue!.toString());
           }
           if (param.maxValue != null && numValue > param.maxValue!) {
-            return '${param.label} darf höchstens ${param.maxValue} sein';
+            return context.l10n.shellyScriptsValidationMaxValue(param.label, param.maxValue!.toString());
           }
           if (param.type == ScriptParameterType.port &&
               (numValue < 1 || numValue > 65535)) {
-            return 'Port muss zwischen 1 und 65535 liegen';
+            return context.l10n.shellyScriptsValidationPortRange;
           }
         }
         return null;
@@ -354,8 +352,8 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Parameter aktualisieren',
+      appBar: AppBarWidget(
+        title: context.l10n.shellyScriptUpdateTitle,
       ),
       body: Form(
         key: _formKey,
@@ -427,8 +425,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
-                                      'Aktualisieren Sie die Parameter. Das Script wird mit '
-                                      'den neuen Werten neu generiert und hochgeladen.',
+                                      context.l10n.shellyScriptsUpdateInfoText,
                                       style: TextStyle(
                                         color: Colors.blue[900],
                                         fontSize: 12,
@@ -484,7 +481,7 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
               child: ElevatedButton.icon(
                 onPressed: _updateScript,
                 icon: const Icon(Icons.check),
-                label: const Text('Parameter aktualisieren'),
+                label: Text(context.l10n.shellyScriptUpdateTitle),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../widgets/app_scaffold.dart';
@@ -71,20 +72,20 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
     // Validation when enabled
     if (_enabled) {
       if (_serverController.text.trim().isEmpty) {
-        MessageUtils.showError(context, 'MQTT-Server darf nicht leer sein');
+        MessageUtils.showError(context, context.l10n.validationMqttServerCannotBeEmpty);
         return;
       }
 
       final portText = _portController.text.trim();
       if (portText.isEmpty) {
-        MessageUtils.showError(context, 'Port darf nicht leer sein');
+        MessageUtils.showError(context, context.l10n.validationFieldCannotBeEmpty);
         return;
       }
 
       final port = int.tryParse(portText);
       if (port == null || port < 1 || port > 65535) {
         MessageUtils.showError(
-            context, 'Port muss eine Zahl zwischen 1 und 65535 sein');
+            context, context.l10n.shellyScriptsValidationPortRange);
         return;
       }
 
@@ -92,12 +93,12 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
       if (_authEnabled) {
         if (_usernameController.text.trim().isEmpty) {
           MessageUtils.showError(
-              context, 'Benutzername darf nicht leer sein');
+              context, context.l10n.validationUsernameCannotBeEmpty);
           return;
         }
 
         if (_passwordController.text.trim().isEmpty) {
-          MessageUtils.showError(context, 'Passwort darf nicht leer sein');
+          MessageUtils.showError(context, context.l10n.validationFieldCannotBeEmpty);
           return;
         }
       }
@@ -129,8 +130,8 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
         MessageUtils.showSuccess(
           context,
           _enabled
-              ? 'MQTT-Verbindung wurde aktiviert'
-              : 'MQTT-Verbindung wurde deaktiviert',
+              ? context.l10n.messageMqttEnabled
+              : context.l10n.messageMqttDisabled,
         );
         Navigator.pop(context, true);
       }
@@ -138,8 +139,8 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
       if (mounted) {
         MessageUtils.showError(
           context,
-          'Fehler beim Speichern der MQTT-Konfiguration: $e',
-          title: 'Fehler',
+          context.l10n.errorWhileSaving(e.toString()),
+          title: context.l10n.error,
         );
       }
     } finally {
@@ -154,8 +155,8 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'MQTT Konfiguration',
+      appBar: AppBarWidget(
+        title: context.l10n.screenMqttConfig,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -183,7 +184,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'MQTT Konfiguration',
+                                context.l10n.mqttConfiguration,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -203,7 +204,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Verbinden Sie Ihr Gerät mit einem MQTT-Broker für Home Automation Integration.',
+                      context.l10n.helpMqttDescription,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -229,7 +230,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'MQTT aktivieren',
+                            context.l10n.mqttEnable,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -250,7 +251,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Aktiviert oder deaktiviert die MQTT-Verbindung',
+                      context.l10n.helpEnableOrDisableMqtt,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -277,7 +278,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                           const Icon(Icons.dns, color: Colors.blue),
                           const SizedBox(width: 8),
                           Text(
-                            'MQTT Server',
+                            context.l10n.mqttServer,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -290,12 +291,12 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _serverController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Server',
                           hintText: 'broker.example.com',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.dns),
-                          helperText: 'Hostname oder IP-Adresse',
+                          helperText: context.l10n.hintHostnameOrIp,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -305,8 +306,8 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                        decoration: const InputDecoration(
-                          labelText: 'Port',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.labelPort,
                           hintText: '1883',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.settings_ethernet),
@@ -335,7 +336,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Authentifizierung verwenden',
+                              context.l10n.infoMqttAuthToggle,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -383,7 +384,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                             const Icon(Icons.person, color: Colors.blue),
                             const SizedBox(width: 8),
                             Text(
-                              'Benutzername',
+                              context.l10n.formUsername,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -396,11 +397,11 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                         const SizedBox(height: 12),
                         TextField(
                           controller: _usernameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Benutzername',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.formUsername,
                             hintText: 'mqtt-user',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.person),
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.person),
                           ),
                         ),
                       ],
@@ -422,7 +423,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                             const Icon(Icons.key, color: Colors.orange),
                             const SizedBox(width: 8),
                             Text(
-                              'Passwort',
+                              context.l10n.formPassword,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -437,7 +438,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
-                            labelText: 'Passwort',
+                            labelText: context.l10n.formPassword,
                             hintText: 'Geben Sie Ihr Passwort ein',
                             border: const OutlineInputBorder(),
                             prefixIcon: const Icon(Icons.key),
@@ -474,7 +475,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save),
-              label: Text(_isSaving ? 'Wird gespeichert...' : 'Speichern'),
+              label: Text(_isSaving ? context.l10n.messageSaving : context.l10n.save),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
@@ -505,9 +506,9 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Standard MQTT-Port ist 1883 (unverschlüsselt) oder 8883 (TLS)\n'
+                      '${context.l10n.helpMqttPorts}\\n'
                       '• Stellen Sie sicher, dass Ihr MQTT-Broker erreichbar ist\n'
-                      '• Die Authentifizierung ist optional, wird aber empfohlen\n'
+                      '${context.l10n.helpMqttAuthRecommended}\\n'
                       '• Nach der Konfiguration verbindet sich das Gerät automatisch',
                       style: TextStyle(
                         fontSize: 13,
@@ -539,7 +540,7 @@ class _MqttConfigurationScreenState extends State<MqttConfigurationScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'MQTT ist deaktiviert. Das Gerät wird nicht mit einem MQTT-Broker verbunden sein.',
+                        context.l10n.infoMqttDisabled,
                         style: TextStyle(
                           color: Colors.orange[900],
                           fontSize: 13,

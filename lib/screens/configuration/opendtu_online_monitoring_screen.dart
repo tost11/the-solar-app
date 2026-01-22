@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
 
+import '../../utils/localization_extension.dart';
 import '../../utils/message_utils.dart';
 import '../../utils/url_utils.dart';
 import '../../widgets/app_bar_widget.dart';
@@ -133,23 +134,23 @@ class _OpenDTUOnlineMonitoringScreenState
 
       if (primaryHost.isEmpty) {
         MessageUtils.showError(
-            context, 'Primärer Server URL ist erforderlich');
+            context, context.l10n.validationPrimaryServerRequired);
         return;
       }
 
       if (!_isValidHost(primaryHost)) {
         MessageUtils.showError(context,
-            'Ungültige primäre Server URL (kein Protokoll http:// oder https:// verwenden)');
+            context.l10n.validationPrimaryUrlInvalid);
         return;
       }
 
       if (systemId.isEmpty) {
-        MessageUtils.showError(context, 'System-ID ist erforderlich');
+        MessageUtils.showError(context, context.l10n.validationSystemIdRequired);
         return;
       }
 
       if (token.isEmpty) {
-        MessageUtils.showError(context, 'Token/Passwort ist erforderlich');
+        MessageUtils.showError(context, context.l10n.validationTokenRequired);
         return;
       }
 
@@ -157,21 +158,21 @@ class _OpenDTUOnlineMonitoringScreenState
       final secondaryHost = _secondaryHostController.text.trim();
       if (secondaryHost.isNotEmpty && !_isValidHost(secondaryHost)) {
         MessageUtils.showError(context,
-            'Ungültige sekundäre Server URL (kein Protokoll http:// oder https:// verwenden)');
+            context.l10n.validationSecondaryUrlInvalid);
         return;
       }
 
       // Validate ports
       final primaryPort = _primaryPortController.text.trim();
       if (!UrlUtils.isValidPort(primaryPort)) {
-        MessageUtils.showError(context, 'Ungültiger primärer Port (1-65535)');
+        MessageUtils.showError(context, context.l10n.validationPrimaryPortInvalid);
         return;
       }
 
       if (secondaryHost.isNotEmpty) {
         final secondaryPort = _secondaryPortController.text.trim();
         if (!UrlUtils.isValidPort(secondaryPort)) {
-          MessageUtils.showError(context, 'Ungültiger sekundärer Port (1-65535)');
+          MessageUtils.showError(context, context.l10n.validationSecondaryPortInvalid);
           return;
         }
       }
@@ -181,7 +182,7 @@ class _OpenDTUOnlineMonitoringScreenState
     final duration = _durationController.text.trim();
     if (!_isValidDuration(duration)) {
       MessageUtils.showError(
-          context, 'Upload-Intervall muss zwischen 1 und 3600 Sekunden liegen');
+          context, context.l10n.validationUploadIntervalRange);
       return;
     }
 
@@ -216,7 +217,7 @@ class _OpenDTUOnlineMonitoringScreenState
         // Show success message
         MessageUtils.showSuccess(
           context,
-          'Online-Monitoring erfolgreich konfiguriert',
+          context.l10n.messageOnlineMonitoringConfigured,
         );
 
         // Return to previous screen with result
@@ -225,7 +226,7 @@ class _OpenDTUOnlineMonitoringScreenState
     } catch (e) {
       if (mounted) {
         MessageUtils.showError(
-            context, 'Fehler beim Konfigurieren des Online-Monitorings: $e');
+            context, context.l10n.errorConfiguringOnlineMonitoring(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -289,48 +290,54 @@ class _OpenDTUOnlineMonitoringScreenState
             const SizedBox(height: 16),
 
             // Protocol Dropdown
-            DropdownButtonFormField<String>(
-              value: protocol,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'Protokoll${isRequired ? " *" : ""}',
-                prefixIcon: const Icon(Icons.security),
+            Builder(
+              builder: (context) => DropdownButtonFormField<String>(
+                value: protocol,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: context.l10n.labelProtocol(isRequired ? ' *' : ''),
+                  prefixIcon: const Icon(Icons.security),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'https', child: Text('HTTPS')),
+                  DropdownMenuItem(value: 'http', child: Text('HTTP')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    onProtocolChanged(value);
+                  }
+                },
               ),
-              items: const [
-                DropdownMenuItem(value: 'https', child: Text('HTTPS')),
-                DropdownMenuItem(value: 'http', child: Text('HTTP')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  onProtocolChanged(value);
-                }
-              },
             ),
             const SizedBox(height: 16),
 
             // Host Input
-            TextField(
-              controller: hostController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'Server-URL${isRequired ? " *" : ""}',
-                hintText: 'z.B. solar.pihost.org',
-                prefixIcon: const Icon(Icons.language),
-                helperText: 'Ohne http:// oder https://',
+            Builder(
+              builder: (context) => TextField(
+                controller: hostController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: '${context.l10n.labelServerUrl}${isRequired ? " *" : ""}',
+                  hintText: context.l10n.helpServerUrlFormat,
+                  prefixIcon: const Icon(Icons.language),
+                  helperText: context.l10n.helpDefaultPortNote,
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
             // Port Input
-            TextField(
-              controller: portController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'Port',
-                hintText: 'Standard: ${UrlUtils.getDefaultPort(protocol)}',
-                prefixIcon: const Icon(Icons.numbers),
-                helperText: 'Standard-Ports werden nicht in URL angezeigt',
+            Builder(
+              builder: (context) => TextField(
+                controller: portController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: context.l10n.labelPortField,
+                  hintText: context.l10n.helpDefaultPort(UrlUtils.getDefaultPort(protocol)),
+                  prefixIcon: const Icon(Icons.numbers),
+                  helperText: context.l10n.helpDefaultPortNote,
+                ),
               ),
             ),
           ],
@@ -342,8 +349,8 @@ class _OpenDTUOnlineMonitoringScreenState
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(
-        title: 'Online-Monitoring konfigurieren',
+      appBar: AppBarWidget(
+        title: context.l10n.screenOpenDtuOnlineMonitoring,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -370,7 +377,7 @@ class _OpenDTUOnlineMonitoringScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Online-Monitoring',
+                                context.l10n.sectionOnlineMonitoring,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -381,7 +388,7 @@ class _OpenDTUOnlineMonitoringScreenState
                               const SizedBox(height: 4),
                               Text(
                                 widget.device.name.isEmpty
-                                    ? 'Gerät'
+                                    ? context.l10n.device
                                     : widget.device.name,
                                 style: TextStyle(
                                   color: Colors.grey[600],
@@ -397,7 +404,7 @@ class _OpenDTUOnlineMonitoringScreenState
                     const Divider(),
                     const SizedBox(height: 8),
                     Text(
-                      'Konfigurieren Sie die Server für das Online-Monitoring',
+                      context.l10n.helpConfigureOnlineMonitoring,
                       style: TextStyle(
                         color: Colors.grey[700],
                         fontSize: 14,
@@ -420,7 +427,7 @@ class _OpenDTUOnlineMonitoringScreenState
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Online-Monitoring aktivieren',
+                        context.l10n.helpOnlineMonitoringInstructions,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -441,8 +448,8 @@ class _OpenDTUOnlineMonitoringScreenState
 
             // Primary Server Section
             _buildServerSection(
-              title: 'Primärer Server',
-              subtitle: 'Erforderlich',
+              title: context.l10n.sectionPrimaryServer,
+              subtitle: context.l10n.labelRequiredField,
               hostController: _primaryHostController,
               portController: _primaryPortController,
               protocol: _primaryProtocol,
@@ -461,8 +468,8 @@ class _OpenDTUOnlineMonitoringScreenState
 
             // Secondary Server Section
             _buildServerSection(
-              title: 'Sekundärer Server',
-              subtitle: 'Optional',
+              title: context.l10n.sectionSecondaryServer,
+              subtitle: context.l10n.labelOptionalField,
               hostController: _secondaryHostController,
               portController: _secondaryPortController,
               protocol: _secondaryProtocol,
@@ -493,7 +500,7 @@ class _OpenDTUOnlineMonitoringScreenState
                             color: Colors.orange, size: 28),
                         const SizedBox(width: 12),
                         Text(
-                          'Zugangsdaten',
+                          context.l10n.sectionCredentials,
                           style: Theme.of(context)
                               .textTheme
                               .titleLarge
@@ -511,11 +518,11 @@ class _OpenDTUOnlineMonitoringScreenState
                     // System ID Input
                     TextField(
                       controller: _systemIdController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'System-ID *',
-                        hintText: 'z.B. 1234',
-                        prefixIcon: Icon(Icons.fingerprint),
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: '${context.l10n.labelSystemId} *',
+                        hintText: context.l10n.helpSystemIdExample,
+                        prefixIcon: const Icon(Icons.fingerprint),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -524,10 +531,10 @@ class _OpenDTUOnlineMonitoringScreenState
                     TextField(
                       controller: _tokenController,
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Token/Passwort *',
-                        prefixIcon: Icon(Icons.password),
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: '${context.l10n.labelToken} *',
+                        prefixIcon: const Icon(Icons.password),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -536,11 +543,11 @@ class _OpenDTUOnlineMonitoringScreenState
                     TextField(
                       controller: _durationController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Upload-Intervall (Sekunden)',
-                        hintText: 'z.B. 30',
-                        prefixIcon: Icon(Icons.timer),
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: context.l10n.labelUploadInterval,
+                        hintText: context.l10n.helpUploadIntervalExample,
+                        prefixIcon: const Icon(Icons.timer),
                       ),
                     ),
                   ],
@@ -561,7 +568,7 @@ class _OpenDTUOnlineMonitoringScreenState
                     )
                   : const Icon(Icons.save),
               label: Text(
-                  _isSaving ? 'Wird gespeichert...' : 'Einstellungen speichern'),
+                  _isSaving ? context.l10n.messageSaving : context.l10n.buttonSavePowerLimit),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
@@ -582,7 +589,7 @@ class _OpenDTUOnlineMonitoringScreenState
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Hinweis',
+                          context.l10n.sectionNote,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -592,13 +599,7 @@ class _OpenDTUOnlineMonitoringScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '• Primärer Server URL, System-ID und Token sind erforderlich wenn aktiviert\n'
-                      '• Sekundärer Server ist optional\n'
-                      '• Protokoll wird automatisch hinzugefügt (https:// oder http://)\n'
-                      '• Standard-Ports (80 für HTTP, 443 für HTTPS) werden automatisch verwendet\n'
-                      '• Nicht-standard Ports werden in der URL angezeigt (z.B. :8080)\n'
-                      '• Upload-Intervall zwischen 1 und 3600 Sekunden\n'
-                      '• Beispiel-Server: solar.pihost.org, solar.tost-soft.de',
+                      context.l10n.helpOnlineMonitoringDescription,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.blue.shade900,

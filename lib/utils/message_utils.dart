@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'localization_extension.dart';
 
 /// Global utility class for displaying messages (errors, success, warnings, info)
 /// Provides consistent UI for all message types across the application
@@ -8,7 +9,7 @@ class MessageUtils {
   /// Parameters:
   /// - context: BuildContext for showing the dialog
   /// - message: Error message to display
-  /// - title: Optional custom title (defaults to "Fehler")
+  /// - title: Optional custom title (defaults to localized "Error")
   static void showError(
     BuildContext context,
     String message, {
@@ -19,12 +20,12 @@ class MessageUtils {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title ?? 'Fehler'),
+        title: Text(title ?? context.l10n.error),
         content: SelectableText(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
           ),
         ],
       ),
@@ -171,13 +172,13 @@ class MessageUtils {
             if (cancelable)
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Abbrechen'),
+                child: Text(context.l10n.cancel),
               ),
             ElevatedButton(
               onPressed: selectedValue != null
                   ? () => Navigator.pop(context, selectedValue)
                   : null,
-              child: const Text('Auswählen'),
+              child: Text(context.l10n.select),
             ),
           ],
         ),
@@ -193,16 +194,16 @@ class MessageUtils {
   /// - context: BuildContext for showing the dialog
   /// - title: Dialog title
   /// - message: Message text to display (can be multi-line)
-  /// - okButtonText: Text for OK button (default: "OK")
-  /// - cancelButtonText: Text for Cancel button (default: "Abbrechen")
+  /// - okButtonText: Text for OK button (defaults to localized "OK")
+  /// - cancelButtonText: Text for Cancel button (defaults to localized "Cancel")
   /// - okButtonColor: Color for OK button (default: Colors.orange for warnings)
   /// - cancelable: Whether dialog can be dismissed by tapping outside (default: false)
   static Future<bool> showConfirmationDialog(
     BuildContext context, {
     required String title,
     required String message,
-    String okButtonText = 'OK',
-    String cancelButtonText = 'Abbrechen',
+    String? okButtonText,
+    String? cancelButtonText,
     Color? okButtonColor,
     bool cancelable = false,
   }) async {
@@ -217,14 +218,14 @@ class MessageUtils {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(cancelButtonText),
+            child: Text(cancelButtonText ?? dialogContext.l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: okButtonColor != null
                 ? ElevatedButton.styleFrom(backgroundColor: okButtonColor)
                 : null,
-            child: Text(okButtonText),
+            child: Text(okButtonText ?? dialogContext.l10n.ok),
           ),
         ],
       ),

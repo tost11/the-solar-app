@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/map_utils.dart';
+import '../constants/translation_keys.dart';
+import '../models/to.dart';
 
 /// Custom widget for displaying Zendure battery pack list
 /// Supports expandable cards for each battery pack with detailed information
@@ -34,7 +36,7 @@ class _ZendureBatteryPackListWidgetState
           padding: const EdgeInsets.all(16.0),
           child: Center(
             child: Text(
-              'Keine Batteriepack-Daten verfügbar',
+              TO(key: FieldTranslationKeys.batteryPackEmpty).getText(context),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -62,7 +64,7 @@ class _ZendureBatteryPackListWidgetState
                   size: 32,
                 ),
                 title: Text(
-                  'Batterie #${index + 1}',
+                  TO(key: FieldTranslationKeys.batteryPackNumber, params: {'num': '${index + 1}'}).getText(context),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -142,19 +144,16 @@ class _ZendureBatteryPackListWidgetState
     }
   }
 
-  /// Get status text in German
+  /// Get status text using translations
   String _getStateText(Map<String, dynamic> pack) {
     final state = pack['state'] as int?;
-    switch (state) {
-      case 0:
-        return 'Idle';
-      case 1:
-        return 'Lädt';
-      case 2:
-        return 'Entlädt';
-      default:
-        return 'Unbekannt';
-    }
+    final stateKey = switch (state) {
+      0 => FieldTranslationKeys.batteryStateIdle,
+      1 => FieldTranslationKeys.batteryStateCharging,
+      2 => FieldTranslationKeys.batteryStateDischarging,
+      _ => FieldTranslationKeys.batteryStateUnknown,
+    };
+    return TO(key: stateKey).getText(context);
   }
 
   /// Format power value
@@ -208,39 +207,67 @@ class _ZendureBatteryPackListWidgetState
         // Always visible fields
         if (pack['sn'] != null)
           _buildDetailRow(
-              Icons.qr_code, 'Seriennummer', pack['sn'].toString()),
+              context,
+              Icons.qr_code,
+              TO(key: FieldTranslationKeys.serialNumber).getText(context),
+              pack['sn'].toString()),
 
         if (pack['power'] != null)
-          _buildDetailRow(Icons.bolt, 'Leistung', _formatPower(pack['power'])),
+          _buildDetailRow(
+              context,
+              Icons.bolt,
+              TO(key: FieldTranslationKeys.power).getText(context),
+              _formatPower(pack['power'])),
 
         if (pack['maxTemp'] != null)
-          _buildDetailRow(Icons.thermostat, 'Max. Temperatur',
+          _buildDetailRow(
+              context,
+              Icons.thermostat,
+              TO(key: FieldTranslationKeys.maxTemperature).getText(context),
               _formatTemperature(pack['maxTemp'])),
 
         if (pack['totalVol'] != null)
-          _buildDetailRow(Icons.electrical_services, 'Gesamtspannung',
+          _buildDetailRow(
+              context,
+              Icons.electrical_services,
+              TO(key: FieldTranslationKeys.totalVoltage).getText(context),
               _formatVoltage(pack['totalVol'])),
 
         if (pack['batcur'] != null)
           _buildDetailRow(
-              Icons.electric_bolt, 'Strom', _formatCurrent(pack['batcur'])),
+              context,
+              Icons.electric_bolt,
+              TO(key: FieldTranslationKeys.current).getText(context),
+              _formatCurrent(pack['batcur'])),
 
         // Expert mode only fields
         if (expertMode) ...[
           if (pack['packType'] != null)
             _buildDetailRow(
-                Icons.battery_std, 'Typ', pack['packType'].toString()),
+                context,
+                Icons.battery_std,
+                TO(key: FieldTranslationKeys.batteryType).getText(context),
+                pack['packType'].toString()),
 
           if (pack['maxVol'] != null)
-            _buildDetailRow(Icons.arrow_upward, 'Max. Zellspannung',
+            _buildDetailRow(
+                context,
+                Icons.arrow_upward,
+                TO(key: FieldTranslationKeys.cellVoltageMax).getText(context),
                 _formatVoltage(pack['maxVol'])),
 
           if (pack['minVol'] != null)
-            _buildDetailRow(Icons.arrow_downward, 'Min. Zellspannung',
+            _buildDetailRow(
+                context,
+                Icons.arrow_downward,
+                TO(key: FieldTranslationKeys.cellVoltageMin).getText(context),
                 _formatVoltage(pack['minVol'])),
 
           if (pack['softVersion'] != null)
-            _buildDetailRow(Icons.code, 'Software-Version',
+            _buildDetailRow(
+                context,
+                Icons.code,
+                TO(key: FieldTranslationKeys.firmwareVersion).getText(context),
                 pack['softVersion'].toString()),
         ],
       ],
@@ -248,7 +275,7 @@ class _ZendureBatteryPackListWidgetState
   }
 
   /// Build a detail row with icon, label, and value
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(BuildContext context, IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
