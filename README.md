@@ -1,7 +1,10 @@
 # The Solar App
 
-A privacy-focused Flutter application for managing and monitoring micro inverters and power stations.
+🇬🇧 **English** | [🇩🇪 Deutsch](README_DE.md)
+
+A Flutter application for Windows, Android and Linux for managing and monitoring micro inverters and power stations.
 Connect locally via Bluetooth or WiFi without any cloud services or user registration required.
+Supported manufacturers are [Hoymiles](#hoymiles-wifinetwork), [Deye Sun](#deyesun-wifinetwork), [Zendure](#zendure-bluetooth--wifi), [Shelly](#shelly-bluetooth--wifinetwork), [Kostal](#kostal-wifinetwork) and [OpenDTU](#opendtu-wifinetwork).
 
 ## ⚠️ Disclaimer
 
@@ -46,65 +49,88 @@ Some screenshots to get an idea of what the app looks like:
 ### Supported Devices
 
 #### Shelly (Bluetooth & WiFi/Network)
-- **Shelly EM3**: Three-phase energy meter with current/voltage/power monitoring
-- **Shelly Plus Plug**: Smart plug with power monitoring and control
-- **All Others**: Setting up general settings
-- **Connection Types**: Bluetooth Low Energy, WiFi/Network (HTTP JSON-RPC)
-- **Features**:
-  - RFC7616 Digest Authentication (SHA-256)
-  - Three-phase energy monitoring (EM3) or single-phase (Plug) with voltage/current/power
-  - Power control (on/off switching for Plug)
-  - General settings, WiFi/AP configuration, authentication, device restart
+- **Supported Modules**: EM (3-phase meter), Switch (smart plug), EM1 (single-phase meter), EM1Data (energy totals), EMData (3-phase energy totals), Temperature (sensor), PM1 (Gen3 power meter)
+- **Connection Types**: Bluetooth Low Energy, WiFi/Network (HTTP JSON-RPC 2.0)
+- **Authentication**: RFC7616 Digest Authentication with SHA-256
+- **Monitoring** (per module type):
+  - **EM**: 3-phase voltage, current, active power per phase; total active power
+  - **Switch**: Voltage, current, active power, temperature, total energy
+  - **EM1**: Single-phase voltage, current, active/apparent power, power factor, frequency
+  - **EM1Data/EMData**: Total energy import/export (per instance/phase)
+  - **Temperature**: Temperature sensor readings
+  - **PM1 (Gen3)**: Single-phase monitoring with bidirectional energy tracking
+- **Configuration**:
+  - WiFi/AP setup
+  - RPC port configuration
+  - Authentication settings
+  - On/off switching (Switch module)
+  - Device restart
 
 #### DeyeSun (WiFi/Network)
-- **Micro Inverters**: Solar inverters with Modbus and HTTP support
-- **Connection Types**: WiFi/Network (HTTP, Modbus TCP)
-- **Features**:
-  - Real-time power production monitoring
-  - Inverter on/off control
-  - Up to 4 PV string monitoring (voltage, current, power, yield)
-  - Grid AC monitoring (voltage, current, frequency)
-  - Power limit configuration (percentage-based)
-  - Temperature, operating time, yield tracking (daily/total)
-  - Online monitoring server, WiFi/AP configuration, device restart
+- **Micro Inverters**: Solar inverters with dual protocol support
+- **Connection Types**: WiFi/Network (HTTP/1.0 HTTPD with Basic Auth, Modbus TCP on configurable port)
+- **Monitoring**: Real-time solar production with up to 4 PV string inputs (per-string voltage, current, power, daily/total yield), AC grid monitoring (voltage, current, frequency, power), radiator temperature, device uptime, operating time tracking
+- **Configuration**:
+  - Power limit (percentage-based)
+  - Inverter on/off toggle
+  - Online monitoring (Server A/B configuration)
+  - WiFi setup (STA mode)
+  - Access point configuration with security options
+  - Device restart
 
 #### Zendure (Bluetooth & WiFi)
-- **Power Stations**: Portable power stations and energy storage
+- **Power Stations**: Portable power stations and energy storage systems
 - **Connection Types**: Bluetooth Low Energy, WiFi/Network (REST API)
-- **Features**:
-  - Battery level monitoring (SOC, pack voltage/current)
-  - Power input/output tracking (solar input, home output)
-  - Battery SOC limits and power limit configuration
+- **Monitoring**: Battery level (SOC with charge/discharge state), solar input power, grid input power, home output power, pack power (input/output), output limit, pack state, battery pack data (voltage, current per pack), WiFi/cloud connection state, firmware version
+- **Configuration**:
+  - Power limits (input/output with mode selection)
+  - Battery SOC limits (min 5-40%, max 80-100%)
+  - Advanced power settings (max inverter power, grid reverse, grid standard)
+  - Emergency power supply (3 modes: normal/energy-saving/off)
+  - Lamp/light toggle
   - WiFi/MQTT configuration (Bluetooth only)
-  - Pack state and firmware version tracking
+  - MQTT configuration (WiFi only)
 
 #### OpenDTU (WiFi/Network)
-- **Solar Gateway**: Open-source DTU for Hoymiles micro inverters
-- **Connection Types**: WiFi/Network (HTTP + WebSocket)
-- **Features**:
-  - Real-time multi-inverter monitoring via WebSocket
-  - Per-inverter detailed data (AC/DC power, voltage, current, temperature)
-  - Power limit configuration and inverter on/off control
-  - Authentication, WiFi configuration, device restart
-  - Expandable inverter list UI
+- **Solar Gateway**: Open-source DTU for Hoymiles micro inverters with multi-inverter management
+- **Connection Types**: WiFi/Network (WebSocket `ws://{ip}:{port}/livedata` for real-time data, HTTP REST API for configuration)
+- **Authentication**: Basic Auth (admin)
+- **Monitoring**: Real-time multi-inverter aggregated data (total power, daily/total yield), per-inverter AC power (voltage, frequency, power), per-inverter DC string data (voltage, current, power), inverter temperature, system information (uptime, CPU temperature, memory usage: heap/sketch/littlefs), persistent inverter map with incremental updates
+- **Configuration**:
+  - Power limit per inverter (percentage-based)
+  - Authentication settings
+  - WiFi setup
+  - Online monitoring cloud relay configuration ([solar-monitoring](https://github.com/tost11/solar-monitoring))
+  - Device restart
+  - Inverter on/off toggle (per device)
+  - Inverter restart (per device)
 
 #### Hoymiles (WiFi/Network)
-- **HMS Inverters**: Standalone micro inverters with built-in WiFi (HMS-400W, HMS-800W-2T, etc.)
-- **Connection Types**: WiFi/Network (TCP + Protobuf on port 10081)
-- **Features**:
-  - Real-time power production monitoring
-  - Single-phase and three-phase inverter support
-  - PV string monitoring (per panel voltage, current, power)
-  - Grid AC monitoring (voltage, frequency, temperature)
-  - Device and network configuration
-  - DTU-Sticks **not** supported
+- **Device Types**:
+  - **DTU Gateways** (DTU-WLite, DTU-Pro, DTU-Lite-S): Manage multiple inverters with aggregated monitoring and expandable inverter list UI
+  - **HMS Inverters** (HMS-800W-2T, HMS-1600W-4T etc.): Standalone micro inverters with built-in WiFi
+- **Connection Types**: WiFi/Network (Binary TCP protocol with Protobuf serialization + CRC16 validation on port 10081)
+- **Monitoring**: Real-time power production, up to 4 PV strings per inverter (per-string voltage, current, power, daily/total yields), AC monitoring (single-phase or three-phase voltage, frequency, active power) and temperature tracking
+- **Configuration**:
+  - Power limit (percentage-based per inverter)
+  - WiFi setup
+  - Access point configuration
+  - Device and network settings
+- **Note**: DTU-Sticks not implemented/working due to encryption of device
 
 #### Kostal (WiFi/Network)
-- **Plenticore Inverters**: Solar inverters with Modbus TCP support
-- **Connection Types**: WiFi/Network (Modbus TCP on port 1502, HTTP detection)
-- **Features**:
-  - Monitoring PV-Strings, AC-Power, Batterie, Power-Meter
-  - Read-only monitoring (no write operations currently)
+- **Plenticore Inverters**: Solar inverters with comprehensive 3-phase monitoring and battery management
+- **Connection Types**: WiFi/Network (Modbus TCP on configurable port, default 1502; HTTP for device detection)
+- **Device Roles**: Fixed roles (inverter, battery, smartMeter) for system integration
+- **Monitoring**:
+  - **DC**: 3 string inputs (voltage, current, power per string)
+  - **AC**: 3-phase monitoring (voltage, current, active power per phase; reactive/apparent power in expert mode)
+  - **Battery**: SOC, voltage, current, charge/discharge power, temperature, cycles, gross/net capacity
+  - **Smart Meter**: External power meter with per-phase voltage, current, power, frequency, power factor
+  - **Home Consumption**: Total consumption with breakdown (from PV, grid, battery)
+  - **Yields**: Daily, monthly, yearly, and total energy production
+  - **System Info**: Model/article number, max power, generation power, uptime, isolation resistance
+- **Optimization**: Batch register reads for fast data fetching
 
 ### Connection Types
 
@@ -298,12 +324,7 @@ Permissions are requested at runtime when needed.
 
 The app automatically scans for devices using:
 - **Bluetooth**: Scans for device-specific service UUIDs
-- **mDNS/Bonjour**: Discovers devices advertising `_http._tcp` service
 - **LAN Scanning**: Checks local subnet IP ranges for compatible devices
-
-## Architecture & Development
-
-For detailed information about the project architecture, design patterns, and development guidelines, see [ARCHITECTURE.md](doc/ARCHITECTURE.md).
 
 ## Contributing
 
