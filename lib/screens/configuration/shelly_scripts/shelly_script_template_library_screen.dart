@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../models/device.dart';
 import '../../../models/shelly_script_template.dart';
 import '../../../services/script_template_service.dart';
+import '../../../utils/dialog_utils.dart';
 import '../../../utils/localization_extension.dart';
+import '../../../utils/message_utils.dart';
 import '../../../utils/version_utils.dart';
 import '../../../widgets/app_bar_widget.dart';
 import '../../../widgets/app_scaffold.dart';
 import 'shelly_script_template_config_screen.dart';
+import 'shelly_script_template_import_screen.dart';
 
 /// Screen for browsing and selecting Shelly script templates
 ///
 /// Shows all available templates with smart filtering based on required devices.
-/// Users can tap a template to configure parameters and deploy to their Shelly device.
+/// Can be used globally (no device) or device-specific (with device for deployment).
 class ShellyScriptTemplateLibraryScreen extends StatefulWidget {
-  final Device device;
+  final Device? device;
   final String? systemId;
 
   const ShellyScriptTemplateLibraryScreen({
     super.key,
-    required this.device,
+    this.device,
     this.systemId,
   });
 
@@ -36,6 +40,7 @@ class _ShellyScriptTemplateLibraryScreenState
   String? _selectedTag;
   List<String> _availableTags = [];
   bool _showAllScripts = false;
+  bool _showAllVersions = false; // Show all template versions
 
   @override
   void initState() {
@@ -50,34 +55,31 @@ class _ShellyScriptTemplateLibraryScreenState
       // Load all templates (includes all versions)
       final allTemplates = await ScriptTemplateService.loadTemplates();
 
-      // Group by ID and get latest version only
-      final latestTemplatesMap = <String, ShellyScriptTemplate>{};
-      for (final template in allTemplates) {
-        final existing = latestTemplatesMap[template.id];
-        if (existing == null ||
-            VersionUtils.compareVersions(template.version, existing.version) > 0) {
-          latestTemplatesMap[template.id] = template;
-        }
-      }
-      final latestTemplates = latestTemplatesMap.values.toList();
+      // Conditionally filter to latest version only
+      final displayTemplates = _showAllVersions
+          ? allTemplates
+          : _getLatestVersionsOnly(allTemplates);
 
       final tags = await ScriptTemplateService.getAllTags();
 
-      // Apply initial compatibility filter (only if toggle is OFF)
-      var initialFiltered = latestTemplates;
-      if (!_showAllScripts && widget.device.getDeviceModelGroup() != null) {
+      // Apply initial compatibility filter (only if toggle is OFF and device provided)
+      var initialFiltered = displayTemplates;
+      if (!_showAllScripts && widget.device != null && widget.device!.getDeviceModelGroup() != null) {
         initialFiltered = ScriptTemplateService.filterByCompatibleDevice(
-          latestTemplates,
-          widget.device.getDeviceModelGroup()!,
+          displayTemplates,
+          widget.device!.getDeviceModelGroup()!,
         );
       }
 
       setState(() {
-        _templates = latestTemplates;  // Store latest only
+        _templates = displayTemplates;
         _filteredTemplates = initialFiltered;
         _availableTags = tags;
         _isLoading = false;
       });
+
+      // Reapply search and tag filters after loading
+      _applyFilters();
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -89,6 +91,19 @@ class _ShellyScriptTemplateLibraryScreenState
         );
       }
     }
+  }
+
+  /// Get only latest version of each template
+  List<ShellyScriptTemplate> _getLatestVersionsOnly(List<ShellyScriptTemplate> templates) {
+    final latestTemplatesMap = <String, ShellyScriptTemplate>{};
+    for (final template in templates) {
+      final existing = latestTemplatesMap[template.id];
+      if (existing == null ||
+          VersionUtils.compareVersions(template.version, existing.version) > 0) {
+        latestTemplatesMap[template.id] = template;
+      }
+    }
+    return latestTemplatesMap.values.toList();
   }
 
   void _applyFilters() {
@@ -104,13 +119,13 @@ class _ShellyScriptTemplateLibraryScreenState
       filtered = ScriptTemplateService.filterByTags(filtered, [_selectedTag!]);
     }
 
-    // Apply compatibility filter (only if toggle is OFF)
-    if (!_showAllScripts) {
+    // Apply compatibility filter (only if toggle is OFF and device provided)
+    if (!_showAllScripts && widget.device != null) {
       // Filter by compatible device model ONLY
-      if (widget.device.deviceModel != null) {
+      if (widget.device!.deviceModel != null) {
         filtered = ScriptTemplateService.filterByCompatibleDevice(
           filtered,
-          widget.device.deviceModel!,
+          widget.device!.getDeviceModelGroup()!,
         );
       }
     }
@@ -120,19 +135,37 @@ class _ShellyScriptTemplateLibraryScreenState
     });
   }
 
+  /// Get count of active filters (for badge display)
+  int _getActiveFilterCount() {
+    int count = 0;
+    if (_showAllScripts) count++;
+    if (_showAllVersions) count++;
+    if (_selectedTag != null) count++;
+    return count;
+  }
+
   /// Check if template is compatible with current device (device model only)
   bool _isTemplateCompatible(ShellyScriptTemplate template) {
-    String? model = widget.device.getDeviceModelGroup();
+    // If no device provided, assume compatible
+    if (widget.device == null) return true;
+
+    String? model = widget.device!.getDeviceModelGroup();
     // Check device model compatibility ONLY (use device.deviceModel directly)
     return template.compatibleDevices.isEmpty || (model != null && template.compatibleDevices.contains(model));
   }
 
   void _onTemplateSelected(ShellyScriptTemplate template) {
+    // If no device, just view the template without deploying
+    if (widget.device == null) {
+      // TODO: Show template details view instead of config screen
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ShellyScriptTemplateConfigScreen(
-          device: widget.device,
+          device: widget.device!,
           template: template,
           systemId: widget.systemId,  // Pass systemId for device filtering
         ),
@@ -161,7 +194,7 @@ class _ShellyScriptTemplateLibraryScreenState
             ),
             const SizedBox(height: 4),
             Text(
-              widget.device.deviceModel ?? dialogContext.l10n.shellyScriptsUnknownModel,
+              widget.device?.deviceModel ?? dialogContext.l10n.shellyScriptsUnknownModel,
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
@@ -197,6 +230,33 @@ class _ShellyScriptTemplateLibraryScreenState
         onTap: () => _onTemplateSelected(template),
         child: Column(
           children: [
+            // User template badge
+            if (template.isUserTemplate)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.blue.shade200),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.blue.shade700, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      context.l10n.shellyScriptsUserTemplate,
+                      style: TextStyle(
+                        color: Colors.blue.shade900,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // Incompatibility warning banner
             if (!isCompatible)
               Container(
@@ -249,12 +309,32 @@ class _ShellyScriptTemplateLibraryScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          template.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                getLocalizedField(context, template.name, template.nameLng),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            if (_showAllVersions) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'v${template.version}',
+                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -267,11 +347,41 @@ class _ShellyScriptTemplateLibraryScreenState
                       ],
                     ),
                   ),
+                  // Context menu for user templates
+                  if (template.isUserTemplate)
+                    PopupMenuButton<String>(
+                      onSelected: (action) => _handleTemplateAction(action, template),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'export',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.download),
+                              const SizedBox(width: 8),
+                              Text(context.l10n.shellyScriptsExportTemplate),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Text(
+                                context.l10n.delete,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
-                template.description,
+                getLocalizedField(context, template.description, template.descriptionLng),
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[700],
@@ -354,11 +464,72 @@ class _ShellyScriptTemplateLibraryScreenState
     );
   }
 
+  /// Navigate to import screen
+  Future<void> _showImportScreen() async {
+    final imported = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ShellyScriptTemplateImportScreen(),
+      ),
+    );
+
+    if (imported == true) {
+      // Reload templates from service (includes newly imported template)
+      await _loadTemplates();
+    }
+  }
+
+  /// Handle template actions (export, delete)
+  Future<void> _handleTemplateAction(String action, ShellyScriptTemplate template) async {
+    switch (action) {
+      case 'export':
+        final json = ScriptTemplateService.exportTemplate(template);
+        await Clipboard.setData(ClipboardData(text: json));
+        if (!mounted) return;
+        MessageUtils.showSuccess(
+          context,
+          context.l10n.shellyScriptsExportSuccess,
+        );
+        break;
+
+      case 'delete':
+        final confirmed = await DialogUtils.showConfirmDialog(
+          context,
+          title: context.l10n.shellyScriptsDeleteTemplateConfirm,
+          content: '${getLocalizedField(context, template.name, template.nameLng)} (${template.version})',
+        );
+
+        if (confirmed != true || !mounted) return;
+
+        await DialogUtils.executeWithLoading(
+          context,
+          loadingMessage: context.l10n.deleting,
+          operation: () async {
+            await ScriptTemplateService.deleteUserTemplate(template);
+          },
+        );
+
+        if (!mounted) return;
+        MessageUtils.showSuccess(context, context.l10n.shellyScriptsTemplateDeleted);
+
+        // Reload templates from service (deleted template will be removed)
+        await _loadTemplates();
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBarWidget(
         title: context.l10n.shellyScriptLibraryTitle,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            tooltip: context.l10n.shellyScriptsImportTemplate,
+            onPressed: _showImportScreen,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -380,56 +551,101 @@ class _ShellyScriptTemplateLibraryScreenState
             ),
           ),
 
-          // Compatibility toggle
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
+          // Collapsible filter accordion
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: ExpansionTile(
+              title: Row(
+                children: [
+                  const Icon(Icons.filter_alt, size: 20),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.filters),
+                  if (_getActiveFilterCount() > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getActiveFilterCount().toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
               children: [
-                const Icon(Icons.filter_alt, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.shellyScriptsShowAllToggle),
-                const Spacer(),
-                Switch(
-                  value: _showAllScripts,
-                  onChanged: (value) {
-                    setState(() => _showAllScripts = value);
-                    _applyFilters();
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Show All Scripts toggle
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(context.l10n.shellyScriptsShowAllToggle),
+                        value: _showAllScripts,
+                        onChanged: (value) {
+                          setState(() => _showAllScripts = value);
+                          _applyFilters();
+                        },
+                      ),
+
+                      // Show All Versions toggle
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(context.l10n.shellyScriptsShowAllVersions),
+                        subtitle: Text(context.l10n.shellyScriptsShowAllVersionsDetail),
+                        value: _showAllVersions,
+                        onChanged: (value) {
+                          setState(() => _showAllVersions = value);
+                          _loadTemplates();
+                        },
+                      ),
+
+                      // Tag filter chips
+                      if (_availableTags.isNotEmpty) ...[
+                        const Divider(height: 32),
+                        Text(
+                          context.l10n.shellyScriptsFilterByTag,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            FilterChip(
+                              label: Text(context.l10n.shellyScriptsFilterAll),
+                              selected: _selectedTag == null,
+                              onSelected: (selected) {
+                                setState(() => _selectedTag = null);
+                                _applyFilters();
+                              },
+                            ),
+                            ..._availableTags.map((tag) => FilterChip(
+                                  label: Text(tag),
+                                  selected: _selectedTag == tag,
+                                  onSelected: (selected) {
+                                    setState(() => _selectedTag = selected ? tag : null);
+                                    _applyFilters();
+                                  },
+                                )),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-
-          // Tag filter chips
-          if (_availableTags.isNotEmpty)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  FilterChip(
-                    label: Text(context.l10n.shellyScriptsFilterAll),
-                    selected: _selectedTag == null,
-                    onSelected: (selected) {
-                      setState(() => _selectedTag = null);
-                      _applyFilters();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ..._availableTags.map((tag) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(tag),
-                          selected: _selectedTag == tag,
-                          onSelected: (selected) {
-                            setState(() => _selectedTag = selected ? tag : null);
-                            _applyFilters();
-                          },
-                        ),
-                      )),
-                ],
-              ),
-            ),
 
           const SizedBox(height: 16),
 

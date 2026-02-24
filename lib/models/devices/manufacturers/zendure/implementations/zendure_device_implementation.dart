@@ -12,12 +12,14 @@ import 'package:the_solar_app/utils/map_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
 import 'package:the_solar_app/widgets/zendure_battery_pack_list_widget.dart';
+import '../../../generic_rendering/device_category_config.dart';
 import '../../../generic_rendering/device_control_item.dart';
 import '../../../generic_rendering/device_custom_section.dart';
 import '../../../generic_rendering/device_data_field.dart';
 import '../../../generic_rendering/device_menu_item.dart';
 import '../../../generic_rendering/general_setting_item.dart';
 import '../../../time_series_field_config.dart';
+import '../../../time_series_field_group.dart';
 
 /// Shared implementation for all Zendure devices (Bluetooth and WiFi)
 ///
@@ -45,7 +47,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             final outputLimit = properties['outputLimit'] as int? ?? 0;
 
             // Define max limits (can be adjusted based on device specs)
-            const maxInputLimit = 1200; // Example: 1200W max
+            const maxInputLimit = 2400; // Example: 1200W max
             const maxOutputLimit = 1200; // Example: 1200W max
 
             // Navigate to PowerLimitScreen
@@ -257,6 +259,42 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   }
 
   @override
+  List<DeviceCategoryConfig> getCategoryConfigs() {
+    return [
+    const DeviceCategoryConfig(
+      category: 'settings',
+      displayName: 'settings',
+      displayNameKey: CategoryTranslationKeys.settings,
+      layout: CategoryLayout.standard,
+      order: 20,
+      // PV1 always shown - use defaults (both false)
+    ),
+    const DeviceCategoryConfig(
+      category: 'battery',
+      displayName: 'battery',
+      displayNameKey: CategoryTranslationKeys.battery,
+      layout: CategoryLayout.standard,
+      order: 15,
+      // PV1 always shown - use defaults (both false)
+    ),
+    const DeviceCategoryConfig(
+      category: 'status',
+      displayName: 'status',
+      displayNameKey: CategoryTranslationKeys.status,
+      layout: CategoryLayout.standard,
+      order: 25,
+      // PV1 always shown - use defaults (both false)
+    ),
+    const DeviceCategoryConfig(
+    category: 'pv',
+    displayName: 'pv',
+    displayNameKey: CategoryTranslationKeys.pvInput,
+    layout: CategoryLayout.standard,
+    order: 10
+    )];
+  }
+
+  @override
   List<DeviceDataField> getDataFields() {
     return [
       DeviceDataField(
@@ -266,6 +304,65 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MapUtils.OM(data, ['data', 'properties', 'solarInputPower']),
         icon: Icons.wb_sunny,
         expertMode: false,
+      ),
+      DeviceDataField(
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 1}),
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarPower1']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        hideIfEmpty: true,
+          category: "pv"
+      ),
+      DeviceDataField(
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 2}),
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarPower2']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        hideIfEmpty: true,
+          category: "pv"
+      ),
+      DeviceDataField(
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 3}),
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarPower3']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        hideIfEmpty: true,
+        category: "pv"
+      ),
+      DeviceDataField(
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 4}),
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarPower4']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        hideIfEmpty: true,
+          category: "pv"
+      ),
+      DeviceDataField(
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 5}),
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarPower5']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        hideIfEmpty: true,
+        category: "pv"
+      ),
+      DeviceDataField(
+        name: TO(key: FieldTranslationKeys.pvCurrent, params: {'num': 6}),
+        type: DataFieldType.watt,
+        valueExtractor: (data) =>
+            MapUtils.OM(data, ['data', 'properties', 'solarPower6']),
+        icon: Icons.wb_sunny,
+        expertMode: false,
+        hideIfEmpty: true
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.acMode),
@@ -278,14 +375,27 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.power,
         expertMode: false,
+        category: "settings"
       ),
       DeviceDataField(
-        name: TO(key: FieldTranslationKeys.homeOutputPower),
+        name: TO(key: "set grid input"),
         type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'properties', 'outputHomePower']),
+        valueExtractor: (data){
+          return MapUtils.OM(data, ['data', 'properties', 'inputLimit']);
+        },
         icon: Icons.home,
         expertMode: false,
+        category: "settings"
+      ),
+      DeviceDataField(
+        name: TO(key: "set grid output"),
+        type: DataFieldType.watt,
+        valueExtractor: (data){
+          return MapUtils.OM(data, ['data', 'properties', 'outputLimit']);
+        },
+        icon: Icons.home,
+        expertMode: false,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.batteryLevel),
@@ -294,32 +404,34 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MapUtils.OM(data, ['data', 'properties', 'electricLevel']),
         icon: Icons.battery_charging_full,
         expertMode: false,
+        category: "battery"
       ),
       DeviceDataField(
-        name: TO(key: FieldTranslationKeys.outputLimit),
+        name: TO(key: FieldTranslationKeys.gridCurrent),
         type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'properties', 'outputLimit']),
+        valueExtractor: (data){
+          if(MapUtils.OM(data, ['data', 'properties', 'gridInputPower']) == null && MapUtils.OM(data, ['data', 'properties', 'outputHomePower']) == null){
+            return null;
+          }
+          return MapUtils.OMas<num>(data, ['data', 'properties', 'gridInputPower'],0) - MapUtils.OMas<num>(data, ['data', 'properties', 'outputHomePower'],0);
+        },
         icon: Icons.power,
-        expertMode: false,
+        expertMode: false
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.batteryPower),
         type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'properties', 'packInputPower']),
+        valueExtractor: (data){
+          if(MapUtils.OM(data, ['data', 'properties', 'packInputPower']) == null && MapUtils.OM(data, ['data', 'properties', 'outputPackPower']) == null){
+            return null;
+          }
+          return MapUtils.OMas<num>(data, ['data', 'properties', 'packInputPower'],0) - MapUtils.OMas<num>(data, ['data', 'properties', 'outputPackPower'],0);
+        },
         icon: Icons.arrow_downward,
         expertMode: false,
+        category: "battery"
       ),
-      DeviceDataField(
-        name: TO(key: FieldTranslationKeys.batteryPower),
-        type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'properties', 'outputPackPower']),
-        icon: Icons.arrow_upward,
-        expertMode: false,
-      ),
-      DeviceDataField(
+      /*DeviceDataField(
         name: TO(key: FieldTranslationKeys.packState),
         type: DataFieldType.none,
         valueExtractor: (data) {
@@ -331,7 +443,8 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.info_outline,
         expertMode: false,
-      ),
+        category: "battery"
+      ),*/
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.packCount),
         type: DataFieldType.none,
@@ -339,15 +452,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MapUtils.OM(data, ['data', 'properties', 'packNum']),
         icon: Icons.battery_std,
         expertMode: false,
-      ),
-      // Additional properties from device
-      DeviceDataField(
-        name: TO(key: FieldTranslationKeys.inputLimit),
-        type: DataFieldType.watt,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'properties', 'inputLimit']),
-        icon: Icons.input,
-        expertMode: true,
+        category: "battery"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.socSet),
@@ -360,6 +465,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.battery_charging_full,
         expertMode: true,
+        category: "battery"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.minSoc),
@@ -372,6 +478,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.battery_alert,
         expertMode: true,
+        category: "battery"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.gridReverse),
@@ -383,6 +490,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.sync_alt,
         expertMode: true,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.maxInverterPower),
@@ -391,6 +499,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MapUtils.OM(data, ['data', 'properties', 'inverseMaxPower']),
         icon: Icons.power_settings_new,
         expertMode: true,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.lampSwitch),
@@ -401,6 +510,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.lightbulb,
         expertMode: true,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.gridOffMode),
@@ -412,6 +522,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.power_off,
         expertMode: true,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.wifiState),
@@ -425,6 +536,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.cloud,
         expertMode: false,
+        category: "status"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.fanMode),
@@ -433,6 +545,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MapUtils.OM(data, ['data', 'properties', 'Fanmode']),
         icon: Icons.air,
         expertMode: true,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.fanSpeed),
@@ -441,16 +554,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
             MapUtils.OM(data, ['data', 'properties', 'Fanspeed']),
         icon: Icons.speed,
         expertMode: true,
-      ),
-      DeviceDataField(
-        name: TO(key: FieldTranslationKeys.smartMode),
-        type: DataFieldType.none,
-        valueExtractor: (data) {
-          final state = MapUtils.OM(data, ['data', 'properties', 'smartMode']);
-          return state == 1 ? 'Enabled' : 'Disabled';
-        },
-        icon: Icons.smart_toy,
-        expertMode: true,
+        category: "status"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.chargeMaxLimit),
@@ -458,7 +562,8 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         valueExtractor: (data) =>
             MapUtils.OM(data, ['data', 'properties', 'chargeMaxLimit']),
         icon: Icons.battery_charging_full,
-        expertMode: false,
+        expertMode: true,
+        category: "settings"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.timestamp),
@@ -474,6 +579,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.access_time,
         expertMode: true,
+        category: "status"
       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.timezone),
@@ -484,6 +590,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         },
         icon: Icons.public,
         expertMode: true,
+        category: "status"
       ),
     ];
   }
@@ -558,11 +665,6 @@ class ZendureDeviceImplementation extends DeviceImplementation {
   }
 
   @override
-  String getFetchCommand() {
-    return 'getData'; // Zendure devices don't use named commands
-  }
-
-  @override
   List<TimeSeriesFieldConfig> getTimeSeriesFields() {
     return [
       TimeSeriesFieldConfig(
@@ -570,24 +672,88 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         type: DataFieldType.watt,
         mapping: ['properties', 'solarInputPower'],
       ),
-      TimeSeriesFieldConfig(
-        name: TO(key: CategoryTranslationKeys.battery),
-        type: DataFieldType.percentage,
-        mapping: ['properties', 'electricLevel'],
-      ),
-      TimeSeriesFieldConfig(
-        name: TO(key: FieldTranslationKeys.outputPower),
-        type: DataFieldType.watt,
-        mapping: ['properties', 'outputHomePower'],
-      ),
-      TimeSeriesFieldConfig(
-        name: TO(key: FieldTranslationKeys.inputVoltage),
-        type: DataFieldType.voltage,
-        mapping: ['properties', 'inputVolt'],
-        formatter: (value) => value / 10, // Convert from 0.1V to V
-      ),
     ];
   }
+
+  @override
+  List<TimeSeriesFieldGroup> getTimeSeriesFieldGroups() {
+    return [
+      TimeSeriesFieldGroup(
+      name: TO(key: FieldTranslationKeys.dcTotalPower),
+      fields: [
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 1}),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'solarPower1'],
+          hideIfEmpty: true
+        ),
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 2}),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'solarPower2'],
+          hideIfEmpty: true
+        ),
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 3}),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'solarPower3'],
+          hideIfEmpty: true
+        ),
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 4}),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'solarPower4'],
+          hideIfEmpty: true
+        ),
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 5}),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'solarPower5'],
+          hideIfEmpty: true
+        ),
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.pvPower, params: {'num': 6}),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'solarPower6'],
+          hideIfEmpty: true
+        ),
+      ],
+      expertMode: false,
+    ),
+    TimeSeriesFieldGroup(
+      name: TO(key: FieldTranslationKeys.gridCurrent),
+      fields: [
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.input),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'gridInputPower'],
+        ),
+        TimeSeriesFieldConfig(
+          name: TO(key: FieldTranslationKeys.output),
+          type: DataFieldType.watt,
+          mapping: ['properties', 'outputHomePower'],
+        ),
+      ],
+      expertMode: false,
+    ),
+    TimeSeriesFieldGroup(
+      name: TO(key: FieldTranslationKeys.batteryPower),
+      fields: [
+        TimeSeriesFieldConfig(
+            name: TO(key: FieldTranslationKeys.input),
+            type: DataFieldType.watt,
+            mapping: ['properties', 'packInputPower'],
+        ),
+        TimeSeriesFieldConfig(
+            name: TO(key: FieldTranslationKeys.output),
+            type: DataFieldType.watt,
+            mapping: ['properties', 'outputPackPower'],
+        ),
+      ],
+      expertMode: false,
+    )];
+  }
+
 
   @override
   Future<Map<String, dynamic>?> sendCommand(

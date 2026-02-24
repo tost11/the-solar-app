@@ -5,6 +5,7 @@ import '../utils/localization_extension.dart';
 import '../utils/permission_utils.dart';
 import '../utils/globals.dart';
 import '../screens/app_info_screen.dart';
+import '../screens/configuration/shelly_scripts/shelly_script_template_library_screen.dart';
 
 class SettingsDrawer extends StatefulWidget {
   const SettingsDrawer({super.key});
@@ -111,6 +112,19 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                 setState(() {});
               },
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.code),
+            title: Text(context.l10n.shellyScriptsTemplateLibrary),
+            onTap: () {
+              Navigator.of(context).pop(); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ShellyScriptTemplateLibraryScreen(),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app, color: Colors.red),

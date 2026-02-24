@@ -355,9 +355,9 @@ class _ShellyScriptTemplateConfigScreenState
     return TextFormField(
       controller: _controllers[param.name],
       decoration: InputDecoration(
-        labelText: param.label,
+        labelText: getLocalizedField(context, param.label, param.labelLng),
         hintText: param.placeholder,
-        helperText: param.description,
+        helperText: getLocalizedField(context, param.description, param.descriptionLng),
         border: const OutlineInputBorder(),
       ),
       keyboardType: param.type == ScriptParameterType.url
@@ -365,7 +365,7 @@ class _ShellyScriptTemplateConfigScreenState
           : TextInputType.text,
       validator: (value) {
         if (param.required && (value == null || value.isEmpty)) {
-          return context.l10n.shellyScriptsValidationRequired(param.label);
+          return context.l10n.shellyScriptsValidationRequired(getLocalizedField(context, param.label, param.labelLng));
         }
         return null;
       },
@@ -379,9 +379,9 @@ class _ShellyScriptTemplateConfigScreenState
     return TextFormField(
       controller: _controllers[param.name],
       decoration: InputDecoration(
-        labelText: param.label,
+        labelText: getLocalizedField(context, param.label, param.labelLng),
         hintText: param.placeholder,
-        helperText: param.description,
+        helperText: getLocalizedField(context, param.description, param.descriptionLng),
         border: const OutlineInputBorder(),
         suffixText: param.type == ScriptParameterType.duration ? 'ms' : null,
       ),
@@ -391,18 +391,18 @@ class _ShellyScriptTemplateConfigScreenState
       ],
       validator: (value) {
         if (param.required && (value == null || value.isEmpty)) {
-          return context.l10n.shellyScriptsValidationRequired(param.label);
+          return context.l10n.shellyScriptsValidationRequired(getLocalizedField(context, param.label, param.labelLng));
         }
         if (value != null && value.isNotEmpty) {
           final numValue = int.tryParse(value);
           if (numValue == null) {
-            return context.l10n.shellyScriptsValidationMustBeNumber(param.label);
+            return context.l10n.shellyScriptsValidationMustBeNumber(getLocalizedField(context, param.label, param.labelLng));
           }
           if (param.minValue != null && numValue < param.minValue!) {
-            return context.l10n.shellyScriptsValidationMinValue(param.label, param.minValue!.toString());
+            return context.l10n.shellyScriptsValidationMinValue(getLocalizedField(context, param.label, param.labelLng), param.minValue!.toString());
           }
           if (param.maxValue != null && numValue > param.maxValue!) {
-            return context.l10n.shellyScriptsValidationMaxValue(param.label, param.maxValue!.toString());
+            return context.l10n.shellyScriptsValidationMaxValue(getLocalizedField(context, param.label, param.labelLng), param.maxValue!.toString());
           }
           if (param.type == ScriptParameterType.port &&
               (numValue < 1 || numValue > 65535)) {
@@ -426,8 +426,8 @@ class _ShellyScriptTemplateConfigScreenState
 
     return Card(
       child: SwitchListTile(
-        title: Text(param.label),
-        subtitle: Text(param.description),
+        title: Text(getLocalizedField(context, param.label, param.labelLng)),
+        subtitle: Text(getLocalizedField(context, param.description, param.descriptionLng)),
         value: currentValue,
         onChanged: (value) {
           setState(() {
@@ -639,7 +639,7 @@ class _ShellyScriptTemplateConfigScreenState
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
-          labelText: param.label,
+          labelText: getLocalizedField(context, param.label, param.labelLng),
           hintText: param.placeholder,
           helperText: _buildSourceHelperText(param, resources),
           helperMaxLines: 2,
@@ -709,7 +709,7 @@ class _ShellyScriptTemplateConfigScreenState
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  context.l10n.shellyScriptsSelectDeviceModal(param.label),
+                  context.l10n.shellyScriptsSelectDeviceModal(getLocalizedField(context, param.label, param.labelLng)),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),

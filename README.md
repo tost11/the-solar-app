@@ -153,9 +153,13 @@ Access via the Systems menu. Each system automatically connects all assigned dev
 ## Shelly Script Automation
 
 Deploy JavaScript automation templates directly to Shelly devices for advanced control without cloud dependency. Scripts run autonomously on the device.
+The script maintaining is handled in this project: https://github.com/tost11/zendure-shelly-tools
 
 **Available Templates:**
 - **Zendure Power Control**: Zero-export automation that automatically balances Zendure power stations based on Shelly EM3 grid measurements (bidirectional: discharge to home, charge from excess)
+- **OpenDTU Power Control**: Zero-export automation that adjusts OpenDTU inverter power limits based on Shelly EM3 grid measurements
+- **Zendure Online Monitoring**: Automated data reporting to online monitoring platforms for Zendure power stations
+  - Compatible with the [Solar Monitoring](https://github.com/tost11/solar-monitoring) project (Live: [solar.pihost.org](https://solar.pihost.org) / [solar.tost-soft.de](https://solar.tost-soft.de))
 
 **Usage:** Open Shelly device → Menu → "Scripts" → "From Template"
 

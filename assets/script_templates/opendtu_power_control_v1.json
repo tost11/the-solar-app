@@ -1,0 +1,280 @@
+{
+  "id": "opendtu-power-control",
+  "name": "OpenDTU Power Control",
+  "name_lng": {
+    "de": "OpenDTU Leistungssteuerung"
+  },
+  "version": "1.0.0",
+  "description": "Controls OpenDTU inverter based on Shelly EM3 measurement (zero feed-in)",
+  "description_lng": {
+    "de": "Steuert OpenDTU Wechselrichter basierend auf Shelly EM3 Messung (Nulleinspeisung)"
+  },
+  "compatibleDevices": [
+    "SPEM"
+  ],
+  "requiredDevices": [
+    "opendtu"
+  ],
+  "author": "TheSolarApp",
+  "tags": [
+    "EM3",
+    "power-management",
+    "zero feed-in",
+    "opendtu"
+  ],
+  "parameters": [
+    {
+      "name": "HOST",
+      "label": "IP Address / Hostname",
+      "label_lng": {
+        "de": "IP-Adresse / Hostname"
+      },
+      "description": "IP address or hostname of the OpenDTU",
+      "description_lng": {
+        "de": "IP-Adresse oder Hostname des OpenDTU"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "192.168.178.2",
+      "sourceConfig": {
+        "source": "device",
+        "sourceProperty": "ipAddress",
+        "sourceFilter": "opendtu"
+      }
+    },
+    {
+      "name": "MAC",
+      "label": "MAC Address (optional)",
+      "label_lng": {
+        "de": "MAC-Adresse (optional)"
+      },
+      "description": "MAC address for auto-resolution in Shelly AP mode",
+      "description_lng": {
+        "de": "MAC-Adresse für Auto-Auflösung im Shelly AP-Modus"
+      },
+      "type": "string",
+      "required": false,
+      "placeholder": "AA:BB:CC:DD:EE:FF"
+    },
+    {
+      "name": "PORT",
+      "label": "Port",
+      "label_lng": {
+        "de": "Port"
+      },
+      "description": "HTTP port of the OpenDTU",
+      "description_lng": {
+        "de": "HTTP-Port des OpenDTU"
+      },
+      "type": "port",
+      "required": true,
+      "defaultValue": 80,
+      "minValue": 1,
+      "maxValue": 65535
+    },
+    {
+      "name": "AUTH_PASSWORD",
+      "label": "Admin Password (optional)",
+      "label_lng": {
+        "de": "Admin-Passwort (optional)"
+      },
+      "description": "Admin password if authentication is enabled",
+      "description_lng": {
+        "de": "Admin-Passwort falls Authentifizierung aktiviert"
+      },
+      "type": "string",
+      "required": false,
+      "placeholder": "openDTU42"
+    },
+    {
+      "name": "INVERTER_SERIAL",
+      "label": "Inverter Serial Number",
+      "label_lng": {
+        "de": "Wechselrichter Seriennummer"
+      },
+      "description": "Serial number of the inverter",
+      "description_lng": {
+        "de": "Seriennummer des Wechselrichters"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "1234567890"
+    },
+    {
+      "name": "INVERTER_MANUFACTURER",
+      "label": "Manufacturer (optional)",
+      "label_lng": {
+        "de": "Hersteller (optional)"
+      },
+      "description": "Manufacturer name for OpenDTU forks (e.g., Hoymiles, DeyeSun)",
+      "description_lng": {
+        "de": "Hersteller-Name für OpenDTU Forks (z.B. Hoymiles, DeyeSun)"
+      },
+      "type": "string",
+      "required": false,
+      "placeholder": "Hoymiles"
+    },
+    {
+      "name": "MAX_INVERTER_POWER",
+      "label": "Maximum Inverter Power (W)",
+      "label_lng": {
+        "de": "Maximale Wechselrichter-Leistung (W)"
+      },
+      "description": "Maximum power of the inverter in watts",
+      "description_lng": {
+        "de": "Maximale Leistung des Wechselrichters in Watt"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 600,
+      "minValue": 1
+    },
+    {
+      "name": "MAX_LIMIT_WATT",
+      "label": "Maximum Limit (W)",
+      "label_lng": {
+        "de": "Maximales Limit (W)"
+      },
+      "description": "Maximum limit in watts (can be less than max power)",
+      "description_lng": {
+        "de": "Maximales Limit in Watt (kann kleiner als max. Leistung sein)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 200,
+      "minValue": 1
+    },
+    {
+      "name": "MIN_LIMIT_PERCENTAGE",
+      "label": "Minimum Limit (%)",
+      "label_lng": {
+        "de": "Minimales Limit (%)"
+      },
+      "description": "Minimum percentage limit (some devices treat 0% as 100%)",
+      "description_lng": {
+        "de": "Minimales Prozent-Limit (manche Geräte behandeln 0% als 100%)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 0,
+      "minValue": 0,
+      "maxValue": 100,
+      "advancedOption": true
+    },
+    {
+      "name": "INPUT_DEVIDER",
+      "label": "Input Divider",
+      "label_lng": {
+        "de": "Eingangs-Teiler"
+      },
+      "description": "For inverters with multiple solar inputs where not all are used (e.g., 0.5 for 2T with one input, 0.25 for 4T with one input)",
+      "description_lng": {
+        "de": "Für Wechselrichter mit mehreren Solar-Eingängen, von denen nicht alle genutzt werden (z.B. 0.5 für 2T mit einem Eingang, 0.25 für 4T mit einem Eingang)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 1,
+      "minValue": 0,
+      "maxValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "DEBUG",
+      "label": "Debug Mode",
+      "label_lng": {
+        "de": "Debug-Modus"
+      },
+      "description": "Enable extended debug output",
+      "description_lng": {
+        "de": "Aktiviere erweiterte Debug-Ausgaben"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_RUN_MAIN_SCRIPT",
+      "label": "Main Loop Interval (s)",
+      "label_lng": {
+        "de": "Hauptschleife Intervall (s)"
+      },
+      "description": "Main loop interval in seconds",
+      "description_lng": {
+        "de": "Hauptschleife Intervall in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 5,
+      "minValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_RESOLVE_MAC",
+      "label": "MAC Resolution Interval (s)",
+      "label_lng": {
+        "de": "MAC-Auflösung Intervall (s)"
+      },
+      "description": "MAC resolution interval in seconds (if MAC is used)",
+      "description_lng": {
+        "de": "MAC-Auflösung Intervall in Sekunden (falls MAC verwendet wird)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 60,
+      "minValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_FETCH_CURRENT_LIMIT",
+      "label": "Status Query Interval (s)",
+      "label_lng": {
+        "de": "Status-Abfrage Intervall (s)"
+      },
+      "description": "Interval for inverter status query in seconds",
+      "description_lng": {
+        "de": "Intervall für Status-Abfrage des Wechselrichters in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 15,
+      "minValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "TIMEOUT_RESEND_LIMIT",
+      "label": "Resend Timeout (s)",
+      "label_lng": {
+        "de": "Wiedersende-Timeout (s)"
+      },
+      "description": "Timeout for resending limit in seconds",
+      "description_lng": {
+        "de": "Timeout für erneutes Senden des Limits in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "TIMEOUT_DEVICE_UNREACHABLE",
+      "label": "Device Unreachable Timeout (s)",
+      "label_lng": {
+        "de": "Gerät-Unerreichbar Timeout (s)"
+      },
+      "description": "Timeout until inverter is recognized as unreachable in seconds",
+      "description_lng": {
+        "de": "Timeout bis Wechselrichter als unerreichbar erkannt wird in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 95,
+      "minValue": 1,
+      "advancedOption": true
+    }
+  ],
+  "sourceCode": "// Inverter configuration\n\n// Control parameters advanced (normaly no change needed)\n\n// ==================== SCRIPT STATE ====================\nlet currentInverterPower = null;             // Current inverter power in watts\nlet lastRunTime = null;                      // Last time limit was set\nlet lastShellyPower = null;                  // Last measured Shelly power\nlet isRunning = false;                    // Prevents concurrent executions\nlet lastRunningStarted = 0;               // Timestamp of last script start\nlet lastSuccesfullSet = Shelly.getUptimeMs();\n\n// Build authentication header if password is set\nlet authHeader = \"\";\nif (AUTH_PASSWORD !== \"\") {\n    let credentials = btoa(\"admin:\" + AUTH_PASSWORD);\n    authHeader = \"Basic \" + credentials;\n}\n\n// ==================== HELPER FUNCTIONS ====================\n\nfunction log(message, debug) {\n    if (!debug || DEBUG) {\n        print(\"[\" + Shelly.getUptimeMs() + \" OpenDTU Power Script]: \" + message);\n    }\n}\n\nfunction getTimeDiff() {\n    let localLastRunTime = lastRunTime;\n    if (localLastRunTime == null) {\n        return null;\n    }\n    let now = Shelly.getUptimeMs();\n    let dif = now - localLastRunTime;\n    return dif;\n}\n\nfunction setCurrentPower(power) {\n    currentInverterPower = power;\n    if (power != null) {\n        lastRunTime = Shelly.getUptimeMs();\n    } else {\n        lastRunTime = null;\n    }\n}\n\n// ==================== MAIN LIMIT CONTROL ====================\n\nfunction setLimit(shellyPower, currentDevicePower) {\n    log(\"Current inverter power: \" + currentDevicePower + \"W\", true);\n    log(\"Current Shelly power: \" + shellyPower + \"W\", true);\n\n    // Calculate combined limit (what we want the inverter to output)\n    let combinedLimit = shellyPower + (currentDevicePower * INPUT_DEVIDER);\n\n    combinedLimit = combinedLimit / INPUT_DEVIDER;\n\n    // Clamp to valid range\n    let outputLimit = Math.max(combinedLimit, 0);\n    outputLimit = Math.min(outputLimit, MAX_LIMIT_WATT);\n\n    // Convert watt to percentage\n    let percentage = Math.round((outputLimit / MAX_INVERTER_POWER) * 100);\n    percentage = Math.max(MIN_LIMIT_PERCENTAGE, Math.min(100, percentage)); // Clamp to 0-100%\n\n    log(\"New inverter limit: \" + outputLimit + \"W (\" + percentage + \"%)\", true);\n\n    // Prepare POST data\n    let postData = {\n        serial: INVERTER_SERIAL,\n        limit_value: percentage,\n        limit_type: 3\n    };\n\n    // Only add manufacturer if it's not empty\n    if (INVERTER_MANUFACTURER !== \"\") {\n        postData.manufacturer = INVERTER_MANUFACTURER;\n    }\n\n    log(\"Sending POST to OpenDTU: \" + JSON.stringify(postData), true);\n\n    let boundary = \"----shellyformboundary\";\n\n    // Multipart-Body erzeugen\n    let body =\n        \"--\" + boundary + \"\\r\\n\" +\n        'Content-Disposition: form-data; name=\"data\"\\r\\n\\r\\n' +\n        JSON.stringify(postData) + \"\\r\\n\" +\n        \"--\" + boundary + \"--\\r\\n\";\n\n    Shelly.call(\"http.request\", {\n        method: \"POST\",\n        url: \"http://\" + HOST + \":\" + PORT + \"/api/limit/config\",\n        headers: {\n            \"Content-Type\": \"multipart/form-data; boundary=\" + boundary,\n            \"Authorization\": authHeader\n        },\n        body: body,\n        timeout: 5\n    }, function (res, err_code, err_msg) {\n\n        if (err_code !== 0) {\n            log(\"HTTP error: \" + err_code + \" \" + err_msg, false);\n            return;\n        }\n\n        log(\"HTTP status: \" + res.code, true);\n\n        if (res.code === 200) {\n            log(\"POST successful: \" + res.body, true);\n            setCurrentPower(outputLimit);\n            log(\"Set inverter power to: \" + outputLimit + \"W (\" + percentage + \"%)\", false);\n\n            if(INPUT_DEVIDER != 1){\n                log(\"Meaning with devider set to: \" + (outputLimit * INPUT_DEVIDER) + \"W \", false);\n            }\n        } else {\n            log(\"POST failed: \" + res.code + \" \" + res.body, false);\n        }\n    });\n}\n\n// ==================== MAIN SCRIPT LOOP ====================\n\nfunction runScript() {\n    if (typeof HOST !== 'string' || HOST === \"\") {\n        log(\"HOST not configured\", false);\n        return;\n    }\n\n    // Prevent concurrent executions\n    if (isRunning && Shelly.getUptimeMs() - lastRunningStarted < 60 * 1000) {\n        log(\"Skipping execution, still running: \" + (Shelly.getUptimeMs() - lastRunningStarted) + \"ms\", false);\n        return;\n    }\n\n    lastRunningStarted = Shelly.getUptimeMs();\n    isRunning = true;\n\n    let shellyPower = lastShellyPower;\n    if (shellyPower == null) {\n        log(\"No Shelly power data available yet\", true);\n        isRunning = false;\n        return;\n    }\n\n    log(\"Current Shelly power: \" + shellyPower + \"W\", true);\n\n    // Check if enough time has passed since last update\n    let diff = getTimeDiff();\n    if (diff != null && diff < 2 * 1000) {\n        log(\"Skipping execution, too soon since last update: \" + diff + \"ms\", true);\n        isRunning = false;\n        return;\n    }\n\n    // Check if power adjustment is needed\n    if (Math.abs(shellyPower) < 5) {\n        log(\"Current power is acceptable, no adjustment needed\", true);\n\n        // But update anyway if it's been a while\n        if (diff == null || diff > TIMEOUT_RESEND_LIMIT * 1000) {\n            log(\"Limit not set in a while, updating anyway\", true);\n        } else {\n            isRunning = false;\n            return;\n        }\n    }\n\n    // Set the limit\n    localInverterPower = currentInverterPower;\n    if (localInverterPower == null || Shelly.getUptimeMs() - lastSuccesfullSet > TIMEOUT_DEVICE_UNREACHABLE * 1000) {\n        log(\"Current inverter power unknown, no limit set, weit to be fetched first\", false);\n        isRunning = false;\n        return;\n    }\n\n    setLimit(shellyPower, localInverterPower);\n    isRunning = false;\n}\n\n// ==================== EVENT HANDLERS ====================\n\n// Listen to Shelly EM power updates\nShelly.addStatusHandler(function (event) {\n    if (event.name === \"em\" && event.delta && typeof event.delta.total_act_power === \"number\") {\n        lastShellyPower = event.delta.total_act_power;\n        log(\"Shelly power updated: \" + lastShellyPower + \"W\", true);\n    }\n\n    //lastShellyPower = (Math.random() - 0.5 ) * 100;\n    //log(\"fake power: \" + lastShellyPower, false);\n});\n\n// ==================== MAC RESOLUTION ====================\n\n// Resolve MAC address to IP (for Shelly AP mode)\nfunction resolveMacToIp() {\n    Shelly.call(\"WiFi.ListAPClients\", {}, function(res, err) {\n        if (err !== 0) {\n            log(\"MAC resolution: WiFi.ListAPClients error code \" + err, false);\n            return;\n        }\n        if (!res || !res.ap_clients) {\n            log(\"MAC resolution: No AP clients available\", true);\n            return;\n        }\n        for (let c of res.ap_clients) {\n            let mac = (c.mac || \"\").toUpperCase();\n            log(\"MAC resolution: Checking device with MAC: \" + mac + \" IP: \" + c.ip, true);\n            if (mac === MAC.toUpperCase()) {\n                log(\"MAC resolution: Device found! MAC: \" + mac + \" IP: \" + c.ip, false);\n                HOST = c.ip;\n                return;\n            }\n        }\n        log(\"MAC resolution: MAC address \" + MAC + \" could not be resolved\", true);\n    });\n}\n\nfunction fetchCurrentLimit() {\n\n    Shelly.call(\"http.request\", {\n        method: \"GET\",\n        url: \"http://\" + HOST + \":\" + PORT + \"/api/livedata/status\",\n        headers: {\n            \"Authorization\": authHeader\n        }\n    }, function (res, err_code, err_msg) {\n\n        if (err_code !== 0) {\n            log(\"HTTP error: \" + err_code + \" \" + err_msg, false);\n            return;\n        }\n\n        if (res.code !== 200) {\n            log(\"Request failed. HTTP status: \" + res.code, false);\n            return;\n        }\n\n        let data = JSON.parse(res.body);\n\n        if (!data.inverters) {\n            log(\"No inverter data found!\", false);\n            return;\n        }\n\n        for (let i = 0; i < data.inverters.length; i++) {\n            if (data.inverters[i].serial === INVERTER_SERIAL && (INVERTER_MANUFACTURER == null || data.inverters[i].manufacturer === INVERTER_MANUFACTURER)) {\n\n                log(\"FetchLimit: Inverter found: \" + INVERTER_SERIAL, true);\n\n                let limitRelative = data.inverters[i].limit_relative;\n                let limitAbsolute = data.inverters[i].limit_absolute;\n                let reachable = data.inverters[i].reachable;\n\n                if(reachable == false){\n                    log(\"FetchLimit: inverter not rechable from opendtu -> skip\", false);\n                    return;\n                }\n\n                if(limitAbsolute < 0){\n                    log(\"FetchLimit: Limit not fetched yet from inverter -> skip\", false);\n                    return;\n                }\n\n                log(\"FetchLimit: Temporary limit (relative): \" + limitRelative + \" %\", true);\n                log(\"FetchLimit: Absolute limit (relative): \" + limitRelative * 0.01 * MAX_INVERTER_POWER + \" W\", true);\n\n                currentInverterPower = limitRelative * MAX_INVERTER_POWER;\n\n                lastSuccesfullSet = Shelly.getUptimeMs();\n\n                return;\n            }\n        }\n\n        log(\"Serial not found: \" + INVERTER_SERIAL, false);\n    });\n}\n\n// ==================== TIMERS ====================\n\n// Main control loop\nTimer.set(INTERVAL_RUN_MAIN_SCRIPT * 1000, true, runScript, null);\nTimer.set(INTERVAL_FETCH_CURRENT_LIMIT * 1000, true, fetchCurrentLimit, null);\n\n// MAC resolution timer (if MAC is configured)\nif (typeof MAC === 'string' && MAC !== \"\") {\n    log(\"MAC resolution enabled for: \" + MAC, false);\n    Timer.set(INTERVAL_RESOLVE_MAC * 1000, true, resolveMacToIp, null);\n    // Resolve immediately on startup\n    Timer.set(1, false, resolveMacToIp, null);\n}\n\nTimer.set(1, false, fetchCurrentLimit, null);",
+  "createdAt": "2026-02-22T20:00:00Z",
+  "updatedAt": "2026-02-22T20:00:00Z"
+}

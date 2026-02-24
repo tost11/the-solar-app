@@ -3798,6 +3798,30 @@ abstract class AppLocalizations {
   /// **'Alle Scripte anzeigen'**
   String get shellyScriptsShowAllToggle;
 
+  /// Filters label
+  ///
+  /// In de, this message translates to:
+  /// **'Filter'**
+  String get filters;
+
+  /// Toggle label for showing all template versions
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Versionen anzeigen'**
+  String get shellyScriptsShowAllVersions;
+
+  /// Detail text for show all versions toggle
+  ///
+  /// In de, this message translates to:
+  /// **'Zeigt alle Template-Versionen an, nicht nur die neueste'**
+  String get shellyScriptsShowAllVersionsDetail;
+
+  /// Label for tag filter section
+  ///
+  /// In de, this message translates to:
+  /// **'Nach Tag filtern'**
+  String get shellyScriptsFilterByTag;
+
   /// Label for current device
   ///
   /// In de, this message translates to:
@@ -5208,6 +5232,24 @@ abstract class AppLocalizations {
   /// **'Stromzähler Phase 3'**
   String get categoryPowerMeterPhase3;
 
+  /// Category: Settings
+  ///
+  /// In de, this message translates to:
+  /// **'Einstellungen'**
+  String get categorySettings;
+
+  /// Category: Status
+  ///
+  /// In de, this message translates to:
+  /// **'Status'**
+  String get categoryStatus;
+
+  /// Category: PV Input
+  ///
+  /// In de, this message translates to:
+  /// **'PV Eingang'**
+  String get categoryPvInput;
+
   /// Field: Solar power
   ///
   /// In de, this message translates to:
@@ -5646,6 +5688,18 @@ abstract class AppLocalizations {
   /// **'String {num}'**
   String fieldStringFallback(String num);
 
+  /// Field: Input (generic)
+  ///
+  /// In de, this message translates to:
+  /// **'Eingang'**
+  String get fieldInput;
+
+  /// Field: Output (generic)
+  ///
+  /// In de, this message translates to:
+  /// **'Ausgang'**
+  String get fieldOutput;
+
   /// Error: Failed to load authentication configuration
   ///
   /// In de, this message translates to:
@@ -5795,6 +5849,156 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Wechselrichter neu gestartet'**
   String get inverterRestarted;
+
+  /// Menu: Script templates library
+  ///
+  /// In de, this message translates to:
+  /// **'Script-Templates'**
+  String get shellyScriptsTemplateLibrary;
+
+  /// Button: Import template
+  ///
+  /// In de, this message translates to:
+  /// **'Template importieren'**
+  String get shellyScriptsImportTemplate;
+
+  /// Badge: User template
+  ///
+  /// In de, this message translates to:
+  /// **'Benutzerdefiniert'**
+  String get shellyScriptsUserTemplate;
+
+  /// Menu: Export template
+  ///
+  /// In de, this message translates to:
+  /// **'Template exportieren'**
+  String get shellyScriptsExportTemplate;
+
+  /// Import screen: Instructions header
+  ///
+  /// In de, this message translates to:
+  /// **'Anleitung'**
+  String get shellyScriptsImportInstructions;
+
+  /// Import screen: Instructions detail
+  ///
+  /// In de, this message translates to:
+  /// **'Fügen Sie Template-JSON aus einer Datei oder der Zwischenablage ein. Das Template wird validiert, bevor es importiert wird.'**
+  String get shellyScriptsImportInstructionsDetail;
+
+  /// Import screen: JSON input label
+  ///
+  /// In de, this message translates to:
+  /// **'Template JSON'**
+  String get shellyScriptsTemplateJson;
+
+  /// Button: Paste from clipboard
+  ///
+  /// In de, this message translates to:
+  /// **'Aus Zwischenablage einfügen'**
+  String get shellyScriptsPasteFromClipboard;
+
+  /// Button label for selecting JSON file
+  ///
+  /// In de, this message translates to:
+  /// **'Datei auswählen'**
+  String get shellyScriptsSelectFile;
+
+  /// Tooltip for file picker button
+  ///
+  /// In de, this message translates to:
+  /// **'JSON-Datei auswählen'**
+  String get shellyScriptsSelectJsonFile;
+
+  /// Error title when file exceeds size limit
+  ///
+  /// In de, this message translates to:
+  /// **'Datei zu groß'**
+  String get shellyScriptsFileTooLarge;
+
+  /// Error detail when file exceeds size limit
+  ///
+  /// In de, this message translates to:
+  /// **'Die Datei ist {size} KB groß. Maximale Größe: 3 KB'**
+  String shellyScriptsFileTooLargeDetail(String size);
+
+  /// Error title when file loading fails
+  ///
+  /// In de, this message translates to:
+  /// **'Fehler beim Laden der Datei'**
+  String get shellyScriptsErrorLoadingFile;
+
+  /// Checkbox: Override existing template
+  ///
+  /// In de, this message translates to:
+  /// **'Vorhandenes Template überschreiben'**
+  String get shellyScriptsOverrideExisting;
+
+  /// Checkbox: Override existing template detail
+  ///
+  /// In de, this message translates to:
+  /// **'Aktivieren, um alle vorhandenen Versionen des Templates mit gleicher ID zu ersetzen'**
+  String get shellyScriptsOverrideExistingDetail;
+
+  /// Button: Validate template
+  ///
+  /// In de, this message translates to:
+  /// **'Template validieren'**
+  String get shellyScriptsValidateTemplate;
+
+  /// Success: Template is valid
+  ///
+  /// In de, this message translates to:
+  /// **'Template ist gültig'**
+  String get shellyScriptsTemplateValid;
+
+  /// Loading: Importing template
+  ///
+  /// In de, this message translates to:
+  /// **'Template wird importiert...'**
+  String get shellyScriptsImportingTemplate;
+
+  /// Success: Template imported
+  ///
+  /// In de, this message translates to:
+  /// **'Template erfolgreich importiert'**
+  String get shellyScriptsTemplateImported;
+
+  /// Warning: Will override asset template
+  ///
+  /// In de, this message translates to:
+  /// **'Dies wird das mitgelieferte Template überschreiben'**
+  String get shellyScriptsWillOverrideAssetTemplate;
+
+  /// Warning: Will override user template
+  ///
+  /// In de, this message translates to:
+  /// **'Ein benutzerdefiniertes Template mit dieser ID und Version existiert bereits'**
+  String get shellyScriptsWillOverrideUserTemplate;
+
+  /// Success: Template exported to clipboard
+  ///
+  /// In de, this message translates to:
+  /// **'Template in Zwischenablage kopiert'**
+  String get shellyScriptsExportSuccess;
+
+  /// Confirm: Delete template
+  ///
+  /// In de, this message translates to:
+  /// **'Template wirklich löschen?'**
+  String get shellyScriptsDeleteTemplateConfirm;
+
+  /// Success: Template deleted
+  ///
+  /// In de, this message translates to:
+  /// **'Template gelöscht'**
+  String get shellyScriptsTemplateDeleted;
+
+  /// Loading: Deleting
+  ///
+  /// In de, this message translates to:
+  /// **'Wird gelöscht...'**
+  String get deleting;
 }
 
 class _AppLocalizationsDelegate

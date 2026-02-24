@@ -100,6 +100,40 @@ Automatically balance Zendure power station output/input based on real-time grid
 
 **📖 For detailed documentation including parameter reference, configuration examples, deployment guide, and troubleshooting, see [ZENDURE_POWER_CONTROL.md](ZENDURE_POWER_CONTROL.md).**
 
+### OpenDTU Power Control (Zero-Export Automation)
+
+Automatically adjust OpenDTU inverter power limits based on real-time grid measurements from Shelly EM3 for zero-export operation.
+
+**Key Features**:
+- Automatic zero-export/nulleinspeisung control for OpenDTU-managed inverters
+- Dynamic power limit adjustment based on grid feedback
+- Support for Hoymiles, DeyeSun, and other OpenDTU-compatible inverters
+- Configurable input divider for multi-input inverters
+
+**Hardware Requirements**:
+- Shelly EM3 (three-phase energy meter)
+- OpenDTU device with connected micro inverter
+- Network connection (WiFi/LAN)
+
+### Zendure Online Monitoring
+
+Automated data reporting to online monitoring platforms for Zendure power stations.
+
+**Key Features**:
+- Periodic data upload to online monitoring platforms
+- Support for multiple monitoring services simultaneously
+- Configurable intervals and data points
+- Three variants: IP/WiFi, MAC/Bluetooth, and auto-discovery
+
+**Hardware Requirements**:
+- Zendure Power Station (ACE 1500, SolarFlow, HUB, etc.)
+- Network connection (WiFi/LAN)
+- Online monitoring account
+
+**Compatible Monitoring Platform**:
+- [Solar Monitoring](https://github.com/tost11/solar-monitoring) - Open-source solar monitoring platform
+- Live instances: [solar.pihost.org](https://solar.pihost.org) / [solar.tost-soft.de](https://solar.tost-soft.de)
+
 ## Managing Scripts
 
 ### Viewing Deployed Scripts

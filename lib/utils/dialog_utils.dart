@@ -95,4 +95,33 @@ class DialogUtils {
       return null;
     }
   }
+
+  /// Shows a confirmation dialog with Yes/No buttons
+  ///
+  /// Returns true if user confirms, false if user cancels, null if dismissed
+  static Future<bool?> showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    String? content,
+    String? confirmText,
+    String? cancelText,
+  }) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(title),
+        content: content != null ? Text(content) : null,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(cancelText ?? 'Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(confirmText ?? 'Bestätigen'),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -2083,6 +2083,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shellyScriptsShowAllToggle => 'Show All Scripts';
 
   @override
+  String get filters => 'Filters';
+
+  @override
+  String get shellyScriptsShowAllVersions => 'Show All Versions';
+
+  @override
+  String get shellyScriptsShowAllVersionsDetail =>
+      'Shows all template versions, not just the latest';
+
+  @override
+  String get shellyScriptsFilterByTag => 'Filter by Tag';
+
+  @override
   String get shellyScriptsCurrentDevice => 'Current Device:';
 
   @override
@@ -2870,6 +2883,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryPowerMeterPhase3 => 'Power Meter Phase 3';
 
   @override
+  String get categorySettings => 'Settings';
+
+  @override
+  String get categoryStatus => 'Status';
+
+  @override
+  String get categoryPvInput => 'PV Input';
+
+  @override
   String get fieldSolarPower => 'Solar Power';
 
   @override
@@ -3103,6 +3125,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get fieldInput => 'Input';
+
+  @override
+  String get fieldOutput => 'Output';
+
+  @override
   String errorLoadingAuthConfig(String error) {
     return 'Failed to load authentication configuration: $error';
   }
@@ -3182,4 +3210,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inverterRestarted => 'Inverter restarted';
+
+  @override
+  String get shellyScriptsTemplateLibrary => 'Script Templates';
+
+  @override
+  String get shellyScriptsImportTemplate => 'Import Template';
+
+  @override
+  String get shellyScriptsUserTemplate => 'User Template';
+
+  @override
+  String get shellyScriptsExportTemplate => 'Export Template';
+
+  @override
+  String get shellyScriptsImportInstructions => 'Instructions';
+
+  @override
+  String get shellyScriptsImportInstructionsDetail =>
+      'Paste template JSON from a file or clipboard. The template will be validated before import.';
+
+  @override
+  String get shellyScriptsTemplateJson => 'Template JSON';
+
+  @override
+  String get shellyScriptsPasteFromClipboard => 'Paste from Clipboard';
+
+  @override
+  String get shellyScriptsSelectFile => 'Select File';
+
+  @override
+  String get shellyScriptsSelectJsonFile => 'Select JSON File';
+
+  @override
+  String get shellyScriptsFileTooLarge => 'File Too Large';
+
+  @override
+  String shellyScriptsFileTooLargeDetail(String size) {
+    return 'The file is $size KB. Maximum size: 3 KB';
+  }
+
+  @override
+  String get shellyScriptsErrorLoadingFile => 'Error Loading File';
+
+  @override
+  String get shellyScriptsOverrideExisting => 'Override Existing Template';
+
+  @override
+  String get shellyScriptsOverrideExistingDetail =>
+      'Enable to replace all existing versions of templates with same ID';
+
+  @override
+  String get shellyScriptsValidateTemplate => 'Validate Template';
+
+  @override
+  String get shellyScriptsTemplateValid => 'Template is valid';
+
+  @override
+  String get shellyScriptsImportingTemplate => 'Importing template...';
+
+  @override
+  String get shellyScriptsTemplateImported => 'Template imported successfully';
+
+  @override
+  String get shellyScriptsWillOverrideAssetTemplate =>
+      'This will override the bundled template';
+
+  @override
+  String get shellyScriptsWillOverrideUserTemplate =>
+      'A user template with this ID and version already exists';
+
+  @override
+  String get shellyScriptsExportSuccess => 'Template copied to clipboard';
+
+  @override
+  String get shellyScriptsDeleteTemplateConfirm => 'Really delete template?';
+
+  @override
+  String get shellyScriptsTemplateDeleted => 'Template deleted';
+
+  @override
+  String get deleting => 'Deleting...';
 }

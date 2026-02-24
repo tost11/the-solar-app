@@ -1,21 +1,26 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import '../models/shelly_script_template.dart';
 import '../utils/version_utils.dart';
 
 /// Service for loading and managing Shelly script templates
 ///
-/// Loads templates from assets/ (bundled templates).
-/// Organizes templates by ID and version for efficient lookup.
-/// Future enhancement: also load from local storage (downloaded templates).
+/// Supports two-tier template system:
+/// - Asset templates (bundled, read-only)
+/// - User templates (imported, editable)
+///
+/// User templates can override asset templates with same ID+version.
 class ScriptTemplateService {
   /// Cache of loaded templates organized by ID and version
   /// Map structure: {template_id: [versions sorted newest to oldest]}
   static Map<String, List<ShellyScriptTemplate>>? _cachedTemplatesByIdVersion;
 
-  /// Load all available script templates from assets
+  /// Load all available script templates (assets + user)
   ///
-  /// Templates are loaded from assets/script_templates/*.json
+  /// Templates are loaded from both assets/ and user directory.
+  /// User templates override assets with same ID+version.
   /// Results are cached and organized by ID and version for efficient lookup.
   /// Returns a flat list of all templates (all versions).
   static Future<List<ShellyScriptTemplate>> loadTemplates() async {
@@ -26,40 +31,105 @@ class ScriptTemplateService {
           .toList();
     }
 
-    final templates = <ShellyScriptTemplate>[];
+    // Load asset templates
+    final assetTemplates = await _loadAssetTemplates();
 
-    // Load asset manifest to find all template files
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    // Load user templates
+    final userTemplates = await loadUserTemplates();
 
-    // Filter for script_templates JSON files
-    final templateFiles = manifestMap.keys
-        .where((key) => key.startsWith('assets/script_templates/') && key.endsWith('.json'))
-        .toList();
-
-    // Load each template file
-    for (final filePath in templateFiles) {
-      try {
-        final jsonString = await rootBundle.loadString(filePath);
-        final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-        final template = ShellyScriptTemplate.fromJson(jsonData);
-        templates.add(template);
-      } catch (e) {
-        print('Error loading template from $filePath: $e');
-      }
-    }
-
-    // Organize by ID and version
+    // Merge: user templates override assets with same ID+version
     _cachedTemplatesByIdVersion = <String, List<ShellyScriptTemplate>>{};
-    for (final template in templates) {
+
+    // Add asset templates first
+    for (final template in assetTemplates) {
       _cachedTemplatesByIdVersion!
           .putIfAbsent(template.id, () => [])
           .add(template);
     }
 
+    // Add/override with user templates
+    for (final template in userTemplates) {
+      final versions = _cachedTemplatesByIdVersion!
+          .putIfAbsent(template.id, () => []);
+
+      // Remove asset template with same version if exists
+      versions.removeWhere((t) =>
+          t.version == template.version && t.source == TemplateSource.asset);
+
+      versions.add(template);
+    }
+
     // Sort each template's versions (newest first)
     for (final versions in _cachedTemplatesByIdVersion!.values) {
       VersionUtils.sortTemplatesByVersion(versions);
+    }
+
+    return _cachedTemplatesByIdVersion!.values
+        .expand((list) => list)
+        .toList();
+  }
+
+  /// Load asset templates from bundled files
+  static Future<List<ShellyScriptTemplate>> _loadAssetTemplates() async {
+    final templates = <ShellyScriptTemplate>[];
+
+    try {
+      // Try to load asset manifest to find all template files
+      final manifestContent = await rootBundle.loadString('AssetManifest.json');
+      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+      // Filter for script_templates JSON files
+      final templateFiles = manifestMap.keys
+          .where((key) => key.startsWith('assets/script_templates/') && key.endsWith('.json'))
+          .toList();
+
+      // Load each template file
+      for (final filePath in templateFiles) {
+        try {
+          final jsonString = await rootBundle.loadString(filePath);
+          final jsonData = json.decode(jsonString) as Map<String, dynamic>;
+          final template = ShellyScriptTemplate.fromJson(
+            jsonData,
+            source: TemplateSource.asset,
+          );
+          templates.add(template);
+        } catch (e) {
+          print('Error loading template from $filePath: $e');
+        }
+      }
+    } catch (e) {//TODO find out why this is needed and fix it (manifest file is missing but it shouldn)
+      // AssetManifest.json not found - fallback to known template files
+      print('Warning: AssetManifest.json not found, using fallback template loading: $e');
+
+      // Hardcoded list of known template files (update when adding new templates)
+      final knownTemplates = [
+        'assets/script_templates/test_script_v1.json',
+        'assets/script_templates/zendure_power_control_ip_v1.json',
+        'assets/script_templates/zendure_power_control_ip_v2.json',
+        'assets/script_templates/zendure_power_control_mac_v1.json',
+        'assets/script_templates/zendure_power_control_mac_v2.json',
+        'assets/script_templates/zendure_power_control_find_v2.json',
+        'assets/script_templates/zendure_online_monitoring_find_v1.json',
+        'assets/script_templates/zendure_online_monitoring_ip_v1.json',
+        'assets/script_templates/zendure_online_monitoring_mac_v1.json',
+        'assets/script_templates/opendtu_power_control_v1.json',
+        'assets/script_templates/script_watchdog_v1.json',
+      ];
+
+      for (final filePath in knownTemplates) {
+        try {
+          final jsonString = await rootBundle.loadString(filePath);
+          final jsonData = json.decode(jsonString) as Map<String, dynamic>;
+          final template = ShellyScriptTemplate.fromJson(
+            jsonData,
+            source: TemplateSource.asset,
+          );
+          templates.add(template);
+        } catch (e) {
+          // Template file doesn't exist or is invalid - skip it
+          print('Could not load template $filePath: $e');
+        }
+      }
     }
 
     return templates;
@@ -190,5 +260,146 @@ class ScriptTemplateService {
       tagSet.addAll(template.tags);
     }
     return tagSet.toList()..sort();
+  }
+
+  /// Get user templates directory
+  static Future<Directory> _getUserTemplatesDirectory() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    return Directory('${appDir.path}/script_templates/user');
+  }
+
+  /// Load user templates from file system
+  static Future<List<ShellyScriptTemplate>> loadUserTemplates() async {
+    final templates = <ShellyScriptTemplate>[];
+    final directory = await _getUserTemplatesDirectory();
+
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+      return templates;
+    }
+
+    final files = directory.listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.json'));
+
+    for (final file in files) {
+      try {
+        final content = await file.readAsString();
+        final json = jsonDecode(content) as Map<String, dynamic>;
+        final template = ShellyScriptTemplate.fromJson(
+          json,
+          source: TemplateSource.user,
+          filePath: file.path,
+        );
+        templates.add(template);
+      } catch (e) {
+        print('Error loading user template ${file.path}: $e');
+      }
+    }
+
+    return templates;
+  }
+
+  /// Save user template to file system
+  static Future<void> _saveUserTemplate(ShellyScriptTemplate template) async {
+    final directory = await _getUserTemplatesDirectory();
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    final filename = '${template.id}_${template.version}.json';
+    final file = File('${directory.path}/$filename');
+
+    final json = template.toJson();
+    final content = const JsonEncoder.withIndent('  ').convert(json);
+    await file.writeAsString(content);
+  }
+
+  /// Import template from JSON string
+  static Future<ShellyScriptTemplate> importTemplate(
+    String jsonString, {
+    bool overrideExisting = false,
+  }) async {
+    // Parse and validate JSON
+    final json = jsonDecode(jsonString) as Map<String, dynamic>;
+    final template = ShellyScriptTemplate.fromJson(
+      json,
+      source: TemplateSource.user,
+    );
+
+    // Validate required fields
+    if (template.id.isEmpty) {
+      throw Exception('Template ID is required');
+    }
+    if (template.version.isEmpty) {
+      throw Exception('Template version is required');
+    }
+    if (template.sourceCode.isEmpty) {
+      throw Exception('Template source code is required');
+    }
+
+    // Check for existing templates with same ID
+    if (overrideExisting) {
+      // Delete ALL existing user template versions with same ID
+      final allVersions = await getAllTemplateVersions(template.id);
+      final userVersions = allVersions.where((t) => t.source == TemplateSource.user);
+
+      for (final existingTemplate in userVersions) {
+        try {
+          await deleteUserTemplate(existingTemplate);
+        } catch (e) {
+          print('Warning: Failed to delete existing template version ${existingTemplate.version}: $e');
+        }
+      }
+    } else {
+      // Check for existing template with same ID+version
+      final existing = await getTemplateById(template.id, version: template.version);
+      if (existing != null) {
+        if (existing.source == TemplateSource.user) {
+          throw Exception('Template ${template.id} v${template.version} already exists');
+        }
+        // Allow overriding asset templates
+      }
+    }
+
+    // Save to file system
+    await _saveUserTemplate(template);
+
+    // Clear cache to force reload
+    clearCache();
+
+    return template;
+  }
+
+  /// Export template to JSON string
+  static String exportTemplate(ShellyScriptTemplate template) {
+    final json = template.toJson();
+    return const JsonEncoder.withIndent('  ').convert(json);
+  }
+
+  /// Delete user template
+  static Future<void> deleteUserTemplate(ShellyScriptTemplate template) async {
+    if (template.source != TemplateSource.user) {
+      throw Exception('Cannot delete asset templates');
+    }
+
+    if (template.filePath != null) {
+      final file = File(template.filePath!);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+
+    clearCache();
+  }
+
+  /// Update user template
+  static Future<void> updateUserTemplate(ShellyScriptTemplate template) async {
+    if (template.source != TemplateSource.user) {
+      throw Exception('Cannot update asset templates');
+    }
+
+    await _saveUserTemplate(template);
+    clearCache();
   }
 }

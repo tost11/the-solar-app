@@ -32,8 +32,14 @@ class ScriptParameter {
   /// Display label in UI (e.g., "Backend Server URL")
   final String label;
 
+  /// Localized label translations (language code -> translation)
+  final Map<String, String>? labelLng;
+
   /// Parameter description/help text
   final String description;
+
+  /// Localized description translations (language code -> translation)
+  final Map<String, String>? descriptionLng;
 
   /// Parameter data type
   final ScriptParameterType type;
@@ -68,7 +74,9 @@ class ScriptParameter {
   ScriptParameter({
     required this.name,
     required this.label,
+    this.labelLng,
     required this.description,
+    this.descriptionLng,
     required this.type,
     this.defaultValue,
     required this.required,
@@ -86,7 +94,13 @@ class ScriptParameter {
     return ScriptParameter(
       name: json['name'] as String,
       label: json['label'] as String,
+      labelLng: json['label_lng'] != null
+          ? Map<String, String>.from(json['label_lng'] as Map)
+          : null,
       description: json['description'] as String,
+      descriptionLng: json['description_lng'] != null
+          ? Map<String, String>.from(json['description_lng'] as Map)
+          : null,
       type: _parseParameterType(json['type'] as String),
       defaultValue: json['defaultValue'],
       required: json['required'] as bool? ?? false,
@@ -107,7 +121,9 @@ class ScriptParameter {
     return {
       'name': name,
       'label': label,
+      if (labelLng != null) 'label_lng': labelLng,
       'description': description,
+      if (descriptionLng != null) 'description_lng': descriptionLng,
       'type': type.name,
       'defaultValue': defaultValue,
       'required': required,

@@ -2904,6 +2904,22 @@
   "@shellyScriptsShowAllToggle": {
     "description": "Toggle label for showing all scripts"
   },
+  "filters": "Filter",
+  "@filters": {
+    "description": "Filters label"
+  },
+  "shellyScriptsShowAllVersions": "Alle Versionen anzeigen",
+  "@shellyScriptsShowAllVersions": {
+    "description": "Toggle label for showing all template versions"
+  },
+  "shellyScriptsShowAllVersionsDetail": "Zeigt alle Template-Versionen an, nicht nur die neueste",
+  "@shellyScriptsShowAllVersionsDetail": {
+    "description": "Detail text for show all versions toggle"
+  },
+  "shellyScriptsFilterByTag": "Nach Tag filtern",
+  "@shellyScriptsFilterByTag": {
+    "description": "Label for tag filter section"
+  },
   "shellyScriptsCurrentDevice": "Aktuelles Gerät:",
   "@shellyScriptsCurrentDevice": {
     "description": "Label for current device"
@@ -4035,6 +4051,18 @@
   "@categoryPowerMeterPhase3": {
     "description": "Category: Power meter phase 3"
   },
+  "categorySettings": "Einstellungen",
+  "@categorySettings": {
+    "description": "Category: Settings"
+  },
+  "categoryStatus": "Status",
+  "@categoryStatus": {
+    "description": "Category: Status"
+  },
+  "categoryPvInput": "PV Eingang",
+  "@categoryPvInput": {
+    "description": "Category: PV Input"
+  },
 
   "fieldSolarPower": "Leistung Solar",
   "@fieldSolarPower": {
@@ -4362,6 +4390,14 @@
       }
     }
   },
+  "fieldInput": "Eingang",
+  "@fieldInput": {
+    "description": "Field: Input (generic)"
+  },
+  "fieldOutput": "Ausgang",
+  "@fieldOutput": {
+    "description": "Field: Output (generic)"
+  },
   "errorLoadingAuthConfig": "Konnte Authentifizierungs-Konfiguration nicht laden: {error}",
   "@errorLoadingAuthConfig": {
     "description": "Error: Failed to load authentication configuration",
@@ -4471,5 +4507,110 @@
   "inverterRestarted": "Wechselrichter neu gestartet",
   "@inverterRestarted": {
     "description": "Success: Inverter restarted"
+  },
+  "shellyScriptsTemplateLibrary": "Script-Templates",
+  "@shellyScriptsTemplateLibrary": {
+    "description": "Menu: Script templates library"
+  },
+  "shellyScriptsImportTemplate": "Template importieren",
+  "@shellyScriptsImportTemplate": {
+    "description": "Button: Import template"
+  },
+  "shellyScriptsUserTemplate": "Benutzerdefiniert",
+  "@shellyScriptsUserTemplate": {
+    "description": "Badge: User template"
+  },
+  "shellyScriptsExportTemplate": "Template exportieren",
+  "@shellyScriptsExportTemplate": {
+    "description": "Menu: Export template"
+  },
+  "shellyScriptsImportInstructions": "Anleitung",
+  "@shellyScriptsImportInstructions": {
+    "description": "Import screen: Instructions header"
+  },
+  "shellyScriptsImportInstructionsDetail": "Fügen Sie Template-JSON aus einer Datei oder der Zwischenablage ein. Das Template wird validiert, bevor es importiert wird.",
+  "@shellyScriptsImportInstructionsDetail": {
+    "description": "Import screen: Instructions detail"
+  },
+  "shellyScriptsTemplateJson": "Template JSON",
+  "@shellyScriptsTemplateJson": {
+    "description": "Import screen: JSON input label"
+  },
+  "shellyScriptsPasteFromClipboard": "Aus Zwischenablage einfügen",
+  "@shellyScriptsPasteFromClipboard": {
+    "description": "Button: Paste from clipboard"
+  },
+  "shellyScriptsSelectFile": "Datei auswählen",
+  "@shellyScriptsSelectFile": {
+    "description": "Button label for selecting JSON file"
+  },
+  "shellyScriptsSelectJsonFile": "JSON-Datei auswählen",
+  "@shellyScriptsSelectJsonFile": {
+    "description": "Tooltip for file picker button"
+  },
+  "shellyScriptsFileTooLarge": "Datei zu groß",
+  "@shellyScriptsFileTooLarge": {
+    "description": "Error title when file exceeds size limit"
+  },
+  "shellyScriptsFileTooLargeDetail": "Die Datei ist {size} KB groß. Maximale Größe: 3 KB",
+  "@shellyScriptsFileTooLargeDetail": {
+    "description": "Error detail when file exceeds size limit",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorLoadingFile": "Fehler beim Laden der Datei",
+  "@shellyScriptsErrorLoadingFile": {
+    "description": "Error title when file loading fails"
+  },
+  "shellyScriptsOverrideExisting": "Vorhandenes Template überschreiben",
+  "@shellyScriptsOverrideExisting": {
+    "description": "Checkbox: Override existing template"
+  },
+  "shellyScriptsOverrideExistingDetail": "Aktivieren, um alle vorhandenen Versionen des Templates mit gleicher ID zu ersetzen",
+  "@shellyScriptsOverrideExistingDetail": {
+    "description": "Checkbox: Override existing template detail"
+  },
+  "shellyScriptsValidateTemplate": "Template validieren",
+  "@shellyScriptsValidateTemplate": {
+    "description": "Button: Validate template"
+  },
+  "shellyScriptsTemplateValid": "Template ist gültig",
+  "@shellyScriptsTemplateValid": {
+    "description": "Success: Template is valid"
+  },
+  "shellyScriptsImportingTemplate": "Template wird importiert...",
+  "@shellyScriptsImportingTemplate": {
+    "description": "Loading: Importing template"
+  },
+  "shellyScriptsTemplateImported": "Template erfolgreich importiert",
+  "@shellyScriptsTemplateImported": {
+    "description": "Success: Template imported"
+  },
+  "shellyScriptsWillOverrideAssetTemplate": "Dies wird das mitgelieferte Template überschreiben",
+  "@shellyScriptsWillOverrideAssetTemplate": {
+    "description": "Warning: Will override asset template"
+  },
+  "shellyScriptsWillOverrideUserTemplate": "Ein benutzerdefiniertes Template mit dieser ID und Version existiert bereits",
+  "@shellyScriptsWillOverrideUserTemplate": {
+    "description": "Warning: Will override user template"
+  },
+  "shellyScriptsExportSuccess": "Template in Zwischenablage kopiert",
+  "@shellyScriptsExportSuccess": {
+    "description": "Success: Template exported to clipboard"
+  },
+  "shellyScriptsDeleteTemplateConfirm": "Template wirklich löschen?",
+  "@shellyScriptsDeleteTemplateConfirm": {
+    "description": "Confirm: Delete template"
+  },
+  "shellyScriptsTemplateDeleted": "Template gelöscht",
+  "@shellyScriptsTemplateDeleted": {
+    "description": "Success: Template deleted"
+  },
+  "deleting": "Wird gelöscht...",
+  "@deleting": {
+    "description": "Loading: Deleting"
   }
 }

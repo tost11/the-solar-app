@@ -2904,6 +2904,22 @@
   "@shellyScriptsShowAllToggle": {
     "description": "Toggle label for showing all scripts"
   },
+  "filters": "Filters",
+  "@filters": {
+    "description": "Filters label"
+  },
+  "shellyScriptsShowAllVersions": "Show All Versions",
+  "@shellyScriptsShowAllVersions": {
+    "description": "Toggle label for showing all template versions"
+  },
+  "shellyScriptsShowAllVersionsDetail": "Shows all template versions, not just the latest",
+  "@shellyScriptsShowAllVersionsDetail": {
+    "description": "Detail text for show all versions toggle"
+  },
+  "shellyScriptsFilterByTag": "Filter by Tag",
+  "@shellyScriptsFilterByTag": {
+    "description": "Label for tag filter section"
+  },
   "shellyScriptsCurrentDevice": "Current Device:",
   "@shellyScriptsCurrentDevice": {
     "description": "Label for current device"
@@ -3602,5 +3618,130 @@
   "inverterRestarted": "Inverter restarted",
   "@inverterRestarted": {
     "description": "Success: Inverter restarted"
+  },
+  "shellyScriptsTemplateLibrary": "Script Templates",
+  "@shellyScriptsTemplateLibrary": {
+    "description": "Menu: Script templates library"
+  },
+  "shellyScriptsImportTemplate": "Import Template",
+  "@shellyScriptsImportTemplate": {
+    "description": "Button: Import template"
+  },
+  "shellyScriptsUserTemplate": "User Template",
+  "@shellyScriptsUserTemplate": {
+    "description": "Badge: User template"
+  },
+  "shellyScriptsExportTemplate": "Export Template",
+  "@shellyScriptsExportTemplate": {
+    "description": "Menu: Export template"
+  },
+  "shellyScriptsImportInstructions": "Instructions",
+  "@shellyScriptsImportInstructions": {
+    "description": "Import screen: Instructions header"
+  },
+  "shellyScriptsImportInstructionsDetail": "Paste template JSON from a file or clipboard. The template will be validated before import.",
+  "@shellyScriptsImportInstructionsDetail": {
+    "description": "Import screen: Instructions detail"
+  },
+  "shellyScriptsTemplateJson": "Template JSON",
+  "@shellyScriptsTemplateJson": {
+    "description": "Import screen: JSON input label"
+  },
+  "shellyScriptsPasteFromClipboard": "Paste from Clipboard",
+  "@shellyScriptsPasteFromClipboard": {
+    "description": "Button: Paste from clipboard"
+  },
+  "shellyScriptsSelectFile": "Select File",
+  "@shellyScriptsSelectFile": {
+    "description": "Button label for selecting JSON file"
+  },
+  "shellyScriptsSelectJsonFile": "Select JSON File",
+  "@shellyScriptsSelectJsonFile": {
+    "description": "Tooltip for file picker button"
+  },
+  "shellyScriptsFileTooLarge": "File Too Large",
+  "@shellyScriptsFileTooLarge": {
+    "description": "Error title when file exceeds size limit"
+  },
+  "shellyScriptsFileTooLargeDetail": "The file is {size} KB. Maximum size: 3 KB",
+  "@shellyScriptsFileTooLargeDetail": {
+    "description": "Error detail when file exceeds size limit",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shellyScriptsErrorLoadingFile": "Error Loading File",
+  "@shellyScriptsErrorLoadingFile": {
+    "description": "Error title when file loading fails"
+  },
+  "shellyScriptsOverrideExisting": "Override Existing Template",
+  "@shellyScriptsOverrideExisting": {
+    "description": "Checkbox: Override existing template"
+  },
+  "shellyScriptsOverrideExistingDetail": "Enable to replace all existing versions of templates with same ID",
+  "@shellyScriptsOverrideExistingDetail": {
+    "description": "Checkbox: Override existing template detail"
+  },
+  "shellyScriptsValidateTemplate": "Validate Template",
+  "@shellyScriptsValidateTemplate": {
+    "description": "Button: Validate template"
+  },
+  "shellyScriptsTemplateValid": "Template is valid",
+  "@shellyScriptsTemplateValid": {
+    "description": "Success: Template is valid"
+  },
+  "shellyScriptsImportingTemplate": "Importing template...",
+  "@shellyScriptsImportingTemplate": {
+    "description": "Loading: Importing template"
+  },
+  "shellyScriptsTemplateImported": "Template imported successfully",
+  "@shellyScriptsTemplateImported": {
+    "description": "Success: Template imported"
+  },
+  "shellyScriptsWillOverrideAssetTemplate": "This will override the bundled template",
+  "@shellyScriptsWillOverrideAssetTemplate": {
+    "description": "Warning: Will override asset template"
+  },
+  "shellyScriptsWillOverrideUserTemplate": "A user template with this ID and version already exists",
+  "@shellyScriptsWillOverrideUserTemplate": {
+    "description": "Warning: Will override user template"
+  },
+  "shellyScriptsExportSuccess": "Template copied to clipboard",
+  "@shellyScriptsExportSuccess": {
+    "description": "Success: Template exported to clipboard"
+  },
+  "shellyScriptsDeleteTemplateConfirm": "Really delete template?",
+  "@shellyScriptsDeleteTemplateConfirm": {
+    "description": "Confirm: Delete template"
+  },
+  "shellyScriptsTemplateDeleted": "Template deleted",
+  "@shellyScriptsTemplateDeleted": {
+    "description": "Success: Template deleted"
+  },
+  "deleting": "Deleting...",
+  "@deleting": {
+    "description": "Loading: Deleting"
+  },
+  "categorySettings": "Settings",
+  "@categorySettings": {
+    "description": "Category: Settings"
+  },
+  "categoryStatus": "Status",
+  "@categoryStatus": {
+    "description": "Category: Status"
+  },
+  "categoryPvInput": "PV Input",
+  "@categoryPvInput": {
+    "description": "Category: PV Input"
+  },
+  "fieldInput": "Input",
+  "@fieldInput": {
+    "description": "Field: Input (generic)"
+  },
+  "fieldOutput": "Output",
+  "@fieldOutput": {
+    "description": "Field: Output (generic)"
   }
 }

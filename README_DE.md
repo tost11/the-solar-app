@@ -156,6 +156,9 @@ Stellen Sie JavaScript-Automatisierungsvorlagen direkt auf Shelly-Geräten für 
 
 **Verfügbare Vorlagen:**
 - **Zendure Power Control**: Nulleinspeisungs-Automatisierung, die Zendure-Powerstationen automatisch basierend auf Shelly EM3-Netzmessungen ausgleicht (bidirektional: Entladung ins Haus, Ladung aus Überschuss)
+- **OpenDTU Power Control**: Nulleinspeisungs-Automatisierung, die OpenDTU-Wechselrichter Leistungsgrenzen basierend auf Shelly EM3-Netzmessungen anpasst
+- **Zendure Online Monitoring**: Automatisierte Datenübertragung an Online-Monitoring-Plattformen für Zendure-Powerstationen
+  - Kompatibel mit dem [Solar Monitoring](https://github.com/tost11/solar-monitoring) Projekt (Live: [solar.pihost.org](https://solar.pihost.org) / [solar.tost-soft.de](https://solar.tost-soft.de))
 
 **Verwendung:** Shelly-Gerät öffnen → Menü → "Scripts" → "From Template"
 

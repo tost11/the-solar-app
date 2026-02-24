@@ -269,6 +269,12 @@ class _ZendureBatteryPackListWidgetState
                 Icons.code,
                 TO(key: FieldTranslationKeys.firmwareVersion).getText(context),
                 pack['softVersion'].toString()),
+          if (pack['softVersion'] != null)
+            _buildDetailRow(
+                context,
+                Icons.thermostat,
+                TO(key: "heat State").getText(context),
+                pack['heatState'].toString()),
         ],
       ],
     );

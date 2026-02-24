@@ -1,0 +1,66 @@
+{
+  "id": "script-watchdog",
+  "name": "Script Restart Checker",
+  "name_lng": {
+    "de": "Skript-Neustart-Prüfer"
+  },
+  "version": "1.0.0",
+  "description": "Monitors a Shelly script and automatically restarts it if it crashes",
+  "description_lng": {
+    "de": "Überwacht ein Shelly-Skript und startet es automatisch neu, falls es abstürzt"
+  },
+  "compatibleDevices": [],
+  "requiredDevices": [],
+  "author": "TheSolarApp",
+  "tags": [
+    "watchdog"
+  ],
+  "parameters": [
+    {
+      "name": "TARGET_SCRIPT_NAME",
+      "label": "Target Script Name",
+      "label_lng": {
+        "de": "Ziel-Skript Name"
+      },
+      "description": "Name of the script to monitor (e.g., __auto_zendure-power-control-ip_2.0.0_a1b2c3d4)",
+      "description_lng": {
+        "de": "Name des zu überwachenden Skripts (z.B. __auto_zendure-power-control-ip_2.0.0_a1b2c3d4)"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "__auto_zendure-power-control-ip_2.0.0_a1b2c3d4"
+    },
+    {
+      "name": "CHECK_INTERVAL_MS",
+      "label": "Check Interval",
+      "label_lng": {
+        "de": "Prüf-Intervall"
+      },
+      "description": "Check interval in milliseconds",
+      "description_lng": {
+        "de": "Prüf-Intervall in Millisekunden"
+      },
+      "type": "duration",
+      "required": true,
+      "defaultValue": 60000,
+      "minValue": 1
+    },
+    {
+      "name": "DEBUG",
+      "label": "Debug Mode",
+      "label_lng": {
+        "de": "Debug-Modus"
+      },
+      "description": "Enable extended debug output",
+      "description_lng": {
+        "de": "Aktiviere erweiterte Debug-Ausgaben"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": false
+    }
+  ],
+  "sourceCode": "function log(message, debug) {\n    if (!debug || DEBUG) {\n        print(\"[\" + Shelly.getUptimeMs() + \" Script Restart Checker]: \" + message);\n    }\n}\n\nfunction findScriptByName(name, callback) {\n    Shelly.call(\"Script.List\", null, function(response, error_code, error_msg) {\n        if (error_code !== 0) {\n            log(\"Error calling Script.List: \" + error_msg, false);\n            callback(null);\n            return;\n        }\n        if (!response || !response.scripts) {\n            log(\"Unexpected response to Script.List\", false);\n            callback(null);\n            return;\n        }\n        for (let i = 0; i < response.scripts.length; i++) {\n            let sc = response.scripts[i];\n            if (sc.name === name) {\n                callback(sc);\n                return;\n            }\n        }\n        log(\"Script with name '\" + name + \"' not found.\", false);\n        callback(null);\n    });\n}\n\nfunction ensureScriptHasCodeAndStart(id, name) {\n    Shelly.call(\"Script.GetCode\", { id: id, offset: 0, len: 1 }, function(getcode_resp, getcode_err, getcode_msg) {\n        if (getcode_err !== 0) {\n            log(\"Error getting code for script '\" + name + \"' (id \" + id + \"): \" + getcode_msg, false);\n            return;\n        }\n        if (!getcode_resp || !getcode_resp.data || getcode_resp.left === undefined) {\n            log(\"Unexpected Script.GetCode response for script '\" + name + \"'\", false);\n        }\n        if (getcode_resp.data === \"\" && getcode_resp.left === undefined) {\n            log(\"Script '\" + name + \"' appears to have no code. Cannot start.\", false);\n            return;\n        }\n\n        Shelly.call(\"Script.Start\", { id: id }, function(start_resp, start_err, start_msg) {\n            if (start_err === 0) {\n                log(\"Script '\" + name + \"' restarted successfully (was_running: \" + start_resp.was_running + \")\", false);\n            } else {\n                log(\"Failed to start script '\" + name + \"': \" + start_msg, false);\n            }\n        });\n    });\n}\n\nfunction checkAndRecover() {\n    findScriptByName(TARGET_SCRIPT_NAME, function(scriptInfo) {\n        if (!scriptInfo) {\n            return;\n        }\n\n        let id = scriptInfo.id;\n        if (scriptInfo.running) {\n            log(\"Script '\" + TARGET_SCRIPT_NAME + \"' (id \" + id + \") is running.\", true);\n        } else {\n            log(\"Script '\" + TARGET_SCRIPT_NAME + \"' (id \" + id + \") is NOT running. Attempting restart.\", false);\n            ensureScriptHasCodeAndStart(id, TARGET_SCRIPT_NAME);\n        }\n    });\n}\n\n// Periodic check\nTimer.set(CHECK_INTERVAL_MS, true, function() {\n    checkAndRecover();\n});",
+  "createdAt": "2026-02-22T20:00:00Z",
+  "updatedAt": "2026-02-22T20:00:00Z"
+}

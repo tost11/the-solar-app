@@ -6,7 +6,12 @@
   "compatibleDevices": ["SPEM"],
   "requiredDevices": ["zendure"],
   "author": "TheSolarApp",
-  "tags": ["power-management", "nulleinspeisung", "zendure"],
+  "tags": [
+    "EM3",
+    "power-management",
+    "zero feed-in",
+    "zendure"
+  ],
   "parameters": [
     {
       "name": "MAC",

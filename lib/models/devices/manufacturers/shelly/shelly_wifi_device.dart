@@ -7,6 +7,10 @@ import 'package:the_solar_app/models/devices/mixins/fetch_data_timeout_mixin.dar
 import 'package:the_solar_app/models/devices/generic_rendering/device_category_config.dart';
 import 'implementations/shelly_device_base_implementation.dart';
 import 'package:the_solar_app/services/device_storage_service.dart';
+import '../../capabilities/device_role_config.dart';
+import '../../capabilities/inverter_capability.dart';
+import '../../capabilities/smart_meter_capability.dart';
+import '../../capabilities/load_capability.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 
 /// Generic Shelly WiFi device template
@@ -15,7 +19,12 @@ import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 /// Used as base class for specific Shelly WiFi device types
 class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
     ShellyWifiService,
-    ShellyDeviceBaseImplementation> with FetchDataTimeoutMixin {
+    ShellyDeviceBaseImplementation>
+    with FetchDataTimeoutMixin,
+         DeviceRoleConfig,
+         InverterCapability,
+         SmartMeterCapability,
+         LoadCapability {
 
   static const Duration DEFAULT_FETCH_INTERVAL = Duration(seconds: 5);
 
@@ -44,6 +53,21 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
     }
     return deviceModel;
   }
+
+  @override
+  List<DeviceRole> getConfigurableRoles() => deviceImpl.getConfigurableRoles();
+
+  @override
+  double? getSolarPVPower(Map<String, dynamic> data) => deviceImpl.getSolarPVPower(data);
+
+  @override
+  double? getSolarGridPower(Map<String, dynamic> data) => deviceImpl.getSolarGridPower(data);
+
+  @override
+  double? getGridPower(Map<String, dynamic> data) => deviceImpl.getGridPower(data);
+
+  @override
+  double? getLoadPower(Map<String, dynamic> data) => deviceImpl.getLoadPower(data);
 
   /// Named constructor for JSON deserialization
   ShellyWifiDeviceTemplate.fromJsonFields({
@@ -125,6 +149,7 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
     return {
       ...super.toJson(),
       ...fetchDataIntervalToJson(),
+      ...roleConfigToJson(),
     };
   }
 }
@@ -165,6 +190,7 @@ class ShellyWifiDevice extends ShellyWifiDeviceTemplate {
     );
     device.deserializeWiFi(json); // Handles both WiFi and Auth
     device.fetchDataIntervalFromJson(json, ShellyWifiDeviceTemplate.DEFAULT_FETCH_INTERVAL);
+    device.roleConfigFromJson(json);
     return device;
   }
 }

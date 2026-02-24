@@ -63,7 +63,7 @@ class _ShellyScriptTemplatePreviewScreenState
       builder: (BuildContext dialogContext) => AlertDialog(
         title: Text(dialogContext.l10n.shellyScriptsDialogInstallConfirmTitle),
         content: Text(
-          dialogContext.l10n.shellyScriptsDialogInstallConfirmMessage(widget.template.name),
+          dialogContext.l10n.shellyScriptsDialogInstallConfirmMessage(getLocalizedField(dialogContext, widget.template.name, widget.template.nameLng)),
         ),
         actions: [
           TextButton(
@@ -161,7 +161,7 @@ class _ShellyScriptTemplatePreviewScreenState
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBarWidget(
-        title: widget.template.name,
+        title: getLocalizedField(context, widget.template.name, widget.template.nameLng),
       ),
       body: Column(
         children: [

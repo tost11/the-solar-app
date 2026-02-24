@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
 import 'package:the_solar_app/models/devices/device_base.dart';
@@ -15,7 +16,6 @@ import 'package:the_solar_app/screens/configuration/wifi_ap_configuration_screen
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_service.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_bluetooth_service.dart';
-import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/localization_extension.dart';
 import 'package:the_solar_app/utils/navigation_utils.dart';
@@ -29,6 +29,7 @@ import '../../../generic_rendering/device_category_config.dart';
 import '../../../generic_rendering/general_setting_item.dart';
 import '../../../mixins/device_authentication_mixin.dart';
 import '../../../time_series_field_config.dart';
+import '../../../capabilities/device_role_config.dart';
 import '../shelly_module_registry.dart';
 
 class ShellyDeviceBaseImplementation extends DeviceImplementation {
@@ -1236,6 +1237,141 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     }
 
     return {};
+  }
+
+  /// Get raw power from EM/EM1 modules (can be negative)
+  /// Returns null if no EM modules present
+  double? getEMPower(Map<String, dynamic> data) {
+    final modules = _getDetectedModules();
+    double total = 0.0;
+    bool hasData = false;
+
+    // EM module: 3-phase total power
+    if (modules.containsKey('em')) {
+      final power = MapUtils.OM(data, ['data', 'em:0', 'total_act_power']);
+      if (power is num) {
+        total += power.toDouble();
+        hasData = true;
+      }
+    }
+
+    // EM1 modules: aggregate all instances
+    if (modules.containsKey('em1')) {
+      for (final id in modules['em1']!) {
+        final power = MapUtils.OM(data, ['data', 'em1:$id', 'act_power']);
+        if (power is num) {
+          total += power.toDouble();
+          hasData = true;
+        }
+      }
+    }
+
+    return hasData ? total : null;
+  }
+
+  /// Get power from PM1/Switch modules (always positive)
+  /// Returns null if no PM1/Switch modules present
+  double? getPositivePower(Map<String, dynamic> data) {
+    final modules = _getDetectedModules();
+    double total = 0.0;
+    bool hasData = false;
+
+    // PM1 modules: aggregate all instances
+    if (modules.containsKey('pm1')) {
+      for (final id in modules['pm1']!) {
+        final power = MapUtils.OM(data, ['data', 'pm1:$id', 'apower']);
+        if (power is num) {
+          total += power.toDouble();
+          hasData = true;
+        }
+      }
+    }
+
+    // Switch modules: aggregate all instances
+    if (modules.containsKey('switch')) {
+      for (final id in modules['switch']!) {
+        final power = MapUtils.OM(data, ['data', 'switch:$id', 'apower']);
+        if (power is num) {
+          total += power.toDouble();
+          hasData = true;
+        }
+      }
+    }
+
+    return hasData ? total : null;
+  }
+
+  /// Returns configurable roles for Shelly devices
+  List<DeviceRole> getConfigurableRoles() {
+    return [
+      DeviceRole.inverter,
+      DeviceRole.smartMeter,
+      DeviceRole.load,
+    ];
+  }
+
+  /// InverterCapability - extract solar production
+  double? getSolarPVPower(Map<String, dynamic> data) {
+    double total = 0.0;
+    bool hasData = false;
+
+    final emPower = getEMPower(data);
+    if (emPower != null) {
+      total += math.max(0.0, -emPower);
+      hasData = true;
+    }
+
+    final positivePower = getPositivePower(data);
+    if (positivePower != null) {
+      total += positivePower;
+      hasData = true;
+    }
+
+    return hasData ? total : null;
+  }
+
+  double? getSolarGridPower(Map<String, dynamic> data) {
+    return getSolarPVPower(data);
+  }
+
+  /// SmartMeterCapability - bidirectional measurement
+  double? getGridPower(Map<String, dynamic> data) {
+    double total = 0.0;
+    bool hasData = false;
+
+    final emPower = getEMPower(data);
+    if (emPower != null) {
+      total += emPower;
+      hasData = true;
+    }
+
+    final positivePower = getPositivePower(data);
+    if (positivePower != null) {
+      total += positivePower;
+      hasData = true;
+    }
+
+    return hasData ? total : null;
+  }
+
+  /// LoadCapability - extract consumption
+  double? getLoadPower(Map<String, dynamic> data) {
+    double total = 0.0;
+    bool hasData = false;
+
+    final emPower = getEMPower(data);
+    if (emPower != null) {
+      total += math.max(0.0, emPower);
+      hasData = true;
+    }
+
+    final positivePower = getPositivePower(data);
+    if (positivePower != null) {
+      total += positivePower;
+      hasData = true;
+    }
+
+    return hasData ? total : null;
   }
 
   /// Build data field from template

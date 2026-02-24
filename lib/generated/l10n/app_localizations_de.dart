@@ -2108,6 +2108,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shellyScriptsShowAllToggle => 'Alle Scripte anzeigen';
 
   @override
+  String get filters => 'Filter';
+
+  @override
+  String get shellyScriptsShowAllVersions => 'Alle Versionen anzeigen';
+
+  @override
+  String get shellyScriptsShowAllVersionsDetail =>
+      'Zeigt alle Template-Versionen an, nicht nur die neueste';
+
+  @override
+  String get shellyScriptsFilterByTag => 'Nach Tag filtern';
+
+  @override
   String get shellyScriptsCurrentDevice => 'Aktuelles Gerät:';
 
   @override
@@ -2900,6 +2913,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get categoryPowerMeterPhase3 => 'Stromzähler Phase 3';
 
   @override
+  String get categorySettings => 'Einstellungen';
+
+  @override
+  String get categoryStatus => 'Status';
+
+  @override
+  String get categoryPvInput => 'PV Eingang';
+
+  @override
   String get fieldSolarPower => 'Leistung Solar';
 
   @override
@@ -3139,6 +3161,12 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get fieldInput => 'Eingang';
+
+  @override
+  String get fieldOutput => 'Ausgang';
+
+  @override
   String errorLoadingAuthConfig(String error) {
     return 'Konnte Authentifizierungs-Konfiguration nicht laden: $error';
   }
@@ -3222,4 +3250,86 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get inverterRestarted => 'Wechselrichter neu gestartet';
+
+  @override
+  String get shellyScriptsTemplateLibrary => 'Script-Templates';
+
+  @override
+  String get shellyScriptsImportTemplate => 'Template importieren';
+
+  @override
+  String get shellyScriptsUserTemplate => 'Benutzerdefiniert';
+
+  @override
+  String get shellyScriptsExportTemplate => 'Template exportieren';
+
+  @override
+  String get shellyScriptsImportInstructions => 'Anleitung';
+
+  @override
+  String get shellyScriptsImportInstructionsDetail =>
+      'Fügen Sie Template-JSON aus einer Datei oder der Zwischenablage ein. Das Template wird validiert, bevor es importiert wird.';
+
+  @override
+  String get shellyScriptsTemplateJson => 'Template JSON';
+
+  @override
+  String get shellyScriptsPasteFromClipboard => 'Aus Zwischenablage einfügen';
+
+  @override
+  String get shellyScriptsSelectFile => 'Datei auswählen';
+
+  @override
+  String get shellyScriptsSelectJsonFile => 'JSON-Datei auswählen';
+
+  @override
+  String get shellyScriptsFileTooLarge => 'Datei zu groß';
+
+  @override
+  String shellyScriptsFileTooLargeDetail(String size) {
+    return 'Die Datei ist $size KB groß. Maximale Größe: 3 KB';
+  }
+
+  @override
+  String get shellyScriptsErrorLoadingFile => 'Fehler beim Laden der Datei';
+
+  @override
+  String get shellyScriptsOverrideExisting =>
+      'Vorhandenes Template überschreiben';
+
+  @override
+  String get shellyScriptsOverrideExistingDetail =>
+      'Aktivieren, um alle vorhandenen Versionen des Templates mit gleicher ID zu ersetzen';
+
+  @override
+  String get shellyScriptsValidateTemplate => 'Template validieren';
+
+  @override
+  String get shellyScriptsTemplateValid => 'Template ist gültig';
+
+  @override
+  String get shellyScriptsImportingTemplate => 'Template wird importiert...';
+
+  @override
+  String get shellyScriptsTemplateImported => 'Template erfolgreich importiert';
+
+  @override
+  String get shellyScriptsWillOverrideAssetTemplate =>
+      'Dies wird das mitgelieferte Template überschreiben';
+
+  @override
+  String get shellyScriptsWillOverrideUserTemplate =>
+      'Ein benutzerdefiniertes Template mit dieser ID und Version existiert bereits';
+
+  @override
+  String get shellyScriptsExportSuccess => 'Template in Zwischenablage kopiert';
+
+  @override
+  String get shellyScriptsDeleteTemplateConfirm => 'Template wirklich löschen?';
+
+  @override
+  String get shellyScriptsTemplateDeleted => 'Template gelöscht';
+
+  @override
+  String get deleting => 'Wird gelöscht...';
 }

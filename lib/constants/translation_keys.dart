@@ -564,6 +564,12 @@ class FieldTranslationKeys {
   /// Grid power mode description (Netzstrom-Modus für das Gerät)
   static const String gridPowerModeDescription = 'fieldGridPowerModeDescription';
 
+  /// Input (Eingang) - generic input field
+  static const String input = 'fieldInput';
+
+  /// Output (Ausgang) - generic output field
+  static const String output = 'fieldOutput';
+
   // =============================================================================
   // OpenDTU-specific fields (9 keys)
   // =============================================================================
@@ -816,6 +822,19 @@ class CategoryTranslationKeys {
 
   /// Power meter phase 3 (Stromzähler Phase 3)
   static const String powerMeterPhase3 = 'categoryPowerMeterPhase3';
+
+  // =============================================================================
+  // General Categories (3 keys)
+  // =============================================================================
+
+  /// Settings category (Einstellungen)
+  static const String settings = 'categorySettings';
+
+  /// Status category (Status)
+  static const String status = 'categoryStatus';
+
+  /// PV input category (PV Eingang)
+  static const String pvInput = 'categoryPvInput';
 }
 
 /// Translation keys for menu item names

@@ -1,5 +1,14 @@
 import 'shelly_script_parameter.dart';
 
+/// Source of the script template
+enum TemplateSource {
+  /// Bundled with app (read-only)
+  asset,
+
+  /// User-imported (editable)
+  user,
+}
+
 /// Template for a Shelly script with configurable parameters
 ///
 /// Templates exist ONLY in the app (for script creation).
@@ -12,11 +21,17 @@ class ShellyScriptTemplate {
   /// Display name shown in UI
   final String name;
 
+  /// Localized name translations (language code -> translation)
+  final Map<String, String>? nameLng;
+
   /// Template version (semantic versioning)
   final String version;
 
   /// Description shown in template selection
   final String description;
+
+  /// Localized description translations (language code -> translation)
+  final Map<String, String>? descriptionLng;
 
   /// Compatible Shelly device models (e.g., ["Plug S Gen3", "Plus 1PM"])
   final List<String> compatibleDevices;
@@ -45,11 +60,19 @@ class ShellyScriptTemplate {
   /// Last update timestamp
   final DateTime updatedAt;
 
+  /// Source of this template (asset or user)
+  final TemplateSource source;
+
+  /// File path for user templates (null for asset templates)
+  final String? filePath;
+
   ShellyScriptTemplate({
     required this.id,
     required this.name,
+    this.nameLng,
     required this.version,
     required this.description,
+    this.descriptionLng,
     required this.compatibleDevices,
     required this.requiredDevices,
     required this.sourceCode,
@@ -58,15 +81,27 @@ class ShellyScriptTemplate {
     required this.tags,
     required this.createdAt,
     required this.updatedAt,
+    this.source = TemplateSource.asset,
+    this.filePath,
   });
 
   /// Create a ShellyScriptTemplate from JSON
-  factory ShellyScriptTemplate.fromJson(Map<String, dynamic> json) {
+  factory ShellyScriptTemplate.fromJson(
+    Map<String, dynamic> json, {
+    TemplateSource source = TemplateSource.asset,
+    String? filePath,
+  }) {
     return ShellyScriptTemplate(
       id: json['id'] as String,
       name: json['name'] as String,
+      nameLng: json['name_lng'] != null
+          ? Map<String, String>.from(json['name_lng'] as Map)
+          : null,
       version: json['version'] as String,
       description: json['description'] as String,
+      descriptionLng: json['description_lng'] != null
+          ? Map<String, String>.from(json['description_lng'] as Map)
+          : null,
       compatibleDevices: (json['compatibleDevices'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -87,6 +122,8 @@ class ShellyScriptTemplate {
           [],
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      source: source,
+      filePath: filePath,
     );
   }
 
@@ -95,8 +132,10 @@ class ShellyScriptTemplate {
     return {
       'id': id,
       'name': name,
+      if (nameLng != null) 'name_lng': nameLng,
       'version': version,
       'description': description,
+      if (descriptionLng != null) 'description_lng': descriptionLng,
       'compatibleDevices': compatibleDevices,
       'requiredDevices': requiredDevices,
       'sourceCode': sourceCode,
@@ -108,8 +147,17 @@ class ShellyScriptTemplate {
     };
   }
 
+  /// Check if this is a user template
+  bool get isUserTemplate => source == TemplateSource.user;
+
+  /// Check if this is an asset template
+  bool get isAssetTemplate => source == TemplateSource.asset;
+
+  /// Check if this template is editable
+  bool get isEditable => source == TemplateSource.user;
+
   @override
   String toString() {
-    return 'ShellyScriptTemplate(id: $id, name: $name, version: $version, parameters: ${parameters.length})';
+    return 'ShellyScriptTemplate(id: $id, name: $name, version: $version, parameters: ${parameters.length}, source: $source)';
   }
 }

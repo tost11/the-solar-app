@@ -1,0 +1,222 @@
+{
+  "id": "zendure-power-control-mac",
+  "name": "Zendure Power Control (MAC/AP)",
+  "name_lng": {
+    "de": "Zendure Leistungssteuerung (MAC/AP)"
+  },
+  "version": "2.0.0",
+  "description": "Controls a Zendure power station via MAC address based on Shelly EM3 measurement (v2: Improved status query)",
+  "description_lng": {
+    "de": "Steuert eine Zendure Powerstation über MAC-Adresse basierend auf Shelly EM3 Messung (v2: Verbesserte Statusabfrage)"
+  },
+  "compatibleDevices": [
+    "SPEM"
+  ],
+  "requiredDevices": [
+    "zendure"
+  ],
+  "author": "TheSolarApp",
+  "tags": [
+    "EM3",
+    "power-management",
+    "zero feed-in",
+    "zendure"
+  ],
+  "parameters": [
+    {
+      "name": "MAC",
+      "label": "MAC Address",
+      "label_lng": {
+        "de": "MAC-Adresse"
+      },
+      "description": "MAC address of the Zendure power station",
+      "description_lng": {
+        "de": "MAC-Adresse der Zendure Powerstation"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "AA:BB:CC:DD:EE:FF",
+      "validationPattern": "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
+      "validationErrorMessage": "Ungültiges MAC-Adressformat"
+    },
+    {
+      "name": "SERIAL",
+      "label": "Serial Number",
+      "label_lng": {
+        "de": "Seriennummer"
+      },
+      "description": "Serial number of the Zendure power station",
+      "description_lng": {
+        "de": "Seriennummer der Zendure Powerstation"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "ABCD1234",
+      "sourceConfig": {
+        "source": "device",
+        "sourceProperty": "serialNumber",
+        "sourceFilter": "zendure"
+      }
+    },
+    {
+      "name": "MAX_POWER",
+      "label": "Maximum Output Power (W)",
+      "label_lng": {
+        "de": "Maximale Ausgangsleistung (W)"
+      },
+      "description": "Maximum output power in watts",
+      "description_lng": {
+        "de": "Maximale Ausgangsleistung in Watt"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 800,
+      "minValue": 0,
+      "maxValue": 1000
+    },
+    {
+      "name": "MAX_POWER_REVERSE",
+      "label": "Maximum Input Power (W)",
+      "label_lng": {
+        "de": "Maximale Eingangsleistung (W)"
+      },
+      "description": "Maximum input power (charging) in watts (negative)",
+      "description_lng": {
+        "de": "Maximale Eingangsleistung (Laden) in Watt (negativ)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 1000,
+      "minValue": 0,
+      "maxValue": 2400
+    },
+    {
+      "name": "REVERSE",
+      "label": "Enable Charging Mode",
+      "label_lng": {
+        "de": "Lademodus aktivieren"
+      },
+      "description": "Enable charging mode on surplus",
+      "description_lng": {
+        "de": "Aktiviere Lademodus bei Überschuss"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    {
+      "name": "REVERSE_STARTUP_POWER",
+      "label": "Charging Mode Startup Power (W)",
+      "label_lng": {
+        "de": "Lademodus Startleistung (W)"
+      },
+      "description": "Minimum power to start charging mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Starten des Lademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 0,
+      "advancedOption": true
+    },
+    {
+      "name": "REVERSE_STOP_POWER",
+      "label": "Charging Mode Stop Power (W)",
+      "label_lng": {
+        "de": "Lademodus Stoppleistung (W)"
+      },
+      "description": "Minimum power to stop charging mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Stoppen des Lademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 10,
+      "minValue": 0,
+      "advancedOption": true
+    },
+    {
+      "name": "STARTUP_POWER",
+      "label": "Discharge Mode Startup Power (W)",
+      "label_lng": {
+        "de": "Entlademodus Startleistung (W)"
+      },
+      "description": "Minimum power to start discharge mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Starten des Entlademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 0,
+      "advancedOption": true
+    },
+    {
+      "name": "STOP_POWER",
+      "label": "Discharge Mode Stop Power (W)",
+      "label_lng": {
+        "de": "Entlademodus Stoppleistung (W)"
+      },
+      "description": "Minimum power to stop discharge mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Stoppen des Entlademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 15,
+      "minValue": 0,
+      "advancedOption": true
+    },
+    {
+      "name": "DEBUG",
+      "label": "Debug Mode",
+      "label_lng": {
+        "de": "Debug-Modus"
+      },
+      "description": "Enable extended debug output",
+      "description_lng": {
+        "de": "Aktiviere erweiterte Debug-Ausgaben"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": false,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_RUN_MAIN_SCRIPT",
+      "label": "Main Loop Interval (s)",
+      "label_lng": {
+        "de": "Hauptschleife Intervall (s)"
+      },
+      "description": "Main loop interval in seconds",
+      "description_lng": {
+        "de": "Hauptschleife Intervall in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 5,
+      "minValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_RESOLVE_MAC",
+      "label": "MAC Resolution Interval (s)",
+      "label_lng": {
+        "de": "MAC-Auflösung Intervall (s)"
+      },
+      "description": "MAC resolution interval in seconds",
+      "description_lng": {
+        "de": "MAC-Auflösung Intervall in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 300,
+      "minValue": 10,
+      "advancedOption": true
+    }
+  ],
+  "sourceCode": "// power station serial number\n// max power in watt giving to grid\n// max power in watt loading from grid\n// loading from grid is enabled (another inverter in home network)\n// power in watt when lading from gid is started\n// power in watt when lading from gid is stopped\n// power in watt when inverting is started\n// power in watt when inverting is stopped\n// console shows debug information while script is running\n// interval in seconds main power script is run (5 sec seems to be a good value)\n// interval in seconds mac to ip resolving ist started\n\nlet lastRunTime = null;\nlet lastShellyPower = null;\nlet isRunning = false;\nlet lastRunningStarted = 0;\nlet lastSeenDevice = Shelly.getUptimeMs();\nlet host = undefined;\n\nif(!SERIAL){\n    throw new Error(\"Variable: SERIAL is required\");\n}\nif(!MAC){\n    throw new Error(\"Variable: MAC is required\");\n}\n\nfunction log(message,debug){\n    if(!debug || DEBUG){\n        print(\"[\" + Shelly.getUptimeMs() + \" Zendure Power Script]: \"+message);\n    }\n}\n\nif(REVERSE_STOP_POWER > REVERSE_STARTUP_POWER){\n    log(\"REVERSE_STOP_POWER larger then REVERSE_STARTUP_POWER set both to: \"+REVERSE_STARTUP_POWER);\n    REVERSE_STOP_POWER = REVERSE_STARTUP_POWER;\n}\nif(STOP_POWER > STARTUP_POWER){\n    log(\"STOP_POWER larger then STARTUP_POWER set both to: \"+STARTUP_POWER);\n    STOP_POWER = STARTUP_POWER;\n}\n\nfunction getTimeDiff(){\n    let localLastRunTime = lastRunTime;\n    if(localLastRunTime == null){\n        return null;\n    }\n    let now = Shelly.getUptimeMs();\n    return now - localLastRunTime;\n}\n\nfunction setLimit(shellyPower,currentDevicePower){\n    log(\"Current Zendure power is: \" + currentDevicePower + \"W\", true);\n\n    let acMode = 2;\n    let inputLimit = 0;\n    let outputLimit = 0;\n\n    let combinedLimit = shellyPower + currentDevicePower;\n\n    log(\"Combined limit is: \" + combinedLimit + \"W\", true);\n\n    if(currentDevicePower <= 0 && combinedLimit > 0 && combinedLimit <= STARTUP_POWER){\n        //not enoth to start up\n        combinedLimit = 0;\n    }\n\n    if(REVERSE && currentDevicePower >= 0 && combinedLimit < 0 && combinedLimit >= (REVERSE_STARTUP_POWER * -1)){\n        //no enoth to start up\n        combinedLimit = 0;\n    }\n\n    if(!REVERSE || combinedLimit >= 0){\n        outputLimit = Math.max(combinedLimit,0);\n        outputLimit = Math.min(outputLimit,MAX_POWER);\n        if(outputLimit >= 0 && outputLimit <= STOP_POWER){\n            outputLimit = 0;\n        }\n    }else{\n        acMode = 1;\n        inputLimit = Math.max(combinedLimit,MAX_POWER_REVERSE * -1);\n        inputLimit *= -1;\n        if(inputLimit >= 0 && inputLimit <= REVERSE_STOP_POWER){\n            inputLimit = 0;\n        }\n    }\n    combinedLimit = (inputLimit * -1) + outputLimit;\n    log(\"new Zendure power is: \" + combinedLimit + \"W\",false);\n\n    let payload = {\n        sn: SERIAL,\n        properties: {\n            acMode: acMode,\n            outputLimit: outputLimit,\n            inputLimit: inputLimit\n        }\n    };\n\n    log(\"Send POST data:\" + JSON.stringify(payload),false);\n    Shelly.call(\"http.request\", {\n        method: \"POST\",\n        url: \"http://\" + host + \"/properties/write\",\n        headers: {\n            \"Content-Type\": \"application/json\"\n        },\n        body: JSON.stringify(payload),\n        timeout: 5\n    }, function(postResult, err_code, err_msg) {\n        log(\"ret code: \" + err_code,false);\n        if (err_code === 0) {\n            if (postResult.code === 200) {\n                log(\"POST erfolgreich:\" + postResult.body,true);\n                lastRunTime = Shelly.getUptimeMs();\n                log(\"Set power of Zendure device to: \" + combinedLimit,false);\n            }else{\n                log(\"Fehler beim POST:\" + err_code + \" \" + err_msg + \" \" + postResult.body,false);\n            }\n        } else {\n            log(\"Fehler beim POST:\" + err_code + \" \" + err_msg,false);\n            if(err_code === -114){\n                log(\"This can happend if Serial number is not matching device \",false);\n            }\n        }\n    });\n}\n\nfunction runScript() {\n    if(typeof host !== 'string' || host === \"\"){\n        log(\"Timed Check Zendure -> Hostname or ip not set\",false);\n        return;\n    }\n\n    if(isRunning && Shelly.getUptimeMs() - lastRunningStarted < 60 * 1000){\n        log(\"Skipped execution still one running: \" + (Shelly.getUptimeMs() - lastRunningStarted),false);\n        return;\n    }\n\n    lastRunningStarted = Shelly.getUptimeMs();\n    isRunning = true;\n\n    let shellyPower = lastShellyPower;\n    if(shellyPower == null){\n        isRunning = false;\n        return;\n    }\n\n    log(\"Current Shelly power:\" + shellyPower + \"W\",true);\n\n    let diff = getTimeDiff();\n    if(diff != null && diff < 2 * 1000){\n        log(\"Skipped execution last set power to new: \" + diff,true);\n        isRunning = false;\n        return\n    }\n\n    if(Math.abs(shellyPower) < 5){\n        log(\"current power is fine\",true);\n\n        if(diff == null || diff > 20 * 1000){\n            log(\"Limit not set int a wile -> do anyway\",true);\n        }else{\n            isRunning = false;\n            return;\n        }\n    }\n\n    Shelly.call(\"HTTP.GET\", { url: \"http://\" + host + \"/properties/report\" }, function(result, err_code, err_msg) {\n        if (err_code !== 0 || result.code !== 200 || !result.body) {\n            log(\"error while getting status of power station, no post performed: \" + err_code + \" \" + err_msg,false);\n            isRunning = false;\n            return;\n        }\n        let response;\n        try {\n            response = JSON.parse(result.body);\n        } catch (e) {\n            log(\"Error while parsing json from device status response\" + err_code + \" \" + err_msg,false);\n            isRunning = false;\n            return;\n        }\n        if (response.properties && response.properties && response.product && response.sn === SERIAL) {\n            lastSeenDevice = Shelly.getUptimeMs();\n            let gotLimit = 0;\n            log(\"got response, acMode: \" + response.properties.acMode +\", outputHome: \" + response.properties.outputHomePower + \", inputHomePower: \" + response.properties.gridInputPower,true);\n            if(response.properties.acMode === 2){\n                //gotLimit = response.properties.outputLimit;\n                gotLimit = response.properties.outputHomePower;\n            }else if(response.properties.acMode === 1){\n                //gotLimit = response.properties.inputLimit * -1;\n                gotLimit = response.properties.gridInputPower * -1;\n            }\n            setLimit(shellyPower,gotLimit);\n        } else {\n            log(\"Could not get value from request response (maybe it is not a zendure response or Serial (SN) is wrong)\",false);\n            log(\"Response: \"+response,true);\n        }\n        isRunning = false;\n    });\n}\n\nShelly.addStatusHandler(function (event) {\n    if (event.name === \"em\" && event.delta && typeof event.delta.total_act_power === \"number\") {\n        lastShellyPower = event.delta.total_act_power;\n    }\n});\n\nTimer.set(INTERVAL_RUN_MAIN_SCRIPT * 1000, true, runScript, null);\n\n\n// -------------------- mac resolving ---------------------\n\n\nfunction resolveMacToIp() {\n    Shelly.call(\"WiFi.ListAPClients\", {}, function(res, err) {\n        if (err !== 0) {\n            log(`Mac Resolving -> error while WiFi.ListAPClients: ${err}`, false);\n            return;\n        }\n\n        if (!res || !res.ap_clients) {\n            log(\"Mac Resolving -> No clients available\", true);\n            return;\n        }\n\n        for (let c of res.ap_clients) {\n            let mac = (c.mac || \"\").toUpperCase();\n            log(\"Found device, mac: \" + c.mac + \" ip: \" + c.ip,true);\n\n            if (mac === MAC.toUpperCase()) {\n                log(\"Ip for device found: \"+ c.ip,false);\n                host = c.ip;\n                return;\n            }\n        }\n\n        log(`Mac Resolving -> MAC Address: ${MAC} could not be resolved`, true);\n    });\n}\n\n//scheduled mac resolution\nTimer.set(INTERVAL_RESOLVE_MAC * 1000, true, resolveMacToIp);\n//start mac resolution\nTimer.set(1, false, resolveMacToIp);",
+  "createdAt": "2026-02-22T20:00:00Z",
+  "updatedAt": "2026-02-24T00:00:00Z"
+}

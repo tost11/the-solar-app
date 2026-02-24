@@ -9,6 +9,10 @@ import 'implementations/shelly_device_base_implementation.dart';
 import 'package:the_solar_app/services/device_storage_service.dart';
 import '../../mixins/device_authentication_mixin.dart';
 import '../../mixins/fetch_data_timeout_mixin.dart';
+import '../../capabilities/device_role_config.dart';
+import '../../capabilities/inverter_capability.dart';
+import '../../capabilities/smart_meter_capability.dart';
+import '../../capabilities/load_capability.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_bluetooth_service.dart';
 
 /// Generic Shelly Bluetooth device template
@@ -18,7 +22,12 @@ import 'package:the_solar_app/services/devices/shelly/shelly_bluetooth_service.d
 class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
     ShellyBluetoothService,
     ShellyDeviceBaseImplementation>
-    with DeviceAuthenticationMixin, FetchDataTimeoutMixin {
+    with DeviceAuthenticationMixin,
+         FetchDataTimeoutMixin,
+         DeviceRoleConfig,
+         InverterCapability,
+         SmartMeterCapability,
+         LoadCapability {
 
   static const Duration DEFAULT_FETCH_INTERVAL = Duration(seconds: 10);
 
@@ -44,6 +53,21 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
     }
     return deviceModel;
   }
+
+  @override
+  List<DeviceRole> getConfigurableRoles() => deviceImpl.getConfigurableRoles();
+
+  @override
+  double? getSolarPVPower(Map<String, dynamic> data) => deviceImpl.getSolarPVPower(data);
+
+  @override
+  double? getSolarGridPower(Map<String, dynamic> data) => deviceImpl.getSolarGridPower(data);
+
+  @override
+  double? getGridPower(Map<String, dynamic> data) => deviceImpl.getGridPower(data);
+
+  @override
+  double? getLoadPower(Map<String, dynamic> data) => deviceImpl.getLoadPower(data);
 
   /// Named constructor for JSON deserialization
   ShellyBluetoothDeviceTemplate.fromJsonFields({
@@ -125,6 +149,7 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
     final json = super.toJson();
     json.addAll(authToJson());
     json.addAll(fetchDataIntervalToJson());
+    json.addAll(roleConfigToJson());
     return json;
   }
 }
@@ -162,6 +187,7 @@ class ShellyBluetoothDevice extends ShellyBluetoothDeviceTemplate {
     );
     device.authFromJson(json);
     device.fetchDataIntervalFromJson(json, ShellyBluetoothDeviceTemplate.DEFAULT_FETCH_INTERVAL);
+    device.roleConfigFromJson(json);
     return device;
   }
 }
