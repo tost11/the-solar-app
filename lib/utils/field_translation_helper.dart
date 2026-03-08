@@ -99,6 +99,8 @@ String? getFieldTranslation(AppLocalizations l10n, String key) {
       return l10n.fieldCellVoltageMin;
     case 'fieldCellVoltageMax':
       return l10n.fieldCellVoltageMax;
+    case 'fieldBatteryVoltage':
+      return l10n.fieldBatteryVoltage;
     case 'fieldCellTemperatureMax':
       return l10n.fieldCellTemperatureMax;
     case 'fieldBatteryPackEmpty':
@@ -355,6 +357,38 @@ String? getFieldTranslation(AppLocalizations l10n, String key) {
       return l10n.restartDeviceConfirm;
     case 'selectInverterToSetLimit':
       return l10n.selectInverterToSetLimit;
+
+    // Shelly settings keys
+    case 'settingEcoMode':
+      return l10n.settingEcoMode;
+    case 'settingEcoModeDesc':
+      return l10n.settingEcoModeDesc;
+    case 'settingDiscoverable':
+      return l10n.settingDiscoverable;
+    case 'settingDiscoverableDesc':
+      return l10n.settingDiscoverableDesc;
+    case 'settingDebugMqtt':
+      return l10n.settingDebugMqtt;
+    case 'settingDebugMqttDesc':
+      return l10n.settingDebugMqttDesc;
+    case 'settingDebugWebsocket':
+      return l10n.settingDebugWebsocket;
+    case 'settingDebugWebsocketDesc':
+      return l10n.settingDebugWebsocketDesc;
+
+    // Zendure keys
+    case 'setGridInput':
+      return l10n.setGridInput;
+    case 'setGridOutput':
+      return l10n.setGridOutput;
+
+    // Zendure battery pack keys
+    case 'heatState':
+      return l10n.heatState;
+
+    // Generic fallback
+    case 'unknown':
+      return l10n.unknown;
 
     default:
       return null;

@@ -51,7 +51,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           Center(
             child: Column(
               children: [
-                Icon(Icons.solar_power, size: 80, color: Theme.of(context).colorScheme.primary),
+                Image.asset('assets/icon/app_icon.png', width: 80, height: 80),
                 const SizedBox(height: 16),
                 const Text('The Solar App', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ],

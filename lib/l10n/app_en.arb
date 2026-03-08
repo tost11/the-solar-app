@@ -3285,6 +3285,10 @@
   "fieldPackState": "Pack State",
   "fieldCellVoltageMin": "Cell Voltage Min",
   "fieldCellVoltageMax": "Cell Voltage Max",
+  "fieldBatteryVoltage": "Battery Voltage",
+  "@fieldBatteryVoltage": {
+    "description": "Data field: Battery voltage"
+  },
   "fieldCellTemperatureMax": "Cell Temperature Max",
   "fieldBatteryPackEmpty": "No battery pack data available",
   "@fieldBatteryPackEmpty": {
@@ -3743,5 +3747,53 @@
   "fieldOutput": "Output",
   "@fieldOutput": {
     "description": "Field: Output (generic)"
+  },
+  "settingEcoMode": "Eco Mode",
+  "@settingEcoMode": {
+    "description": "Setting: Eco Mode"
+  },
+  "settingEcoModeDesc": "Enable or disable Eco mode",
+  "@settingEcoModeDesc": {
+    "description": "Setting description: Eco Mode"
+  },
+  "settingDiscoverable": "Discoverable",
+  "@settingDiscoverable": {
+    "description": "Setting: Discoverable"
+  },
+  "settingDiscoverableDesc": "Make device discoverable via Bluetooth",
+  "@settingDiscoverableDesc": {
+    "description": "Setting description: Discoverable"
+  },
+  "settingDebugMqtt": "Debug MQTT",
+  "@settingDebugMqtt": {
+    "description": "Setting: Debug MQTT"
+  },
+  "settingDebugMqttDesc": "Enable MQTT debug logging",
+  "@settingDebugMqttDesc": {
+    "description": "Setting description: Debug MQTT"
+  },
+  "settingDebugWebsocket": "Debug WebSocket",
+  "@settingDebugWebsocket": {
+    "description": "Setting: Debug WebSocket"
+  },
+  "settingDebugWebsocketDesc": "Enable WebSocket debug logging",
+  "@settingDebugWebsocketDesc": {
+    "description": "Setting description: Debug WebSocket"
+  },
+  "setGridInput": "Set Grid Input",
+  "@setGridInput": {
+    "description": "Field: Set Grid Input"
+  },
+  "setGridOutput": "Set Grid Output",
+  "@setGridOutput": {
+    "description": "Field: Set Grid Output"
+  },
+  "heatState": "Heat State",
+  "@heatState": {
+    "description": "Field: Heat State"
+  },
+  "unknown": "Unknown",
+  "@unknown": {
+    "description": "Fallback: Unknown value"
   }
 }

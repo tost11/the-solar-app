@@ -948,40 +948,40 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     print(config.toString());
     return [
       GeneralSettingItem(
-        name: TO(key: 'settingEcoMode'),
+        name: TO(key: FieldTranslationKeys.settingEcoMode),
         commandName: GENERAL_SETTGINS_ECO_MODE,
         currentStatus: MapUtils.OM(config,['device','eco_mode']) as bool? ?? false,
         popUpOnChange: true,
-        description: TO(key: 'settingEcoModeDesc'),
+        description: TO(key: FieldTranslationKeys.settingEcoModeDesc),
         icon: Icons.eco,
         confirmationTitle: 'Eco Mode ändern?',
         confirmationMessage: 'Möchten Sie den Eco Mode wirklich ändern? Dies kann die Geräteleistung beeinflussen.',
       ),
       GeneralSettingItem(
-        name: TO(key: 'settingDiscoverable'),
+        name: TO(key: FieldTranslationKeys.settingDiscoverable),
         commandName: GENERAL_SETTINGS_DISCOVERABLE,
         currentStatus: MapUtils.OM(config,['device','discoverable']) as bool? ?? true,
         popUpOnChange: true,
-        description: TO(key: 'settingDiscoverableDesc'),
+        description: TO(key: FieldTranslationKeys.settingDiscoverableDesc),
         icon: Icons.visibility,
         confirmationMessage: 'Möchten Sie den Sichtbarkeit wirklich ändern?',
       ),
       GeneralSettingItem(
-        name: TO(key: 'settingDebugMqtt'),
+        name: TO(key: FieldTranslationKeys.settingDebugMqtt),
         commandName: GENERAL_SETTINGS_DEBUG_MQTT,
         currentStatus: MapUtils.OM(config,['debug','mqtt','enable']) as bool? ?? false,
         popUpOnChange: true,
-        description: TO(key: 'settingDebugMqttDesc'),
+        description: TO(key: FieldTranslationKeys.settingDebugMqttDesc),
         icon: Icons.bug_report,
         confirmationTitle: 'Debug MQTT ändern?',
         confirmationMessage: 'Möchten Sie MQTT Debug-Protokollierung wirklich ändern? Dies kann die Leistung beeinflussen und zusätzliche Logs erzeugen.',
       ),
       GeneralSettingItem(
-        name: TO(key: 'settingDebugWebsocket'),
+        name: TO(key: FieldTranslationKeys.settingDebugWebsocket),
         commandName: GENERAL_SETTINGS_DEBUG_WEBSOCKET,
         currentStatus: MapUtils.OM(config,['debug','websocket','enable']) as bool? ?? false,
         popUpOnChange: true,
-        description: TO(key: 'settingDebugWebsocketDesc'),
+        description: TO(key: FieldTranslationKeys.settingDebugWebsocketDesc),
         icon: Icons.bug_report,
         confirmationTitle: 'Debug Websocket ändern?',
         confirmationMessage: 'Möchten Sie Websocket Debug-Protokollierung wirklich ändern? Dies kann die Leistung beeinflussen und zusätzliche Logs erzeugen.',
@@ -1477,7 +1477,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     // Create TO object with translation key and optional parameters
     final TO nameTO = nameKey != null
         ? TO(key: nameKey, params: nameParams)
-        : TO(key: 'unknown'); // Fallback for templates without translation key
+        : TO(key: FieldTranslationKeys.unknown); // Fallback for templates without translation key
 
     return DeviceControlItem(
       name: nameTO,

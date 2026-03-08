@@ -378,7 +378,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         category: "settings"
       ),
       DeviceDataField(
-        name: TO(key: "set grid input"),
+        name: TO(key: FieldTranslationKeys.setGridInput),
         type: DataFieldType.watt,
         valueExtractor: (data){
           return MapUtils.OM(data, ['data', 'properties', 'inputLimit']);
@@ -388,7 +388,7 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         category: "settings"
       ),
       DeviceDataField(
-        name: TO(key: "set grid output"),
+        name: TO(key: FieldTranslationKeys.setGridOutput),
         type: DataFieldType.watt,
         valueExtractor: (data){
           return MapUtils.OM(data, ['data', 'properties', 'outputLimit']);

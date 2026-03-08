@@ -223,25 +223,24 @@ class _ZendureBatteryPackListWidgetState
           _buildDetailRow(
               context,
               Icons.thermostat,
-              TO(key: FieldTranslationKeys.maxTemperature).getText(context),
+              TO(key: FieldTranslationKeys.temperature).getText(context),
               _formatTemperature(pack['maxTemp'])),
 
         if (pack['totalVol'] != null)
           _buildDetailRow(
               context,
               Icons.electrical_services,
-              TO(key: FieldTranslationKeys.totalVoltage).getText(context),
+              TO(key: FieldTranslationKeys.batteryVoltage).getText(context),
               _formatVoltage(pack['totalVol'])),
-
-        if (pack['batcur'] != null)
-          _buildDetailRow(
-              context,
-              Icons.electric_bolt,
-              TO(key: FieldTranslationKeys.current).getText(context),
-              _formatCurrent(pack['batcur'])),
 
         // Expert mode only fields
         if (expertMode) ...[
+          if (pack['batcur'] != null)
+            _buildDetailRow(
+                context,
+                Icons.electric_bolt,
+                TO(key: FieldTranslationKeys.current).getText(context),
+                _formatCurrent(pack['batcur'])),
           if (pack['packType'] != null)
             _buildDetailRow(
                 context,
@@ -273,7 +272,7 @@ class _ZendureBatteryPackListWidgetState
             _buildDetailRow(
                 context,
                 Icons.thermostat,
-                TO(key: "heat State").getText(context),
+                TO(key: FieldTranslationKeys.heatState).getText(context),
                 pack['heatState'].toString()),
         ],
       ],

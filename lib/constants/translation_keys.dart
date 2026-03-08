@@ -193,6 +193,9 @@ class FieldTranslationKeys {
   /// Cell voltage max (Zellspannung Max)
   static const String cellVoltageMax = 'fieldCellVoltageMax';
 
+  /// Battery voltage (Batteriespannung)
+  static const String batteryVoltage = 'fieldBatteryVoltage';
+
   /// Cell temperature max (Zelltemperatur Max)
   static const String cellTemperatureMax = 'fieldCellTemperatureMax';
 
@@ -425,6 +428,42 @@ class FieldTranslationKeys {
 
   /// Lock time minutes (Sperrzeit Minuten)
   static const String lockTimeMinutes = 'fieldLockTimeMinutes';
+
+  /// Shelly eco mode setting (Eco Modus)
+  static const String settingEcoMode = 'settingEcoMode';
+
+  /// Shelly eco mode description
+  static const String settingEcoModeDesc = 'settingEcoModeDesc';
+
+  /// Shelly discoverable setting (Auffindbar)
+  static const String settingDiscoverable = 'settingDiscoverable';
+
+  /// Shelly discoverable description
+  static const String settingDiscoverableDesc = 'settingDiscoverableDesc';
+
+  /// Shelly debug MQTT setting (Debug MQTT)
+  static const String settingDebugMqtt = 'settingDebugMqtt';
+
+  /// Shelly debug MQTT description
+  static const String settingDebugMqttDesc = 'settingDebugMqttDesc';
+
+  /// Shelly debug WebSocket setting (Debug WebSocket)
+  static const String settingDebugWebsocket = 'settingDebugWebsocket';
+
+  /// Shelly debug WebSocket description
+  static const String settingDebugWebsocketDesc = 'settingDebugWebsocketDesc';
+
+  /// Zendure set grid input (Netz Eingang setzen)
+  static const String setGridInput = 'setGridInput';
+
+  /// Zendure set grid output (Netz Ausgang setzen)
+  static const String setGridOutput = 'setGridOutput';
+
+  /// Zendure battery pack heat state (Heizstatus)
+  static const String heatState = 'heatState';
+
+  /// Unknown value fallback
+  static const String unknown = 'unknown';
 
   /// Inverter (Wechselrichter)
   static const String inverter = 'fieldInverter';

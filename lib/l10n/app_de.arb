@@ -3463,6 +3463,10 @@
   "@fieldCellVoltageMax": {
     "description": "Data field: Cell voltage max"
   },
+  "fieldBatteryVoltage": "Batteriespannung",
+  "@fieldBatteryVoltage": {
+    "description": "Data field: Battery voltage"
+  },
   "fieldCellTemperatureMax": "Zelltemperatur Max",
   "@fieldCellTemperatureMax": {
     "description": "Data field: Cell temperature max"
@@ -4612,5 +4616,53 @@
   "deleting": "Wird gelöscht...",
   "@deleting": {
     "description": "Loading: Deleting"
+  },
+  "settingEcoMode": "Eco Modus",
+  "@settingEcoMode": {
+    "description": "Setting: Eco Mode"
+  },
+  "settingEcoModeDesc": "Eco-Modus aktivieren oder deaktivieren",
+  "@settingEcoModeDesc": {
+    "description": "Setting description: Eco Mode"
+  },
+  "settingDiscoverable": "Auffindbar",
+  "@settingDiscoverable": {
+    "description": "Setting: Discoverable"
+  },
+  "settingDiscoverableDesc": "Gerät über Bluetooth auffindbar machen",
+  "@settingDiscoverableDesc": {
+    "description": "Setting description: Discoverable"
+  },
+  "settingDebugMqtt": "Debug MQTT",
+  "@settingDebugMqtt": {
+    "description": "Setting: Debug MQTT"
+  },
+  "settingDebugMqttDesc": "MQTT Debug-Protokollierung aktivieren",
+  "@settingDebugMqttDesc": {
+    "description": "Setting description: Debug MQTT"
+  },
+  "settingDebugWebsocket": "Debug WebSocket",
+  "@settingDebugWebsocket": {
+    "description": "Setting: Debug WebSocket"
+  },
+  "settingDebugWebsocketDesc": "WebSocket Debug-Protokollierung aktivieren",
+  "@settingDebugWebsocketDesc": {
+    "description": "Setting description: Debug WebSocket"
+  },
+  "setGridInput": "Eingestellter Netz Eingang",
+  "@setGridInput": {
+    "description": "Field: Set Grid Input"
+  },
+  "setGridOutput": "Eingestellter Netz Ausgang",
+  "@setGridOutput": {
+    "description": "Field: Set Grid Output"
+  },
+  "heatState": "Heizstatus",
+  "@heatState": {
+    "description": "Field: Heat State"
+  },
+  "unknown": "Unbekannt",
+  "@unknown": {
+    "description": "Fallback: Unknown value"
   }
 }

@@ -2474,6 +2474,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldCellVoltageMax => 'Cell Voltage Max';
 
   @override
+  String get fieldBatteryVoltage => 'Battery Voltage';
+
+  @override
   String get fieldCellTemperatureMax => 'Cell Temperature Max';
 
   @override
@@ -3291,4 +3294,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleting => 'Deleting...';
+
+  @override
+  String get settingEcoMode => 'Eco Mode';
+
+  @override
+  String get settingEcoModeDesc => 'Enable or disable Eco mode';
+
+  @override
+  String get settingDiscoverable => 'Discoverable';
+
+  @override
+  String get settingDiscoverableDesc =>
+      'Make device discoverable via Bluetooth';
+
+  @override
+  String get settingDebugMqtt => 'Debug MQTT';
+
+  @override
+  String get settingDebugMqttDesc => 'Enable MQTT debug logging';
+
+  @override
+  String get settingDebugWebsocket => 'Debug WebSocket';
+
+  @override
+  String get settingDebugWebsocketDesc => 'Enable WebSocket debug logging';
+
+  @override
+  String get setGridInput => 'Set Grid Input';
+
+  @override
+  String get setGridOutput => 'Set Grid Output';
+
+  @override
+  String get heatState => 'Heat State';
+
+  @override
+  String get unknown => 'Unknown';
 }

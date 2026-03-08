@@ -4482,6 +4482,12 @@ abstract class AppLocalizations {
   /// **'Zellspannung Max'**
   String get fieldCellVoltageMax;
 
+  /// Data field: Battery voltage
+  ///
+  /// In de, this message translates to:
+  /// **'Batteriespannung'**
+  String get fieldBatteryVoltage;
+
   /// Data field: Cell temperature max
   ///
   /// In de, this message translates to:
@@ -5999,6 +6005,78 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Wird gelöscht...'**
   String get deleting;
+
+  /// Setting: Eco Mode
+  ///
+  /// In de, this message translates to:
+  /// **'Eco Modus'**
+  String get settingEcoMode;
+
+  /// Setting description: Eco Mode
+  ///
+  /// In de, this message translates to:
+  /// **'Eco-Modus aktivieren oder deaktivieren'**
+  String get settingEcoModeDesc;
+
+  /// Setting: Discoverable
+  ///
+  /// In de, this message translates to:
+  /// **'Auffindbar'**
+  String get settingDiscoverable;
+
+  /// Setting description: Discoverable
+  ///
+  /// In de, this message translates to:
+  /// **'Gerät über Bluetooth auffindbar machen'**
+  String get settingDiscoverableDesc;
+
+  /// Setting: Debug MQTT
+  ///
+  /// In de, this message translates to:
+  /// **'Debug MQTT'**
+  String get settingDebugMqtt;
+
+  /// Setting description: Debug MQTT
+  ///
+  /// In de, this message translates to:
+  /// **'MQTT Debug-Protokollierung aktivieren'**
+  String get settingDebugMqttDesc;
+
+  /// Setting: Debug WebSocket
+  ///
+  /// In de, this message translates to:
+  /// **'Debug WebSocket'**
+  String get settingDebugWebsocket;
+
+  /// Setting description: Debug WebSocket
+  ///
+  /// In de, this message translates to:
+  /// **'WebSocket Debug-Protokollierung aktivieren'**
+  String get settingDebugWebsocketDesc;
+
+  /// Field: Set Grid Input
+  ///
+  /// In de, this message translates to:
+  /// **'Eingestellter Netz Eingang'**
+  String get setGridInput;
+
+  /// Field: Set Grid Output
+  ///
+  /// In de, this message translates to:
+  /// **'Eingestellter Netz Ausgang'**
+  String get setGridOutput;
+
+  /// Field: Heat State
+  ///
+  /// In de, this message translates to:
+  /// **'Heizstatus'**
+  String get heatState;
+
+  /// Fallback: Unknown value
+  ///
+  /// In de, this message translates to:
+  /// **'Unbekannt'**
+  String get unknown;
 }
 
 class _AppLocalizationsDelegate

@@ -2502,6 +2502,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fieldCellVoltageMax => 'Zellspannung Max';
 
   @override
+  String get fieldBatteryVoltage => 'Batteriespannung';
+
+  @override
   String get fieldCellTemperatureMax => 'Zelltemperatur Max';
 
   @override
@@ -3332,4 +3335,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deleting => 'Wird gelöscht...';
+
+  @override
+  String get settingEcoMode => 'Eco Modus';
+
+  @override
+  String get settingEcoModeDesc => 'Eco-Modus aktivieren oder deaktivieren';
+
+  @override
+  String get settingDiscoverable => 'Auffindbar';
+
+  @override
+  String get settingDiscoverableDesc =>
+      'Gerät über Bluetooth auffindbar machen';
+
+  @override
+  String get settingDebugMqtt => 'Debug MQTT';
+
+  @override
+  String get settingDebugMqttDesc => 'MQTT Debug-Protokollierung aktivieren';
+
+  @override
+  String get settingDebugWebsocket => 'Debug WebSocket';
+
+  @override
+  String get settingDebugWebsocketDesc =>
+      'WebSocket Debug-Protokollierung aktivieren';
+
+  @override
+  String get setGridInput => 'Eingestellter Netz Eingang';
+
+  @override
+  String get setGridOutput => 'Eingestellter Netz Ausgang';
+
+  @override
+  String get heatState => 'Heizstatus';
+
+  @override
+  String get unknown => 'Unbekannt';
 }
