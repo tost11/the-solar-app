@@ -293,14 +293,11 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           // Parse scripts array from response
           final scriptsData = resp['scripts'] as List<dynamic>?;
-          if (scriptsData == null || scriptsData.isEmpty) {
-            MessageUtils.showWarning(context, context.l10n.statusNoScriptsFound);
-            return;
-          }
-
-          final scripts = scriptsData
-              .map((s) => ShellyScript.fromJson(s as Map<String, dynamic>))
-              .toList();
+          final scripts = (scriptsData == null || scriptsData.isEmpty)
+              ? <ShellyScript>[]
+              : scriptsData
+                  .map((s) => ShellyScript.fromJson(s as Map<String, dynamic>))
+                  .toList();
 
           // Navigate to scripts screen with systemId
           await NavigationUtils.pushConfigurationScreen(

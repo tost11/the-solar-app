@@ -2027,6 +2027,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shellyScriptsHelpEditTip => 'Tap Edit to open a script.';
 
   @override
+  String get shellyScriptsLoadingStatus => 'Loading scripts...';
+
+  @override
   String get shellyScriptsEmptyStateTitle => 'No Scripts Available';
 
   @override
@@ -3331,4 +3334,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknown => 'Unknown';
+
+  @override
+  String get bluetoothAdvancedOptions => 'Advanced Options';
+
+  @override
+  String get bluetoothShowAllDevices => 'Show all devices';
+
+  @override
+  String get bluetoothShowAllDevicesHelp =>
+      'Shows all BLE devices, not only known manufacturers (Zendure, Shelly)';
+
+  @override
+  String get bluetoothUnknownDeviceWarning =>
+      'Unknown devices with warning icon. Select manufacturer manually.';
+
+  @override
+  String get bluetoothSelectManufacturer => 'Select device type';
+
+  @override
+  String get bluetoothManufacturerDetected =>
+      'Manufacturer detected. You can change it.';
+
+  @override
+  String get bluetoothManufacturerUnknown => 'Manufacturer not detected.';
+
+  @override
+  String get bluetoothUnknownDevice => 'Unknown';
+
+  @override
+  String get bluetoothUnknownDeviceName => 'Unknown Device';
+
+  @override
+  String get manufacturer => 'Manufacturer';
 }

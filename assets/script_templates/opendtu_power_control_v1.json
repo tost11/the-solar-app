@@ -10,7 +10,7 @@
     "de": "Steuert OpenDTU Wechselrichter basierend auf Shelly EM3 Messung (Nulleinspeisung)"
   },
   "compatibleDevices": [
-    "SPEM"
+    "SPEM","S3EM"
   ],
   "requiredDevices": [
     "opendtu"

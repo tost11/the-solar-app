@@ -4,6 +4,17 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../constants/bluetooth_constants.dart';
 
+/// Enriched scan result with manufacturer detection
+class BluetoothScanResult {
+  final ScanResult scanResult;
+  final String? detectedManufacturer; // null = unknown manufacturer
+
+  BluetoothScanResult(this.scanResult, this.detectedManufacturer);
+
+  bool get isKnownManufacturer => detectedManufacturer != null;
+  BluetoothDevice get device => scanResult.device;
+}
+
 /// Service for handling Bluetooth Low Energy device scanning
 ///
 /// This service manages BLE scanning operations, including:
@@ -13,19 +24,36 @@ import '../constants/bluetooth_constants.dart';
 /// - Scan result management and updates
 class BluetoothScanService {
   // Scan state
-  List<ScanResult> _scanResults = [];
+  List<BluetoothScanResult> _scanResults = [];
   bool _isScanning = false;
   StreamSubscription<List<ScanResult>>? _scanSubscription;
 
   // Callback for scan result updates
-  Function(List<ScanResult>)? _onScanResultsUpdated;
+  Function(List<BluetoothScanResult>)? _onScanResultsUpdated;
 
-  List<ScanResult> get scanResults => _scanResults;
+  List<BluetoothScanResult> get scanResults => _scanResults;
   bool get isScanning => _isScanning;
 
   /// Sets a callback to be notified when scan results are updated
-  void setOnScanResultsUpdated(Function(List<ScanResult>) callback) {
+  void setOnScanResultsUpdated(Function(List<BluetoothScanResult>) callback) {
     _onScanResultsUpdated = callback;
+  }
+
+  /// Detects manufacturer from scan result based on MAC address or device name
+  ///
+  /// Returns manufacturer constant or null if unknown
+  String? detectManufacturer(ScanResult result) {
+    String macAddress = result.device.remoteId.toString();
+    String name = result.device.advName.toString();
+
+    if (macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE)) {
+      return DEVICE_MANUFACTURER_ZENDURE;
+    }
+    if (name.startsWith(BLUETOOTH_NAME_PREFIX_SHELLY)) {
+      return DEVICE_MANUFACTURER_SHELLY;
+    }
+
+    return null; // Unknown manufacturer
   }
 
   /// Checks if all required Bluetooth permissions are granted
@@ -75,17 +103,16 @@ class BluetoothScanService {
     return {'available': true, 'message': null};
   }
 
-  /// Starts a Bluetooth Low Energy scan for supported devices
-  ///
-  /// Scans for devices with MAC addresses matching supported manufacturers:
-  /// - Zendure devices (MAC prefix from BLUETOOTH_MAC_PREFIX_ZENDURE)
-  /// - Shelly devices (MAC prefix from BLUETOOTH_MAC_PREFIX_SHELLY)
+  /// Starts a Bluetooth Low Energy scan for devices
   ///
   /// [timeout] - Duration of the scan (default: 10 seconds)
+  /// [showAllDevices] - If false (default), filters for known manufacturers only (Zendure, Shelly).
+  ///                   If true, shows all BLE devices with manufacturer detection.
   ///
   /// Returns a map with success status and error message if applicable
   Future<Map<String, dynamic>> startScan({
     Duration timeout = const Duration(seconds: 10),
+    bool showAllDevices = false,
   }) async {
     if (_isScanning) {
       return {
@@ -122,18 +149,19 @@ class BluetoothScanService {
 
       // Subscribe to scan results
       _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
-        // Filter results for supported manufacturers
-        List<ScanResult> filtered = [];
+        // Detect manufacturer and conditionally filter
+        List<BluetoothScanResult> enriched = [];
         for (ScanResult res in results) {
-          String macAddress = res.device.remoteId.toString();
-          String name = res.device.advName.toString();
-          // Filter for both Zendure and Shelly devices
-          if (macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE) ||
-              name.startsWith(BLUETOOTH_NAME_PREFIX_SHELLY)) {
-            filtered.add(res);
+          String? manufacturer = detectManufacturer(res);
+
+          // Apply filter only if showAllDevices is false
+          if (!showAllDevices && manufacturer == null) {
+            continue; // Skip unknown devices (current behavior)
           }
+
+          enriched.add(BluetoothScanResult(res, manufacturer));
         }
-        _scanResults = filtered;
+        _scanResults = enriched;
         _notifyResultsUpdated();
       });
 

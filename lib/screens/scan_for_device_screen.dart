@@ -8,6 +8,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:lan_scanner/lan_scanner.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
+import 'package:the_solar_app/utils/bluetooth_device_utils.dart';
 import '../constants/bluetooth_constants.dart';
 import '../services/devices/zendure/zendure_bluetooth_service.dart';
 import '../services/devices/shelly/shelly_bluetooth_service.dart';
@@ -25,6 +26,7 @@ import '../widgets/device_list_widget.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/scan_advanced_options_widget.dart';
+import '../widgets/bluetooth_advanced_options_widget.dart';
 import '../utils/permission_utils.dart';
 import '../utils/localization_extension.dart';
 import 'manual_device_add_screen.dart';
@@ -46,7 +48,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   final NetworkInfo _networkInfo = NetworkInfo();
 
   // Bluetooth scanning
-  List<ScanResult> _scanResults = [];
+  List<BluetoothScanResult> _scanResults = [];
   bool _isScanning = false;
 
   // Network scanning
@@ -56,8 +58,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   // Network scanning progress - unified view
   NetworkScanProgress? _scanProgress;
 
-  // Advanced scanning options widget key
+  // Advanced scanning options widget keys
   final GlobalKey<ScanAdvancedOptionsWidgetState> _advancedOptionsKey = GlobalKey();
+  final GlobalKey<BluetoothAdvancedOptionsWidgetState> _bluetoothAdvancedOptionsKey = GlobalKey();
 
   // Tabs
   late TabController _tabController;
@@ -94,9 +97,14 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   Future<void> _startScan() async {
     if (_isScanning) return;
 
+    // Get configuration from advanced options widget
+    final config = _bluetoothAdvancedOptionsKey.currentState?.getCurrentConfiguration()
+      ?? BluetoothScanConfiguration.defaults();
+
     // Start the scan using the service
     final result = await _bluetoothScanService.startScan(
       timeout: const Duration(seconds: 10),
+      showAllDevices: config.showAllDevices,
     );
 
     // Handle errors
@@ -111,6 +119,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                     onPressed: () => _checkPermissions(),
                   )
                 : null,
+            showCloseIcon: true,
+            duration: const Duration(days: 365),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -119,20 +130,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
 
   Future<void> _stopScan() async {
     await _bluetoothScanService.stopScan();
-  }
-
-  Future<DeviceBase> _connectToDevice(BluetoothDevice device) async {
-    String macAddress = device.remoteId.toString();
-    String name = device.advName.toString();
-
-    // Detect device brand based on MAC prefix or name
-    if (name.startsWith(BLUETOOTH_NAME_PREFIX_SHELLY)) {
-      return await _connectToBluetoothDevice(device, DEVICE_MANUFACTURER_SHELLY);
-    } else if (macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE)) {
-      return await _connectToBluetoothDevice(device, DEVICE_MANUFACTURER_ZENDURE);
-    } else {
-      throw Exception('Unknown device brand');
-    }
   }
 
   Future<DeviceBase> _connectToBluetoothDevice(BluetoothDevice device, String type) async {
@@ -154,9 +151,12 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
         return existingDevice;
       }
 
-      // New device: use advertised name as temporary name
+      // New device: use advertised name as temporary name with correct manufacturer
       String advertisedName = device.advName;
-      String deviceName = advertisedName.isNotEmpty ? "Zendure $advertisedName" : "Zendure Device";
+      String manufacturerDisplayName = _getManufacturerDisplayName(type);
+      String deviceName = advertisedName.isNotEmpty
+          ? "$manufacturerDisplayName $advertisedName"
+          : "$manufacturerDisplayName Device";
 
       // Create device with temporary name
       // Model will be updated later when device info is fetched
@@ -175,6 +175,18 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     } catch (e) {
       debugPrint("error while creating bluetooth device with type $type: $e");
       rethrow;
+    }
+  }
+
+  /// Returns user-friendly display name for manufacturer constant
+  String _getManufacturerDisplayName(String manufacturer) {
+    switch (manufacturer) {
+      case DEVICE_MANUFACTURER_ZENDURE:
+        return 'Zendure';
+      case DEVICE_MANUFACTURER_SHELLY:
+        return 'Shelly';
+      default:
+        return manufacturer; // Fallback to raw constant value
     }
   }
 
@@ -425,6 +437,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
         );
       });
       MessageUtils.showSuccess(context, context.l10n.messageDeviceSaved);
+      // User stays on scan screen to continue scanning
     }
   }
 
@@ -1193,6 +1206,8 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                       icon: Icon(_isScanning ? Icons.hourglass_empty : Icons.bluetooth_searching),
                       label: Text(_isScanning ? context.l10n.messageScanning : context.l10n.actionBluetoothScan),
                     ),
+                    const SizedBox(height: 8),
+                    BluetoothAdvancedOptionsWidget(key: _bluetoothAdvancedOptionsKey),
                   ],
                 ),
               ),
@@ -1201,18 +1216,51 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                 child: DeviceListWidget(
                   scanResults: _scanResults,
                   isScanning: _isScanning,
-                  onDeviceTap: (device) async {
-                    var knownDevice = await DialogUtils.executeWithLoading(
+                  onDeviceTap: (device, detectedManufacturer) async {
+                    // Get current showAllDevices mode
+                    final config = _bluetoothAdvancedOptionsKey.currentState?.getCurrentConfiguration()
+                      ?? BluetoothScanConfiguration.defaults();
+
+                    // If in showAllDevices mode, show dialog first (may return null if canceled)
+                    if (config.showAllDevices) {
+                      final manufacturer = await BluetoothDeviceUtils.showManufacturerSelectionDialog(
                         context,
-                        loadingMessage: context.l10n.messageConnectingToDevice,
-                        operation: () async {
-                          return await _connectToDevice(device);
-                        },
-                        showErrorDialog: true
-                    );
-                    // Return device to parent DeviceListScreen
-                    if (mounted && knownDevice != null) {
-                      Navigator.pop(context, knownDevice);
+                        detectedManufacturer: detectedManufacturer,
+                      );
+
+                      // User canceled - return silently without error
+                      if (manufacturer == null) return;
+
+                      // Proceed with connection using selected manufacturer
+                      var knownDevice = await DialogUtils.executeWithLoading(
+                          context,
+                          loadingMessage: context.l10n.messageConnectingToDevice,
+                          operation: () async {
+                            return await _connectToBluetoothDevice(device, manufacturer);
+                          },
+                          showErrorDialog: true
+                      );
+
+                      if (mounted && knownDevice != null) {
+                        Navigator.pop(context, knownDevice);
+                      }
+                    } else {
+                      // Normal mode - connect directly with detected manufacturer
+                      var knownDevice = await DialogUtils.executeWithLoading(
+                          context,
+                          loadingMessage: context.l10n.messageConnectingToDevice,
+                          operation: () async {
+                            if (detectedManufacturer == null) {
+                              throw Exception('Unknown device brand');
+                            }
+                            return await _connectToBluetoothDevice(device, detectedManufacturer);
+                          },
+                          showErrorDialog: true
+                      );
+
+                      if (mounted && knownDevice != null) {
+                        Navigator.pop(context, knownDevice);
+                      }
                     }
                   }
                 ),

@@ -2052,6 +2052,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tippen Sie auf Bearbeiten um ein Script zu öffnen.';
 
   @override
+  String get shellyScriptsLoadingStatus => 'Lade Skripte...';
+
+  @override
   String get shellyScriptsEmptyStateTitle => 'Keine Scripts verfügbar';
 
   @override
@@ -3373,4 +3376,37 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get unknown => 'Unbekannt';
+
+  @override
+  String get bluetoothAdvancedOptions => 'Erweiterte Optionen';
+
+  @override
+  String get bluetoothShowAllDevices => 'Alle Geräte anzeigen';
+
+  @override
+  String get bluetoothShowAllDevicesHelp =>
+      'Zeigt alle BLE-Geräte, nicht nur bekannte Hersteller (Zendure, Shelly)';
+
+  @override
+  String get bluetoothUnknownDeviceWarning =>
+      'Unbekannte Geräte mit Warnsymbol. Hersteller manuell wählen.';
+
+  @override
+  String get bluetoothSelectManufacturer => 'Gerätetyp auswählen';
+
+  @override
+  String get bluetoothManufacturerDetected =>
+      'Hersteller erkannt. Sie können diesen ändern.';
+
+  @override
+  String get bluetoothManufacturerUnknown => 'Hersteller nicht erkannt.';
+
+  @override
+  String get bluetoothUnknownDevice => 'Unbekannt';
+
+  @override
+  String get bluetoothUnknownDeviceName => 'Unbekanntes Gerät';
+
+  @override
+  String get manufacturer => 'Hersteller';
 }

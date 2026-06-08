@@ -278,8 +278,14 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
 
         // Return the result
         if (data.containsKey('result')) {
-          _handleResponse(method,data["result"] as Map<String,dynamic>);
-          return data["result"];
+          final result = data["result"];
+
+          // Skip response parsing for Script.Delete (returns boolean, not map)
+          if (method != ShellyCommands.scriptDelete && result is Map<String, dynamic>) {
+            _handleResponse(method, result);
+          }
+
+          return result;
         }
         return Map<String,dynamic>();
       } else {

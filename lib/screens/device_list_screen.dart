@@ -252,26 +252,23 @@ class _DeviceListScreenState extends State<DeviceListScreen>
       MaterialPageRoute(builder: (context) => destinationScreen),
     );
 
-    // Handle returned device from scan screen
-    if (result is Device) {
-      // New device was added - reload and select it
-      await _loadDevices();
-      if (mounted) {
-        setState(() {
-          _selectedDevice = _devices.firstWhere(
-            (d) => d.id == result.id,
-            orElse: () => result,
-          );
-        });
+    // Always refresh device list when returning from scan screen
+    // This ensures newly saved devices appear, regardless of how screen was exited
+    await _loadDevices();
 
-        // On mobile: navigate to the device detail screen
-        if (ResponsiveBreakpoints.isMobile(context)) {
-          _navigateToDevice(_selectedDevice);
-        }
+    // Handle returned device for selection (optional)
+    if (result is Device && mounted) {
+      setState(() {
+        _selectedDevice = _devices.firstWhere(
+          (d) => d.id == result.id,
+          orElse: () => result,
+        );
+      });
+
+      // On mobile: navigate to the device detail screen
+      if (ResponsiveBreakpoints.isMobile(context)) {
+        _navigateToDevice(_selectedDevice);
       }
-    } else if (result == true) {
-      // Generic reload signal
-      await _loadDevices();
     }
   }
 

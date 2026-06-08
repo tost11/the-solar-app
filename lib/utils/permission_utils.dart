@@ -50,6 +50,8 @@ class PermissionUtils {
                   label: 'Einstellungen',
                   onPressed: () => openAppSettings(),
                 ),
+                showCloseIcon: true,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }
@@ -80,6 +82,8 @@ class PermissionUtils {
                       label: 'Einstellungen',
                       onPressed: () => openAppSettings(),
                     ),
+                    showCloseIcon: true,
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               }
@@ -107,6 +111,8 @@ class PermissionUtils {
                   label: 'Einstellungen',
                   onPressed: () => openAppSettings(),
                 ),
+                showCloseIcon: true,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }

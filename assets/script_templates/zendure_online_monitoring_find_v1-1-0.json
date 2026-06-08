@@ -1,0 +1,225 @@
+{
+  "id": "zendure-online-monit-find",
+  "name": "Zendure Online Monitoring (Auto-Discovery)",
+  "name_lng": {
+    "de": "Zendure Online-Überwachung (Auto-Erkennung)"
+  },
+  "version": "1.1.0",
+  "description": "Sends Zendure power station data to online monitoring system with automatic network discovery (v1.1.0: shelly standalone if zendure device not reachable)",
+  "description_lng": {
+    "de": "Sendet Zendure Powerstation Daten an Online-Überwachungssystem mit automatischer Netzwerk-Erkennung (v1.1.0: Shelly eigenständig wenn Zendure nicht erreichbar)"
+  },
+  "compatibleDevices": [
+    "SPEM","S3EM"
+  ],
+  "requiredDevices": [
+    "zendure"
+  ],
+  "author": "TheSolarApp",
+  "tags": [
+    "monitoring",
+    "online-monitoring",
+    "auto-discovery",
+    "zendure"
+  ],
+  "parameters": [
+    {
+      "name": "SERIAL",
+      "label": "Serial Number",
+      "label_lng": {
+        "de": "Seriennummer"
+      },
+      "description": "Serial number of the Zendure power station",
+      "description_lng": {
+        "de": "Seriennummer der Zendure Powerstation"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "ABCD1234",
+      "sourceConfig": {
+        "source": "device",
+        "sourceProperty": "serialNumber",
+        "sourceFilter": "zendure"
+      }
+    },
+    {
+      "name": "DATA_DURATION",
+      "label": "Data Fetch Interval (s)",
+      "label_lng": {
+        "de": "Datenabfrage-Intervall (s)"
+      },
+      "description": "Time difference between fetching new inverter data in seconds",
+      "description_lng": {
+        "de": "Zeitintervall zwischen Datenabfragen in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 5
+    },
+    {
+      "name": "DEBUG",
+      "label": "Debug Mode",
+      "label_lng": {
+        "de": "Debug-Modus"
+      },
+      "description": "Enable debug logging to see more information",
+      "description_lng": {
+        "de": "Aktiviere Debug-Logging für mehr Informationen"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": false,
+      "advancedOption": true
+    },
+    {
+      "name": "ONLINE_SYSTEM_ID",
+      "label": "System ID",
+      "label_lng": {
+        "de": "System ID"
+      },
+      "description": "System ID from monitoring URL (https://[DOMAIN]/dd/[ID])",
+      "description_lng": {
+        "de": "System ID aus Monitoring URL (https://[DOMAIN]/dd/[ID])"
+      },
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "ONLINE_CLIENT_TOKEN",
+      "label": "Client Token",
+      "label_lng": {
+        "de": "Client Token"
+      },
+      "description": "Client secret token from monitoring system settings",
+      "description_lng": {
+        "de": "Client Secret Token aus Monitoring System Einstellungen"
+      },
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "ONLINE_URL_1",
+      "label": "Primary Monitoring URL",
+      "label_lng": {
+        "de": "Primäre Monitoring URL"
+      },
+      "description": "First domain to send data to",
+      "description_lng": {
+        "de": "Erste Domain zum Senden der Daten"
+      },
+      "type": "url",
+      "required": true,
+      "defaultValue": "https://solar.pihost.org"
+    },
+    {
+      "name": "ONLINE_URL_2",
+      "label": "Backup Monitoring URL",
+      "label_lng": {
+        "de": "Backup Monitoring URL"
+      },
+      "description": "Backup domain if first is down",
+      "description_lng": {
+        "de": "Backup Domain falls erste nicht erreichbar"
+      },
+      "type": "url",
+      "required": false,
+      "defaultValue": "https://solar.tost-soft.de"
+    },
+    {
+      "name": "ONLINE_DEVICE_ID",
+      "label": "Device ID",
+      "label_lng": {
+        "de": "Geräte ID"
+      },
+      "description": "Device ID for online monitoring (only important if multiple devices are in one system)",
+      "description_lng": {
+        "de": "Geräte ID für Online-Monitoring (nur wichtig bei mehreren Geräten in einem System)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 1,
+      "minValue": 1
+    },
+    {
+      "name": "INTERVAL_SCAN_NETWORK",
+      "label": "Network Scan Interval (s)",
+      "label_lng": {
+        "de": "Netzwerk-Scan Intervall (s)"
+      },
+      "description": "Interval in seconds to search for power station in network",
+      "description_lng": {
+        "de": "Intervall in Sekunden zur Suche nach Powerstation im Netzwerk"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 900,
+      "minValue": 60,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_DEVICE_OFFLINE",
+      "label": "Device Offline Timeout (s)",
+      "label_lng": {
+        "de": "Geräte-Offline Timeout (s)"
+      },
+      "description": "Time in seconds when power station is assumed offline",
+      "description_lng": {
+        "de": "Zeit in Sekunden nach der Powerstation als offline angenommen wird"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 600,
+      "minValue": 60,
+      "advancedOption": true
+    },
+    {
+      "name": "CHECK_WIFI_AP",
+      "label": "Scan WiFi AP Network",
+      "label_lng": {
+        "de": "WiFi AP Netzwerk scannen"
+      },
+      "description": "Scan WiFi AP network for power station",
+      "description_lng": {
+        "de": "WiFi AP Netzwerk nach Powerstation scannen"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    },
+    {
+      "name": "CHECK_WIFI_STA",
+      "label": "Scan WiFi STA Network",
+      "label_lng": {
+        "de": "WiFi STA Netzwerk scannen"
+      },
+      "description": "Scan WiFi STA network for power station",
+      "description_lng": {
+        "de": "WiFi STA Netzwerk nach Powerstation scannen"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    },
+    {
+      "name": "CHECK_ETH",
+      "label": "Scan Ethernet Network",
+      "label_lng": {
+        "de": "Ethernet Netzwerk scannen"
+      },
+      "description": "Scan Ethernet network for power station",
+      "description_lng": {
+        "de": "Ethernet Netzwerk nach Powerstation scannen"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    }
+  ],
+  "sourceCode": "// scan wifi sta network for power station\nvar CHECK_WIFI_STA = true;\n//scan ethernet network for power station\nvar CHECK_ETH = true\n// time in seconds when power station is assumed offline (no response from requests)\nlet INTERVAL_DEVICE_OFFLINE = 60 * 10;//offline after 10 minutes\n\nlet host = undefined;\nlet lastSeenDevice = null;\nlet scanRunning = false;\n\nif(!SERIAL){throw new Error(\"Variable: SERIAL is required\");}\nif(!DATA_DURATION){throw new Error(\"Variable: DATA_DURATION is required\");}\nif(DATA_DURATION < 5){throw new Error(\"Variable: DATA_DURATION not allowed to be lower then 5 seconds\");}\nif(ONLINE_DEVICE_ID <= 0){throw new Error(\"Variable: ONLINE_DEVICE_ID not allowed to be lower then 1\");}\nif(ONLINE_DEVICE_ID_SHELLY <= 0){throw new Error(\"Variable: ONLINE_DEVICE_ID_SHELLY not allowed to be lower then 1\");}\nif(ONLINE_DEVICE_ID_SHELLY == ONLINE_DEVICE_ID){throw new Error(\"Variable: ONLINE_DEVICE_ID can not be equal\");}\nif(!ONLINE_SYSTEM_ID){throw new Error(\"Variable: ONLINE_SYSTEM_ID is required\");}\nif(!ONLINE_URL_1){throw new Error(\"Variable: ONLINE_URL_1 is required\");}\nif(!ONLINE_CLIENT_TOKEN){throw new Error(\"Variable: ONLINE_CLIENT_TOKEN is required\");}\nif(!INTERVAL_DEVICE_OFFLINE){throw new Error(\"Variable: INTERVAL_DEVICE_OFFLINE is required\");}\nif(!INTERVAL_SCAN_NETWORK){throw new Error(\"Variable: INTERVAL_SCAN_NETWORK is required\");}\nif(!CHECK_WIFI_AP){throw new Error(\"Variable: CHECK_WIFI_AP is required\");}\nif(!CHECK_WIFI_STA){throw new Error(\"Variable: CHECK_WIFI_STA is required\");}\nif(!CHECK_ETH){throw new Error(\"Variable: CHECK_ETH is required\");}\n\n\nfunction log(message, debug) {\n  if (!debug || DEBUG) {\n    let prefix = \"[\" + Shelly.getUptimeMs() + \" Zendure Online Monitoring]: \";\n    let fullMessage = prefix + message;\n    print(fullMessage);\n  }\n}\n\nfunction isDeviceReachable(){\n  if(!lastSeenDevice){\n    return false;\n  }\n  return Shelly.getUptimeMs() - lastSeenDevice < INTERVAL_DEVICE_OFFLINE * 1000;\n}\n\n// Parsing Funktion mit sauberem Entfernen von Null- und 0-Werten\nfunction parseZendureData(resp) {\n  let p = resp.properties || {};\n\n  let inputsDC = [];\n  for (let i = 1; i <= 6; i++) {\n    let key = \"solarPower\" + i;\n    if (typeof p[key] === \"number\" && p[key] !== 0) {\n      inputsDC.push({\n        id: i,\n        watt: p[key]\n      });\n    }\n  }\n\n  let inputsAC = [];\n  let outputsAC = [];\n  let batteries = [];\n  //TODO pars packData\n\n  let device = {\n    id: ONLINE_DEVICE_ID\n  };\n\n  let packPower = 0;\n  let packPowerOk = false;\n  if (typeof p.packInputPower === \"number\") {\n    packPower -= p.packInputPower;\n    packPowerOk = true;\n  }\n  if (typeof p.outputPackPower === \"number\") {\n    packPower += p.outputPackPower;\n    packPowerOk = true;\n  }\n  if (packPowerOk){\n    device.batteryWatt = packPower;\n  }\n  if (typeof p.solarInputPower === \"number\" && p.solarInputPower > 0) {\n    device.inputWattDC = p.solarInputPower;\n  }\n  if (typeof p.outputHomePower === \"number\") {\n    device.outputWattAC = p.outputHomePower;\n  }\n  if (typeof p.gridInputPower === \"number\") {\n    device.inputWattAC = p.gridInputPower;\n  }\n  if (typeof p.BatVolt === \"number\") {\n    device.batteryVoltage = p.BatVolt / 100.0;\n  }\n  if (typeof p.electricLevel === \"number\") {\n    device.batteryPercentage = p.electricLevel;\n  }\n  if (typeof p.hyperTmp === \"number\" && p.hyperTmp !== 0) {\n    device.temperature = p.hyperTmp / 100.0;\n  }\n\n  if (inputsDC.length) device.inputsDC = inputsDC;\n  if (inputsAC.length) device.inputsAC = inputsAC;\n  if (batteries.length) device.batteries = batteries;\n  if (outputsAC.length) device.outputsAC = outputsAC;\n\n  return device;\n}\n\nfunction tryLogMessageIfPossible(body){\n  if(!body){\n    return;//no body given\n  }\n  try{\n    var msg = JSON.parse(body);\n    if(msg.error){\n      log(\"Response error: \"+msg.error,true);\n    }else{\n      log(\"Response body: \"+msg,true);\n    }\n  }catch(error){\n    //coult not be handle log full body\n    log(\"Response body: \"+msg,true);\n  }\n}\n\nfunction handlePostResult(domain,result, err_code, err_msg){\n  if (err_code !== 0) {\n    log(\"could not send data to: \" + domain + \" error_code: \" + err_code + \" error_msg: \" + err_msg,false);\n    return false;\n  }\n  if(result.code === 403 || result.code === 401 || result.code === 404){\n    log(\"Permission denied or system no found while sending data to \" + domain + \" with status: \"+result.code+\", is system id and client token correct ?, status code \" + result.code,false);\n    tryLogMessageIfPossible(result.body);\n    return true;//return true so second domain is not tried (it will also be unauthorized on second domain)\n  }\n  if(result.code === 400){\n    log(\"Could not send data \" + domain + \", because our data seem to be invalid ?! -> skip this sample, status code \" + result.code,false);\n    tryLogMessageIfPossible(result.body);\n    return true;//return true so second domain is not tried (it will also be invalid on second domain)\n  }\n  if(result.code === 200){\n    log(\"Data successfully send to \" + domain,false);\n    return true;\n  }\n  log(\"Data not send was no possible to \" + domain + \" http code: \" + result.code,false);\n  tryLogMessageIfPossible(result.body);\n  return false;\n}\n\n// Function to get and print the model information of the device\nfunction getShellyData(callback) {\n\n  Shelly.call(\"EM.GetStatus\", {id:0}, function (ShellyEM) {\n    log(\"Device Info: \" + JSON.stringify(ShellyEM),true);\n    Shelly.call(\"EMData.GetStatus\", {id:0}, function (ShellyEMData) {\n      log(\"Device Info: \" + JSON.stringify(ShellyEMData),true);\n\n      var shellyDevice = {\n        id: ONLINE_DEVICE_ID_SHELLY,\n        gridWatt: 0,\n        grids:[{\n          id:1\n        },{\n          id:2\n        },{\n          id:3\n        }]\n      };\n\n      if(ShellyEM){\n        if(ShellyEM.a_voltage > 1){\n          shellyDevice.grids[0].voltage = ShellyEM.a_voltage;\n          shellyDevice.grids[0].ampere = ShellyEM.a_current;\n          shellyDevice.grids[0].watt = ShellyEM.a_act_power;\n          shellyDevice.grids[0].frequency = ShellyEM.a_freq;\n        }\n\n        if(ShellyEM.b_voltage > 1){\n          shellyDevice.grids[1].voltage = ShellyEM.b_voltage;\n          shellyDevice.grids[1].ampere = ShellyEM.b_current;\n          shellyDevice.grids[1].watt = ShellyEM.b_act_power;\n          shellyDevice.grids[1].frequency = ShellyEM.b_freq;\n        }\n\n        if(ShellyEM.c_voltage > 1){\n          shellyDevice.grids[2].voltage = ShellyEM.c_voltage;\n          shellyDevice.grids[2].ampere = ShellyEM.c_current;\n          shellyDevice.grids[2].watt = ShellyEM.c_act_power;\n          shellyDevice.grids[2].frequency = ShellyEM.c_freq;\n        }\n\n        shellyDevice.gridWatt = ShellyEM.total_act_power;\n      }\n\n      if(ShellyEMData){\n        //TODO handle calucate more save\n        typeof ShellyEMData.a_total_act_energy === \"number\" && shellyDevice.grids[0].totalConsumptionKWH = ShellyEMData.a_total_act_energy / 1000;\n        typeof ShellyEMData.a_total_act_energy === \"number\" && shellyDevice.grids[0].totalFeedInKWH = ShellyEMData.a_total_act_ret_energy / 1000;\n\n        typeof ShellyEMData.b_total_act_energy === \"number\" && shellyDevice.grids[1].totalConsumptionKWH = ShellyEMData.b_total_act_energy / 1000;\n        typeof ShellyEMData.b_total_act_ret_energy === \"number\" && shellyDevice.grids[1].totalFeedInKWH = ShellyEMData.b_total_act_ret_energy / 1000;\n\n        typeof ShellyEMData.c_total_act_energy === \"number\" && shellyDevice.grids[2].totalConsumptionKWH = ShellyEMData.c_total_act_energy / 1000;\n        typeof ShellyEMData.c_total_act_ret_energy === \"number\" && shellyDevice.grids[2].totalFeedInKWH = ShellyEMData.c_total_act_ret_energy / 1000;\n\n        typeof ShellyEMData.total_act === \"number\" && shellyDevice.gridTotalConsumptionKWH = ShellyEMData.total_act / 1000;\n        typeof ShellyEMData.total_act_ret === \"number\" && shellyDevice.gridTotalFeedInKWH = ShellyEMData.total_act_ret / 1000;\n      }\n\n      log(\"Shelly parsed data: \" + JSON.stringify(shellyDevice),true)\n      callback(shellyDevice)\n    });\n  });\n}\n\nfunction runSecondPartOfScript(payload){\n\n  getShellyData(function(shellyDevice){\n\n    payload.devices.push(shellyDevice);\n\n    let toSend = JSON.stringify(payload)\n\n    log(\"sendData: \"+toSend,true);\n\n    Shelly.call(\"HTTP.Request\", {\n      method: \"POST\",\n      url: ONLINE_URL_1+\"/api/solar/data?systemId=\"+ONLINE_SYSTEM_ID,\n      timeout: 10,\n      headers: {\n        \"Content-Type\": \"application/json\",\n        \"clientToken\": ONLINE_CLIENT_TOKEN\n      },\n      body: toSend\n    }, function(result, err_code, err_msg) {\n      if(!handlePostResult(ONLINE_URL_1,result,err_code,err_msg)){\n        //try second domain\n        if(!ONLINE_URL_2){\n          log(\"No Second Domain defined\",true);\n          return;\n        }\n        Shelly.call(\"HTTP.Request\", {\n          method: \"POST\",\n          timeout: 10,\n          url: ONLINE_URL_2+\"/api/solar/data?systemId=\"+ONLINE_SYSTEM_ID,\n          headers: {\n            \"Content-Type\": \"application/json\",\n            \"clientToken\": ONLINE_CLIENT_TOKEN\n          },\n          body: toSend\n        }, function(result, err_code, err_msg) {\n          handlePostResult(ONLINE_URL_2,result,err_code,err_msg);\n        });\n      }\n    });\n  });\n}\n\nfunction runScript() {\n  var payload = {\n    duration: DATA_DURATION,\n    timestamp: Date.now(),\n    devices: []\n  };\n\n  if(typeof host !== 'string' || host === \"\"){\n    log(\"Main script no run -> Hostname or ip not set, scanning? -> continue with shelly data only: \"+scanRunning,false);\n    runSecondPartOfScript(payload);\n    return;\n  }\n  Shelly.call(\"HTTP.GET\", {url: \"http://\" + host + \"/properties/report\",timeout: 5},function(result, err_code, err_msg) {\n    if (err_code !== 0 || result.code !== 200 || !result.body) {\n      log(\"error while getting status of power station, no post performed: \" + err_code + \" \" + err_msg,false);\n      runSecondPartOfScript(payload);\n      return;\n    }\n\n    let response;\n    try {\n      response = JSON.parse(result.body);\n    }catch(error){\n      log(\"Could parse json response from zendure bower station\", false);\n    }\n\n    if (!response || !response.properties || !response.messageId || !response.product || response.sn !== SERIAL) {\n      log(\"Could not get value from request response (maybe it is not a zendure response or Serial (SN) is wrong)\",false);\n      log(\"Response: \"+response,true);\n      runSecondPartOfScript(payload);\n      return;\n    }\n    //set zendure data to our send payload\n    lastSeenDevice = Shelly.getUptimeMs();\n    payload.devices.push(parseZendureData(response));\n    runSecondPartOfScript(payload);\n  });\n}\n\n// Timer alle DATA_DURATION Sekunden für Datenerfassung & Übertragung\nTimer.set(DATA_DURATION * 1000, true, runScript, null);\n\n// -------------------- find device in network -------------------------------\n\nvar networks = [];\nvar currentTimeout = 1;\n\n// Function to perform a network scan and look for the Zendure device\nfunction scanForZendureDevice(i,networkId) {\n\n  if(isDeviceReachable()){\n    //device reconnected stop scan\n    log(\"Device reconnected -> stop network scanning\",false);\n    currentTimeout = 1;\n    scanRunning = false;\n    return;\n  }\n\n  if (i > 255) {\n    i=0\n    networkId++\n  }\n\n  if(networkId >= networks.length){\n    log(\"All networks scanned with timeout: \" + currentTimeout + \" -> increase Timeout\",false);\n    if(currentTimeout === 1){\n      currentTimeout = 2;\n      log(\"new scn itteration wiht timeout: \" + currentTimeout,false);\n      Timer.set(1, false, function(){scanForZendureDevice(1,0)}, null);\n    }else if(currentTimeout === 2){\n      currentTimeout = 5;\n      log(\"new scn itteration wiht timeout: \" + currentTimeout,false);\n      Timer.set(1, false, function(){scanForZendureDevice(1,0)}, null);\n    }else{\n      log(\"Network scann ended without result -.-\",false);\n      currentTimeout = 1;\n      scanRunning = false;\n    }\n    return\n  }\n\n  var ipBase = networks[networkId];\n  var ip = ipBase + i;\n  var url = \"http://\" + ip + \"/properties/report\"; // Assuming the device's API endpoint\n\n  log(\"check ip for zendure: \"+ip,true);\n  Shelly.call(\"HTTP.GET\", { url: url , timeout: currentTimeout}, function(result, err_code, err_msg) {\n    if (err_code === 0) { // HTTP request was successful\n      // Check for HTTP status code 200\n      log(\"Recived http response: \"+result.code, true);\n      if (result.code === 200 && result.body) {\n        try {\n          var deviceInfo = JSON.parse(result.body); // Parse the JSON response\n\n          // Check if the serial number matches the target\n          if (deviceInfo && deviceInfo.properties && deviceInfo.product && deviceInfo.sn === SERIAL) {\n            // If the serial number matches, log the internal IP and hostname\n            log(\"Device found with ip: \" + ip,false);\n            Script.storage.setItem(\"deviceIp\",ip);\n            host = ip;\n            scanRunning = false;\n            return;\n          }\n        } catch (e) {\n          log(\"Error parsing response from IP: \" + ip, true); // Log if JSON parsing fails\n        }\n      } else {\n        log(\"Received non-200 status code (\" + result.status + \") from IP or body is empty: \" + ip, true);\n      }\n    } else {\n      log(\"HTTP request error (\" + err_code + \"): \" + err_msg + \" from IP: \" + ip, true);\n    }\n\n    Timer.set(1, false, function(){scanForZendureDevice(i + 1,networkId)}, null);\n  });\n}\n\nfunction parseIp(ip){\n  if(!ip && ip.length <= 0){\n    return null;\n  }\n  let lastDotPos = ip.indexOf('.', ip.indexOf('.') + 1);\n\n  while (lastDotPos !== -1) {\n    let nextDotPos = ip.indexOf('.', lastDotPos + 1);\n    if (nextDotPos === -1) break;\n    lastDotPos = nextDotPos;\n  }\n\n  return ip.slice(0, lastDotPos+1);\n}\n\nfunction getWifiStaIp(){\n  if(!CHECK_WIFI_STA){\n    scanForZendureDevice(1,0);\n    return;\n  }\n  log(\"Check ip for WiFi sta Mode\",true);\n  Shelly.call(\"WiFi.GetStatus\",{}, function(result, err_code, err_msg) {\n    if(err_code === 0 && result.sta_ip){\n      log(\"sta mode-> found ip: \" + result.sta_ip,true);\n      networks.push(parseIp(result.sta_ip));//todo subnets (if possible)\n    }else{\n      log(\"sta mode-> not connected or configured incorrect\",true);\n    }\n    //scanForZendureDevice(1,0);\n    log(\"Networks to scann for devices: \" + networks,false);\n    scanForZendureDevice(1,0);\n  });\n}\n\nfunction getWifiApIp(){\n  if(!CHECK_WIFI_AP){\n    getWifiStaIp();\n    return;\n  }\n  log(\"Check ip for WiFi ap Mode\",true);\n  Shelly.call(\"WiFi.GetConfig\",{}, function(result, err_code, err_msg) {\n    if(err_code === 0 && result.ap && result.ap.enable){\n      log(\"sta mode-> default ip: 192.168.33.1\",true);\n      networks.push(\"192.168.33.\");\n    }else{\n      log(\"ap not enabled\",true);\n    }\n    getWifiStaIp();\n  });\n}\n\nfunction getEthernetIp(){\n  if(!CHECK_ETH){\n    getWifiApIp();\n    return;\n  }\n  log(\"Check Ethernet\",true);\n  Shelly.call(\"Eth.GetConfig\",{}, function(result, err_code, err_msg) {\n    if(err_code === 0 && result.enable === true){\n      if(result.server_mode && result.ip){\n        log(\"eth-> in server mode ip: \" + result.ip,true);\n        networks.push(parseIp(result.ip));//todo subnet\n        getWifiApIp();\n      }else{\n        Shelly.call(\"Ethernet.GetStatus\",{}, function(result, err_code, err_msg) {\n          if(err_code === 0 && result.ip){\n            log(\"eth-> cient mode ip: \" + result.sta_ip,true);\n            networks.push(parseIp(result.ip));\n          }else{\n            log(\"eth-> cient mode not connected\",true);\n          }\n          getWifiApIp();\n        });\n      }\n    }else{\n      log(\"eth-> not enabled\",true);\n      getWifiApIp();\n    }\n  });\n}\n\nfunction startFindingDevice(){\n  if(isDeviceReachable()){\n    log(\"scanning not needed device is reachable -> do not start\",true);\n    return;\n  }else{\n    log(\"Device ip known but not seen in time: \" + ((Shelly.getUptimeMs() - lastSeenDevice)/1000) + \"s\",true);\n  }\n  if(scanRunning){\n    log(\"Scanning for zendure device already running -> do not start\",true);\n    return;\n  }\n  scanRunning = true;\n  log(\"Device ip unknown or not reachable start search\",false);\n  networks = [];\n  getEthernetIp();\n}\n\nfunction loadIpFromStorage(){\n  const deviceIp = Script.storage.getItem(\"deviceIp\");\n  if(deviceIp){\n    log(\"Loaded ip from storrage: \"+deviceIp,false);\n    host = deviceIp;\n    //wait 30 sec to check if ip still valid to start first execution of finding device\n    Timer.set(1000 * 30, false, startFindingDevice, null);\n  }else{\n    log(\"Device ip not found in storrage start search imediatly\",false);\n    //no ip from last run start finding instantly\n    Timer.set(1, false, startFindingDevice, null);\n  }\n}\n\n//on run periodically\nTimer.set(INTERVAL_SCAN_NETWORK * 1000, true, startFindingDevice, null);\n//on startup\nTimer.set(1, false, loadIpFromStorage, null);",
+  "createdAt": "2026-02-24T00:00:00Z",
+  "updatedAt": "2026-02-24T00:00:00Z"
+}

@@ -1,0 +1,262 @@
+{
+  "id": "zendure-power-control-find",
+  "name": "Zendure Power Control (Auto-Discovery)",
+  "name_lng": {
+    "de": "Zendure Leistungssteuerung (Auto-Erkennung)"
+  },
+  "version": "2.0.1",
+  "description": "Controls a Zendure power station with automatic network discovery (v2.0.1: Added smartMode flag)",
+  "description_lng": {
+    "de": "Steuert eine Zendure Powerstation mit automatischer Netzwerk-Erkennung (v2.0.1: smartMode Flag hinzugefügt)"
+  },
+  "compatibleDevices": [
+    "SPEM","S3EM"
+  ],
+  "requiredDevices": [
+    "zendure"
+  ],
+  "author": "TheSolarApp",
+  "tags": [
+    "EM3",
+    "power-management",
+    "zero feed-in",
+    "zendure",
+    "auto-discovery"
+  ],
+  "parameters": [
+    {
+      "name": "SERIAL",
+      "label": "Serial Number",
+      "label_lng": {
+        "de": "Seriennummer"
+      },
+      "description": "Serial number of the Zendure power station",
+      "description_lng": {
+        "de": "Seriennummer der Zendure Powerstation"
+      },
+      "type": "string",
+      "required": true,
+      "placeholder": "ABCD1234",
+      "sourceConfig": {
+        "source": "device",
+        "sourceProperty": "serialNumber",
+        "sourceFilter": "zendure"
+      }
+    },
+    {
+      "name": "MAX_POWER",
+      "label": "Maximum Output Power (W)",
+      "label_lng": {
+        "de": "Maximale Ausgangsleistung (W)"
+      },
+      "description": "Maximum output power in watts",
+      "description_lng": {
+        "de": "Maximale Ausgangsleistung in Watt"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 800,
+      "minValue": 0,
+      "maxValue": 1000
+    },
+    {
+      "name": "MAX_POWER_REVERSE",
+      "label": "Maximum Input Power (W)",
+      "label_lng": {
+        "de": "Maximale Eingangsleistung (W)"
+      },
+      "description": "Maximum input power (charging) in watts",
+      "description_lng": {
+        "de": "Maximale Eingangsleistung (Laden) in Watt"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 1000,
+      "minValue": 0,
+      "maxValue": 2400
+    },
+    {
+      "name": "REVERSE",
+      "label": "Enable Charging Mode",
+      "label_lng": {
+        "de": "Lademodus aktivieren"
+      },
+      "description": "Enable charging mode on surplus",
+      "description_lng": {
+        "de": "Aktiviere Lademodus bei Überschuss"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    {
+      "name": "REVERSE_STARTUP_POWER",
+      "label": "Charging Mode Startup Power (W)",
+      "label_lng": {
+        "de": "Lademodus Startleistung (W)"
+      },
+      "description": "Minimum power to start charging mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Starten des Lademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 0
+    },
+    {
+      "name": "REVERSE_STOP_POWER",
+      "label": "Charging Mode Stop Power (W)",
+      "label_lng": {
+        "de": "Lademodus Stoppleistung (W)"
+      },
+      "description": "Minimum power to stop charging mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Stoppen des Lademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 10,
+      "minValue": 0
+    },
+    {
+      "name": "STARTUP_POWER",
+      "label": "Discharge Mode Startup Power (W)",
+      "label_lng": {
+        "de": "Entlademodus Startleistung (W)"
+      },
+      "description": "Minimum power to start discharge mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Starten des Entlademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 30,
+      "minValue": 0
+    },
+    {
+      "name": "STOP_POWER",
+      "label": "Discharge Mode Stop Power (W)",
+      "label_lng": {
+        "de": "Entlademodus Stoppleistung (W)"
+      },
+      "description": "Minimum power to stop discharge mode",
+      "description_lng": {
+        "de": "Mindestleistung zum Stoppen des Entlademodus"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 15,
+      "minValue": 0
+    },
+    {
+      "name": "DEBUG",
+      "label": "Debug Mode",
+      "label_lng": {
+        "de": "Debug-Modus"
+      },
+      "description": "Enable extended debug output",
+      "description_lng": {
+        "de": "Aktiviere erweiterte Debug-Ausgaben"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true
+    },
+    {
+      "name": "INTERVAL_RUN_MAIN_SCRIPT",
+      "label": "Main Loop Interval (s)",
+      "label_lng": {
+        "de": "Hauptschleife Intervall (s)"
+      },
+      "description": "Main loop interval in seconds",
+      "description_lng": {
+        "de": "Hauptschleife Intervall in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 5,
+      "minValue": 1
+    },
+    {
+      "name": "INTERVAL_DEVICE_OFFLINE",
+      "label": "Offline Timeout (s)",
+      "label_lng": {
+        "de": "Offline Timeout (s)"
+      },
+      "description": "Offline detection timeout in seconds",
+      "description_lng": {
+        "de": "Offline-Erkennung Timeout in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 600,
+      "minValue": 1,
+      "advancedOption": true
+    },
+    {
+      "name": "INTERVAL_SCAN_NETWORK",
+      "label": "Network Scan Interval (s)",
+      "label_lng": {
+        "de": "Netzwerk-Scan Intervall (s)"
+      },
+      "description": "Network scan interval in seconds",
+      "description_lng": {
+        "de": "Netzwerk-Scan Intervall in Sekunden"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 900,
+      "minValue": 60,
+      "advancedOption": true
+    },
+    {
+      "name": "CHECK_WIFI_AP",
+      "label": "Check Ap Network",
+      "label_lng": {
+        "de": "AP Netzwerk Prüfen"
+      },
+      "description": "searches ap-network of shelly for zendure power station",
+      "description_lng": {
+        "de": "Durchsucht Shelly Ap-Netzwerk nach Zendure Speicher"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    },
+    {
+      "name": "CHECK_WIFI_STA",
+      "label": "Check Wifi Network",
+      "label_lng": {
+        "de": "Wifi Netzwerk Prüfen"
+      },
+      "description": "searches Wifi-network of shelly for zendure power station",
+      "description_lng": {
+        "de": "Durchsucht Shelly Wifi-Netzwerk nach Zendure Speicher"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    },
+    {
+      "name": "CHECK_ETH",
+      "label": "Check Ethernet Network",
+      "label_lng": {
+        "de": "Ethernet Netzwerk Prüfen"
+      },
+      "description": "searches LAN-network of shelly for zendure power station",
+      "description_lng": {
+        "de": "Durchsucht Shelly LAN-Netzwerk nach Zendure Speicher"
+      },
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "advancedOption": true
+    }
+  ],
+  "sourceCode": "// max power in watt giving to grid\n// max power in watt loading from grid\n// loading from grid is enabled (another inverter in home network)\n// power in watt when lading from gid is started\n// power in watt when lading from gid is stopped\n// power in watt when inverting is started\n// power in watt when inverting is stopped\n// console shows debug information while script is running\n// interval in seconds main power script is run (5 sec seems to be a good value)\n// time in seconds when power station is assumed offline (no response from requests)\n// interval in seconds search for power station in network\n// scan wifi ap network for power station\nvar CHECK_WIFI_AP = true;\n// scan wifi sta network for power station\nvar CHECK_WIFI_STA = true;\n//scan ethernet network for power station\nvar CHECK_ETH = true\n\nlet lastRunTime = null;\nlet lastShellyPower = null;\nlet isRunning = false;\nlet lastRunningStarted = 0;\nlet scanRunning = false;\nlet lastSeenDevice = null;\nlet host = null;\n\nif(!SERIAL){\n    throw new Error(\"Variable: SERIAL is required\");\n}\n\nfunction isDeviceReachable(){\n    if(!lastSeenDevice){\n        return false;\n    }\n    return Shelly.getUptimeMs() - lastSeenDevice < INTERVAL_DEVICE_OFFLINE * 1000;\n}\n\nfunction log(message,debug){\n    if(!debug || DEBUG){\n        print(\"[\" + Shelly.getUptimeMs() + \" Zendure Power Script]: \"+message);\n    }\n}\n\nif(REVERSE_STOP_POWER > REVERSE_STARTUP_POWER){\n    log(\"REVERSE_STOP_POWER larger then REVERSE_STARTUP_POWER set both to: \"+REVERSE_STARTUP_POWER);\n    REVERSE_STOP_POWER = REVERSE_STARTUP_POWER;\n}\nif(STOP_POWER > STARTUP_POWER){\n    log(\"STOP_POWER larger then STARTUP_POWER set both to: \"+STARTUP_POWER);\n    STOP_POWER = STARTUP_POWER;\n}\n\nfunction getTimeDiff(){\n    let localLastRunTime = lastRunTime;\n    if(localLastRunTime == null){\n        return null;\n    }\n    let now = Shelly.getUptimeMs();\n    return now - localLastRunTime;\n}\n\nfunction setLimit(shellyPower,currentDevicePower){\n    log(\"Current Zendure power is: \" + currentDevicePower + \"W\", true);\n\n    let acMode = 2;\n    let inputLimit = 0;\n    let outputLimit = 0;\n\n    let combinedLimit = shellyPower + currentDevicePower;\n\n    log(\"Combined limit is: \" + combinedLimit + \"W\", true);\n\n    if(currentDevicePower <= 0 && combinedLimit > 0 && combinedLimit <= STARTUP_POWER){\n        //not enoth to start up\n        combinedLimit = 0;\n    }\n\n    if(REVERSE && currentDevicePower >= 0 && combinedLimit < 0 && combinedLimit >= (REVERSE_STARTUP_POWER * -1)){\n        //no enoth to start up\n        combinedLimit = 0;\n    }\n\n    if(!REVERSE || combinedLimit >= 0){\n        outputLimit = Math.max(combinedLimit,0);\n        outputLimit = Math.min(outputLimit,MAX_POWER);\n        if(outputLimit >= 0 && outputLimit <= STOP_POWER){\n            outputLimit = 0;\n        }\n    }else{\n        acMode = 1;\n        inputLimit = Math.max(combinedLimit,MAX_POWER_REVERSE * -1);\n        inputLimit *= -1;\n        if(inputLimit >= 0 && inputLimit <= REVERSE_STOP_POWER){\n            inputLimit = 0;\n        }\n    }\n    combinedLimit = (inputLimit * -1) + outputLimit;\n    log(\"new Zendure power is: \" + combinedLimit + \"W\",false);\n\n    let payload = {\n        sn: SERIAL,\n        properties: {\n            acMode: acMode,\n            outputLimit: outputLimit,\n            inputLimit: inputLimit,\n            smartMode: 1\n        }\n    };\n\n    log(\"Send POST data:\" + JSON.stringify(payload),false);\n    Shelly.call(\"http.request\", {\n        method: \"POST\",\n        url: \"http://\" + host + \"/properties/write\",\n        headers: {\n            \"Content-Type\": \"application/json\"\n        },\n        body: JSON.stringify(payload),\n        timeout: 5\n    }, function(postResult, err_code, err_msg) {\n        log(\"ret code: \" + err_code,false);\n        if (err_code === 0) {\n            if (postResult.code === 200) {\n                log(\"POST erfolgreich:\" + postResult.body,true);\n                lastRunTime = Shelly.getUptimeMs();\n                log(\"Set power of Zendure device to: \" + combinedLimit,false);\n            }else{\n                log(\"Fehler beim POST:\" + err_code + \" \" + err_msg + \" \" + postResult.body,false);\n            }\n        } else {\n            log(\"Fehler beim POST:\" + err_code + \" \" + err_msg,false);\n            if(err_code === -114){\n                log(\"This can happend if Serial number is not matching device \",false);\n            }\n        }\n    });\n}\n\nfunction runScript() {\n    if(typeof host !== 'string' || host === \"\"){\n        log(\"Main script no run -> Hostname or ip not set, scanning?: \" + scanRunning,false);\n        return;\n    }\n\n    if(isRunning && Shelly.getUptimeMs() - lastRunningStarted < 60 * 1000){\n        log(\"Skipped execution still one running: \" + (Shelly.getUptimeMs() - lastRunningStarted),false);\n        return;\n    }\n\n    lastRunningStarted = Shelly.getUptimeMs();\n    isRunning = true;\n\n    let shellyPower = lastShellyPower;\n    if(shellyPower == null){\n        isRunning = false;\n        return;\n    }\n\n    log(\"Current Shelly power:\" + shellyPower + \"W\",true);\n\n    let diff = getTimeDiff();\n    if(diff != null && diff < 2 * 1000){\n        log(\"Skipped execution last set power to new: \" + diff,true);\n        isRunning = false;\n        return\n    }\n\n    if(Math.abs(shellyPower) < 5){\n        log(\"current power is fine\",true);\n\n        if(diff == null || diff > 20 * 1000){\n            log(\"Limit not set int a wile -> do anyway\",true);\n        }else{\n            isRunning = false;\n            return;\n        }\n    }\n\n    Shelly.call(\"HTTP.GET\", { url: \"http://\" + host + \"/properties/report\" }, function(result, err_code, err_msg) {\n        if (err_code !== 0 || result.code !== 200 || !result.body) {\n            log(\"error while getting status of power station, no post performed: \" + err_code + \" \" + err_msg,false);\n            isRunning = false;\n            return;\n        }\n        let response;\n        try {\n            response = JSON.parse(result.body);\n        } catch (e) {\n            log(\"Error while parsing json from device status response\" + err_code + \" \" + err_msg,false);\n            isRunning = false;\n            return;\n        }\n        if (response.properties && response.properties && response.product && response.sn === SERIAL) {\n            lastSeenDevice = Shelly.getUptimeMs();\n            let gotLimit = 0;\n            log(\"got response, acMode: \" + response.properties.acMode +\", outputHome: \" + response.properties.outputHomePower + \", inputHomePower: \" + response.properties.gridInputPower,true);\n            if(response.properties.acMode === 2){\n                //gotLimit = response.properties.outputLimit;\n                gotLimit = response.properties.outputHomePower;\n            }else if(response.properties.acMode === 1){\n                //gotLimit = response.properties.inputLimit * -1;\n                gotLimit = response.properties.gridInputPower * -1;\n            }\n            setLimit(shellyPower,gotLimit);\n        } else {\n            log(\"Could not get value from request response (maybe it is not a zendure response or Serial (SN) is wrong)\",false);\n            log(\"Response: \"+response,true);\n        }\n        isRunning = false;\n    });\n}\n\nShelly.addStatusHandler(function (event) {\n    if (event.name === \"em\" && event.delta && typeof event.delta.total_act_power === \"number\") {\n        lastShellyPower = event.delta.total_act_power;\n    }\n});\n\nTimer.set(INTERVAL_RUN_MAIN_SCRIPT * 1000, true, runScript, null);\n\n// -------------------- find device in network -------------------------------\n\nvar networks = [];\nvar currentTimeout = 1;\n\n// Function to perform a network scan and look for the Zendure device\nfunction scanForZendureDevice(i,networkId) {\n\n    if(isDeviceReachable()){\n        //device reconnected stop scan\n        log(\"Device reconnected -> stop network scanning\",false);\n        currentTimeout = 1;\n        scanRunning = false;\n        return;\n    }\n\n    if (i > 255) {\n        i=0\n        networkId++\n    }\n\n    if(networkId >= networks.length){\n        log(\"All networks scanned with timeout: \" + currentTimeout + \" -> increase Timeout\",false);\n        if(currentTimeout === 1){\n            currentTimeout = 2;\n            log(\"new scn itteration wiht timeout: \" + currentTimeout,false);\n            Timer.set(1, false, function(){scanForZendureDevice(1,0)}, null);\n        }else if(currentTimeout === 2){\n            currentTimeout = 5;\n            log(\"new scn itteration wiht timeout: \" + currentTimeout,false);\n            Timer.set(1, false, function(){scanForZendureDevice(1,0)}, null);\n        }else{\n            log(\"Network scann ended without result -.-\",false);\n            currentTimeout = 1;\n            scanRunning = false;\n        }\n        return\n    }\n\n    var ipBase = networks[networkId];\n    var ip = ipBase + i;\n    var url = \"http://\" + ip + \"/properties/report\"; // Assuming the device's API endpoint\n\n    log(\"check ip for zendure: \"+ip,true);\n    Shelly.call(\"HTTP.GET\", { url: url , timeout: currentTimeout}, function(result, err_code, err_msg) {\n        if (err_code === 0) { // HTTP request was successful\n            // Check for HTTP status code 200\n            log(\"Recived http response: \"+result.code, true);\n            if (result.code === 200 && result.body) {\n                try {\n                    var deviceInfo = JSON.parse(result.body); // Parse the JSON response\n\n                    // Check if the serial number matches the target\n                    if (deviceInfo && deviceInfo.properties && deviceInfo.product && deviceInfo.sn === SERIAL) {\n                        // If the serial number matches, log the internal IP and hostname\n                        log(\"Device found with ip: \" + ip,false);\n                        Script.storage.setItem(\"deviceIp\",ip);\n                        host = ip;\n                        scanRunning = false;\n                        return;\n                    }\n                } catch (e) {\n                    log(\"Error parsing response from IP: \" + ip, true); // Log if JSON parsing fails\n                }\n            } else {\n                log(\"Received non-200 status code (\" + result.status + \") from IP or body is empty: \" + ip, true);\n            }\n        } else {\n            log(\"HTTP request error (\" + err_code + \"): \" + err_msg + \" from IP: \" + ip, true);\n        }\n\n        Timer.set(1, false, function(){scanForZendureDevice(i + 1,networkId)}, null);\n    });\n}\n\nfunction parseIp(ip){\n    if(!ip && ip.length <= 0){\n        return null;\n    }\n    let lastDotPos = ip.indexOf('.', ip.indexOf('.') + 1);\n\n    while (lastDotPos !== -1) {\n        let nextDotPos = ip.indexOf('.', lastDotPos + 1);\n        if (nextDotPos === -1) break;\n        lastDotPos = nextDotPos;\n    }\n\n    return ip.slice(0, lastDotPos+1);\n}\n\nfunction getWifiStaIp(){\n    if(!CHECK_WIFI_STA){\n        scanForZendureDevice(1,0);\n        return;\n    }\n    log(\"Check ip for WiFi sta Mode\",true);\n    Shelly.call(\"WiFi.GetStatus\",{}, function(result, err_code, err_msg) {\n        if(err_code === 0 && result.sta_ip){\n            log(\"sta mode-> found ip: \" + result.sta_ip,true);\n            networks.push(parseIp(result.sta_ip));//todo subnets (if possible)\n        }else{\n            log(\"sta mode-> not connected or configured incorrect\",true);\n        }\n        //scanForZendureDevice(1,0);\n        log(\"Networks to scann for devices: \" + networks,false);\n        scanForZendureDevice(1,0);\n    });\n}\n\nfunction getWifiApIp(){\n    if(!CHECK_WIFI_AP){\n        getWifiStaIp();\n        return;\n    }\n    log(\"Check ip for WiFi ap Mode\",true);\n    Shelly.call(\"WiFi.GetConfig\",{}, function(result, err_code, err_msg) {\n        if(err_code === 0 && result.ap && result.ap.enable){\n            log(\"sta mode-> default ip: 192.168.33.1\",true);\n            networks.push(\"192.168.33.\");\n        }else{\n            log(\"ap not enabled\",true);\n        }\n        getWifiStaIp();\n    });\n}\n\nfunction getEthernetIp(){\n    if(!CHECK_ETH){\n        getWifiApIp();\n        return;\n    }\n    log(\"Check Ethernet\",true);\n    Shelly.call(\"Eth.GetConfig\",{}, function(result, err_code, err_msg) {\n        if(err_code === 0 && result.enable === true){\n            if(result.server_mode && result.ip){\n                log(\"eth-> in server mode ip: \" + result.ip,true);\n                networks.push(parseIp(result.ip));//todo subnet\n                getWifiApIp();\n            }else{\n                Shelly.call(\"Ethernet.GetStatus\",{}, function(result, err_code, err_msg) {\n                    if(err_code === 0 && result.ip){\n                        log(\"eth-> cient mode ip: \" + result.sta_ip,true);\n                        networks.push(parseIp(result.ip));\n                    }else{\n                        log(\"eth-> cient mode not connected\",true);\n                    }\n                    getWifiApIp();\n                });\n            }\n        }else{\n            log(\"eth-> not enabled\",true);\n            getWifiApIp();\n        }\n    });\n}\n\nfunction startFindingDevice(){\n    if(isDeviceReachable()){\n        log(\"scanning not needed device is reachable -> do not start\",true);\n        return;\n    }else{\n        log(\"Device ip known but not seen in time: \" + ((Shelly.getUptimeMs() - lastSeenDevice)/1000) + \"s\",true);\n    }\n    if(scanRunning){\n        log(\"Scanning for zendure device already running -> do not start\",true);\n        return;\n    }\n    scanRunning = true;\n    log(\"Device ip unknown or not reachable start search\",false);\n    networks = [];\n    getEthernetIp();\n}\n\nfunction loadIpFromStorage(){\n    const deviceIp = Script.storage.getItem(\"deviceIp\");\n    if(deviceIp){\n        log(\"Loaded ip from storrage: \"+deviceIp,false);\n        host = deviceIp;\n        //wait 30 sec to check if ip still valid to start first execution of finding device\n        Timer.set(1000 * 30, false, startFindingDevice, null);\n    }else{\n        log(\"Device ip not found in storrage start search imediatly\",false);\n        //no ip from last run start finding instantly\n        Timer.set(1, false, startFindingDevice, null);\n    }\n}\n\n//on run periodically\nTimer.set(INTERVAL_SCAN_NETWORK * 1000, true, startFindingDevice, null);\n//on startup\nTimer.set(1, false, loadIpFromStorage, null);",
+  "createdAt": "2026-02-22T20:00:00Z",
+  "updatedAt": "2026-02-24T00:00:00Z"
+}

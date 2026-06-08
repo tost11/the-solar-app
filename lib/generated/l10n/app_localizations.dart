@@ -3702,6 +3702,12 @@ abstract class AppLocalizations {
   /// **'Tippen Sie auf Bearbeiten um ein Script zu öffnen.'**
   String get shellyScriptsHelpEditTip;
 
+  /// Loading indicator text when fetching scripts
+  ///
+  /// In de, this message translates to:
+  /// **'Lade Skripte...'**
+  String get shellyScriptsLoadingStatus;
+
   /// Empty state title when no scripts
   ///
   /// In de, this message translates to:
@@ -6077,6 +6083,66 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Unbekannt'**
   String get unknown;
+
+  /// Bluetooth advanced options button label
+  ///
+  /// In de, this message translates to:
+  /// **'Erweiterte Optionen'**
+  String get bluetoothAdvancedOptions;
+
+  /// Checkbox label to show all BLE devices
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Geräte anzeigen'**
+  String get bluetoothShowAllDevices;
+
+  /// Tooltip for show all devices checkbox
+  ///
+  /// In de, this message translates to:
+  /// **'Zeigt alle BLE-Geräte, nicht nur bekannte Hersteller (Zendure, Shelly)'**
+  String get bluetoothShowAllDevicesHelp;
+
+  /// Warning text when show all devices is enabled
+  ///
+  /// In de, this message translates to:
+  /// **'Unbekannte Geräte mit Warnsymbol. Hersteller manuell wählen.'**
+  String get bluetoothUnknownDeviceWarning;
+
+  /// Dialog title for manufacturer selection
+  ///
+  /// In de, this message translates to:
+  /// **'Gerätetyp auswählen'**
+  String get bluetoothSelectManufacturer;
+
+  /// Info message when manufacturer is auto-detected
+  ///
+  /// In de, this message translates to:
+  /// **'Hersteller erkannt. Sie können diesen ändern.'**
+  String get bluetoothManufacturerDetected;
+
+  /// Warning message when manufacturer is unknown
+  ///
+  /// In de, this message translates to:
+  /// **'Hersteller nicht erkannt.'**
+  String get bluetoothManufacturerUnknown;
+
+  /// Badge label for unknown manufacturer devices
+  ///
+  /// In de, this message translates to:
+  /// **'Unbekannt'**
+  String get bluetoothUnknownDevice;
+
+  /// Display name for devices without advertised name
+  ///
+  /// In de, this message translates to:
+  /// **'Unbekanntes Gerät'**
+  String get bluetoothUnknownDeviceName;
+
+  /// Manufacturer field label
+  ///
+  /// In de, this message translates to:
+  /// **'Hersteller'**
+  String get manufacturer;
 }
 
 class _AppLocalizationsDelegate

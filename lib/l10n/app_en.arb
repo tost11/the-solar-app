@@ -2840,6 +2840,10 @@
   "@shellyScriptsHelpEditTip": {
     "description": "Help text for editing tip"
   },
+  "shellyScriptsLoadingStatus": "Loading scripts...",
+  "@shellyScriptsLoadingStatus": {
+    "description": "Loading indicator text when fetching scripts"
+  },
   "shellyScriptsEmptyStateTitle": "No Scripts Available",
   "@shellyScriptsEmptyStateTitle": {
     "description": "Empty state title when no scripts"
@@ -3795,5 +3799,49 @@
   "unknown": "Unknown",
   "@unknown": {
     "description": "Fallback: Unknown value"
+  },
+  "bluetoothAdvancedOptions": "Advanced Options",
+  "@bluetoothAdvancedOptions": {
+    "description": "Bluetooth advanced options button label"
+  },
+  "bluetoothShowAllDevices": "Show all devices",
+  "@bluetoothShowAllDevices": {
+    "description": "Checkbox label to show all BLE devices"
+  },
+  "bluetoothShowAllDevicesHelp": "Shows all BLE devices, not only known manufacturers (Zendure, Shelly)",
+  "@bluetoothShowAllDevicesHelp": {
+    "description": "Tooltip for show all devices checkbox"
+  },
+  "bluetoothUnknownDeviceWarning": "Unknown devices with warning icon. Select manufacturer manually.",
+  "@bluetoothUnknownDeviceWarning": {
+    "description": "Warning text when show all devices is enabled"
+  },
+  "bluetoothSelectManufacturer": "Select device type",
+  "@bluetoothSelectManufacturer": {
+    "description": "Dialog title for manufacturer selection"
+  },
+  "bluetoothManufacturerDetected": "Manufacturer detected. You can change it.",
+  "@bluetoothManufacturerDetected": {
+    "description": "Info message when manufacturer is auto-detected"
+  },
+  "bluetoothManufacturerUnknown": "Manufacturer not detected.",
+  "@bluetoothManufacturerUnknown": {
+    "description": "Warning message when manufacturer is unknown"
+  },
+  "bluetoothUnknownDevice": "Unknown",
+  "@bluetoothUnknownDevice": {
+    "description": "Badge label for unknown manufacturer devices"
+  },
+  "bluetoothUnknownDeviceName": "Unknown Device",
+  "@bluetoothUnknownDeviceName": {
+    "description": "Display name for devices without advertised name"
+  },
+  "manufacturer": "Manufacturer",
+  "@manufacturer": {
+    "description": "Manufacturer field label"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button label"
   }
 }

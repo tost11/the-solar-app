@@ -50,6 +50,7 @@ class MessageUtils {
         content: Text(message),
         backgroundColor: Colors.green,
         duration: duration ?? const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -72,6 +73,7 @@ class MessageUtils {
         content: Text(message),
         backgroundColor: Colors.orange,
         duration: duration ?? const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -94,6 +96,7 @@ class MessageUtils {
         content: Text(message),
         backgroundColor: Colors.blue,
         duration: duration ?? const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -118,6 +121,7 @@ class MessageUtils {
         content: Text(message),
         backgroundColor: backgroundColor,
         duration: duration ?? const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

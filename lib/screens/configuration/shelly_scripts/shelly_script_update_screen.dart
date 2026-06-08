@@ -234,8 +234,8 @@ class _ShellyScriptUpdateScreenState extends State<ShellyScriptUpdateScreen> {
         }
 
         if (mounted) {
-          // Navigate back to scripts list
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          // Navigate back to scripts screen (pop UpdateScreen only)
+          Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {

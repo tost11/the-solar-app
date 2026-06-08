@@ -45,6 +45,9 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
   /// Track which automation scripts have updates available
   final Map<int, bool> _hasUpdates = {};
 
+  /// Track manual loading state for user-triggered refreshes
+  bool _isLoadingScripts = false;
+
   @override
   void initState() {
     super.initState();
@@ -73,7 +76,13 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
   }
 
   /// Fetch status for all scripts in background using Script.List
-  Future<void> _fetchAllScriptsStatus() async {
+  Future<void> _fetchAllScriptsStatus({bool showLoadingIndicator = false}) async {
+    if (showLoadingIndicator && mounted) {
+      setState(() {
+        _isLoadingScripts = true;
+      });
+    }
+
     try {
       final resp = await widget.sendCommandToDevice(
         COMMAND_FETCH_SCRIPTS,  // Single batch call
@@ -118,6 +127,12 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       }
     } catch (e) {
       // Silent fail for background polling
+    } finally {
+      if (showLoadingIndicator && mounted) {
+        setState(() {
+          _isLoadingScripts = false;
+        });
+      }
     }
   }
 
@@ -134,7 +149,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     );
 
     // Refresh status after returning from detail screen
-    _fetchAllScriptsStatus();
+    _fetchAllScriptsStatus(showLoadingIndicator: true);
   }
 
   /// Update parameters of a template-created script
@@ -215,7 +230,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       );
 
       // Refresh scripts list after update
-      _fetchAllScriptsStatus();
+      _fetchAllScriptsStatus(showLoadingIndicator: true);
     }
   }
 
@@ -364,7 +379,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
       );
 
       // Refresh scripts list after user edits (screen handles the update)
-      _fetchAllScriptsStatus();
+      _fetchAllScriptsStatus(showLoadingIndicator: true);
       return;
     }
 
@@ -501,7 +516,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     }
 
     // Refresh scripts list
-    _fetchAllScriptsStatus();
+    _fetchAllScriptsStatus(showLoadingIndicator: true);
   }
 
   /// Generate automation script name with specified version
@@ -547,11 +562,10 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
     );
 
     if (result != null && mounted) {
-      setState(() {
-        _scriptsData.remove(script.id);
-      });
       MessageUtils.showSuccess(context, context.l10n.shellyScriptsScriptDeleted);
     }
+
+    _fetchAllScriptsStatus(showLoadingIndicator: true);
   }
 
   /// Build a script card for the list
@@ -916,8 +930,26 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
 
             const SizedBox(height: 16),
 
-            // Scripts List or Empty State
-            if (currentScripts.isEmpty)
+            // Scripts List, Loading State, or Empty State
+            if (_isLoadingScripts)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.l10n.shellyScriptsLoadingStatus,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else if (currentScripts.isEmpty)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -1015,7 +1047,7 @@ class _ShellyScriptsScreenState extends State<ShellyScriptsScreen> {
             ),
           );
           // Refresh scripts list after deployment
-          _fetchAllScriptsStatus();
+          _fetchAllScriptsStatus(showLoadingIndicator: true);
         },
         icon: const Icon(Icons.add),
         label: const Text('Aus Vorlage erstellen'),

@@ -318,8 +318,11 @@ class _ShellyScriptTemplateConfigScreenState
             context.l10n.shellyScriptsScriptInstalled,
           );
 
-          // Navigate back to scripts list (pop all the way back)
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          // Navigate back to scripts screen (pop Config + Library)
+          int popsNeeded = 2; // TemplateConfig + TemplateLibrary
+          for (int i = 0; i < popsNeeded && Navigator.of(context).canPop(); i++) {
+            Navigator.of(context).pop();
+          }
         }
       } catch (e) {
         if (mounted) {
