@@ -46,7 +46,7 @@ class BluetoothScanService {
     String macAddress = result.device.remoteId.toString();
     String name = result.device.advName.toString();
 
-    if (macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE)) {
+    if (macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE1) || macAddress.startsWith(BLUETOOTH_MAC_PREFIX_ZENDURE2) || name.startsWith(BLUETOOTH_NAME_PREFIX_ZENDURE)) {//TODO do name better with regex
       return DEVICE_MANUFACTURER_ZENDURE;
     }
     if (name.startsWith(BLUETOOTH_NAME_PREFIX_SHELLY)) {

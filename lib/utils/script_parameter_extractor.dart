@@ -51,8 +51,57 @@ class ScriptParameterExtractor {
 
   /// Parse string value to appropriate type
   ///
-  /// Handles strings (quoted), numbers, and booleans
+  /// Handles strings (quoted), numbers, booleans, and arrays
   static dynamic _parseValue(String valueStr) {
+    // Handle array syntax: ["item1", "item2"]
+    if (valueStr.startsWith('[') && valueStr.endsWith(']')) {
+      final inner = valueStr.substring(1, valueStr.length - 1).trim();
+      if (inner.isEmpty) return [];
+
+      final items = <String>[];
+      var currentItem = StringBuffer();
+      var inQuotes = false;
+      var escapeNext = false;
+
+      for (var i = 0; i < inner.length; i++) {
+        final char = inner[i];
+
+        if (escapeNext) {
+          currentItem.write(char);
+          escapeNext = false;
+          continue;
+        }
+
+        if (char == '\\') {
+          escapeNext = true;
+          continue;
+        }
+
+        if (char == '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+
+        if (char == ',' && !inQuotes) {
+          items.add(currentItem.toString().trim());
+          currentItem = StringBuffer();
+          continue;
+        }
+
+        if (inQuotes) {
+          currentItem.write(char);
+        }
+      }
+
+      // Add last item
+      final lastItem = currentItem.toString().trim();
+      if (lastItem.isNotEmpty) {
+        items.add(lastItem);
+      }
+
+      return items;
+    }
+
     // Remove quotes for strings
     if (valueStr.startsWith('"') && valueStr.endsWith('"')) {
       // Unescape quotes

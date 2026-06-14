@@ -117,8 +117,11 @@ class ScriptTemplateUtils {
   /// - Strings, URLs, device names, topics: Quoted with escaped quotes
   /// - Numbers, ports, durations: Raw number
   /// - Booleans: true/false
+  /// - String arrays: JavaScript array with quoted strings
   static String _formatValue(dynamic value, ScriptParameterType type) {
-    if (value == null) return 'null';
+    if (value == null) {
+      return type == ScriptParameterType.stringArray ? '[]' : 'null';
+    }
 
     switch (type) {
       case ScriptParameterType.string:
@@ -134,6 +137,16 @@ class ScriptTemplateUtils {
 
       case ScriptParameterType.boolean:
         return value.toString();
+
+      case ScriptParameterType.stringArray:
+        if (value is List) {
+          final items = value.map((item) {
+            final escaped = item.toString().replaceAll('"', r'\"');
+            return '"$escaped"';
+          }).join(', ');
+          return '[$items]';
+        }
+        return '[]';
     }
   }
 
@@ -211,6 +224,35 @@ class ScriptTemplateUtils {
           final urlString = value.toString();
           if (!_isValidUrl(urlString)) {
             errors[param.name] = param.validationErrorMessage ?? '${param.label} ist keine gültige URL';
+          }
+          break;
+
+        case ScriptParameterType.stringArray:
+          if (value is! List) {
+            errors[param.name] = '${param.label} muss ein Array sein';
+            break;
+          }
+
+          final list = value as List;
+          if (param.required && list.isEmpty) {
+            errors[param.name] = '${param.label} muss mindestens einen Eintrag enthalten';
+            break;
+          }
+
+          // Validate each item against validation pattern if provided
+          if (param.validationPattern != null) {
+            final regex = RegExp(param.validationPattern!);
+            for (var i = 0; i < list.length; i++) {
+              final item = list[i].toString();
+              if (item.isEmpty) {
+                errors[param.name] = '${param.label}: Eintrag ${i + 1} darf nicht leer sein';
+                break;
+              }
+              if (!regex.hasMatch(item)) {
+                errors[param.name] = param.validationErrorMessage ?? '${param.label}: Eintrag ${i + 1} hat ein ungültiges Format';
+                break;
+              }
+            }
           }
           break;
 

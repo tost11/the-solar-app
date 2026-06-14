@@ -351,6 +351,8 @@ class _ShellyScriptTemplateConfigScreenState
       case ScriptParameterType.string:
       case ScriptParameterType.url:
         return _buildTextField(param);
+      case ScriptParameterType.stringArray:
+        return _buildStringArrayField(param);
     }
   }
 
@@ -437,6 +439,81 @@ class _ShellyScriptTemplateConfigScreenState
             _parameterValues[param.name] = value;
           });
         },
+      ),
+    );
+  }
+
+  Widget _buildStringArrayField(ScriptParameter param) {
+    List<String> items = _parameterValues[param.name] is List
+        ? List<String>.from(_parameterValues[param.name] as List)
+        : [];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              getLocalizedField(context, param.label, param.labelLng),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              getLocalizedField(context, param.description, param.descriptionLng),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 16),
+            ...items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: item,
+                        decoration: InputDecoration(
+                          labelText: 'Eintrag ${index + 1}',
+                          border: const OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            items[index] = value;
+                            _parameterValues[param.name] = items;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      color: Colors.red,
+                      onPressed: () {
+                        setState(() {
+                          items.removeAt(index);
+                          _parameterValues[param.name] = items;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Hinzufügen'),
+              onPressed: () {
+                setState(() {
+                  items.add('');
+                  _parameterValues[param.name] = items;
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

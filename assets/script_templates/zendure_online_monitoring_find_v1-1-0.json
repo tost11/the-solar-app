@@ -142,6 +142,21 @@
       "minValue": 1
     },
     {
+      "name": "ONLINE_DEVICE_ID_SHELLY",
+      "label": "Shelly Device ID",
+      "label_lng": {
+        "de": "Shelly Geräte ID"
+      },
+      "description": "Device ID for Shelly energy meter in online monitoring (only important if multiple devices are in one system)",
+      "description_lng": {
+        "de": "Geräte ID für Shelly Energiezähler im Online-Monitoring (nur wichtig bei mehreren Geräten in einem System)"
+      },
+      "type": "number",
+      "required": true,
+      "defaultValue": 2,
+      "minValue": 1
+    },
+    {
       "name": "INTERVAL_SCAN_NETWORK",
       "label": "Network Scan Interval (s)",
       "label_lng": {

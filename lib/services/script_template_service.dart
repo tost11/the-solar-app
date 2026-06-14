@@ -120,6 +120,7 @@ class ScriptTemplateService {
         'assets/script_templates/zendure_online_monitoring_mac_v1-1-0.json',
         'assets/script_templates/opendtu_power_control_v1.json',
         'assets/script_templates/script_watchdog_v1.json',
+        'assets/script_templates/script_watchdog_v1-1-0.json',
       ];
 
       for (final filePath in knownTemplates) {

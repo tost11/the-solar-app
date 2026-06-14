@@ -19,6 +19,9 @@ enum ScriptParameterType {
 
   /// Time duration (seconds, milliseconds)
   duration,
+
+  /// Array of strings
+  stringArray,
 }
 
 /// Configurable parameter for a script template
@@ -152,6 +155,8 @@ class ScriptParameter {
         return ScriptParameterType.boolean;
       case 'duration':
         return ScriptParameterType.duration;
+      case 'stringarray':
+        return ScriptParameterType.stringArray;
       default:
         return ScriptParameterType.string;
     }
