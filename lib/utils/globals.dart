@@ -41,9 +41,29 @@ class Globals {
     languageNotifier.value = Locale(languageCode);
   }
 
+  // Auto script update
+  static final ValueNotifier<bool> autoScriptUpdateNotifier = ValueNotifier<bool>(false);
+
+  /// Get current auto script update state
+  static bool get autoScriptUpdate => autoScriptUpdateNotifier.value;
+
+  /// Set auto script update state and persist it
+  static Future<void> setAutoScriptUpdate(bool value) async {
+    autoScriptUpdateNotifier.value = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('auto_script_update', value);
+  }
+
+  /// Load auto script update state from persistent storage
+  static Future<void> loadAutoScriptUpdate() async {
+    final prefs = await SharedPreferences.getInstance();
+    autoScriptUpdateNotifier.value = prefs.getBool('auto_script_update') ?? false;
+  }
+
   /// Initialize all global settings
   static Future<void> initialize() async {
     await loadExpertMode();
     await loadLanguage();
+    await loadAutoScriptUpdate();
   }
 }

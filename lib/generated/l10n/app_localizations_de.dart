@@ -3409,4 +3409,90 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get manufacturer => 'Hersteller';
+
+  @override
+  String get scriptUpdatesTitle => 'Skript-Updates';
+
+  @override
+  String get scriptUpdatesCheckButton => 'Skript-Updates prüfen';
+
+  @override
+  String get scriptUpdatesChecking => 'Updates werden geprüft...';
+
+  @override
+  String get scriptUpdatesNoUpdates => 'Alle Skripte sind aktuell';
+
+  @override
+  String scriptUpdatesAvailable(int count) {
+    return '$count Update(s) verfügbar';
+  }
+
+  @override
+  String get scriptUpdatesDownloading => 'Template wird heruntergeladen...';
+
+  @override
+  String scriptUpdatesSuccess(int count) {
+    return '$count Template(s) erfolgreich aktualisiert';
+  }
+
+  @override
+  String get scriptUpdatesErrorNetwork => 'Keine Verbindung zum Update-Server';
+
+  @override
+  String get scriptUpdatesErrorInvalid => 'Ungültiges Template-Format';
+
+  @override
+  String get scriptUpdatesUpdateAll => 'Alle aktualisieren';
+
+  @override
+  String scriptUpdatesCurrentVersion(String version) {
+    return 'Installiert: v$version';
+  }
+
+  @override
+  String scriptUpdatesNewVersion(String version) {
+    return 'Verfügbar: v$version';
+  }
+
+  @override
+  String get scriptUpdatesNotInstalled => 'Nicht installiert';
+
+  @override
+  String get scriptUpdatesInstall => 'Installieren';
+
+  @override
+  String get scriptUpdatesUpToDate => 'Aktuell';
+
+  @override
+  String scriptUpdatesFailed(String error) {
+    return 'Update fehlgeschlagen: $error';
+  }
+
+  @override
+  String get scriptUpdatesInstallingAll => 'Alle Updates werden installiert...';
+
+  @override
+  String get scriptUpdatesTabOfficial => 'Offizielle';
+
+  @override
+  String get scriptUpdatesTabCustom => 'Eigene';
+
+  @override
+  String get scriptUpdatesCustomEmpty =>
+      'Keine eigenen Skripte mit Update-URL konfiguriert';
+
+  @override
+  String get scriptUpdatesCheckSingle => 'Prüfen';
+
+  @override
+  String scriptUpdatesCustomSource(String url) {
+    return 'Quelle: $url';
+  }
+
+  @override
+  String get autoScriptUpdate => 'Auto-Update Skript-Templates';
+
+  @override
+  String get autoScriptUpdateDescription =>
+      'Offizielle Templates beim App-Start automatisch aktualisieren';
 }

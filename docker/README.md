@@ -19,6 +19,7 @@ All servers support both GET and POST requests to RPC endpoints:
 | EM3 | 8082 | SPEM-003CEBEU | `/rpc/Shelly.GetDeviceInfo`, `/rpc/Shelly.GetStatus` |
 | Plug | 8083 | SNPL-00112EU | `/rpc/Shelly.GetDeviceInfo`, `/rpc/Shelly.GetStatus` |
 | PM1 | 8084 | S3PM-002CXCEU | `/rpc/Shelly.GetDeviceInfo`, `/rpc/Shelly.GetStatus` |
+| Script Templates | 8085 | - | `/manifest.json`, `/{id}/versions.json`, `/{id}/{file}.json` |
 
 ## Testing Examples
 
@@ -178,11 +179,73 @@ curl http://localhost:8081/rpc/Shelly.GetStatus | jq .
 - **Modules**: `pm1:0`
 - **Features**: Voltage, current, active power, frequency, energy totals (active and return)
 
+## Script Template Update Mock Server - Port 8085
+
+A mock server for testing the script template update feature. On startup, it automatically generates a newer version of every template (with a timestamp-based version `9999.1.HHMMSS`) so the app always shows updates available.
+
+### How It Works
+
+1. Container starts and copies all templates from `assets/script_templates/`
+2. For each template, reads `versions.json` and finds the latest version
+3. Creates a copy with version `9999.1.HHMMSS` (always newer than any real version)
+4. Updates `versions.json` and `manifest.json` to include the new version
+5. Serves all files via nginx on port 80 (mapped to host port 8085)
+
+### Usage with Flutter App
+
+```bash
+# Start mock server
+cd docker
+docker-compose up -d script-templates-mock
+
+# Run Flutter app with mock URL
+flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+
+# Or for a specific platform
+flutter run -d linux --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+```
+
+### Testing Endpoints
+
+```bash
+# Check manifest (should show latestVersion: 9999.1.HHMMSS)
+curl http://localhost:8085/manifest.json | jq .
+
+# Check versions for a specific template
+curl http://localhost:8085/script-watchdog/versions.json | jq .
+
+# Download a specific template
+curl http://localhost:8085/test-script/test-script_v2-0-0.json | jq .id,.version
+
+# Verify auto-generated version exists
+curl http://localhost:8085/test-script/ 2>/dev/null | grep "v9999"
+```
+
+### Rebuilding After Template Changes
+
+If you modify templates in `assets/script_templates/`, restart the container to regenerate:
+
+```bash
+docker-compose restart script-templates-mock
+
+# Or rebuild from scratch
+docker-compose up -d --build script-templates-mock
+```
+
+### Architecture
+
+- **Image**: nginx:alpine + jq + bash
+- **Startup**: Custom script generates mock data, then starts nginx
+- **Port**: Container port 80 → host port 8085
+- **Volume**: `../assets/script_templates` mounted read-only as `/templates`
+- **Version format**: `9999.1.HHMMSS` (unique per container restart)
+
 ## Notes
 
-- MockServer image is ~200MB per container (~800MB total for 4 containers)
+- MockServer image is ~200MB per container (~800MB total for 4 Shelly containers)
+- Script Templates mock uses nginx:alpine (~40MB)
 - All expectation files are mounted read-only
 - Health checks ensure containers are ready before marking as "healthy"
 - Automatic restart on failure for reliability
-- 50ms response delay configured to simulate network latency
+- 50ms response delay configured to simulate network latency (Shelly mocks only)
 - Supports GET and POST methods (method: ".*" in expectations)

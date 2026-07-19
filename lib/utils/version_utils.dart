@@ -26,6 +26,22 @@ class VersionUtils {
     return 0;
   }
 
+  /// Check if a version string is a valid semantic version (X.Y.Z with numeric parts)
+  ///
+  /// Returns true if the version matches the pattern "major.minor.patch"
+  /// where each part is a non-negative integer.
+  ///
+  /// Examples:
+  ///   isValidSemanticVersion("1.0.0") => true
+  ///   isValidSemanticVersion("2.1.3") => true
+  ///   isValidSemanticVersion("abc")   => false
+  ///   isValidSemanticVersion("1.0")   => false
+  ///   isValidSemanticVersion("")      => false
+  static bool isValidSemanticVersion(String version) {
+    final semverPattern = RegExp(r'^\d+\.\d+\.\d+$');
+    return semverPattern.hasMatch(version);
+  }
+
   /// Sort templates by version in descending order (newest first)
   ///
   /// Modifies the list in place.

@@ -89,6 +89,33 @@ services:
     networks:
       - shelly-mock-net
 
+  # Script Template Update Mock Server (nginx + auto-generated newer versions)
+  # Serves script templates with automatically generated newer versions
+  # so the app always shows updates available for testing.
+  #
+  # Usage: flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+  script-templates-mock:
+    build:
+      context: ./mockserver/script-templates
+      dockerfile: Dockerfile
+    container_name: script-templates-mock
+    environment:
+      - MOCK_SERVER_EXTERNAL_URL=http://localhost:8085
+    ports:
+      - "8085:80"  # Nginx serves on port 80, mapped to host 8085
+    volumes:
+      - ../assets/script_templates:/templates:ro  # Source templates (read-only)
+      - ../test/fixtures/custom_templates:/custom-templates:ro  # Custom test templates (read-only)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/manifest.json"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - shelly-mock-net
+
 networks:
   shelly-mock-net:
     driver: bridge

@@ -3367,4 +3367,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get manufacturer => 'Manufacturer';
+
+  @override
+  String get scriptUpdatesTitle => 'Script Updates';
+
+  @override
+  String get scriptUpdatesCheckButton => 'Check Script Updates';
+
+  @override
+  String get scriptUpdatesChecking => 'Checking for updates...';
+
+  @override
+  String get scriptUpdatesNoUpdates => 'All scripts are up to date';
+
+  @override
+  String scriptUpdatesAvailable(int count) {
+    return '$count update(s) available';
+  }
+
+  @override
+  String get scriptUpdatesDownloading => 'Downloading template...';
+
+  @override
+  String scriptUpdatesSuccess(int count) {
+    return '$count template(s) successfully updated';
+  }
+
+  @override
+  String get scriptUpdatesErrorNetwork => 'Cannot connect to update server';
+
+  @override
+  String get scriptUpdatesErrorInvalid => 'Invalid template format';
+
+  @override
+  String get scriptUpdatesUpdateAll => 'Update All';
+
+  @override
+  String scriptUpdatesCurrentVersion(String version) {
+    return 'Installed: v$version';
+  }
+
+  @override
+  String scriptUpdatesNewVersion(String version) {
+    return 'Available: v$version';
+  }
+
+  @override
+  String get scriptUpdatesNotInstalled => 'Not installed';
+
+  @override
+  String get scriptUpdatesInstall => 'Install';
+
+  @override
+  String get scriptUpdatesUpToDate => 'Up to date';
+
+  @override
+  String scriptUpdatesFailed(String error) {
+    return 'Update failed: $error';
+  }
+
+  @override
+  String get scriptUpdatesInstallingAll => 'Installing all updates...';
+
+  @override
+  String get scriptUpdatesTabOfficial => 'Official';
+
+  @override
+  String get scriptUpdatesTabCustom => 'Custom';
+
+  @override
+  String get scriptUpdatesCustomEmpty =>
+      'No custom scripts with update URL configured';
+
+  @override
+  String get scriptUpdatesCheckSingle => 'Check';
+
+  @override
+  String scriptUpdatesCustomSource(String url) {
+    return 'Source: $url';
+  }
+
+  @override
+  String get autoScriptUpdate => 'Auto-Update Script Templates';
+
+  @override
+  String get autoScriptUpdateDescription =>
+      'Automatically update official templates on app startup';
 }

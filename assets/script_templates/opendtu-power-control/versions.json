@@ -1,0 +1,13 @@
+{
+  "templateId": "opendtu-power-control",
+  "versions": [
+    {
+      "version": "1.0.1",
+      "fileName": "opendtu-power-control_v1-0-1.json"
+    },
+    {
+      "version": "1.0.0",
+      "fileName": "opendtu-power-control_v1-0-0.json"
+    }
+  ]
+}

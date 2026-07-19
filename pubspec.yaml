@@ -88,6 +88,18 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/script_templates/
+    - assets/script_templates/opendtu-power-control/
+    - assets/script_templates/script-watchdog/
+    - assets/script_templates/test-script/
+    - assets/script_templates/zendure-online-monit-find/
+    - assets/script_templates/zendure-online-monit-ip/
+    - assets/script_templates/zendure-online-monit-mac/
+    - assets/script_templates/zendure-power-control-find/
+    - assets/script_templates/zendure-power-control-find-beta/
+    - assets/script_templates/zendure-power-control-ip/
+    - assets/script_templates/zendure-power-control-ip-beta/
+    - assets/script_templates/zendure-power-control-mac/
+    - assets/script_templates/zendure-power-control-mac-beta/
     - assets/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see

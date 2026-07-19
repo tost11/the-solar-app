@@ -1,0 +1,34 @@
+{
+  "id": "custom-hello-world",
+  "name": "Custom Hello World",
+  "version": "1.0.0",
+  "description": "Test template for custom update flow. Prints a message on a timer.",
+  "compatibleDevices": [],
+  "requiredDevices": [],
+  "author": "TheSolarApp Test",
+  "tags": ["test", "custom"],
+  "parameters": [
+    {
+      "name": "MESSAGE",
+      "label": "Message",
+      "description": "Text to print to the console",
+      "type": "string",
+      "required": true,
+      "defaultValue": "Hello World"
+    },
+    {
+      "name": "INTERVAL_MS",
+      "label": "Interval (ms)",
+      "description": "Timer interval in milliseconds",
+      "type": "duration",
+      "required": true,
+      "defaultValue": 5000,
+      "minValue": 1000,
+      "maxValue": 60000
+    }
+  ],
+  "sourceCode": "function printMessage() {\n  print(MESSAGE);\n}\n\n// Timer: repeating at configured interval\nTimer.set(INTERVAL_MS, true, printMessage);\n\nprintMessage();",
+  "createdAt": "2026-07-18T00:00:00Z",
+  "updatedAt": "2026-07-18T00:00:00Z",
+  "updatePath": "http://localhost:8085/custom-hello-world"
+}

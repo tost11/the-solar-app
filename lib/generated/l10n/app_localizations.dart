@@ -6143,6 +6143,150 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Hersteller'**
   String get manufacturer;
+
+  /// Title for the script updates screen
+  ///
+  /// In de, this message translates to:
+  /// **'Skript-Updates'**
+  String get scriptUpdatesTitle;
+
+  /// Button label to check for script updates
+  ///
+  /// In de, this message translates to:
+  /// **'Skript-Updates prüfen'**
+  String get scriptUpdatesCheckButton;
+
+  /// Loading message while checking for updates
+  ///
+  /// In de, this message translates to:
+  /// **'Updates werden geprüft...'**
+  String get scriptUpdatesChecking;
+
+  /// Message when no updates are available
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Skripte sind aktuell'**
+  String get scriptUpdatesNoUpdates;
+
+  /// Message showing number of available updates
+  ///
+  /// In de, this message translates to:
+  /// **'{count} Update(s) verfügbar'**
+  String scriptUpdatesAvailable(int count);
+
+  /// Loading message while downloading a template
+  ///
+  /// In de, this message translates to:
+  /// **'Template wird heruntergeladen...'**
+  String get scriptUpdatesDownloading;
+
+  /// Success message after updating templates
+  ///
+  /// In de, this message translates to:
+  /// **'{count} Template(s) erfolgreich aktualisiert'**
+  String scriptUpdatesSuccess(int count);
+
+  /// Error message when server cannot be reached
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Verbindung zum Update-Server'**
+  String get scriptUpdatesErrorNetwork;
+
+  /// Error message for invalid template format
+  ///
+  /// In de, this message translates to:
+  /// **'Ungültiges Template-Format'**
+  String get scriptUpdatesErrorInvalid;
+
+  /// Button to update all available templates
+  ///
+  /// In de, this message translates to:
+  /// **'Alle aktualisieren'**
+  String get scriptUpdatesUpdateAll;
+
+  /// Label showing currently installed version
+  ///
+  /// In de, this message translates to:
+  /// **'Installiert: v{version}'**
+  String scriptUpdatesCurrentVersion(String version);
+
+  /// Label showing new available version
+  ///
+  /// In de, this message translates to:
+  /// **'Verfügbar: v{version}'**
+  String scriptUpdatesNewVersion(String version);
+
+  /// Label when template is not installed locally
+  ///
+  /// In de, this message translates to:
+  /// **'Nicht installiert'**
+  String get scriptUpdatesNotInstalled;
+
+  /// Button to install a new template
+  ///
+  /// In de, this message translates to:
+  /// **'Installieren'**
+  String get scriptUpdatesInstall;
+
+  /// Label when template is up to date
+  ///
+  /// In de, this message translates to:
+  /// **'Aktuell'**
+  String get scriptUpdatesUpToDate;
+
+  /// Error message when update fails
+  ///
+  /// In de, this message translates to:
+  /// **'Update fehlgeschlagen: {error}'**
+  String scriptUpdatesFailed(String error);
+
+  /// Loading message while installing all updates
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Updates werden installiert...'**
+  String get scriptUpdatesInstallingAll;
+
+  /// Tab label for official/built-in template updates
+  ///
+  /// In de, this message translates to:
+  /// **'Offizielle'**
+  String get scriptUpdatesTabOfficial;
+
+  /// Tab label for custom/user-imported template updates
+  ///
+  /// In de, this message translates to:
+  /// **'Eigene'**
+  String get scriptUpdatesTabCustom;
+
+  /// Empty state message when no custom templates have an update URL
+  ///
+  /// In de, this message translates to:
+  /// **'Keine eigenen Skripte mit Update-URL konfiguriert'**
+  String get scriptUpdatesCustomEmpty;
+
+  /// Button label to check a single template for updates
+  ///
+  /// In de, this message translates to:
+  /// **'Prüfen'**
+  String get scriptUpdatesCheckSingle;
+
+  /// Label showing the update source URL for a custom template
+  ///
+  /// In de, this message translates to:
+  /// **'Quelle: {url}'**
+  String scriptUpdatesCustomSource(String url);
+
+  /// Toggle label for automatic script template updates
+  ///
+  /// In de, this message translates to:
+  /// **'Auto-Update Skript-Templates'**
+  String get autoScriptUpdate;
+
+  /// Description for automatic script template update toggle
+  ///
+  /// In de, this message translates to:
+  /// **'Offizielle Templates beim App-Start automatisch aktualisieren'**
+  String get autoScriptUpdateDescription;
 }
 
 class _AppLocalizationsDelegate

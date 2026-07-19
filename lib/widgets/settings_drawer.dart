@@ -5,6 +5,7 @@ import '../utils/localization_extension.dart';
 import '../utils/permission_utils.dart';
 import '../utils/globals.dart';
 import '../screens/app_info_screen.dart';
+import '../screens/configuration/shelly_scripts/script_update_check_screen.dart';
 import '../screens/configuration/shelly_scripts/shelly_script_template_library_screen.dart';
 
 class SettingsDrawer extends StatefulWidget {
@@ -31,6 +32,22 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
     setState(() {
       _packageInfo = info;
     });
+  }
+
+  /// Navigate to a settings screen, replacing any existing settings screen on the stack.
+  /// Device screens are preserved — only screens tagged with '/settings/' route names are popped.
+  void _navigateToSettingsScreen(Widget screen, String routeName) {
+    Navigator.of(context).pop(); // Close drawer
+    // Pop any existing settings screen from the stack
+    Navigator.of(context).popUntil(
+      (route) => !(route.settings.name?.startsWith('/settings/') ?? false),
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: RouteSettings(name: routeName),
+        builder: (_) => screen,
+      ),
+    );
   }
 
   @override
@@ -116,15 +133,18 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
           ListTile(
             leading: const Icon(Icons.code),
             title: Text(context.l10n.shellyScriptsTemplateLibrary),
-            onTap: () {
-              Navigator.of(context).pop(); // Close drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ShellyScriptTemplateLibraryScreen(),
-                ),
-              );
-            },
+            onTap: () => _navigateToSettingsScreen(
+              const ShellyScriptTemplateLibraryScreen(),
+              '/settings/template-library',
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.system_update),
+            title: Text(context.l10n.scriptUpdatesCheckButton),
+            onTap: () => _navigateToSettingsScreen(
+              const ScriptUpdateCheckScreen(),
+              '/settings/script-updates',
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app, color: Colors.red),
@@ -145,13 +165,10 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                 : '${context.l10n.version}: ...',
             ),
             subtitle: Text(context.l10n.tapForDetails),
-            onTap: () {
-              Navigator.of(context).pop(); // Close drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AppInfoScreen()),
-              );
-            },
+            onTap: () => _navigateToSettingsScreen(
+              const AppInfoScreen(),
+              '/settings/app-info',
+            ),
           ),
         ],
       ),

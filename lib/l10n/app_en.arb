@@ -3843,5 +3843,131 @@
   "confirm": "Confirm",
   "@confirm": {
     "description": "Confirm button label"
+  },
+  "scriptUpdatesTitle": "Script Updates",
+  "@scriptUpdatesTitle": {
+    "description": "Title for the script updates screen"
+  },
+  "scriptUpdatesCheckButton": "Check Script Updates",
+  "@scriptUpdatesCheckButton": {
+    "description": "Button label to check for script updates"
+  },
+  "scriptUpdatesChecking": "Checking for updates...",
+  "@scriptUpdatesChecking": {
+    "description": "Loading message while checking for updates"
+  },
+  "scriptUpdatesNoUpdates": "All scripts are up to date",
+  "@scriptUpdatesNoUpdates": {
+    "description": "Message when no updates are available"
+  },
+  "scriptUpdatesAvailable": "{count} update(s) available",
+  "@scriptUpdatesAvailable": {
+    "description": "Message showing number of available updates",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptUpdatesDownloading": "Downloading template...",
+  "@scriptUpdatesDownloading": {
+    "description": "Loading message while downloading a template"
+  },
+  "scriptUpdatesSuccess": "{count} template(s) successfully updated",
+  "@scriptUpdatesSuccess": {
+    "description": "Success message after updating templates",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptUpdatesErrorNetwork": "Cannot connect to update server",
+  "@scriptUpdatesErrorNetwork": {
+    "description": "Error message when server cannot be reached"
+  },
+  "scriptUpdatesErrorInvalid": "Invalid template format",
+  "@scriptUpdatesErrorInvalid": {
+    "description": "Error message for invalid template format"
+  },
+  "scriptUpdatesUpdateAll": "Update All",
+  "@scriptUpdatesUpdateAll": {
+    "description": "Button to update all available templates"
+  },
+  "scriptUpdatesCurrentVersion": "Installed: v{version}",
+  "@scriptUpdatesCurrentVersion": {
+    "description": "Label showing currently installed version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptUpdatesNewVersion": "Available: v{version}",
+  "@scriptUpdatesNewVersion": {
+    "description": "Label showing new available version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptUpdatesNotInstalled": "Not installed",
+  "@scriptUpdatesNotInstalled": {
+    "description": "Label when template is not installed locally"
+  },
+  "scriptUpdatesInstall": "Install",
+  "@scriptUpdatesInstall": {
+    "description": "Button to install a new template"
+  },
+  "scriptUpdatesUpToDate": "Up to date",
+  "@scriptUpdatesUpToDate": {
+    "description": "Label when template is up to date"
+  },
+  "scriptUpdatesFailed": "Update failed: {error}",
+  "@scriptUpdatesFailed": {
+    "description": "Error message when update fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptUpdatesInstallingAll": "Installing all updates...",
+  "@scriptUpdatesInstallingAll": {
+    "description": "Loading message while installing all updates"
+  },
+  "scriptUpdatesTabOfficial": "Official",
+  "@scriptUpdatesTabOfficial": {
+    "description": "Tab label for official/built-in template updates"
+  },
+  "scriptUpdatesTabCustom": "Custom",
+  "@scriptUpdatesTabCustom": {
+    "description": "Tab label for custom/user-imported template updates"
+  },
+  "scriptUpdatesCustomEmpty": "No custom scripts with update URL configured",
+  "@scriptUpdatesCustomEmpty": {
+    "description": "Empty state message when no custom templates have an update URL"
+  },
+  "scriptUpdatesCheckSingle": "Check",
+  "@scriptUpdatesCheckSingle": {
+    "description": "Button label to check a single template for updates"
+  },
+  "scriptUpdatesCustomSource": "Source: {url}",
+  "@scriptUpdatesCustomSource": {
+    "description": "Label showing the update source URL for a custom template",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "autoScriptUpdate": "Auto-Update Script Templates",
+  "@autoScriptUpdate": {
+    "description": "Toggle label for automatic script template updates"
+  },
+  "autoScriptUpdateDescription": "Automatically update official templates on app startup",
+  "@autoScriptUpdateDescription": {
+    "description": "Description for automatic script template update toggle"
   }
 }

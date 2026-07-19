@@ -15,7 +15,7 @@ enum TemplateSource {
 /// Final scripts are stored ON THE SHELLY DEVICE (in compiled form).
 /// This is a deployment helper system to simplify script creation.
 class ShellyScriptTemplate {
-  /// Unique template ID (e.g., "influx-reporter-v1")
+  /// Unique template ID (e.g., "test-script-v1")
   final String id;
 
   /// Display name shown in UI
@@ -66,6 +66,15 @@ class ShellyScriptTemplate {
   /// File path for user templates (null for asset templates)
   final String? filePath;
 
+  /// Base URL path for fetching updates from remote repository.
+  /// Points to the template's folder on the remote server.
+  /// Example: "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/test-script"
+  /// If null, template is not updatable from remote source.
+  final String? updatePath;
+
+  /// Whether this template supports remote updates
+  bool get isUpdatable => updatePath != null;
+
   ShellyScriptTemplate({
     required this.id,
     required this.name,
@@ -83,6 +92,7 @@ class ShellyScriptTemplate {
     required this.updatedAt,
     this.source = TemplateSource.asset,
     this.filePath,
+    this.updatePath,
   });
 
   /// Create a ShellyScriptTemplate from JSON
@@ -124,6 +134,7 @@ class ShellyScriptTemplate {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       source: source,
       filePath: filePath,
+      updatePath: json['updatePath'] as String?,
     );
   }
 
@@ -142,6 +153,7 @@ class ShellyScriptTemplate {
       'parameters': parameters.map((p) => p.toJson()).toList(),
       if (author != null) 'author': author,
       'tags': tags,
+      if (updatePath != null) 'updatePath': updatePath,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

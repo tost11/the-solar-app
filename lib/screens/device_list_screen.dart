@@ -4,9 +4,12 @@ import 'package:uuid/uuid.dart';
 import '../models/device.dart';
 import '../models/system.dart';
 import '../services/device_storage_service.dart';
+import '../services/script_template_service.dart';
 import '../services/system_storage_service.dart';
 import '../utils/device_connection_utils.dart';
+import '../utils/globals.dart';
 import '../utils/localization_extension.dart';
+import '../utils/message_utils.dart';
 import '../utils/navigation_utils.dart';
 import '../utils/responsive_breakpoints.dart';
 import '../widgets/app_bar_widget.dart';
@@ -37,6 +40,8 @@ class DeviceListScreen extends StatefulWidget {
 
 class _DeviceListScreenState extends State<DeviceListScreen>
     with SingleTickerProviderStateMixin {
+  static bool _autoUpdateChecked = false;
+
   late TabController _tabController;
   final DeviceStorageService _storageService = DeviceStorageService();
   List<Device> _devices = [];
@@ -66,6 +71,11 @@ class _DeviceListScreenState extends State<DeviceListScreen>
         }
       });
     }
+
+    // Auto-update script templates on startup (if enabled, runs only once per app session)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAutoScriptUpdates();
+    });
   }
 
   @override
@@ -108,6 +118,37 @@ class _DeviceListScreenState extends State<DeviceListScreen>
 
     // Setup connection listeners for newly loaded devices
     _setupConnectionListeners();
+  }
+
+  /// Silently check and install official script template updates on startup.
+  /// Runs only once per app session. Shows SnackBar only on success.
+  Future<void> _checkAutoScriptUpdates() async {
+    if (_autoUpdateChecked) return;
+    _autoUpdateChecked = true;
+
+    if (!Globals.autoScriptUpdate) return;
+
+    // Small delay to not compete with initial device loading
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    final updates = await ScriptTemplateService.checkForRemoteUpdates();
+    if (updates == null || updates.isEmpty) return;
+
+    int successCount = 0;
+    for (final update in updates) {
+      final result = await ScriptTemplateService.installRemoteUpdate(update);
+      if (result != null) successCount++;
+    }
+
+    if (!mounted) return;
+
+    if (successCount > 0) {
+      MessageUtils.showSuccess(
+        context,
+        context.l10n.scriptUpdatesSuccess(successCount),
+      );
+    }
   }
 
   void _setupConnectionListeners() {

@@ -1,9 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../models/shelly_script_template.dart';
 import '../utils/version_utils.dart';
+
+/// Base URL for fetching remote template updates.
+///
+/// Override for debug/testing with mock server:
+///   flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+///
+/// Default: GitHub raw content URL for production use.
+const String _remoteManifestBaseUrl = String.fromEnvironment(
+  'SCRIPT_UPDATE_BASE_URL',
+  defaultValue: 'https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates',
+);
 
 /// Service for loading and managing Shelly script templates
 ///
@@ -12,6 +24,7 @@ import '../utils/version_utils.dart';
 /// - User templates (imported, editable)
 ///
 /// User templates can override asset templates with same ID+version.
+/// Remote updates are fetched from GitHub repository on user request.
 class ScriptTemplateService {
   /// Cache of loaded templates organized by ID and version
   /// Map structure: {template_id: [versions sorted newest to oldest]}
@@ -69,7 +82,10 @@ class ScriptTemplateService {
         .toList();
   }
 
-  /// Load asset templates from bundled files
+  /// Load asset templates from bundled files (folder-based structure)
+  ///
+  /// Structure: assets/script_templates/{template-id}/versions.json
+  ///            assets/script_templates/{template-id}/{template-id}_v{version}.json
   static Future<List<ShellyScriptTemplate>> _loadAssetTemplates() async {
     final templates = <ShellyScriptTemplate>[];
 
@@ -78,9 +94,15 @@ class ScriptTemplateService {
       final manifestContent = await rootBundle.loadString('AssetManifest.json');
       final Map<String, dynamic> manifestMap = json.decode(manifestContent);
 
-      // Filter for script_templates JSON files
+      // Filter for script_templates JSON files in subdirectories
+      // Exclude manifest.json and versions.json files
       final templateFiles = manifestMap.keys
-          .where((key) => key.startsWith('assets/script_templates/') && key.endsWith('.json'))
+          .where((key) =>
+              key.startsWith('assets/script_templates/') &&
+              key.endsWith('.json') &&
+              !key.endsWith('manifest.json') &&
+              !key.endsWith('versions.json') &&
+              key.split('/').length == 4) // Only files in subdirectories
           .toList();
 
       // Load each template file
@@ -97,49 +119,64 @@ class ScriptTemplateService {
           print('Error loading template from $filePath: $e');
         }
       }
-    } catch (e) {//TODO find out why this is needed and fix it (manifest file is missing but it shouldn)
-      // AssetManifest.json not found - fallback to known template files
+    } catch (e) {
+      // AssetManifest.json not found - fallback to loading via local manifest
       print('Warning: AssetManifest.json not found, using fallback template loading: $e');
-
-      // Hardcoded list of known template files (update when adding new templates)
-      final knownTemplates = [
-        'assets/script_templates/test_script_v1.json',
-        'assets/script_templates/zendure_power_control_ip_v1.json',
-        'assets/script_templates/zendure_power_control_ip_v2.json',
-        'assets/script_templates/zendure_power_control_ip_v2-0-1.json',
-        'assets/script_templates/zendure_power_control_mac_v1.json',
-        'assets/script_templates/zendure_power_control_mac_v2.json',
-        'assets/script_templates/zendure_power_control_mac_v2-0-1.json',
-        'assets/script_templates/zendure_power_control_find_v2.json',
-        'assets/script_templates/zendure_power_control_find_v2-0-1.json',
-        'assets/script_templates/zendure_online_monitoring_find_v1.json',
-        'assets/script_templates/zendure_online_monitoring_find_v1-1-0.json',
-        'assets/script_templates/zendure_online_monitoring_ip_v1.json',
-        'assets/script_templates/zendure_online_monitoring_ip_v1-1-0.json',
-        'assets/script_templates/zendure_online_monitoring_mac_v1.json',
-        'assets/script_templates/zendure_online_monitoring_mac_v1-1-0.json',
-        'assets/script_templates/opendtu_power_control_v1.json',
-        'assets/script_templates/script_watchdog_v1.json',
-        'assets/script_templates/script_watchdog_v1-1-0.json',
-      ];
-
-      for (final filePath in knownTemplates) {
-        try {
-          final jsonString = await rootBundle.loadString(filePath);
-          final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-          final template = ShellyScriptTemplate.fromJson(
-            jsonData,
-            source: TemplateSource.asset,
-          );
-          templates.add(template);
-        } catch (e) {
-          // Template file doesn't exist or is invalid - skip it
-          print('Could not load template $filePath: $e');
-        }
-      }
+      await _loadAssetTemplatesFallback(templates);
     }
 
     return templates;
+  }
+
+  /// Fallback loading method using the bundled manifest.json
+  ///
+  /// Used when AssetManifest.json is not available (e.g., Linux desktop builds).
+  static Future<void> _loadAssetTemplatesFallback(
+    List<ShellyScriptTemplate> templates,
+  ) async {
+    try {
+      // Load our own manifest.json
+      final manifestString = await rootBundle.loadString(
+        'assets/script_templates/manifest.json',
+      );
+      final manifest = json.decode(manifestString) as Map<String, dynamic>;
+      final templateEntries = manifest['templates'] as List<dynamic>;
+
+      for (final entry in templateEntries) {
+        final templateId = entry['id'] as String;
+
+        // Load versions.json for this template
+        try {
+          final versionsString = await rootBundle.loadString(
+            'assets/script_templates/$templateId/versions.json',
+          );
+          final versionsData = json.decode(versionsString) as Map<String, dynamic>;
+          final versions = versionsData['versions'] as List<dynamic>;
+
+          // Load each version file
+          for (final versionEntry in versions) {
+            final fileName = versionEntry['fileName'] as String;
+            final filePath = 'assets/script_templates/$templateId/$fileName';
+
+            try {
+              final jsonString = await rootBundle.loadString(filePath);
+              final jsonData = json.decode(jsonString) as Map<String, dynamic>;
+              final template = ShellyScriptTemplate.fromJson(
+                jsonData,
+                source: TemplateSource.asset,
+              );
+              templates.add(template);
+            } catch (e) {
+              print('Could not load template $filePath: $e');
+            }
+          }
+        } catch (e) {
+          print('Could not load versions.json for $templateId: $e');
+        }
+      }
+    } catch (e) {
+      print('Error loading manifest.json fallback: $e');
+    }
   }
 
   /// Get template by ID and optional version
@@ -341,8 +378,27 @@ class ScriptTemplateService {
     if (template.version.isEmpty) {
       throw Exception('Template version is required');
     }
+    if (!VersionUtils.isValidSemanticVersion(template.version)) {
+      throw Exception(
+        'Template version "${template.version}" is not a valid semantic version (expected X.Y.Z)',
+      );
+    }
     if (template.sourceCode.isEmpty) {
       throw Exception('Template source code is required');
+    }
+
+    // Validate parameters have required sub-fields
+    for (final param in template.parameters) {
+      if (param.name.isEmpty) {
+        throw Exception(
+          'Template "${template.id}": Parameter has empty name',
+        );
+      }
+      if (param.label.isEmpty) {
+        throw Exception(
+          'Template "${template.id}": Parameter "${param.name}" has empty label',
+        );
+      }
     }
 
     // Check for existing templates with same ID
@@ -409,4 +465,264 @@ class ScriptTemplateService {
     await _saveUserTemplate(template);
     clearCache();
   }
+
+  // ===== Remote Update Methods =====
+
+  /// Fetch the global manifest from the remote repository.
+  ///
+  /// Returns parsed manifest data or null if fetch fails.
+  /// Manifest contains list of all templates with their latest versions.
+  static Future<Map<String, dynamic>?> fetchRemoteManifest() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_remoteManifestBaseUrl/manifest.json'),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      }
+      print('Failed to fetch remote manifest: HTTP ${response.statusCode}');
+      return null;
+    } catch (e) {
+      print('Error fetching remote manifest: $e');
+      return null;
+    }
+  }
+
+  /// Fetch the versions.json for a specific template from remote repository.
+  ///
+  /// [updatePath] is the base URL for the template folder.
+  /// Returns parsed versions data or null if fetch fails.
+  static Future<Map<String, dynamic>?> fetchRemoteVersionManifest(
+    String updatePath,
+  ) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$updatePath/versions.json'),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      }
+      print('Failed to fetch remote versions.json from $updatePath: HTTP ${response.statusCode}');
+      return null;
+    } catch (e) {
+      print('Error fetching remote versions.json from $updatePath: $e');
+      return null;
+    }
+  }
+
+  /// Download a specific template version from remote repository.
+  ///
+  /// [updatePath] is the base URL for the template folder.
+  /// [fileName] is the template JSON filename (e.g., "script-watchdog_v1-1-1.json").
+  /// Returns the parsed template or null if download fails.
+  static Future<ShellyScriptTemplate?> downloadRemoteTemplate(
+    String updatePath,
+    String fileName,
+  ) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$updatePath/$fileName'),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        return ShellyScriptTemplate.fromJson(
+          jsonData,
+          source: TemplateSource.user,
+        );
+      }
+      print('Failed to download template $fileName from $updatePath: HTTP ${response.statusCode}');
+      return null;
+    } catch (e) {
+      print('Error downloading template $fileName from $updatePath: $e');
+      return null;
+    }
+  }
+
+  /// Check for available remote updates for all templates.
+  ///
+  /// Fetches the remote manifest and compares with locally available versions.
+  /// Returns a list of [RemoteUpdateInfo] for templates with newer versions available.
+  /// Returns null if the remote manifest could not be fetched (network error).
+  static Future<List<RemoteUpdateInfo>?> checkForRemoteUpdates() async {
+    final manifest = await fetchRemoteManifest();
+    if (manifest == null) return null;
+
+    final remoteTemplates = manifest['templates'] as List<dynamic>?;
+    if (remoteTemplates == null) return null;
+
+    // Ensure local templates are loaded
+    await loadTemplates();
+
+    final updates = <RemoteUpdateInfo>[];
+
+    for (final entry in remoteTemplates) {
+      final templateId = entry['id'] as String;
+      final remoteLatestVersion = entry['latestVersion'] as String;
+      final updatePath = entry['updatePath'] as String;
+
+      // Get local latest version
+      final localVersions = _cachedTemplatesByIdVersion?[templateId];
+      final localLatestVersion = localVersions?.isNotEmpty == true
+          ? localVersions!.first.version
+          : null;
+
+      // Compare versions
+      if (localLatestVersion == null ||
+          VersionUtils.compareVersions(remoteLatestVersion, localLatestVersion) > 0) {
+        updates.add(RemoteUpdateInfo(
+          templateId: templateId,
+          localVersion: localLatestVersion,
+          remoteVersion: remoteLatestVersion,
+          updatePath: updatePath,
+        ));
+      }
+    }
+
+    return updates;
+  }
+
+  /// Download and install a remote template update.
+  ///
+  /// Fetches the versions.json, finds the target version,
+  /// downloads the template, and imports it as a user template.
+  /// Returns the imported template or null on failure.
+  static Future<ShellyScriptTemplate?> installRemoteUpdate(
+    RemoteUpdateInfo updateInfo,
+  ) async {
+    // Fetch versions.json to get the filename for the latest version
+    final versionsData = await fetchRemoteVersionManifest(updateInfo.updatePath);
+    if (versionsData == null) return null;
+
+    final versions = versionsData['versions'] as List<dynamic>?;
+    if (versions == null || versions.isEmpty) return null;
+
+    // Find the target version entry
+    String? targetFileName;
+    for (final v in versions) {
+      if (v['version'] == updateInfo.remoteVersion) {
+        targetFileName = v['fileName'] as String?;
+        break;
+      }
+    }
+
+    if (targetFileName == null) {
+      print('Could not find fileName for version ${updateInfo.remoteVersion}');
+      return null;
+    }
+
+    // Download the template
+    final template = await downloadRemoteTemplate(
+      updateInfo.updatePath,
+      targetFileName,
+    );
+    if (template == null) return null;
+
+    // Import as user template (overrides existing)
+    try {
+      final jsonString = const JsonEncoder.withIndent('  ').convert(template.toJson());
+      final imported = await importTemplate(jsonString, overrideExisting: true);
+      return imported;
+    } catch (e) {
+      print('Error importing remote template: $e');
+      return null;
+    }
+  }
+
+  /// Get user-imported templates that have an updatePath and are NOT built-in (asset) templates.
+  ///
+  /// Returns only the latest version per template ID.
+  /// Excludes templates that also exist as asset templates (those are handled by the manifest check).
+  static Future<List<ShellyScriptTemplate>> getCustomUpdatableTemplates() async {
+    await loadTemplates();
+    if (_cachedTemplatesByIdVersion == null) return [];
+
+    final result = <ShellyScriptTemplate>[];
+
+    for (final entry in _cachedTemplatesByIdVersion!.entries) {
+      final versions = entry.value;
+      // Skip if any version is an asset template (built-in, handled by manifest)
+      final hasAssetVersion = versions.any((t) => t.source == TemplateSource.asset);
+      if (hasAssetVersion) continue;
+
+      // Only include if latest version has an updatePath
+      final latest = versions.first; // sorted newest first
+      if (latest.updatePath != null) {
+        result.add(latest);
+      }
+    }
+    return result;
+  }
+
+  /// Check for update of a single template using its own updatePath.
+  ///
+  /// Fetches the template's versions.json from its updatePath,
+  /// finds the highest available version, and compares with the local version.
+  /// Returns [RemoteUpdateInfo] if an update is available, null if up-to-date or on error.
+  static Future<RemoteUpdateInfo?> checkForSingleTemplateUpdate(
+    ShellyScriptTemplate template,
+  ) async {
+    if (template.updatePath == null) return null;
+
+    final versionsData = await fetchRemoteVersionManifest(template.updatePath!);
+    if (versionsData == null) return null;
+
+    final versions = versionsData['versions'] as List<dynamic>?;
+    if (versions == null || versions.isEmpty) return null;
+
+    // Find latest version in remote versions.json
+    String? latestRemoteVersion;
+    for (final v in versions) {
+      final ver = v['version'] as String?;
+      if (ver == null) continue;
+      if (!VersionUtils.isValidSemanticVersion(ver)) continue;
+      if (latestRemoteVersion == null ||
+          VersionUtils.compareVersions(ver, latestRemoteVersion) > 0) {
+        latestRemoteVersion = ver;
+      }
+    }
+
+    if (latestRemoteVersion == null) return null;
+    if (VersionUtils.compareVersions(latestRemoteVersion, template.version) <= 0) {
+      return null; // up-to-date
+    }
+
+    return RemoteUpdateInfo(
+      templateId: template.id,
+      localVersion: template.version,
+      remoteVersion: latestRemoteVersion,
+      updatePath: template.updatePath!,
+    );
+  }
+}
+
+/// Information about a remotely available template update
+class RemoteUpdateInfo {
+  /// Template ID
+  final String templateId;
+
+  /// Currently installed local version (null if not installed locally)
+  final String? localVersion;
+
+  /// Latest available remote version
+  final String remoteVersion;
+
+  /// Base URL for fetching the template files
+  final String updatePath;
+
+  const RemoteUpdateInfo({
+    required this.templateId,
+    required this.localVersion,
+    required this.remoteVersion,
+    required this.updatePath,
+  });
+
+  /// Whether this is a new template (not installed locally)
+  bool get isNewTemplate => localVersion == null;
+
+  @override
+  String toString() =>
+      'RemoteUpdateInfo($templateId: ${localVersion ?? "not installed"} -> $remoteVersion)';
 }

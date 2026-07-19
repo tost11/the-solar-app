@@ -1,0 +1,6 @@
+{
+  "templateId": "custom-hello-world",
+  "versions": [
+    { "version": "1.0.0", "fileName": "custom-hello-world_v1-0-0.json" }
+  ]
+}

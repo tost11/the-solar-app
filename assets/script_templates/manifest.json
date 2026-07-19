@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-07-17T08:58:06Z",
+  "templates": [
+    {
+      "id": "opendtu-power-control",
+      "latestVersion": "1.0.1",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/opendtu-power-control"
+    },
+    {
+      "id": "script-watchdog",
+      "latestVersion": "1.1.1",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/script-watchdog"
+    },
+    {
+      "id": "test-script",
+      "latestVersion": "2.0.0",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/test-script"
+    },
+    {
+      "id": "zendure-online-monit-find",
+      "latestVersion": "1.1.1",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-online-monit-find"
+    },
+    {
+      "id": "zendure-online-monit-ip",
+      "latestVersion": "1.1.1",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-online-monit-ip"
+    },
+    {
+      "id": "zendure-online-monit-mac",
+      "latestVersion": "1.1.1",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-online-monit-mac"
+    },
+    {
+      "id": "zendure-power-control-find",
+      "latestVersion": "2.0.2",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-find"
+    },
+    {
+      "id": "zendure-power-control-find-beta",
+      "latestVersion": "1.0.0",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-find-beta"
+    },
+    {
+      "id": "zendure-power-control-ip",
+      "latestVersion": "2.0.2",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-ip"
+    },
+    {
+      "id": "zendure-power-control-ip-beta",
+      "latestVersion": "1.0.0",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-ip-beta"
+    },
+    {
+      "id": "zendure-power-control-mac",
+      "latestVersion": "2.0.2",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-mac"
+    },
+    {
+      "id": "zendure-power-control-mac-beta",
+      "latestVersion": "1.0.0",
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-mac-beta"
+    }
+  ]
+}

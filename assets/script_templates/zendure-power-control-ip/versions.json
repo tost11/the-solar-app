@@ -1,0 +1,21 @@
+{
+  "templateId": "zendure-power-control-ip",
+  "versions": [
+    {
+      "version": "2.0.2",
+      "fileName": "zendure-power-control-ip_v2-0-2.json"
+    },
+    {
+      "version": "2.0.1",
+      "fileName": "zendure-power-control-ip_v2-0-1.json"
+    },
+    {
+      "version": "2.0.0",
+      "fileName": "zendure-power-control-ip_v2-0-0.json"
+    },
+    {
+      "version": "1.0.0",
+      "fileName": "zendure-power-control-ip_v1-0-0.json"
+    }
+  ]
+}
