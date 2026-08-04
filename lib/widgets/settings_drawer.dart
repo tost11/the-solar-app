@@ -7,6 +7,7 @@ import '../utils/globals.dart';
 import '../screens/app_info_screen.dart';
 import '../screens/configuration/shelly_scripts/script_update_check_screen.dart';
 import '../screens/configuration/shelly_scripts/shelly_script_template_library_screen.dart';
+import '../screens/settings/debug_settings_screen.dart';
 
 class SettingsDrawer extends StatefulWidget {
   const SettingsDrawer({super.key});
@@ -130,6 +131,17 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
               },
             ),
           ),
+          // Debug settings (expert mode only)
+          if (Globals.expertMode)
+            ListTile(
+              leading: const Icon(Icons.bug_report),
+              title: const Text('Debug-Einstellungen'),
+              subtitle: const Text('Log-Level und Kategorien konfigurieren'),
+              onTap: () => _navigateToSettingsScreen(
+                const DebugSettingsScreen(),
+                '/settings/debug',
+              ),
+            ),
           ListTile(
             leading: const Icon(Icons.code),
             title: Text(context.l10n.shellyScriptsTemplateLibrary),

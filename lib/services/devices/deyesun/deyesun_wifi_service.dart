@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../models/devices/manufacturers/deyesun/wifi_deyesun_device.dart';
 import '../../../utils/number_utils.dart';
+import '../../../utils/debug_log.dart';
 import 'deyesun_modbus_connection.dart';
 
 class DeyeSunWifiService extends BaseDeviceService {
@@ -48,14 +49,11 @@ class DeyeSunWifiService extends BaseDeviceService {
         final serverHeader = initialResponse.headers['server']?.toLowerCase();
         final wwwAuthHeader = initialResponse.headers['www-authenticate'];
 
-        debugPrint(serverHeader.toString());
-        debugPrint(wwwAuthHeader.toString());
-        debugPrint(initialResponse.statusCode.toString());
       // Check for DeyeSun-specific 401 response pattern
       if ((initialResponse.statusCode == 401 && serverHeader == 'httpd' && wwwAuthHeader != null && wwwAuthHeader.contains('Basic realm="USER LOGIN"')) || //not authenticated
           (initialResponse.statusCode == 200 && serverHeader != null &&  serverHeader.startsWith("microsoft-iis/"))){//already authenticated (device stores ip and status of authentication)
 
-          debugPrint('[$ipAddress:$port] DeyeSun device detected, authenticating...');
+          DebugLog.device('[$ipAddress:$port] DeyeSun device detected, authenticating...', level: LogLevel.debug);
 
           // Authenticate and fetch device info from status page
           // Use provided credentials or defaults
@@ -67,7 +65,7 @@ class DeyeSunWifiService extends BaseDeviceService {
           );
           final statusCode = response.statusCode;
 
-          debugPrint('[$ipAddress:$port] Response status: $statusCode');
+          DebugLog.device('[$ipAddress:$port] Response status: $statusCode', level: LogLevel.debug);
 
           if (statusCode == 200) {
             // Read response body
@@ -75,7 +73,7 @@ class DeyeSunWifiService extends BaseDeviceService {
 
             // Parse JavaScript variables from HTML
             final jsVars = _parseJavaScriptVariables(body);
-            debugPrint('[$ipAddress:$port] Parsed ${jsVars.length} variables');
+            DebugLog.device('[$ipAddress:$port] Parsed ${jsVars.length} variables', level: LogLevel.verbose);
 
             final serialNumber = jsVars['cover_mid'];
             //final firmwareVersion = jsVars['cover_ver'];
@@ -83,7 +81,7 @@ class DeyeSunWifiService extends BaseDeviceService {
             final model = getModelFromSerial(serialNumber) ?? "Unknown";
 
             if (serialNumber != null && serialNumber.isNotEmpty) {
-              debugPrint('[$ipAddress:$port] DeyeSun device verified: SN=$serialNumber');
+              DebugLog.device('[$ipAddress:$port] DeyeSun device verified: SN=$serialNumber', level: LogLevel.debug);
               return NetworkDevice(
                 ipAddress: ipAddress,
                 hostname: null,
@@ -93,18 +91,18 @@ class DeyeSunWifiService extends BaseDeviceService {
                 port: port
               );
             } else {
-              debugPrint('[$ipAddress:$port] DeyeSun device found but no serial number');
-              debugPrint('[$ipAddress:$port] Available variables: ${jsVars.keys.join(", ")}');
+              DebugLog.device('[$ipAddress:$port] DeyeSun device found but no serial number', level: LogLevel.warning);
+              DebugLog.device('[$ipAddress:$port] Available variables: ${jsVars.keys.join(", ")}', level: LogLevel.warning);
             }
           } else {
             final body = await response.transform(utf8.decoder).join();
-            debugPrint('[$ipAddress:$port] DeyeSun authentication failed: $statusCode');
-            debugPrint('[$ipAddress:$port] Response body preview: ${body.substring(0, body.length > 200 ? 200 : body.length)}');
+            DebugLog.device('[$ipAddress:$port] DeyeSun authentication failed: $statusCode', level: LogLevel.error);
+            DebugLog.device('[$ipAddress:$port] Response body preview: ${body.substring(0, body.length > 200 ? 200 : body.length)}', level: LogLevel.error);
           }
         }
       }
     } catch (e) {
-      debugPrint('[$ipAddress] Error detecting DeyeSun device: $e');
+      DebugLog.device('[$ipAddress] Error detecting DeyeSun device: $e', level: LogLevel.error);
     }
 
     return null;
@@ -228,7 +226,7 @@ class DeyeSunWifiService extends BaseDeviceService {
   ) async {
     final client = HttpClient();
     try {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Sending command to $path...');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Sending command to $path...', level: LogLevel.debug);
 
       final uri = Uri.parse('${getBaseUri()}$path');
       final request = await client.postUrl(uri).timeout(Duration(seconds: timeoutSeconds));
@@ -253,24 +251,21 @@ class DeyeSunWifiService extends BaseDeviceService {
 
       request.headers.set('Content-Length', body.length, preserveHeaderCase: true);
 
-      debugPrint(body);
-      debugPrint(request.headers.toString());
-
       request.write(body);
 
       final response = await request.close().timeout(Duration(seconds: timeoutSeconds));
 
       if (response.statusCode == 200) {
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Command to $path successful');
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Command to $path successful', level: LogLevel.debug);
         return {'success': true};
       } else {
         final responseBody = await response.transform(utf8.decoder).join();
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Command to $path failed: ${response.statusCode}');
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Response: ${responseBody.substring(0, responseBody.length > 200 ? 200 : responseBody.length)}');
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Command to $path failed: ${response.statusCode}', level: LogLevel.error);
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Response: ${responseBody.substring(0, responseBody.length > 200 ? 200 : responseBody.length)}', level: LogLevel.error);
         return null;
       }
     } catch (e) {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Error sending command to $path: $e');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Error sending command to $path: $e', level: LogLevel.error);
       return null;
     } finally {
       client.close();
@@ -305,7 +300,7 @@ class DeyeSunWifiService extends BaseDeviceService {
         return jsVars.cast<String, dynamic>();
       }
     } catch (e) {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Error fetching status: $e');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Error fetching status: $e', level: LogLevel.error);
     }
     return null;
   }
@@ -322,7 +317,7 @@ class DeyeSunWifiService extends BaseDeviceService {
         return jsVars.cast<String, dynamic>();
       }
     } catch (e) {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Error fetching config from $page: $e');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Error fetching config from $page: $e', level: LogLevel.error);
     }
     return null;
   }
@@ -384,10 +379,10 @@ class DeyeSunWifiService extends BaseDeviceService {
 
       device.emitData(jsVars);
 
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched HTTP data');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Fetched HTTP data', level: LogLevel.debug);
       lastSeen = DateTime.now().millisecondsSinceEpoch;
     } else {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data error: ${response.statusCode}');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data error: ${response.statusCode}', level: LogLevel.error);
       return false;
     }
     return true;
@@ -401,7 +396,7 @@ class DeyeSunWifiService extends BaseDeviceService {
       fetchHttp();
       connectedWith += "http";
     } catch (e) {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data exception: $e');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] DeyeSun fetch data exception: $e', level: LogLevel.error);
     }
 
     // Try Modbus connection first for real-time data
@@ -424,13 +419,13 @@ class DeyeSunWifiService extends BaseDeviceService {
         device.data["data"] = modbusData;
         device.emitData(modbusData);
 
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched Modbus data: ${registers.length} registers');
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Fetched Modbus data: ${registers.length} registers', level: LogLevel.debug);
         connectedWith += "Modbus";
       } else {
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Modbus read failed');
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Modbus read failed', level: LogLevel.error);
       }
     } catch (e) {
-      debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Modbus fetch error: $e');
+      DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Modbus fetch error: $e', level: LogLevel.error);
     }
 
     if(connectedWith.isNotEmpty){
@@ -452,7 +447,7 @@ class DeyeSunWifiService extends BaseDeviceService {
   /// Registers 40-116 (77 registers total, indexed 0-76 in array)
   Map<String, dynamic> _parseModbusRegisters(List<int> registers) {
     if (registers.length < 77) {
-      debugPrint('[DeyeModbus] Invalid register count: ${registers.length}');
+      DebugLog.device('[DeyeModbus] Invalid register count: ${registers.length}', level: LogLevel.error);
       return {};
     }
 
@@ -538,15 +533,6 @@ class DeyeSunWifiService extends BaseDeviceService {
     // Add raw register data for debugging
     data['_raw_registers'] = registers;
 
-    // Print all registers for debugging
-    /*debugPrint('[DeyeModbus] === Register Dump ===');
-    for (int i = 0; i < registers.length; i++) {
-      final address = 40 + i;
-      final value = registers[i];
-      debugPrint('[DeyeModbus] Reg $address (0x${address.toRadixString(16).padLeft(2, '0').toUpperCase()}): $value (0x${value.toRadixString(16).padLeft(4, '0').toUpperCase()})');
-    }
-    debugPrint('[DeyeModbus] === End Register Dump ===');*/
-
     return data;
   }
 
@@ -555,28 +541,28 @@ class DeyeSunWifiService extends BaseDeviceService {
   /// Register 0x0028 (40 decimal) contains power limit percentage
   Future<bool> writeModbusPowerLimit(int percentage) async {
     if (_modbusConnection == null || !_modbusConnection!.isConnected) {
-      debugPrint('[DeyeModbus] Cannot write power limit - not connected');
+      DebugLog.device('[DeyeModbus] Cannot write power limit - not connected', level: LogLevel.warning);
       return false;
     }
 
     if (percentage < 0 || percentage > 100) {
-      debugPrint('[DeyeModbus] Invalid power limit: $percentage');
+      DebugLog.device('[DeyeModbus] Invalid power limit: $percentage', level: LogLevel.warning);
       return false;
     }
 
     try {
-      debugPrint('[DeyeModbus] Writing power limit: $percentage%');
+      DebugLog.device('[DeyeModbus] Writing power limit: $percentage%', level: LogLevel.debug);
       final success = await _modbusConnection!.writeRegister(0x0028, percentage);
 
       if (success) {
-        debugPrint('[DeyeModbus] Power limit set successfully');
+        DebugLog.device('[DeyeModbus] Power limit set successfully', level: LogLevel.debug);
       } else {
-        debugPrint('[DeyeModbus] Failed to set power limit');
+        DebugLog.device('[DeyeModbus] Failed to set power limit', level: LogLevel.error);
       }
 
       return success;
     } catch (e) {
-      debugPrint('[DeyeModbus] Error writing power limit: $e');
+      DebugLog.device('[DeyeModbus] Error writing power limit: $e', level: LogLevel.error);
       return false;
     }
   }
@@ -587,25 +573,25 @@ class DeyeSunWifiService extends BaseDeviceService {
   /// 1 = on, 2 = off
   Future<bool> writeModbusPowerStatus(bool on) async {
     if (_modbusConnection == null || !_modbusConnection!.isConnected) {
-      debugPrint('[DeyeModbus] Cannot write power status - not connected');
+      DebugLog.device('[DeyeModbus] Cannot write power status - not connected', level: LogLevel.warning);
       return false;
     }
 
     final value = on ? 1 : 2;
 
     try {
-      debugPrint('[DeyeModbus] Writing power status: ${on ? "on" : "off"} (value: $value)');
+      DebugLog.device('[DeyeModbus] Writing power status: ${on ? "on" : "off"} (value: $value)', level: LogLevel.debug);
       final success = await _modbusConnection!.writeRegister(0x002B, value);
 
       if (success) {
-        debugPrint('[DeyeModbus] Power status set successfully');
+        DebugLog.device('[DeyeModbus] Power status set successfully', level: LogLevel.debug);
       } else {
-        debugPrint('[DeyeModbus] Failed to set power status');
+        DebugLog.device('[DeyeModbus] Failed to set power status', level: LogLevel.error);
       }
 
       return success;
     } catch (e) {
-      debugPrint('[DeyeModbus] Error writing power status: $e');
+      DebugLog.device('[DeyeModbus] Error writing power status: $e', level: LogLevel.error);
       return false;
     }
   }

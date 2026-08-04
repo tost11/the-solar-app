@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../utils/debug_log.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -48,12 +49,12 @@ class OpenDtuWebSocketConnection {
     Map<String, String>? authHeaders,
   ) async {
     if (_isDisposed) {
-      debugPrint('[OpenDTU-WS] Cannot connect: connection disposed');
+      DebugLog.device('[OpenDTU-WS] Cannot connect: connection disposed', level: LogLevel.warning);
       return false;
     }
 
     if (_isConnecting) {
-      debugPrint('[OpenDTU-WS] Connection attempt already in progress');
+      DebugLog.device('[OpenDTU-WS] Connection attempt already in progress', level: LogLevel.warning);
       return false;
     }
 
@@ -75,7 +76,7 @@ class OpenDtuWebSocketConnection {
       return true;
     } catch (e) {
       _isConnecting = false;
-      debugPrint('[OpenDTU-WS] Connection failed: $e');
+      DebugLog.device('[OpenDTU-WS] Connection failed: $e', level: LogLevel.error);
       _scheduleReconnect();
       return false;
     }
@@ -87,7 +88,7 @@ class OpenDtuWebSocketConnection {
       throw Exception('Connection parameters not set');
     }
 
-    debugPrint('[OpenDTU-WS] Connecting to ws://$_ipAddress:$_port/livedata');
+    DebugLog.device('[OpenDTU-WS] Connecting to ws://$_ipAddress:$_port/livedata', level: LogLevel.debug);
 
     // Build WebSocket URL
     final wsUrl = 'ws://$_ipAddress:$_port/livedata';
@@ -123,7 +124,7 @@ class OpenDtuWebSocketConnection {
       },
     );
 
-    debugPrint('[OpenDTU-WS] Connected successfully');
+    DebugLog.device('[OpenDTU-WS] Connected successfully', level: LogLevel.debug);
 
     // Register listeners
     _messageSubscription = _webSocket!.listen(
@@ -150,7 +151,7 @@ class OpenDtuWebSocketConnection {
         }
       }
     } catch (e) {
-      debugPrint('[OpenDTU-WS] Error parsing message: $e');
+      DebugLog.device('[OpenDTU-WS] Error parsing message: $e', level: LogLevel.error);
     }
   }
 
@@ -252,14 +253,14 @@ class OpenDtuWebSocketConnection {
 
       return result;
     } catch (e) {
-      debugPrint('[OpenDTU-WS] Error parsing inverter data: $e');
+      DebugLog.device('[OpenDTU-WS] Error parsing inverter data: $e', level: LogLevel.error);
       return null;
     }
   }
 
   /// Handle WebSocket errors
   void _onWebSocketError(dynamic error) {
-    debugPrint('[OpenDTU-WS] Socket error: $error');
+    DebugLog.device('[OpenDTU-WS] Socket error: $error', level: LogLevel.error);
     _webSocket = null;
     _messageSubscription?.cancel();
     _messageSubscription = null;
@@ -268,7 +269,7 @@ class OpenDtuWebSocketConnection {
 
   /// Handle WebSocket connection closure
   void _onWebSocketDone() {
-    debugPrint('[OpenDTU-WS] Socket closed');
+    DebugLog.device('[OpenDTU-WS] Socket closed', level: LogLevel.debug);
     _webSocket = null;
     _messageSubscription?.cancel();
     _messageSubscription = null;
@@ -278,27 +279,27 @@ class OpenDtuWebSocketConnection {
   /// Schedule automatic reconnection
   void _scheduleReconnect() {
     if (_isDisposed) {
-      debugPrint('[OpenDTU-WS] Not scheduling reconnect: connection disposed');
+      DebugLog.device('[OpenDTU-WS] Not scheduling reconnect: connection disposed', level: LogLevel.debug);
       return;
     }
 
     if (_reconnectTimer != null && _reconnectTimer!.isActive) {
-      debugPrint('[OpenDTU-WS] Reconnect already scheduled');
+      DebugLog.device('[OpenDTU-WS] Reconnect already scheduled', level: LogLevel.warning);
       return;
     }
 
     if (_ipAddress == null || _port == null) {
-      debugPrint('[OpenDTU-WS] Cannot schedule reconnect: missing connection parameters');
+      DebugLog.device('[OpenDTU-WS] Cannot schedule reconnect: missing connection parameters', level: LogLevel.warning);
       return;
     }
 
-    debugPrint('[OpenDTU-WS] Scheduling reconnect in ${RECONNECT_DELAY_MS}ms');
+    DebugLog.device('[OpenDTU-WS] Scheduling reconnect in ${RECONNECT_DELAY_MS}ms', level: LogLevel.debug);
 
     _reconnectTimer = Timer(
       const Duration(milliseconds: RECONNECT_DELAY_MS),
       () async {
         if (!_isDisposed) {
-          debugPrint('[OpenDTU-WS] Attempting reconnection...');
+          DebugLog.device('[OpenDTU-WS] Attempting reconnection...', level: LogLevel.debug);
           await connect(_ipAddress!, _port!, _authHeaders);
         }
       },
@@ -307,7 +308,7 @@ class OpenDtuWebSocketConnection {
 
   /// Disconnect from WebSocket (allows reconnection)
   Future<void> disconnect() async {
-    debugPrint('[OpenDTU-WS] Disconnecting...');
+    DebugLog.device('[OpenDTU-WS] Disconnecting...', level: LogLevel.debug);
 
     // Cancel reconnect timer
     _reconnectTimer?.cancel();
@@ -321,7 +322,7 @@ class OpenDtuWebSocketConnection {
     try {
       await _webSocket?.close();
     } catch (e) {
-      debugPrint('[OpenDTU-WS] Error closing socket: $e');
+      DebugLog.device('[OpenDTU-WS] Error closing socket: $e', level: LogLevel.error);
     }
     _webSocket = null;
 
@@ -333,7 +334,7 @@ class OpenDtuWebSocketConnection {
 
   /// Permanently dispose connection (prevents reconnection)
   void dispose() {
-    debugPrint('[OpenDTU-WS] Disposing connection...');
+    DebugLog.device('[OpenDTU-WS] Disposing connection...', level: LogLevel.debug);
     _isDisposed = true;
     disconnect();
     _invertersMap.clear();

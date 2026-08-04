@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../models/device.dart';
 import './message_utils.dart';
+import './debug_log.dart';
 
 /// Utility class for device connection operations
 ///
@@ -206,7 +207,17 @@ class DeviceConnectionUtils {
     return results;
   }
 
-  /// Core BLE scanning logic - shared by all Bluetooth methods
+  /// Core BLE device lookup - performs a real BLE scan then falls back to fromId().
+  ///
+  /// On Linux/Windows the BlueZ/WinRT backend only emits scan results for
+  /// newly discovered devices. Devices already known to the adapter (from a
+  /// previous connection) won't appear in scan results but CAN be referenced
+  /// via BluetoothDevice.fromId() since they're still in the adapter's list.
+  ///
+  /// Strategy:
+  /// 1. Do a real BLE scan to discover any new devices
+  /// 2. For devices not found via scan, use fromId() as fallback
+  ///    (they may already be known to the adapter from a prior session)
   static Future<Map<String, BluetoothDevice>> _scanForBluetoothDevices(
     List<String> deviceSerialNumbers, {
     required Duration timeout,
@@ -216,6 +227,36 @@ class DeviceConnectionUtils {
     final snSet = deviceSerialNumbers.toSet();
     final foundDevices = <String, BluetoothDevice>{};
 
+    // Step 1: Do a real BLE scan to discover new devices
+    DebugLog.bluetooth('Scanning for ${snSet.length} BLE device(s)...', level: LogLevel.info);
+    await _scanForMissingDevices(snSet, foundDevices, timeout);
+
+    // Step 2: For devices not found via scan, try fromId() as fallback.
+    // On Linux, already-known devices won't appear in scan results (deviceAdded)
+    // but are still in the adapter's device list and can be connected via fromId().
+    for (final sn in snSet) {
+      if (!foundDevices.containsKey(sn)) {
+        try {
+          final device = BluetoothDevice.fromId(sn);
+          foundDevices[sn] = device;
+          DebugLog.bluetooth('Device $sn found via fromId (already known to adapter)', level: LogLevel.debug);
+        } catch (e) {
+          DebugLog.bluetooth('Device $sn not found - not in range', level: LogLevel.warning);
+        }
+      }
+    }
+
+    return foundDevices;
+  }
+
+  /// Fallback BLE scan for devices not resolved via fromId().
+  /// Kept commented out by default - enable if fromId() proves unreliable
+  /// on some platforms (e.g. older Android versions).
+  static Future<void> _scanForMissingDevices(
+    Set<String> snSet,
+    Map<String, BluetoothDevice> foundDevices,
+    Duration timeout,
+  ) async {
     try {
       await FlutterBluePlus.startScan(timeout: timeout);
 
@@ -238,11 +279,47 @@ class DeviceConnectionUtils {
       await subscription.cancel();
       await FlutterBluePlus.stopScan();
     } catch (e) {
-      debugPrint('BLE scan error: $e');
+      DebugLog.error('BLE scan error: $e', category: 'bluetooth');
     }
-
-    return foundDevices;
   }
+
+  // /// Original implementation: always re-scans before connecting.
+  // /// Kept for reference in case fromId() proves unreliable on some platforms.
+  // static Future<Map<String, BluetoothDevice>> _scanForBluetoothDevicesLegacy(
+  //   List<String> deviceSerialNumbers, {
+  //   required Duration timeout,
+  // }) async {
+  //   if (deviceSerialNumbers.isEmpty) return {};
+  //
+  //   final snSet = deviceSerialNumbers.toSet();
+  //   final foundDevices = <String, BluetoothDevice>{};
+  //
+  //   try {
+  //     await FlutterBluePlus.startScan(timeout: timeout);
+  //
+  //     final subscription = FlutterBluePlus.scanResults.listen((results) {
+  //       for (var result in results) {
+  //         final sn = result.device.remoteId.toString();
+  //         if (snSet.contains(sn) && !foundDevices.containsKey(sn)) {
+  //           foundDevices[sn] = result.device;
+  //
+  //           if (foundDevices.length == snSet.length) {
+  //             FlutterBluePlus.stopScan();
+  //             break;
+  //           }
+  //         }
+  //       }
+  //     });
+  //
+  //     await Future.delayed(timeout);
+  //     await subscription.cancel();
+  //     await FlutterBluePlus.stopScan();
+  //   } catch (e) {
+  //     debugPrint('BLE scan error: $e');
+  //   }
+  //
+  //   return foundDevices;
+  // }
 
   /// Setup BLE device after scan
   static Future<bool> _setupBluetoothDevice(
@@ -259,7 +336,7 @@ class DeviceConnectionUtils {
 
       return true;
     } catch (e) {
-      debugPrint('BLE setup error for ${device.name}: $e');
+      DebugLog.error('BLE setup error for ${device.name}: $e', category: 'bluetooth');
       return false;
     }
   }

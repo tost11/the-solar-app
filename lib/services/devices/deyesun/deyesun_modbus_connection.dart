@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:mutex/mutex.dart';
 import '../../../utils/modbus_utils.dart';
+import '../../../utils/debug_log.dart';
 
 /// Standalone Modbus TCP connection for Deye Sun inverters
 ///
@@ -57,7 +58,7 @@ class DeyeSunModbusConnection {
   /// Connect to Deye Sun inverter via Modbus TCP
   Future<bool> connect(String ipAddress, int port, String serialNumber) async {
     if (_isDisposed) {
-      debugPrint('[DeyeModbus] Cannot connect - connection disposed');
+      DebugLog.device('[DeyeModbus] Cannot connect - connection disposed', level: LogLevel.warning);
       return false;
     }
 
@@ -77,7 +78,7 @@ class DeyeSunModbusConnection {
     _isConnecting = true;
 
     try {
-      debugPrint('[DeyeModbus] Connecting to $_ipAddress:$_port...');
+      DebugLog.device('[DeyeModbus] Connecting to $_ipAddress:$_port...', level: LogLevel.debug);
 
       _socket = await Socket.connect(
         _ipAddress!,
@@ -95,10 +96,10 @@ class DeyeSunModbusConnection {
       _isConnecting = false;
       // No timer cancellation needed - BaseDeviceService handles reconnection
 
-      debugPrint('[DeyeModbus] Connected successfully');
+      DebugLog.device('[DeyeModbus] Connected successfully', level: LogLevel.debug);
       return true;
     } catch (e) {
-      debugPrint('[DeyeModbus] Connection failed: $e');
+      DebugLog.device('[DeyeModbus] Connection failed: $e', level: LogLevel.error);
       _socket = null;
       _isConnecting = false;
       // No reconnection scheduling - BaseDeviceService handles it
@@ -119,7 +120,7 @@ class DeyeSunModbusConnection {
     try {
       await _socket?.close();
     } catch (e) {
-      debugPrint('[DeyeModbus] Error closing socket: $e');
+      DebugLog.device('[DeyeModbus] Error closing socket: $e', level: LogLevel.error);
     }
 
     _socket = null;
@@ -137,7 +138,7 @@ class DeyeSunModbusConnection {
   /// Returns list of 16-bit register values, or null on failure
   Future<List<int>?> readRegisters(int startRegister, int count) async {
     if (!isConnected) {
-      debugPrint('[DeyeModbus] Cannot read - not connected');
+      DebugLog.device('[DeyeModbus] Cannot read - not connected', level: LogLevel.warning);
       return null;
     }
 
@@ -159,7 +160,7 @@ class DeyeSunModbusConnection {
   /// Returns true on success, false on failure
   Future<bool> writeRegister(int register, int value) async {
     if (!isConnected) {
-      debugPrint('[DeyeModbus] Cannot write - not connected');
+      DebugLog.device('[DeyeModbus] Cannot write - not connected', level: LogLevel.warning);
       return false;
     }
 
@@ -182,7 +183,7 @@ class DeyeSunModbusConnection {
   ) async {
     // Check if another command is already in progress (prevent concurrent execution)
     if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
-      debugPrint('[$commandName] Another command is in progress, aborting');
+      DebugLog.device('[$commandName] Another command is in progress, aborting', level: LogLevel.warning);
       return null;
     }
 
@@ -190,7 +191,7 @@ class DeyeSunModbusConnection {
 
     while (attempt <= MAX_COMMAND_RETRIES) {
       if (!isConnected) {
-        debugPrint('[$commandName] Not connected (attempt ${attempt + 1})');
+        DebugLog.device('[$commandName] Not connected (attempt ${attempt + 1})', level: LogLevel.verbose);
         return null;
       }
 
@@ -206,7 +207,7 @@ class DeyeSunModbusConnection {
 
           result = await _responseCompleter!.future;
         } catch (e) {
-          debugPrint('[$commandName] Error on attempt ${attempt + 1}: $e');
+          DebugLog.device('[$commandName] Error on attempt ${attempt + 1}: $e', level: LogLevel.verbose);
         } finally {
           _cancelCommandTimeout();
           _responseCompleter = null; // Clean up completer
@@ -221,13 +222,13 @@ class DeyeSunModbusConnection {
       if (attempt <= MAX_COMMAND_RETRIES) {
         // Get delay for this retry attempt (exponential backoff)
         final delayMs = RETRY_DELAYS_MS[attempt - 1];
-        debugPrint('[$commandName] Retry attempt $attempt after ${delayMs}ms delay');
+        DebugLog.device('[$commandName] Retry attempt $attempt after ${delayMs}ms delay', level: LogLevel.verbose);
         await Future.delayed(Duration(milliseconds: delayMs));
       }
     }
 
     // All retries exhausted - disconnect to trigger reconnection via BaseDeviceService
-    debugPrint('[$commandName] All ${MAX_COMMAND_RETRIES + 1} attempts failed, disconnecting socket');
+    DebugLog.device('[$commandName] All ${MAX_COMMAND_RETRIES + 1} attempts failed, disconnecting socket', level: LogLevel.error);
     await disconnect();
 
     return null;
@@ -310,7 +311,7 @@ class DeyeSunModbusConnection {
   /// Handle incoming socket data
   void _onDataReceived(List<int> data) {
     if (_readBytes + data.length > READ_BUFFER_LENGTH) {
-      debugPrint('[DeyeModbus] Read buffer overflow - resetting');
+      DebugLog.device('[DeyeModbus] Read buffer overflow - resetting', level: LogLevel.warning);
       _readBytes = 0;
       if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
         _responseCompleter!.complete(null);
@@ -337,7 +338,7 @@ class DeyeSunModbusConnection {
 
     // Validate frame start and end bytes
     if (_readBuffer[0] != 0xA5) {
-      debugPrint('[DeyeModbus] Invalid start byte: ${_readBuffer[0].toRadixString(16)}');
+      DebugLog.device('[DeyeModbus] Invalid start byte: ${_readBuffer[0].toRadixString(16)}', level: LogLevel.error);
       _readBytes = 0;
       _responseCompleter!.complete(null);
       return;
@@ -352,7 +353,7 @@ class DeyeSunModbusConnection {
     final modbusEnd = _readBytes - 4; // Exclude checksum (1 byte) and end byte (1 byte) and frame checksum (2 bytes)
 
     if (modbusEnd <= modbusStart) {
-      debugPrint('[DeyeModbus] Invalid frame length');
+      DebugLog.device('[DeyeModbus] Invalid frame length', level: LogLevel.error);
       _readBytes = 0;
       _responseCompleter!.complete(null);
       return;
@@ -366,7 +367,7 @@ class DeyeSunModbusConnection {
     } else if (functionCode == MODBUS_WRITE_MULTIPLE) {
       _handleWriteResponse(modbusFrame);
     } else {
-      debugPrint('[DeyeModbus] Unknown function code: $functionCode');
+      DebugLog.device('[DeyeModbus] Unknown function code: $functionCode', level: LogLevel.error);
       _readBytes = 0;
       _responseCompleter!.complete(null);
     }
@@ -380,7 +381,7 @@ class DeyeSunModbusConnection {
     final calculatedCrc = ModbusUtils.modbusCRC16(ModbusUtils.bytesToHex(frameWithoutCrc));
 
     if (receivedCrc != calculatedCrc) {
-      debugPrint('[DeyeModbus] Read CRC mismatch: got $receivedCrc, expected $calculatedCrc');
+      DebugLog.device('[DeyeModbus] Read CRC mismatch: got $receivedCrc, expected $calculatedCrc', level: LogLevel.error);
       _readBytes = 0;
       _responseCompleter!.complete(null);
       return;
@@ -397,7 +398,7 @@ class DeyeSunModbusConnection {
       registers.add(value);
     }
 
-    debugPrint('[DeyeModbus] Read ${registers.length} registers successfully');
+    DebugLog.device('[DeyeModbus] Read ${registers.length} registers successfully', level: LogLevel.debug);
     _readBytes = 0;
     _responseCompleter!.complete(registers);
   }
@@ -410,20 +411,20 @@ class DeyeSunModbusConnection {
     final calculatedCrc = ModbusUtils.modbusCRC16(ModbusUtils.bytesToHex(frameWithoutCrc));
 
     if (receivedCrc != calculatedCrc) {
-      debugPrint('[DeyeModbus] Write CRC mismatch: got $receivedCrc, expected $calculatedCrc');
+      DebugLog.device('[DeyeModbus] Write CRC mismatch: got $receivedCrc, expected $calculatedCrc', level: LogLevel.error);
       _readBytes = 0;
       _responseCompleter!.complete(null);
       return;
     }
 
-    debugPrint('[DeyeModbus] Write successful');
+    DebugLog.device('[DeyeModbus] Write successful', level: LogLevel.debug);
     _readBytes = 0;
     _responseCompleter!.complete([1]); // Success indicator
   }
 
   /// Handle socket errors
   void _onSocketError(error) {
-    debugPrint('[DeyeModbus] Socket error: $error');
+    DebugLog.device('[DeyeModbus] Socket error: $error', level: LogLevel.error);
     _socket = null;
     // No reconnection scheduling - BaseDeviceService detects via isConnected/isHealthy
 
@@ -434,7 +435,7 @@ class DeyeSunModbusConnection {
 
   /// Handle socket disconnection
   void _onSocketDone() {
-    debugPrint('[DeyeModbus] Socket disconnected');
+    DebugLog.device('[DeyeModbus] Socket disconnected', level: LogLevel.error);
     _socket = null;
     // No reconnection scheduling - BaseDeviceService detects via isConnected/isHealthy
 
@@ -447,7 +448,7 @@ class DeyeSunModbusConnection {
   void _startCommandTimeout() {
     _cancelCommandTimeout();
     _commandTimeoutTimer = Timer(Duration(milliseconds: COMMAND_TIMEOUT_MS), () {
-      debugPrint('[DeyeModbus] Command timeout');
+      DebugLog.device('[DeyeModbus] Command timeout', level: LogLevel.warning);
       if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
         _responseCompleter!.complete(null);
       }

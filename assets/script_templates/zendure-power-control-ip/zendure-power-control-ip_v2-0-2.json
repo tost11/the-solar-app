@@ -76,7 +76,7 @@
       "required": true,
       "defaultValue": 800,
       "minValue": 0,
-      "maxValue": 1000
+      "maxValue": 3600
     },
     {
       "name": "MAX_POWER_REVERSE",
@@ -92,7 +92,7 @@
       "required": true,
       "defaultValue": 1000,
       "minValue": 0,
-      "maxValue": 2400
+      "maxValue": 3600
     },
     {
       "name": "REVERSE",

@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../utils/debug_log.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
@@ -60,7 +61,7 @@ class KostalWifiService extends BaseDeviceService {
         return null; // Not a Kostal device
       }
 
-      debugPrint('[$ipAddress:$port] Potential Kostal device detected via HTTP (SCB=$hasScbTitle, branding=$hasBrandingXml)');
+      DebugLog.device('[$ipAddress:$port] Potential Kostal device detected via HTTP (SCB=$hasScbTitle, branding=$hasBrandingXml)', level: LogLevel.debug);
 
       // ===== STAGE 2: TCP Verification =====
 
@@ -73,7 +74,7 @@ class KostalWifiService extends BaseDeviceService {
           timeout: const Duration(seconds: 2),
         );
 
-        debugPrint('[$ipAddress:$port] TCP connection to port 1502 successful - Kostal device confirmed');
+        DebugLog.device('[$ipAddress:$port] TCP connection to port 1502 successful - Kostal device confirmed', level: LogLevel.debug);
 
         // Close socket immediately
         await socket.close();
@@ -88,7 +89,7 @@ class KostalWifiService extends BaseDeviceService {
           port: port, // HTTP port for web interface
         );
       } catch (e) {
-        debugPrint('[$ipAddress:$port] TCP connection to port 1502 failed: $e');
+        DebugLog.device('[$ipAddress:$port] TCP connection to port 1502 failed: $e', level: LogLevel.warning);
         // HTML looked like Kostal but Modbus port not accessible - likely false positive
         return null;
       } finally {
@@ -97,7 +98,7 @@ class KostalWifiService extends BaseDeviceService {
         } catch (_) {}
       }
     } catch (e) {
-      debugPrint('[$ipAddress:$port] Error detecting Kostal device: $e');
+      DebugLog.device('[$ipAddress:$port] Error detecting Kostal device: $e', level: LogLevel.error);
     }
 
     return null;
@@ -154,11 +155,11 @@ class KostalWifiService extends BaseDeviceService {
         device.data["data"] = data;
         device.emitData(data);
 
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Fetched Modbus data: ${data.keys.length} fields');
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Fetched Modbus data: ${data.keys.length} fields', level: LogLevel.debug);
         lastSeen = DateTime.now().millisecondsSinceEpoch;
         return;
       } else {
-        debugPrint('[${wifiDevice.getCurrentBaseUrl()}] Modbus read returned no data');
+        DebugLog.device('[${wifiDevice.getCurrentBaseUrl()}] Modbus read returned no data', level: LogLevel.warning);
         device.emitStatus('Keine Daten');
         return;
       }
@@ -242,11 +243,11 @@ class KostalWifiService extends BaseDeviceService {
         _parseBatteryData(batteryRegs, data);
       }
 
-      debugPrint(data.toString());
+      DebugLog.device('Kostal data: ${data.toString()}', level: LogLevel.verbose);
 
       return data.isNotEmpty ? data : null;
     } catch (e) {
-      debugPrint('[KostalModbus] Error fetching data: $e');
+      DebugLog.device('[KostalModbus] Error fetching data: $e', level: LogLevel.error);
       return null;
     }
   }

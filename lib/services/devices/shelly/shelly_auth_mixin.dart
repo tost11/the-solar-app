@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../models/devices/device_base.dart';
 import '../../../models/devices/mixins/device_authentication_mixin.dart';
 import '../../../utils/shelly_auth_utils.dart';
+import '../../../utils/debug_log.dart';
 import '../base_device_service.dart';
 
 /// Mixin providing Shelly authentication functionality
@@ -52,14 +53,14 @@ mixin ShellyAuthMixin on BaseDeviceService {
   /// Returns the built authentication object
   /// Throws exception if credentials are missing or invalid
   Map<String, dynamic> buildAuthFromChallenge(Map<String, dynamic> challenge) {
-    debugPrint('Building auth from challenge: $challenge');
+    DebugLog.device('Building auth from challenge: $challenge', level: LogLevel.verbose);
 
     final authDevice = _getAuthDevice();
 
     // Check if credentials are available
     if (authDevice.authUsername == null ||
         authDevice.authPassword == null) {
-      debugPrint('Authentication credentials not configured');
+      DebugLog.device('Authentication credentials not configured', level: LogLevel.warning);
       throw Exception(
           'Gerät erfordert Authentifizierung. Bitte konfigurieren Sie Benutzername und Passwort.');
     }
@@ -72,13 +73,13 @@ mixin ShellyAuthMixin on BaseDeviceService {
 
     // Warn if realm mismatch
     if (deviceScr != null && deviceScr != realm) {
-      debugPrint(
+      DebugLog.device(
           'Warning: Realm mismatch. Device: $deviceScr, Challenge: $realm');
     }
 
     // Compute or use cached HA1
     if (_cachedHA1 == null) {
-      debugPrint('Computing HA1 hash');
+      DebugLog.device('Computing HA1 hash', level: LogLevel.verbose);
       _cachedHA1 = ShellyAuthUtils.computeHA1(
         authDevice.authUsername!,
         realm,
@@ -95,7 +96,7 @@ mixin ShellyAuthMixin on BaseDeviceService {
       nc: challenge['nc'] as int?,
     );
 
-    debugPrint('Auth object built successfully');
+    DebugLog.device('Auth object built successfully', level: LogLevel.verbose);
     return _cachedAuthObject!;
   }
 
@@ -107,12 +108,12 @@ mixin ShellyAuthMixin on BaseDeviceService {
   ///
   /// Returns the built authentication object, or null if parsing fails
   Map<String, dynamic>? parseAndBuildAuth(String errorMessage) {
-    debugPrint('Parsing authentication challenge from error message');
+    DebugLog.device('Parsing authentication challenge from error message', level: LogLevel.debug);
 
     // Parse authentication challenge
     final challenge = ShellyAuthUtils.parseAuthChallenge(errorMessage);
     if (challenge == null) {
-      debugPrint('Failed to parse authentication challenge');
+      DebugLog.device('Failed to parse authentication challenge', level: LogLevel.error);
       return null;
     }
 

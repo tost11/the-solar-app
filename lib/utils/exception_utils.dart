@@ -1,4 +1,5 @@
 
+import 'debug_log.dart';
 
 class ApiException implements Exception {
   final int statusCode;
@@ -12,6 +13,6 @@ class ApiException implements Exception {
   }
 
   void printError() {
-    print(toString());
+    DebugLog.system(toString(), level: LogLevel.error);
   }
 }

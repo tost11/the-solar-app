@@ -1,4 +1,5 @@
  import 'package:flutter/material.dart';
+import "../../../../../utils/debug_log.dart";
 import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_menu_item.dart';
 import 'package:the_solar_app/models/devices/manufacturers/zendure/implementations/zendure_device_implementation.dart';
@@ -44,7 +45,7 @@ class WifiZendureDeviceImplementation extends ZendureDeviceImplementation {
 
         if (mqttConfig == null || !context.mounted) return;
 
-        debugPrint("curren mqtt cnfig is: ${mqttConfig.toString()}");
+        DebugLog.device("Current MQTT config: ${mqttConfig.toString()}", level: LogLevel.verbose);
 
         // Parse server URL: "mqtt://192.168.178.223:1883"
         String? server;

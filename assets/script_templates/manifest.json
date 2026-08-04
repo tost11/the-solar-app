@@ -38,9 +38,9 @@
       "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-find"
     },
     {
-      "id": "zendure-power-control-find-beta",
+      "id": "zen-pwr-ctrl-find-beta",
       "latestVersion": "1.0.0",
-      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-find-beta"
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zen-pwr-ctrl-find-beta"
     },
     {
       "id": "zendure-power-control-ip",
@@ -48,9 +48,9 @@
       "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-ip"
     },
     {
-      "id": "zendure-power-control-ip-beta",
+      "id": "zen-pwr-ctrl-ip-beta",
       "latestVersion": "1.0.0",
-      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-ip-beta"
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zen-pwr-ctrl-ip-beta"
     },
     {
       "id": "zendure-power-control-mac",
@@ -58,9 +58,9 @@
       "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-mac"
     },
     {
-      "id": "zendure-power-control-mac-beta",
+      "id": "zen-pwr-ctrl-mac-beta",
       "latestVersion": "1.0.0",
-      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zendure-power-control-mac-beta"
+      "updatePath": "https://raw.githubusercontent.com/tost11/the-solar-app/main/assets/script_templates/zen-pwr-ctrl-mac-beta"
     }
   ]
 }

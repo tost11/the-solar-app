@@ -1,6 +1,7 @@
 import 'dart:io';
+import 'debug_log.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
@@ -91,7 +92,7 @@ class PermissionUtils {
           }
         }
       } catch (e) {
-        debugPrint('Error checking Android version for WiFi permissions: $e');
+        DebugLog.system('Error checking Android version for WiFi permissions: $e', level: LogLevel.error);
       }
     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import "../../../../../utils/debug_log.dart";
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/devices/capabilities/battery_capability.dart';
 import 'package:the_solar_app/models/devices/capabilities/device_role_config.dart';
@@ -90,7 +91,7 @@ class WiFiZendureDevice extends GenericWiFiDevice<
       if (minSoc != null) commandParams["minSoc"] = minSoc * 10;
       if (maxSoc != null) commandParams["socSet"] = maxSoc * 10;
 
-      debugPrint("Zendure wifi set limit params:  $commandParams");
+      DebugLog.device("Zendure WiFi set limit params: $commandParams", level: LogLevel.verbose);
 
       ret = await connectionService?.sendCommand(commandParams);
     } else if (command == COMMAND_SET_POWER_CONFIG) {

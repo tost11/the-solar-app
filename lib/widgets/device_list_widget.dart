@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import '../utils/debug_log.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../services/bluetooth_scan_service.dart';
 
 class DeviceListWidget extends StatelessWidget {
@@ -33,7 +34,7 @@ class DeviceListWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         final enrichedResult = scanResults[index];
         final device = enrichedResult.device;
-        final rssi = enrichedResult.scanResult.rssi;
+        final rssi = enrichedResult.scanResult?.rssi;
 
         return ListTile(
           leading: CircleAvatar(
@@ -59,11 +60,13 @@ class DeviceListWidget extends StatelessWidget {
                 _buildUnknownDeviceBadge(),
             ],
           ),
-          subtitle: Text('${device.id}\nSignalstärke: $rssi dBm'),
+          subtitle: Text('${device.id}\nSignalstärke: ${rssi != null ? '$rssi dBm' : 'unbekannt'}'),
           isThreeLine: true,
           trailing: const Icon(Icons.chevron_right),
           onTap: () {
-            _logDeviceInfo(enrichedResult.scanResult);
+            if (enrichedResult.scanResult != null) {
+              _logDeviceInfo(enrichedResult.scanResult!);
+            }
             onDeviceTap(device, enrichedResult.detectedManufacturer);
           },
         );
@@ -102,24 +105,24 @@ class DeviceListWidget extends StatelessWidget {
     final device = result.device;
     final rssi = result.rssi;
     final advData = result.advertisementData;
-
-    print('═══════════════════════════════════════════════════════════════');
-    print('DEVICE CLICKED - Full Information:');
-    print('═══════════════════════════════════════════════════════════════');
-    print('Device Name: ${device.name.isNotEmpty ? device.name : 'Unbekanntes Gerät'}');
-    print('Device ID: ${device.id}');
-    print('RSSI (Signal Strength): $rssi dBm');
-    print('Remote ID: ${device.remoteId}');
-
-    print('\nAdvertisement Data:');
-    print('  Local Name: ${advData.localName}');
-    print('  TX Power Level: ${advData.txPowerLevel}');
-    print('  Connectable: ${advData.connectable}');
-    print('  Manufacturer Data: ${advData.manufacturerData}');
-    print('  Service Data: ${advData.serviceData}');
-    print('  Service UUIDs: ${advData.serviceUuids}');
-
-    print('\nTimestamp: ${result.timeStamp}');
-    print('═══════════════════════════════════════════════════════════════\n');
+    DebugLog.ui('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
+    DebugLog.ui('DEVICE CLICKED - Full Information:', level: LogLevel.debug);
+    DebugLog.ui('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
+    DebugLog.ui('Device Name: ${device.name.isNotEmpty ? device.name : "Unbekanntes Gerät"}', level: LogLevel.debug);
+    DebugLog.ui('Device ID: ${device.id}', level: LogLevel.debug);
+    DebugLog.ui('RSSI (Signal Strength): $rssi dBm', level: LogLevel.debug);
+    DebugLog.ui('Remote ID: ${device.remoteId}', level: LogLevel.debug);
+    DebugLog.ui('Remote ID: ${device.remoteId}', level: LogLevel.debug);
+    DebugLog.ui('\nAdvertisement Data:', level: LogLevel.debug);
+    DebugLog.ui('  Local Name: ${advData.localName}', level: LogLevel.debug);
+    DebugLog.ui('  TX Power Level: ${advData.txPowerLevel}', level: LogLevel.debug);
+    DebugLog.ui('  Connectable: ${advData.connectable}', level: LogLevel.debug);
+    DebugLog.ui('  Manufacturer Data: ${advData.manufacturerData}', level: LogLevel.verbose);
+    DebugLog.ui('  Service Data: ${advData.serviceData}', level: LogLevel.verbose);
+    DebugLog.ui('  Service UUIDs: ${advData.serviceUuids}', level: LogLevel.verbose);
+    DebugLog.ui('  Service UUIDs: ${advData.serviceUuids}', level: LogLevel.verbose);
+    DebugLog.ui('\nTimestamp: ${result.timeStamp}', level: LogLevel.debug);
+    DebugLog.ui('═══════════════════════════════════════════════════════════════\n', level: LogLevel.debug);
+    DebugLog.ui('═══════════════════════════════════════════════════════════════\n', level: LogLevel.debug);
   }
 }

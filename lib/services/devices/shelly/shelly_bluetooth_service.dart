@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../../../constants/bluetooth_constants.dart';
 import '../../../constants/shelly_constants.dart';
 import '../../../models/devices/device_base.dart';
 import '../../../models/devices/manufacturers/shelly/shelly_bluetooth_device.dart';
 import '../../../utils/map_utils.dart';
+import '../../../utils/debug_log.dart';
 import '../bluetooth_device_service.dart';
 import '../../device_storage_service.dart';
 import 'shelly_auth_mixin.dart';
@@ -76,12 +78,12 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
   /// Setup Shelly characteristics (enable notifications)
   @override
   Future<void> setupCharacteristics() async {
-    debugPrint('\nEnabling notifications...');
+    DebugLog.device('Enabling BLE notifications...', level: LogLevel.debug);
     try {
       await readNotifyCharacteristic!.setNotifyValue(true);
-      debugPrint('Notifications enabled');
+      DebugLog.device('Notifications enabled', level: LogLevel.debug);
     } catch (e) {
-      debugPrint('Failed to enable notifications: $e');
+      DebugLog.device('Failed to enable notifications: $e', level: LogLevel.error);
     }
   }
 
@@ -93,26 +95,29 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
   /// Perform device-specific connection optimization
   Future<void> _onDeviceConnected() async {
-    // Clear Android GATT cache for reliability
-    try {
-      await bluetoothDevice.clearGattCache();
-    } catch (e) {
-      debugPrint('GATT cache clear not supported: $e');
+    // Android-only optimizations
+    if (Platform.isAndroid) {
+      // Clear Android GATT cache for reliability
+      try {
+        await bluetoothDevice.clearGattCache();
+      } catch (e) {
+        DebugLog.device('GATT cache clear failed: $e', level: LogLevel.warning);
+      }
+
+      // Request high priority connection (Android optimization)
+      try {
+        await bluetoothDevice.requestConnectionPriority(
+            connectionPriorityRequest: ConnectionPriority.high);
+      } catch (e) {
+        DebugLog.device('Connection priority request failed: $e', level: LogLevel.warning);
+      }
     }
 
-    // Request larger MTU for better performance
+    // Request larger MTU for better performance (supported on Android and some other platforms)
     try {
       await bluetoothDevice.requestMtu(185);
     } catch (e) {
-      debugPrint('MTU negotiation failed: $e');
-    }
-
-    // Request high priority connection (Android optimization)
-    try {
-      await bluetoothDevice.requestConnectionPriority(
-          connectionPriorityRequest: ConnectionPriority.high);
-    } catch (e) {
-      debugPrint('Connection priority request failed: $e');
+      DebugLog.device('MTU negotiation failed: $e', level: LogLevel.warning);
     }
   }
 
@@ -143,27 +148,27 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
         // Add authentication if enabled and cached
         if (cachedAuthObject != null) {
           request['auth'] = cachedAuthObject;
-          debugPrint('Adding cached auth to request');
+          DebugLog.device('Adding cached auth to request', level: LogLevel.verbose);
         }
 
         String jsonRequest = jsonEncode(request);
         List<int> requestBytes = utf8.encode(jsonRequest);
 
-        debugPrint("Sending $jsonRequest");
-        debugPrint('>>> $method (${requestBytes.length} bytes)');
+        DebugLog.device("Sending $jsonRequest", level: LogLevel.verbose);
+        DebugLog.device('>>> $method (${requestBytes.length} bytes)', level: LogLevel.verbose);
 
         // Write request length (4 bytes, big-endian per Shelly spec)
         Uint8List lengthBytes = Uint8List(4);
         ByteData.view(lengthBytes.buffer).setUint32(0, requestBytes.length, Endian.big);
         await _writeWithChunking(writeCharacteristic!, lengthBytes);
 
-        debugPrint("length ok");
+        DebugLog.device("Length check OK", level: LogLevel.verbose);
 
         // Wait per Shelly spec
         await Future.delayed(const Duration(milliseconds: 300));
 
         // Write request data (chunked if necessary due to MTU)
-        debugPrint("Writing request data...");
+        DebugLog.device("Writing request data...", level: LogLevel.verbose);
         await _writeWithChunking(rwCharacteristic!, requestBytes, addPreWriteDelay: false);
 
         // Read response length (4 bytes, big-endian)
@@ -173,7 +178,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
         }
         int responseLength = ByteData.view(Uint8List.fromList(responseLengthBytes).buffer)
             .getUint32(0, Endian.big);
-        debugPrint('Response length: $responseLength bytes');
+        DebugLog.device('Response length: $responseLength bytes', level: LogLevel.verbose);
 
         // Read response data in chunks
         List<int> responseBytes = [];
@@ -206,7 +211,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
         // Parse JSON response
         String jsonResponse = utf8.decode(responseBytes);
-        debugPrint('<<< $method response received');
+        DebugLog.device('<<< $method response received', level: LogLevel.verbose);
 
         Map<String, dynamic> response = jsonDecode(jsonResponse);
 
@@ -216,7 +221,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
           final errorCode = error is Map ? error['code'] : null;
 
           if (errorCode == 401) {
-            debugPrint('Received 401 authentication challenge');
+            DebugLog.device('Received 401 authentication challenge', level: LogLevel.debug);
 
             // Try to handle authentication and retry
             final retryResponse = await _handleAuthenticationChallenge(
@@ -240,7 +245,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
         returnResponse = MapUtils.OM(response, ["result"]) as Map<String, dynamic>?;
       } catch (e) {
-        debugPrint('Error sending command $method: $e');
+        DebugLog.device('Error sending command $method: $e', level: LogLevel.error);
         if(method != ShellyCommands.getStatus && method != ShellyCommands.getDeviceInfo) {
           //ony when command from user show inf forderground
           device.emitError('Befehl fehlgeschlagen: $e');
@@ -260,24 +265,24 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
   /// Process response from device
   void _processResponse(String method, Map<String, dynamic> response) {
-    debugPrint('\nProcessing response for method: $method');
-    debugPrint(response.toString());
+    DebugLog.device('Processing response for method: $method', level: LogLevel.verbose);
+    DebugLog.device('Response: ${response.toString()}', level: LogLevel.verbose);
 
     var src = response["src"] as String?;
     if(src != null){
       //TODO make this better
-      debugPrint("set realm to: $src");
+      DebugLog.device("Set realm to: $src", level: LogLevel.verbose);
       (device as dynamic).deviceScr = src;
     }
 
     if (response.containsKey('error')) {
-      debugPrint('Error in response: ${response['error']}');
+      DebugLog.device('Error in response: ${response['error']}', level: LogLevel.error);
       throw Exception("Error from shelly received: ${response['error']}");
     }
 
     var result = response['result'];
     if (result == null) {
-      debugPrint('No result in response');
+      DebugLog.device('No result in response', level: LogLevel.warning);
       return;
     }
 
@@ -286,22 +291,22 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
     } else if (method == ShellyCommands.getStatus) {
       _handleData(result);
     } else {
-      debugPrint('Unhandled method response: $method');
+      DebugLog.device('Unhandled method response: $method', level: LogLevel.warning);
     }
   }
 
   /// Handle device info response
   void _handleDeviceInfo(Map<String, dynamic> info) {
-    debugPrint('\nDEVICE INFO:');
-    debugPrint(jsonEncode(info));
+    DebugLog.device('Device info received', level: LogLevel.debug);
+    DebugLog.device('Device info: ${jsonEncode(info)}', level: LogLevel.verbose);
 
     var deviceId = info['id'] as String?;
     var deviceModel = info['model'] as String?;
     var deviceFirmware = info['fw_id'] as String?;
 
-    debugPrint('Device ID: $deviceId');
-    debugPrint('Model: $deviceModel');
-    debugPrint('Firmware: $deviceFirmware');
+    DebugLog.device('Device ID: $deviceId', level: LogLevel.debug);
+    DebugLog.device('Model: $deviceModel', level: LogLevel.debug);
+    DebugLog.device('Firmware: $deviceFirmware', level: LogLevel.debug);
 
     device.data["config"] = info;
     device.emitDeviceInfo(info);
@@ -314,12 +319,12 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
       if (device.name != newName || device.deviceModel != deviceModel) {
         device.deviceModel = deviceModel;
         device.name = newName;
-        debugPrint('Updated device name from "${device.name}" to "$newName"');
+        DebugLog.device('Updated device name from "${device.name}" to "$newName"', level: LogLevel.debug);
 
         // Save updated device to storage
         DeviceStorageService().saveDevice(device);
       } else {
-        debugPrint('Device name already correct: ${device.name}');
+        DebugLog.device('Device name already correct: ${device.name}', level: LogLevel.debug);
       }
     }
 
@@ -335,7 +340,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
     final currentModules = device.data['_detectedModules'];
     if (currentModules == null || !_mapsEqual(currentModules as Map?, detectedModules)) {
       device.data['_detectedModules'] = detectedModules;
-      debugPrint('Detected Shelly modules: $detectedModules');
+      DebugLog.device('Detected Shelly modules: $detectedModules', level: LogLevel.debug);
 
       // Regenerate dynamic fields, controls, and time series based on new modules
       _updateDeviceElements();
@@ -411,18 +416,18 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
       // Extract error message
       final errorMessage = error is Map ? error['message'] as String? : null;
       if (errorMessage == null) {
-        debugPrint('No error message in 401 response');
+        DebugLog.device('No error message in 401 response', level: LogLevel.warning);
         return null;
       }
 
       // Use base class method to parse challenge and build auth object
       final authObject = parseAndBuildAuth(errorMessage);
       if (authObject == null) {
-        debugPrint('Failed to build authentication object');
+        DebugLog.device('Failed to build authentication object', level: LogLevel.error);
         return null;
       }
 
-      debugPrint('Built authentication object, retrying request...');
+      DebugLog.device('Built authentication object, retrying request...', level: LogLevel.debug);
 
       // Retry the request with authentication
       // Build request with auth
@@ -439,8 +444,8 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
       String jsonRequest = jsonEncode(retryRequest);
       List<int> requestBytes = utf8.encode(jsonRequest);
 
-      debugPrint("Retrying with auth: $jsonRequest");
-      debugPrint('>>> $method (${requestBytes.length} bytes) [with auth]');
+      DebugLog.device("Retrying with auth: $jsonRequest", level: LogLevel.verbose);
+      DebugLog.device('>>> $method (${requestBytes.length} bytes) [with auth]', level: LogLevel.verbose);
 
       // Write request length
       Uint8List lengthBytes = Uint8List(4);
@@ -491,7 +496,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
       // Parse retry response
       String jsonResponse = utf8.decode(responseBytes);
-      debugPrint('<<< $method retry response received');
+      DebugLog.device('<<< $method retry response received', level: LogLevel.verbose);
 
       Map<String, dynamic> retryResponse = jsonDecode(jsonResponse);
 
@@ -501,7 +506,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
         final retryErrorCode = retryError is Map ? retryError['code'] : null;
 
         if (retryErrorCode == 401) {
-          debugPrint('Authentication retry failed with 401');
+          DebugLog.device('Authentication retry failed with 401', level: LogLevel.error);
           // Clear cached auth since it didn't work
           resetAuthCache();
           throw Exception('Authentifizierung fehlgeschlagen. Bitte überprüfen Sie Benutzername und Passwort.');
@@ -513,17 +518,19 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
       return MapUtils.OM(retryResponse, ["result"]) as Map<String, dynamic>?;
     } catch (e) {
-      debugPrint('Error handling authentication challenge: $e');
+      DebugLog.device('Error handling authentication challenge: $e', level: LogLevel.error);
       return null;
     }
   }
 
   /// Helper method to write data with delay for BLE stability
+  /// Uses explicit 5s timeout to avoid holding _commandMutex for the full
+  /// FBP default (15s) if the device drops during write.
   Future<void> _write(
     BluetoothCharacteristic characteristic,
     List<int> data,
   ) async {
-    await characteristic.write(data, withoutResponse: false);
+    await characteristic.write(data, withoutResponse: false, timeout: 5);
   }
 
   /// Unified helper to write data with chunking and proper delays

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "../../../../../utils/debug_log.dart";
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
@@ -549,7 +550,7 @@ class OpenDTUDeviceImplementation extends DeviceImplementation {
     }
 
     // Update cache and regenerate
-    debugPrint('[OpenDTU] Generating field groups for ${currentSerials.length} inverters');
+    DebugLog.device('[OpenDTU] Generating field groups for ${currentSerials.length} inverters', level: LogLevel.debug);
     _cachedInverterSerials = currentSerials;
     _dynamicFieldGroups = [];
 

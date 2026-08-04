@@ -1,6 +1,7 @@
 import 'dart:async';
+import '../utils/debug_log.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../utils/localization_extension.dart';
 import '../models/device.dart';
 import '../models/devices/device_base.dart';  // For DeviceError class
@@ -153,7 +154,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
     // Device changed - need to reset everything
     if (oldWidget.device.id != widget.device.id) {
-      debugPrint('[DeviceDetailScreen] Device changed from ${oldWidget.device.name} to ${widget.device.name}');
+      DebugLog.ui('[DeviceDetailScreen] Device changed from ${oldWidget.device.name} to ${widget.device.name}', level: LogLevel.debug);
 
       // 1. Cancel old device's stream subscriptions
       _statusSubscription?.cancel();
@@ -316,7 +317,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   Future<void> _tryAutoConnect() async {
     final wasAlreadyConnected = widget.device.getServiceConnection()?.isConnected() ?? false;
 
-    await DeviceConnectionUtils.connectDevice(context, widget.device, showMessages: false);
+    if (!wasAlreadyConnected) {
+      if (mounted) setState(() => _isConnecting = true);
+    }
+
+    try {
+      await DeviceConnectionUtils.connectDevice(context, widget.device, showMessages: false);
+    } finally {
+      if (mounted) setState(() => _isConnecting = false);
+    }
 
     // If device was already connected, force an immediate data refresh
     if (wasAlreadyConnected) {
@@ -324,7 +333,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         await widget.device.getServiceConnection()?.fetchData();
       } catch (e) {
         // Ignore fetch errors - periodic fetch will retry
-        debugPrint('[DeviceDetailScreen] Force refresh failed: $e');
+        DebugLog.ui('[DeviceDetailScreen] Force refresh failed: $e', level: LogLevel.error);
       }
     }
   }
@@ -1152,7 +1161,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               connectionStatus: _connectionStatus,
               connectionType: widget.device.connectionType,
               isConnected: isConnected,
-              isAutoReconnecting: _isAutoReconnecting,
+              isAutoReconnecting: _isAutoReconnecting || _isConnecting,
             ),
 
             // Custom sections after device info
@@ -1246,20 +1255,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   ),
                 ),
             ],
-
-            if (_isConnecting)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 8),
-                      Text(widget.device.connectionType == ConnectionType.wifi ? 'Verbinde mit WiFi...' : 'Suche Bluetooth-Gerät...'),
-                    ],
-                  ),
-                ),
-              ),
 
             if (isConnected) ...[
               // Custom sections after controls (moved before Live Data section)

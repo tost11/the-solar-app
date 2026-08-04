@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import '../../utils/debug_log.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import 'package:the_solar_app/models/device.dart';
 
 import 'base_device_service.dart';
@@ -71,15 +71,36 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
   /// Connect to a Bluetooth device - device-specific connection logic
   @override
   Future<bool> internalConnect() async {
-    debugPrint('\n═══════════════════════════════════════════════════════════════');
-    debugPrint('CONNECTING TO DEVICE');
-    debugPrint('═══════════════════════════════════════════════════════════════');
-    debugPrint('Device: ${bluetoothDevice.platformName}');
-    debugPrint('ID: ${bluetoothDevice.remoteId}');
+    DebugLog.bluetooth('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
+    DebugLog.bluetooth('CONNECTING TO DEVICE', level: LogLevel.debug);
+    DebugLog.bluetooth('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
+    DebugLog.bluetooth('Device: ${bluetoothDevice.platformName}', level: LogLevel.debug);
+    DebugLog.bluetooth('ID: ${bluetoothDevice.remoteId}', level: LogLevel.debug);
 
     // Connect to device
-    await bluetoothDevice.connect(timeout: const Duration(seconds: 15));
-    debugPrint('Connected successfully!');
+    // On Linux/Windows, the device must be in the BLE adapter's device list
+    // (via a real scan) before connect() works. If "No element" occurs, we
+    // trigger a quick scan to rediscover the device, then retry once.
+    try {
+      await bluetoothDevice.connect(license: License.nonprofit, timeout: const Duration(seconds: 15));
+    } catch (e) {
+      if (e.toString().contains('No element')) {
+        DebugLog.bluetooth('Device not in adapter list, scanning to rediscover...', level: LogLevel.info);
+        try {
+          await FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
+          await Future.delayed(const Duration(seconds: 5));
+          await FlutterBluePlus.stopScan();
+        } catch (scanError) {
+          DebugLog.bluetooth('Recovery scan failed: $scanError', level: LogLevel.warning);
+        }
+
+        // Retry connect once after scan
+        await bluetoothDevice.connect(license: License.nonprofit, timeout: const Duration(seconds: 15));
+      } else {
+        rethrow;
+      }
+    }
+    DebugLog.bluetooth('Connected successfully!', level: LogLevel.debug);
 
     device.emitStatus('Verbunden');
 
@@ -87,9 +108,9 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
     await onDeviceConnected();
 
     // Discover services
-    debugPrint('\nDiscovering services...');
+    DebugLog.bluetooth('\nDiscovering services...', level: LogLevel.debug);
     List<BluetoothService> services = await bluetoothDevice.discoverServices();
-    debugPrint('Found ${services.length} services');
+    DebugLog.bluetooth('Found ${services.length} services', level: LogLevel.debug);
 
     // Find the device-specific service
     BluetoothService? deviceService = _findService(services);
@@ -107,13 +128,21 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
       throw Exception('Required characteristics not found');
     }
 
-    debugPrint('All required characteristics found');
+    DebugLog.bluetooth('All required characteristics found', level: LogLevel.debug);
 
     // Allow subclasses to setup characteristics (e.g., enable notifications)
-    await setupCharacteristics();
+    // If setup fails, disconnect the BLE link to avoid a zombie connection
+    // where isConnected() returns true but characteristics are unusable.
+    try {
+      await setupCharacteristics();
+    } catch (e) {
+      DebugLog.bluetooth('setupCharacteristics() failed: $e — disconnecting BLE link', level: LogLevel.error);
+      try { await bluetoothDevice.disconnect(); } catch (_) {}
+      rethrow;
+    }
 
-    debugPrint('Device ready!');
-    debugPrint('═══════════════════════════════════════════════════════════════\n');
+    DebugLog.bluetooth('Device ready!', level: LogLevel.debug);
+    DebugLog.bluetooth('═══════════════════════════════════════════════════════════════\n', level: LogLevel.debug);
 
     return true;
   }
@@ -121,8 +150,16 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
   /// Device-specific Bluetooth disconnection logic
   @override
   Future<void> internalDisconnect() async {
-    // Disconnect Bluetooth device
-    await bluetoothDevice.disconnect();
+    // Only call disconnect if the device is still physically connected.
+    // Calling disconnect() on an already-disconnected device causes FBP to wait
+    // up to 35s for a BlueZ confirmation that never arrives (device already gone).
+    try {
+      if (bluetoothDevice.isConnected) {
+        await bluetoothDevice.disconnect();
+      }
+    } catch (e) {
+      DebugLog.bluetooth('BLE disconnect error (non-critical): $e', level: LogLevel.debug);
+    }
 
     // Clear characteristic references
     _notifyCharacteristic = null;
@@ -135,11 +172,11 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
   BluetoothService? _findService(List<BluetoothService> services) {
     for (var service in services) {
       String serviceUuidStr = service.uuid.toString().toLowerCase();
-      debugPrint('Service: $serviceUuidStr');
+      DebugLog.bluetooth('Service: $serviceUuidStr', level: LogLevel.verbose);
 
       if (serviceUuidStr == serviceUuid.toLowerCase() ||
           (serviceUuidShort != null && serviceUuidStr == serviceUuidShort!.toLowerCase())) {
-        debugPrint('Found device service!');
+        DebugLog.bluetooth('Found device service!', level: LogLevel.debug);
         return service;
       }
     }
@@ -151,14 +188,14 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
     for (var service in services) {
       for (var char in service.characteristics) {
         String charUuid = char.uuid.toString().toLowerCase();
-        debugPrint('Characteristic: $charUuid');
+        DebugLog.bluetooth('Characteristic: $charUuid', level: LogLevel.verbose);
 
         // Check notify characteristic
         if (notifyCharacteristicUuid != null &&
             (charUuid == notifyCharacteristicUuid!.toLowerCase() ||
              (notifyCharacteristicUuidShort != null && charUuid == notifyCharacteristicUuidShort!.toLowerCase()))) {
           _notifyCharacteristic = char;
-          debugPrint('Found notify characteristic!');
+          DebugLog.bluetooth('Found notify characteristic!', level: LogLevel.debug);
         }
 
         // Check write characteristic
@@ -166,7 +203,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
             (charUuid == writeCharacteristicUuid!.toLowerCase() ||
              (writeCharacteristicUuidShort != null && charUuid == writeCharacteristicUuidShort!.toLowerCase()))) {
           _writeCharacteristic = char;
-          debugPrint('Found write characteristic!');
+          DebugLog.bluetooth('Found write characteristic!', level: LogLevel.debug);
         }
 
         // Check RW characteristic (used by Shelly)
@@ -174,7 +211,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
             (charUuid == rwCharacteristicUuid!.toLowerCase() ||
              (rwCharacteristicUuidShort != null && charUuid == rwCharacteristicUuidShort!.toLowerCase()))) {
           _rwCharacteristic = char;
-          debugPrint('Found RW characteristic!');
+          DebugLog.bluetooth('Found RW characteristic!', level: LogLevel.debug);
         }
 
         // Check read/notify characteristic (used by Shelly)
@@ -182,7 +219,7 @@ abstract class BluetoothDeviceService extends BaseDeviceService {
             (charUuid == readNotifyCharacteristicUuid!.toLowerCase() ||
              (readNotifyCharacteristicUuidShort != null && charUuid == readNotifyCharacteristicUuidShort!.toLowerCase()))) {
           _readNotifyCharacteristic = char;
-          debugPrint('Found read/notify characteristic!');
+          DebugLog.bluetooth('Found read/notify characteristic!', level: LogLevel.debug);
         }
       }
     }

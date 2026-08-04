@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../utils/debug_log.dart';
 import '../models/device.dart';
 import '../models/devices/mixins/device_wifi_mixin.dart';
 import '../models/resolved_resource.dart';
@@ -40,7 +41,7 @@ class ResourceResolverService {
   ) async {
     final system = await _systemStorage.getSystemById(systemId);
     if (system == null) {
-      debugPrint('System not found: $systemId, falling back to all devices');
+      DebugLog.system('System not found: $systemId, falling back to all devices', level: LogLevel.warning);
       return resolveFromAllDevices(source, sourceProperty, filterInfo);
     }
 
@@ -67,8 +68,12 @@ class ResourceResolverService {
     final filteredDevices = _applyFilters(devices, filterInfo);
 
     // Extract property from each device
+    // Only include WiFi-capable devices — scripts run on Shelly (network)
+    // and cannot communicate with Bluetooth-only devices
     final results = <ResolvedResource>[];
     for (final device in filteredDevices) {
+      if (device is! DeviceWifiMixin) continue;
+
       final value = _extractPropertyFromDevice(device, sourceProperty);
       if (value != null && value.isNotEmpty) {
         results.add(ResolvedResource.create(device, value));
@@ -116,11 +121,11 @@ class ResourceResolverService {
         case 'devicemodel':
           return device.deviceModel;
         default:
-          debugPrint('Unknown property: $propertyName');
+          DebugLog.system('Unknown property: $propertyName', level: LogLevel.warning);
           return null;
       }
     } catch (e) {
-      debugPrint('Error extracting $propertyName from ${device.name}: $e');
+      DebugLog.system('Error extracting $propertyName from ${device.name}: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -152,7 +157,7 @@ class ResourceResolverService {
         final deviceType = (json['deviceType'] as String?)?.toLowerCase();
         return deviceType != null && filters.contains(deviceType);
       } catch (e) {
-        debugPrint('Error filtering device ${device.name}: $e');
+        DebugLog.system('Error filtering device ${device.name}: $e', level: LogLevel.error);
         return false;
       }
     }).toList();

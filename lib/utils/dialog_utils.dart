@@ -124,4 +124,57 @@ class DialogUtils {
       ),
     );
   }
+
+  /// Shows a generic text input dialog
+  ///
+  /// Returns the entered text, or null if cancelled/dismissed.
+  ///
+  /// Parameters:
+  /// - [title] - Dialog title
+  /// - [label] - TextField label text
+  /// - [hintText] - TextField hint text
+  /// - [initialValue] - Pre-filled text value
+  /// - [obscureText] - Whether to hide input (for passwords/PINs)
+  /// - [keyboardType] - Keyboard type (e.g., TextInputType.number for PINs)
+  /// - [confirmText] - Confirm button text (default: 'OK')
+  /// - [cancelText] - Cancel button text (default: 'Abbrechen')
+  static Future<String?> showInputDialog(
+    BuildContext context, {
+    required String title,
+    String? label,
+    String? hintText,
+    String? initialValue,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    String? confirmText,
+    String? cancelText,
+  }) async {
+    final controller = TextEditingController(text: initialValue);
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hintText,
+            labelText: label,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(null),
+            child: Text(cancelText ?? 'Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: Text(confirmText ?? 'OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }

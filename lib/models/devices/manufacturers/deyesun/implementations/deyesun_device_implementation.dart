@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "../../../../../utils/debug_log.dart";
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
@@ -259,8 +260,8 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
             // Get current limit from Modbus data
             var currentLimit = MapUtils.OM(device.data, ['data', 'limit_percentage']) as int?;
 
-            debugPrint("Current power rating is: $powerRating");
-            debugPrint("Current limit is: $currentLimit");
+            DebugLog.device("Current power rating: $powerRating", level: LogLevel.debug);
+            DebugLog.device("Current limit: $currentLimit", level: LogLevel.debug);
 
             if (context.mounted) {
               final result = await NavigationUtils.pushConfigurationScreen(

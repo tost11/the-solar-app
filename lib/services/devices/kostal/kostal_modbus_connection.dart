@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../utils/debug_log.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
@@ -61,7 +62,7 @@ class KostalModbusConnection {
   /// Connect to Kostal inverter via Modbus TCP
   Future<bool> connect(String ipAddress, int port) async {
     if (_isDisposed) {
-      debugPrint('[KostalModbus] Cannot connect - connection disposed');
+      DebugLog.device('[KostalModbus] Cannot connect - connection disposed', level: LogLevel.warning);
       return false;
     }
 
@@ -80,7 +81,7 @@ class KostalModbusConnection {
     _isConnecting = true;
 
     try {
-      debugPrint('[KostalModbus] Connecting to $_ipAddress:$_port...');
+      DebugLog.device('[KostalModbus] Connecting to $_ipAddress:$_port...', level: LogLevel.debug);
 
       _socket = await Socket.connect(
         _ipAddress!,
@@ -98,10 +99,10 @@ class KostalModbusConnection {
       _isConnecting = false;
       // No timer cancellation needed - BaseDeviceService handles reconnection
 
-      debugPrint('[KostalModbus] Connected successfully');
+      DebugLog.device('[KostalModbus] Connected successfully', level: LogLevel.debug);
       return true;
     } catch (e) {
-      debugPrint('[KostalModbus] Connection failed: $e');
+      DebugLog.device('[KostalModbus] Connection failed: $e', level: LogLevel.error);
       _socket = null;
       _isConnecting = false;
       // No reconnection scheduling - BaseDeviceService handles it
@@ -122,7 +123,7 @@ class KostalModbusConnection {
     try {
       await _socket?.close();
     } catch (e) {
-      debugPrint('[KostalModbus] Error closing socket: $e');
+      DebugLog.device('[KostalModbus] Error closing socket: $e', level: LogLevel.error);
     }
 
     _socket = null;
@@ -140,12 +141,12 @@ class KostalModbusConnection {
   /// Returns list of 16-bit register values, or null on failure
   Future<List<int>?> readRegisters(int startRegister, int count, int unitId) async {
     if (!isConnected) {
-      debugPrint('[KostalModbus] Cannot read - not connected');
+      DebugLog.device('[KostalModbus] Cannot read - not connected', level: LogLevel.warning);
       return null;
     }
 
     if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
-      debugPrint('[KostalModbus] Cannot read - previous command still pending');
+      DebugLog.device('[KostalModbus] Cannot read - previous command still pending', level: LogLevel.warning);
       return null;
     }
 
@@ -171,7 +172,7 @@ class KostalModbusConnection {
           }
         }
       } catch (e) {
-        debugPrint('[KostalModbus] Read error: $e');
+        DebugLog.device('[KostalModbus] Read error: $e', level: LogLevel.error);
       } finally {
         _cancelCommandTimeout();
       }
@@ -185,12 +186,12 @@ class KostalModbusConnection {
   /// Returns true on success, false on failure
   Future<bool> writeRegister(int register, int value, int unitId) async {
     if (!isConnected) {
-      debugPrint('[KostalModbus] Cannot write - not connected');
+      DebugLog.device('[KostalModbus] Cannot write - not connected', level: LogLevel.warning);
       return false;
     }
 
     if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
-      debugPrint('[KostalModbus] Cannot write - previous command still pending');
+      DebugLog.device('[KostalModbus] Cannot write - previous command still pending', level: LogLevel.warning);
       return false;
     }
 
@@ -213,7 +214,7 @@ class KostalModbusConnection {
           ret = _parseWriteResponse(result);
         }
       } catch (e) {
-        debugPrint('[KostalModbus] Write error: $e');
+        DebugLog.device('[KostalModbus] Write error: $e', level: LogLevel.error);
       } finally {
         _cancelCommandTimeout();
       }
@@ -265,7 +266,7 @@ class KostalModbusConnection {
   /// Parse read registers response
   List<int>? _parseReadResponse(Uint8List data) {
     if (data.length < 9) {
-      debugPrint('[KostalModbus] Response too short: ${data.length} bytes');
+      DebugLog.device('[KostalModbus] Response too short: ${data.length} bytes', level: LogLevel.error);
       return null;
     }
 
@@ -276,7 +277,7 @@ class KostalModbusConnection {
     final functionCode = byteData.getUint8(7);
 
     if (protocolId != 0) {
-      debugPrint('[KostalModbus] Invalid protocol ID: $protocolId');
+      DebugLog.device('[KostalModbus] Invalid protocol ID: $protocolId', level: LogLevel.error);
       return null;
     }
 
@@ -284,7 +285,7 @@ class KostalModbusConnection {
       final byteCount = byteData.getUint8(8);
 
       if (data.length < 9 + byteCount) {
-        debugPrint('[KostalModbus] Incomplete response');
+        DebugLog.device('[KostalModbus] Incomplete response', level: LogLevel.error);
         return null;
       }
 
@@ -300,10 +301,10 @@ class KostalModbusConnection {
     } else if (functionCode >= 0x80) {
       // Error response
       final exceptionCode = byteData.getUint8(8);
-      debugPrint('[KostalModbus] Modbus exception: $exceptionCode');
+      DebugLog.device('[KostalModbus] Modbus exception: $exceptionCode', level: LogLevel.error);
       return null;
     } else {
-      debugPrint('[KostalModbus] Unexpected function code: $functionCode');
+      DebugLog.device('[KostalModbus] Unexpected function code: $functionCode', level: LogLevel.error);
       return null;
     }
   }
@@ -319,11 +320,11 @@ class KostalModbusConnection {
     final functionCode = byteData.getUint8(7);
 
     if (functionCode == MODBUS_WRITE_SINGLE) {
-      debugPrint('[KostalModbus] Write successful');
+      DebugLog.device('[KostalModbus] Write successful', level: LogLevel.debug);
       return true;
     } else if (functionCode >= 0x80) {
       final exceptionCode = byteData.getUint8(8);
-      debugPrint('[KostalModbus] Write exception: $exceptionCode');
+      DebugLog.device('[KostalModbus] Write exception: $exceptionCode', level: LogLevel.error);
       return false;
     }
 
@@ -333,7 +334,7 @@ class KostalModbusConnection {
   /// Handle incoming socket data
   void _onDataReceived(List<int> data) {
     if (_readBytes + data.length > READ_BUFFER_LENGTH) {
-      debugPrint('[KostalModbus] Read buffer overflow - resetting');
+      DebugLog.device('[KostalModbus] Read buffer overflow - resetting', level: LogLevel.warning);
       _readBytes = 0;
       if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
         _responseCompleter!.complete(null);
@@ -378,7 +379,7 @@ class KostalModbusConnection {
 
   /// Handle socket errors
   void _onSocketError(error) {
-    debugPrint('[KostalModbus] Socket error: $error');
+    DebugLog.device('[KostalModbus] Socket error: $error', level: LogLevel.error);
     _socket = null;
     // No reconnection scheduling - BaseDeviceService detects via isConnected/isHealthy
 
@@ -389,7 +390,7 @@ class KostalModbusConnection {
 
   /// Handle socket disconnection
   void _onSocketDone() {
-    debugPrint('[KostalModbus] Socket disconnected');
+    DebugLog.device('[KostalModbus] Socket disconnected', level: LogLevel.error);
     _socket = null;
     // No reconnection scheduling - BaseDeviceService detects via isConnected/isHealthy
 
@@ -402,7 +403,7 @@ class KostalModbusConnection {
   void _startCommandTimeout() {
     _cancelCommandTimeout();
     _commandTimeoutTimer = Timer(Duration(milliseconds: COMMAND_TIMEOUT_MS), () {
-      debugPrint('[KostalModbus] Command timeout');
+      DebugLog.device('[KostalModbus] Command timeout', level: LogLevel.warning);
       if (_responseCompleter != null && !_responseCompleter!.isCompleted) {
         _responseCompleter!.complete(null);
       }

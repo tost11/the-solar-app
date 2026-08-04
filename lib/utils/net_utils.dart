@@ -1,4 +1,5 @@
 import 'dart:io' show Platform, NetworkInterface, InternetAddressType;
+import 'debug_log.dart';
 import 'package:flutter/foundation.dart';
 
 /// Simple model for network interface information
@@ -144,7 +145,7 @@ class NetUtils {
         }
       //}
     } catch (e) {
-      debugPrint('Error getting network interfaces: $e');
+      DebugLog.network('Error getting network interfaces: $e', level: LogLevel.error);
     }
 
     return interfaces;

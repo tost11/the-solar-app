@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import "../../../utils/debug_log.dart";
 
 /// Mixin for adding WiFi connection capabilities to device models.
 ///
@@ -57,7 +58,7 @@ mixin DeviceWifiMixin {
         return await func(netHostname!,netPort!);
       }
     }catch (e){
-      debugPrint("Could not connect to: $netHostname $netPort");
+      DebugLog.network("Could not connect to: $netHostname $netPort", level: LogLevel.warning);
       prevEx = e;
     }
 
@@ -69,7 +70,7 @@ mixin DeviceWifiMixin {
         throw prevEx;
       }
     }catch (e){
-      debugPrint("Could not connect to: $netIpAddress $netPort");
+      DebugLog.network("Could not connect to: $netIpAddress $netPort", level: LogLevel.warning);
       rethrow;
     }
   }

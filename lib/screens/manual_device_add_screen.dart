@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../utils/debug_log.dart';
 import 'package:flutter/material.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:lan_scanner/lan_scanner.dart';
@@ -215,16 +216,16 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
 
       // Prefer IPv4, fallback to IPv6
       if (ipv4Addresses.isNotEmpty) {
-        debugPrint('Resolved $hostname to IPv4: ${ipv4Addresses.first.address}');
+        DebugLog.network('Resolved $hostname to IPv4: ${ipv4Addresses.first.address}', level: LogLevel.debug);
         return ipv4Addresses.first.address;
       } else if (ipv6Addresses.isNotEmpty) {
-        debugPrint('Resolved $hostname to IPv6 (no IPv4 available): ${ipv6Addresses.first.address}');
+        DebugLog.network('Resolved $hostname to IPv6 (no IPv4 available): ${ipv6Addresses.first.address}', level: LogLevel.debug);
         return ipv6Addresses.first.address;
       }
 
       return null;
     } catch (e) {
-      debugPrint('Failed to resolve hostname $hostname: $e');
+      DebugLog.network('Failed to resolve hostname $hostname: $e', level: LogLevel.error);
     }
     return null;
   }
@@ -237,7 +238,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
       // Remove trailing dot if present
       return host.host.endsWith('.') ? host.host.substring(0, host.host.length - 1) : host.host;
     } catch (e) {
-      debugPrint('Failed to reverse resolve IP $ipAddress: $e');
+      DebugLog.network('Failed to reverse resolve IP $ipAddress: $e', level: LogLevel.error);
     }
     return null;
   }
@@ -270,7 +271,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
         }
         ipAddressToProbe = resolvedIp;
         hostnameForDevice = inputValue; // Store hostname for later
-        debugPrint('Resolved hostname $inputValue to IP $resolvedIp');
+        DebugLog.network("Resolved hostname $inputValue to IP $resolvedIp", level: LogLevel.debug);
       }
 
       // Determine username based on authentication mode
@@ -290,7 +291,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
         timeout: const Duration(seconds: 5),
       );
 
-      debugPrint("Probing manually created device complete");
+      DebugLog.network("Probing manually created device complete", level: LogLevel.debug);
 
       if (device != null && mounted) {
         //TODO check what this here is for and if it even is working
@@ -298,7 +299,7 @@ class _ManualDeviceAddScreenState extends State<ManualDeviceAddScreen> {
         if (isIp && hostnameForDevice == null) {
           hostnameForDevice = await _resolveIpToHostname(ipAddressToProbe);
           if (hostnameForDevice != null) {
-            debugPrint('Reverse resolved IP $ipAddressToProbe to hostname $hostnameForDevice');
+            DebugLog.network("Reverse resolved IP $ipAddressToProbe to hostname $hostnameForDevice", level: LogLevel.debug);
           }
         }
 

@@ -4838,5 +4838,89 @@
   "autoScriptUpdateDescription": "Offizielle Templates beim App-Start automatisch aktualisieren",
   "@autoScriptUpdateDescription": {
     "description": "Description for automatic script template update toggle"
+  },
+  "menuDeviceControl": "Steuerung",
+  "@menuDeviceControl": {
+    "description": "Menu: Device control screen"
+  },
+  "menuSubtitleDeviceControl": "Neustart, Ein/Aus",
+  "@menuSubtitleDeviceControl": {
+    "description": "Menu subtitle: Device control"
+  },
+  "screenDeviceControl": "Gerätesteuerung",
+  "@screenDeviceControl": {
+    "description": "Title of the device control screen"
+  },
+  "controlPowerOn": "Einschalten",
+  "@controlPowerOn": {
+    "description": "Button: turn inverter on"
+  },
+  "controlPowerOff": "Ausschalten",
+  "@controlPowerOff": {
+    "description": "Button: turn inverter off"
+  },
+  "controlRestartInverter": "Wechselrichter neu starten",
+  "@controlRestartInverter": {
+    "description": "Button: restart inverter"
+  },
+  "controlRestartDtu": "Gerät neu starten (DTU)",
+  "@controlRestartDtu": {
+    "description": "Button: restart DTU"
+  },
+  "controlPowerOffConfirm": "Wechselrichter-Ausgang ausschalten?",
+  "@controlPowerOffConfirm": {
+    "description": "Confirmation: turn off inverter"
+  },
+  "controlRestartDtuConfirm": "Das Gerät wird neu gestartet und die Verbindung wird getrennt. Fortfahren?",
+  "@controlRestartDtuConfirm": {
+    "description": "Confirmation: restart DTU"
+  },
+  "controlInverterTurnedOn": "Wechselrichter eingeschaltet",
+  "@controlInverterTurnedOn": {
+    "description": "Success: inverter turned on"
+  },
+  "controlInverterTurnedOff": "Wechselrichter ausgeschaltet",
+  "@controlInverterTurnedOff": {
+    "description": "Success: inverter turned off"
+  },
+  "controlDtuRestarting": "Gerät startet neu, verbinde erneut...",
+  "@controlDtuRestarting": {
+    "description": "Info: DTU restarting"
+  },
+  "controlActionRunning": "Befehl wird gesendet...",
+  "@controlActionRunning": {
+    "description": "Loading message for control action"
+  },
+  "controlNoSerial": "Keine Wechselrichter-Seriennummer verfügbar",
+  "@controlNoSerial": {
+    "description": "Error: no inverter serial for control action"
+  },
+  "menuDeviceHistory": "Verlauf",
+  "@menuDeviceHistory": {
+    "description": "Menu: historical data screen"
+  },
+  "menuSubtitleDeviceHistory": "Leistungskurve & Tagesertrag",
+  "@menuSubtitleDeviceHistory": {
+    "description": "Menu subtitle: historical data"
+  },
+  "screenDeviceHistory": "Verlauf",
+  "@screenDeviceHistory": {
+    "description": "Title of the historical data screen"
+  },
+  "historyPowerCurve": "Leistungskurve (Heute)",
+  "@historyPowerCurve": {
+    "description": "Title of the intraday power curve chart"
+  },
+  "historyDailyEnergy": "Tagesertrag Verlauf",
+  "@historyDailyEnergy": {
+    "description": "Title of the daily energy history chart"
+  },
+  "historyNoData": "Keine Daten verfügbar",
+  "@historyNoData": {
+    "description": "Shown when a historical chart has no data"
+  },
+  "historyRefreshed": "Verlauf aktualisiert",
+  "@historyRefreshed": {
+    "description": "Success message after manually refreshing history"
   }
 }

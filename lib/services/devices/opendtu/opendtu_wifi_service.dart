@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../utils/debug_log.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
@@ -63,7 +64,7 @@ class OpenDTUWifiService extends BaseDeviceService {
               // Extract ap_mac as the persistent serial number
               final apMac = networkData['ap_mac'] as String?;
               if (apMac == null || apMac.isEmpty) {
-                debugPrint('OpenDTU device found but ap_mac is missing or empty');
+                DebugLog.device('OpenDTU device found but ap_mac is missing or empty', level: LogLevel.warning);
                 return null;
               }
 
@@ -79,13 +80,13 @@ class OpenDTUWifiService extends BaseDeviceService {
                 port: port
               );
             } else {
-              debugPrint('OpenDTU network status endpoint returned ${networkResponse.statusCode}');
+              DebugLog.device('OpenDTU network status endpoint returned ${networkResponse.statusCode}', level: LogLevel.debug);
             }
           }
         }
       }
     } catch (e) {
-      debugPrint('Error detecting OpenDTU device: $e');
+      DebugLog.device('Error detecting OpenDTU device: $e', level: LogLevel.error);
     }
 
     return null;
@@ -183,9 +184,9 @@ class OpenDTUWifiService extends BaseDeviceService {
     // Fetch initial live data from HTTP endpoint before WebSocket takes over
     try {
       await fetchLiveDataStatus();
-      debugPrint('[OpenDTU] Initial live data fetched successfully');
+      DebugLog.device('[OpenDTU] Initial live data fetched successfully', level: LogLevel.debug);
     } catch (e) {
-      debugPrint('[OpenDTU] Failed to fetch initial live data: $e');
+      DebugLog.device('[OpenDTU] Failed to fetch initial live data: $e', level: LogLevel.error);
       // Don't throw - WebSocket will provide data later
     }
 
@@ -197,7 +198,7 @@ class OpenDTUWifiService extends BaseDeviceService {
         _buildHeaders(),
       ) ?? false;
     } catch(e){
-      debugPrint('OpenDTU WebSocket connection failed: $e');
+      DebugLog.device('OpenDTU WebSocket connection failed: $e', level: LogLevel.error);
     }
 
     return true;
@@ -235,7 +236,7 @@ class OpenDTUWifiService extends BaseDeviceService {
       await fetchSystemInfo();
       connectedWith += " http";
     } catch (e) {
-      debugPrint('Error fetching OpenDTU HTTP data: $e');
+      DebugLog.device('Error fetching OpenDTU HTTP data: $e', level: LogLevel.error);
     }
 
     // 3. Emit custom connection status (shows connection types)
@@ -260,7 +261,7 @@ class OpenDTUWifiService extends BaseDeviceService {
   Future<Map<String, dynamic>?> fetchSystemInfo() async {
     try {
       var data = await sendGetCommand("/api/system/status");
-      debugPrint("OpenDTU received HTTP data: $data");
+      DebugLog.device("OpenDTU received HTTP data: $data", level: LogLevel.verbose);
 
       if (data == null) {
         throw Exception("System info from OpenDTU null when fetching");
@@ -269,7 +270,7 @@ class OpenDTUWifiService extends BaseDeviceService {
       device.emitDeviceInfo(data);
       return data;
     } catch (e) {
-      debugPrint('Error fetching system info: $e');
+      DebugLog.device('Error fetching system info: $e', level: LogLevel.error);
       rethrow;
     }
   }
@@ -281,7 +282,7 @@ class OpenDTUWifiService extends BaseDeviceService {
   Future<Map<String, dynamic>> fetchNetworkStatus() async {
     try {
       var data = await sendGetCommand("/api/network/status");
-      debugPrint("OpenDTU received network status: $data");
+      DebugLog.device("OpenDTU received network status: $data", level: LogLevel.verbose);
 
       if (data == null) {
         throw Exception("Network status from OpenDTU null when fetching");
@@ -295,7 +296,7 @@ class OpenDTUWifiService extends BaseDeviceService {
 
       return data;
     } catch (e) {
-      debugPrint('Error fetching network status: $e');
+      DebugLog.device('Error fetching network status: $e', level: LogLevel.error);
       rethrow;
     }
   }
@@ -313,7 +314,7 @@ class OpenDTUWifiService extends BaseDeviceService {
 
       if (response.statusCode == 200) {
         final rawData = jsonDecode(response.body) as Map<String, dynamic>;
-        debugPrint('OpenDTU received initial live data: $rawData');
+        DebugLog.device('OpenDTU received initial live data: $rawData', level: LogLevel.verbose);
 
         // Parse using WebSocket connection's parser
         final parsedData = _websocketConnection?.parseRawLiveData(rawData);
@@ -330,7 +331,7 @@ class OpenDTUWifiService extends BaseDeviceService {
         throw Exception('HTTP ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Error fetching initial live data: $e');
+      DebugLog.device('Error fetching initial live data: $e', level: LogLevel.error);
       rethrow;
     }
   }
@@ -363,7 +364,7 @@ class OpenDTUWifiService extends BaseDeviceService {
       // Add JSON as "data" field in multipart form
       request.fields['data'] = jsonEncode(data);
 
-      debugPrint('OpenDTU: Sending command to $endpoint with data: $data');
+      DebugLog.device('OpenDTU: Sending command to $endpoint with data: $data', level: LogLevel.verbose);
 
       // Send request
       final streamedResponse = await request.send().timeout(const Duration(seconds: 5));
@@ -374,7 +375,7 @@ class OpenDTUWifiService extends BaseDeviceService {
 
         // Check for success response
         if (responseData['type'] == 'success') {
-          debugPrint('OpenDTU command to $endpoint successful');
+          DebugLog.device('OpenDTU command to $endpoint successful', level: LogLevel.debug);
           return responseData;
         } else {
           throw Exception(responseData['message'] ?? 'Unknown error');
@@ -385,7 +386,7 @@ class OpenDTUWifiService extends BaseDeviceService {
         throw Exception('Command failed: HTTP ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Error sending OpenDTU command to $endpoint: $e');
+      DebugLog.device('Error sending OpenDTU command to $endpoint: $e', level: LogLevel.error);
       rethrow;
     }
   }
@@ -407,7 +408,7 @@ class OpenDTUWifiService extends BaseDeviceService {
           throw ApiException(404,"Endpoint ${getBaseUri()}$endpoint");
         }
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        debugPrint('OpenDTU GET $endpoint successful: $data');
+        DebugLog.device('OpenDTU GET $endpoint successful: $data', level: LogLevel.debug);
         return data;
       } else if (response.statusCode == 401) {
         throw Exception('Authentication required or invalid');
@@ -415,7 +416,7 @@ class OpenDTUWifiService extends BaseDeviceService {
         throw Exception('GET request failed: HTTP ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Error sending OpenDTU GET to $endpoint: $e');
+      DebugLog.device('Error sending OpenDTU GET to $endpoint: $e', level: LogLevel.error);
       rethrow;
     }
   }
@@ -432,7 +433,7 @@ class OpenDTUWifiService extends BaseDeviceService {
       // and throws on errors, so if we get here it succeeded
       return response != null;
     } catch (e) {
-      debugPrint('OpenDTU restart failed: $e');
+      DebugLog.device('OpenDTU restart failed: $e', level: LogLevel.error);
       rethrow;
     }
   }

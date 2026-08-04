@@ -3495,4 +3495,68 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get autoScriptUpdateDescription =>
       'Offizielle Templates beim App-Start automatisch aktualisieren';
+
+  @override
+  String get menuDeviceControl => 'Steuerung';
+
+  @override
+  String get menuSubtitleDeviceControl => 'Neustart, Ein/Aus';
+
+  @override
+  String get screenDeviceControl => 'Gerätesteuerung';
+
+  @override
+  String get controlPowerOn => 'Einschalten';
+
+  @override
+  String get controlPowerOff => 'Ausschalten';
+
+  @override
+  String get controlRestartInverter => 'Wechselrichter neu starten';
+
+  @override
+  String get controlRestartDtu => 'Gerät neu starten (DTU)';
+
+  @override
+  String get controlPowerOffConfirm => 'Wechselrichter-Ausgang ausschalten?';
+
+  @override
+  String get controlRestartDtuConfirm =>
+      'Das Gerät wird neu gestartet und die Verbindung wird getrennt. Fortfahren?';
+
+  @override
+  String get controlInverterTurnedOn => 'Wechselrichter eingeschaltet';
+
+  @override
+  String get controlInverterTurnedOff => 'Wechselrichter ausgeschaltet';
+
+  @override
+  String get controlDtuRestarting => 'Gerät startet neu, verbinde erneut...';
+
+  @override
+  String get controlActionRunning => 'Befehl wird gesendet...';
+
+  @override
+  String get controlNoSerial => 'Keine Wechselrichter-Seriennummer verfügbar';
+
+  @override
+  String get menuDeviceHistory => 'Verlauf';
+
+  @override
+  String get menuSubtitleDeviceHistory => 'Leistungskurve & Tagesertrag';
+
+  @override
+  String get screenDeviceHistory => 'Verlauf';
+
+  @override
+  String get historyPowerCurve => 'Leistungskurve (Heute)';
+
+  @override
+  String get historyDailyEnergy => 'Tagesertrag Verlauf';
+
+  @override
+  String get historyNoData => 'Keine Daten verfügbar';
+
+  @override
+  String get historyRefreshed => 'Verlauf aktualisiert';
 }

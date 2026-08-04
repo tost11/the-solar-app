@@ -15,6 +15,11 @@ class AuthenticationScreen extends BaseCommandScreen {
   final bool currentEnabled;
   final bool usernameEditable;
 
+  /// Whether to show the enable/disable toggle. When false, authentication is
+  /// always treated as enabled (used for devices where the credential cannot be
+  /// disabled, e.g. Hoymiles BLE PIN).
+  final bool showEnableToggle;
+
   const AuthenticationScreen({
     super.key,
     required super.device,
@@ -23,6 +28,7 @@ class AuthenticationScreen extends BaseCommandScreen {
     this.currentPassword,
     this.currentEnabled = false,
     this.usernameEditable = true,
+    this.showEnableToggle = true,
   });
 
   @override
@@ -41,7 +47,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     super.initState();
     _usernameController = TextEditingController(text: widget.currentUsername ?? 'admin');
     _passwordController = TextEditingController(text: widget.currentPassword ?? '');
-    _enabled = widget.currentEnabled;
+    _enabled = widget.showEnableToggle ? widget.currentEnabled : true;
   }
 
   @override
@@ -196,53 +202,55 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
             const SizedBox(height: 16),
 
             // Enable/Disable Toggle Card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _enabled ? Icons.lock : Icons.lock_open,
-                          color: _enabled ? Colors.green : Colors.grey,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            context.l10n.helpAuthToggle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+            if (widget.showEnableToggle) ...[
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            _enabled ? Icons.lock : Icons.lock_open,
+                            color: _enabled ? Colors.green : Colors.grey,
                           ),
-                        ),
-                        Switch(
-                          value: _enabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _enabled = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.helpAuthToggle,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              context.l10n.helpAuthToggle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ),
+                          Switch(
+                            value: _enabled,
+                            onChanged: (value) {
+                              setState(() {
+                                _enabled = value;
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(
+                        context.l10n.helpAuthToggle,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
             // Username and Password Fields (only shown when enabled)
             if (_enabled) ...[

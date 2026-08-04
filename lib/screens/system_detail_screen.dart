@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../utils/debug_log.dart';
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/device_base.dart';
 import 'package:the_solar_app/models/system.dart';
@@ -126,7 +127,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
       try {
         device.getServiceConnection()?.dispose();
       } catch (e) {
-        debugPrint('Error disconnecting device ${device.name}: $e');
+        DebugLog.ui('Error disconnecting device ${device.name}: $e', level: LogLevel.error);
       }
     }
   }

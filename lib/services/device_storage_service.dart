@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../utils/debug_log.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/device.dart';
@@ -37,17 +38,17 @@ class DeviceStorageService {
   /// and builds the device registry Map for fast lookups.
   Future<void> initialize() async {
     if (_isInitialized) {
-      debugPrint('[DeviceStorage] Already initialized, skipping reload');
+      DebugLog.storage('[DeviceStorage] Already initialized, skipping reload', level: LogLevel.debug);
       return;
     }
 
-    debugPrint('[DeviceStorage] Initializing device registry from storage...');
+    DebugLog.storage('[DeviceStorage] Initializing device registry from storage...', level: LogLevel.debug);
 
     final prefs = await SharedPreferences.getInstance();
     final String? devicesJson = prefs.getString(_devicesKey);
 
     if (devicesJson == null) {
-      debugPrint('[DeviceStorage] No devices in storage, starting with empty registry');
+      DebugLog.storage('[DeviceStorage] No devices in storage, starting with empty registry', level: LogLevel.debug);
       _isInitialized = true;
       return;
     }
@@ -64,7 +65,7 @@ class DeviceStorageService {
             devices.add(dev);
           }
         } catch (e) {
-          debugPrint('[DeviceStorage] Error loading device: $e');
+          DebugLog.storage('[DeviceStorage] Error loading device: $e', level: LogLevel.error);
           // Continue with next device
         }
       }
@@ -75,10 +76,10 @@ class DeviceStorageService {
         _deviceRegistry[device.id] = device;
       }
 
-      debugPrint('[DeviceStorage] Loaded ${_deviceRegistry.length} devices into registry');
+      DebugLog.storage('[DeviceStorage] Loaded ${_deviceRegistry.length} devices into registry', level: LogLevel.debug);
       _isInitialized = true;
     } catch (e) {
-      debugPrint('[DeviceStorage] Error initializing registry: $e');
+      DebugLog.storage('[DeviceStorage] Error initializing registry: $e', level: LogLevel.error);
       _deviceRegistry.clear();
       _isInitialized = true;
     }
@@ -92,7 +93,7 @@ class DeviceStorageService {
   /// IMPORTANT: Must call initialize() first on app startup!
   List<DeviceBase> getKnownDevices() {
     if (!_isInitialized) {
-      debugPrint('[DeviceStorage] WARNING: getKnownDevices() called before initialize()!');
+      DebugLog.storage('[DeviceStorage] WARNING: getKnownDevices() called before initialize()!', level: LogLevel.warning);
       return [];
     }
     return _deviceRegistry.values.toList();
@@ -116,7 +117,7 @@ class DeviceStorageService {
   /// This ensures both RAM and storage are kept in sync.
   Future<void> saveDevice(DeviceBase device) async {
     if (!_isInitialized) {
-      debugPrint('[DeviceStorage] WARNING: saveDevice() called before initialize()!');
+      DebugLog.storage('[DeviceStorage] WARNING: saveDevice() called before initialize()!', level: LogLevel.warning);
       return;
     }
 
@@ -128,12 +129,12 @@ class DeviceStorageService {
 
       // Only dispose if it's a DIFFERENT instance (not same object reference)
       if (!identical(existingDevice, device)) {
-        debugPrint('[DeviceStorage] Replacing device instance, disposing old one: ${existingDevice.name}');
+        DebugLog.storage('[DeviceStorage] Replacing device instance, disposing old one: ${existingDevice.name}', level: LogLevel.debug);
         try {
           await existingDevice.dispose();
-          debugPrint('[DeviceStorage] Old device instance disposed successfully');
+          DebugLog.storage('[DeviceStorage] Old device instance disposed successfully', level: LogLevel.debug);
         } catch (e) {
-          debugPrint('[DeviceStorage] Error disposing replaced device: $e');
+          DebugLog.storage('[DeviceStorage] Error disposing replaced device: $e', level: LogLevel.error);
           // Continue with replacement even if dispose fails
         }
       }
@@ -142,7 +143,7 @@ class DeviceStorageService {
     // Update in-memory registry
     _deviceRegistry[device.id] = device;
 
-    debugPrint('[DeviceStorage] ${isNew ? "Added new" : "Updated"} device: ${device.name} (ID: ${device.id})');
+    DebugLog.storage('[DeviceStorage] ${isNew ? "Added new" : "Updated"} device: ${device.name} (ID: ${device.id})', level: LogLevel.debug);
 
     // Persist entire registry to storage
     await _persistToStorage();
@@ -157,25 +158,25 @@ class DeviceStorageService {
   /// This prevents memory leaks from orphaned service connections.
   Future<void> removeDevice(String deviceId) async {
     if (!_isInitialized) {
-      debugPrint('[DeviceStorage] WARNING: removeDevice() called before initialize()!');
+      DebugLog.storage('[DeviceStorage] WARNING: removeDevice() called before initialize()!', level: LogLevel.warning);
       return;
     }
 
     // Direct O(1) lookup by device ID
     final device = _deviceRegistry[deviceId];
     if (device == null) {
-      debugPrint('[DeviceStorage] Device not found for removal: $deviceId');
+      DebugLog.storage('[DeviceStorage] Device not found for removal: $deviceId', level: LogLevel.warning);
       return;
     }
 
-    debugPrint('[DeviceStorage] Removing device: ${device.name} (ID: $deviceId)');
+    DebugLog.storage('[DeviceStorage] Removing device: ${device.name} (ID: $deviceId)', level: LogLevel.debug);
 
     // Cleanup device resources (service connections, streams)
     try {
       await device.dispose();
-      debugPrint('[DeviceStorage] Device disposed successfully');
+      DebugLog.storage('[DeviceStorage] Device disposed successfully', level: LogLevel.debug);
     } catch (e) {
-      debugPrint('[DeviceStorage] Error disposing device: $e');
+      DebugLog.storage('[DeviceStorage] Error disposing device: $e', level: LogLevel.error);
       // Continue with removal even if dispose fails
     }
 
@@ -194,9 +195,9 @@ class DeviceStorageService {
         _deviceRegistry.values.map((d) => d.toJson()).toList(),
       );
       await prefs.setString(_devicesKey, devicesJson);
-      debugPrint('[DeviceStorage] Persisted ${_deviceRegistry.length} devices to storage');
+      DebugLog.storage('[DeviceStorage] Persisted ${_deviceRegistry.length} devices to storage', level: LogLevel.debug);
     } catch (e) {
-      debugPrint('[DeviceStorage] Error persisting to storage: $e');
+      DebugLog.storage('[DeviceStorage] Error persisting to storage: $e', level: LogLevel.error);
       // Don't throw - registry is still valid in memory
     }
   }
@@ -208,12 +209,12 @@ class DeviceStorageService {
       try {
         await device.dispose();
       } catch (e) {
-        debugPrint('[DeviceStorage] Error disposing device during clearAll: $e');
+        DebugLog.storage('[DeviceStorage] Error disposing device during clearAll: $e', level: LogLevel.error);
       }
     }
 
     _deviceRegistry.clear();
     await _persistToStorage();
-    debugPrint('[DeviceStorage] Cleared all devices from registry and storage');
+    DebugLog.storage('[DeviceStorage] Cleared all devices from registry and storage', level: LogLevel.debug);
   }
 }

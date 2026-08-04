@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../utils/debug_log.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/device.dart';
@@ -247,7 +248,7 @@ class _DeviceListScreenState extends State<DeviceListScreen>
         }
       } catch (e) {
         // Log error and show user-friendly message
-        debugPrint('Error during device deletion: $e');
+        DebugLog.ui('Error during device deletion: $e', level: LogLevel.error);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

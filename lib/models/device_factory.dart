@@ -11,6 +11,7 @@ import 'devices/manufacturers/opendtu/wifi_opendtu_device.dart';
 import 'devices/manufacturers/hoymiles/hoymiles_device.dart';
 import 'devices/manufacturers/hoymiles/hoymiles_inverter_device.dart';
 import 'devices/manufacturers/hoymiles/hoymiles_dtu_device.dart';
+import 'devices/manufacturers/hoymiles/hoymiles_bluetooth_device.dart';
 import 'devices/manufacturers/kostal/wifi_kostal_device.dart';
 
 /// Factory class for creating device instances
@@ -31,6 +32,8 @@ class DeviceFactory {
         } else if(deviceType == DEVICE_MANUFACTURER_SHELLY) {
           // All Shelly devices use the generic implementation with dynamic module detection
           return ShellyBluetoothDevice.fromJson(json);
+        } else if(deviceType == DEVICE_MANUFACTURER_HOYMILES) {
+          return HoymilesBluetoothDevice.fromJson(json);
         }else{
           return null;
         }
@@ -85,8 +88,38 @@ class DeviceFactory {
         deviceSn: deviceSn,
         deviceModel: deviceModel
       );
+    }else if(deviceType == DEVICE_MANUFACTURER_HOYMILES){
+      return HoymilesBluetoothDevice(
+        id: id,
+        name: name,
+        lastSeen: DateTime.now(),
+        deviceSn: deviceSn,
+        inverterSerial: deviceSn, // Fallback: use deviceSn as serial if not provided separately
+        deviceModel: deviceModel,
+      );
     }
     throw Exception("could not create bluetooth device $deviceType doese not exist");
+  }
+
+  /// Create a Hoymiles BLE device
+  ///
+  /// Requires both the MAC address (deviceSn, for reconnection scanning)
+  /// and the inverter serial (from BLE name "RMI-{serial}", for V0 encryption).
+  static HoymilesBluetoothDevice createHoymilesBluetoothDevice({
+    required String id,
+    required String name,
+    required String deviceSn,
+    required String inverterSerial,
+    String? deviceModel,
+  }) {
+    return HoymilesBluetoothDevice(
+      id: id,
+      name: name,
+      lastSeen: DateTime.now(),
+      deviceSn: deviceSn,
+      inverterSerial: inverterSerial,
+      deviceModel: deviceModel,
+    );
   }
 
   /// Create a Hoymiles device (WiFi only)

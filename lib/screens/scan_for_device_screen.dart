@@ -1,7 +1,8 @@
 import 'dart:async';
+import '../utils/debug_log.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:lan_scanner/lan_scanner.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
@@ -11,6 +12,8 @@ import '../constants/bluetooth_constants.dart';
 import '../services/device_storage_service.dart';
 import '../services/network_scan_service.dart';
 import '../services/bluetooth_scan_service.dart';
+import '../services/devices/hoymiles/hoymiles_wifi_service.dart';
+import '../models/devices/manufacturers/hoymiles/hoymiles_bluetooth_device.dart';
 import '../models/device.dart';
 import '../models/device_factory.dart';
 import '../models/network_device.dart';
@@ -127,7 +130,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     await _bluetoothScanService.stopScan();
   }
 
-  Future<DeviceBase> _connectToBluetoothDevice(BluetoothDevice device, String type) async {
+  Future<DeviceBase> _connectToBluetoothDevice(BluetoothDevice device, String type, {String? pin}) async {
     String id = device.remoteId.toString() + "_ble";
 
     try {
@@ -140,37 +143,70 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
         existingDevice = null;
       }
 
-      // If device already exists, return it (keep existing name, don't overwrite)
+      // If device already exists, update PIN if provided and return it
       if (existingDevice != null) {
-        debugPrint("Device already known, using existing: ${existingDevice.name}");
+        DebugLog.ui("Device already known, using existing: ${existingDevice.name}", level: LogLevel.debug);
+        if (pin != null && existingDevice is HoymilesBluetoothDevice) {
+          existingDevice.authPassword = pin;
+          await _storageService.saveDevice(existingDevice);
+        }
         return existingDevice;
       }
 
       // New device: use advertised name as temporary name with correct manufacturer
-      String advertisedName = device.advName;
+      String advertisedName = device.advName.isNotEmpty ? device.advName : device.platformName;
       String manufacturerDisplayName = _getManufacturerDisplayName(type);
       String deviceName = advertisedName.isNotEmpty
           ? "$manufacturerDisplayName $advertisedName"
           : "$manufacturerDisplayName Device";
 
-      // Create device with temporary name
-      // Model will be updated later when device info is fetched
-      final knownDevice = DeviceFactory.createBluetoothDevice(
-        id: id,
-        name: deviceName,
-        deviceSn: device.remoteId.toString(),
-        deviceModel: null,  // Will be updated after connection
-        manufacturer: type,
-        bluetoothDevice: device
-      );
+      // Create device - Hoymiles BLE needs special handling for inverterSerial
+      DeviceBase knownDevice;
+      if (type == DEVICE_MANUFACTURER_HOYMILES && advertisedName.startsWith(HOYMILES_BLE_NAME_PREFIX)) {
+        final inverterSerial = advertisedName.substring(HOYMILES_BLE_NAME_PREFIX.length);
+        final deviceModel = HoymilesWifiService.getModelFromSerial(inverterSerial);
+        knownDevice = DeviceFactory.createHoymilesBluetoothDevice(
+          id: id,
+          name: deviceName,
+          deviceSn: device.remoteId.toString(),
+          inverterSerial: inverterSerial,
+          deviceModel: deviceModel,
+        );
+        // Set user-provided PIN (or keep default from factory)
+        if (pin != null) {
+          (knownDevice as HoymilesBluetoothDevice).authPassword = pin;
+        }
+      } else {
+        knownDevice = DeviceFactory.createBluetoothDevice(
+          id: id,
+          name: deviceName,
+          deviceSn: device.remoteId.toString(),
+          deviceModel: null,
+          manufacturer: type,
+          bluetoothDevice: device,
+        );
+      }
 
       await _storageService.saveDevice(knownDevice);
-      debugPrint("New device created: $deviceName");
+      DebugLog.ui("New device created: $deviceName", level: LogLevel.debug);
       return knownDevice;
     } catch (e) {
-      debugPrint("error while creating bluetooth device with type $type: $e");
+      DebugLog.ui("Error while creating bluetooth device with type $type: $e", level: LogLevel.error);
       rethrow;
     }
+  }
+
+  /// Show PIN input dialog for Hoymiles BLE devices.
+  /// Returns the entered PIN, or null if the user cancelled.
+  Future<String?> _showHoymilesPinDialog() async {
+    return await DialogUtils.showInputDialog(
+      context,
+      title: 'Hoymiles BLE PIN',
+      label: 'PIN',
+      hintText: HOYMILES_BLE_DEFAULT_PIN,
+      initialValue: HOYMILES_BLE_DEFAULT_PIN,
+      keyboardType: TextInputType.number,
+    );
   }
 
   /// Returns user-friendly display name for manufacturer constant
@@ -180,6 +216,8 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
         return 'Zendure';
       case DEVICE_MANUFACTURER_SHELLY:
         return 'Shelly';
+      case DEVICE_MANUFACTURER_HOYMILES:
+        return 'Hoymiles';
       default:
         return manufacturer; // Fallback to raw constant value
     }
@@ -191,7 +229,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     // Get scanning configuration from advanced options widget
     final config = _advancedOptionsKey.currentState?.getCurrentConfiguration();
     if (config == null) {
-      debugPrint('Advanced options widget not initialized yet');
+      DebugLog.ui("Advanced options widget not initialized yet", level: LogLevel.warning);
       return;
     }
 
@@ -235,7 +273,7 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
       return;
     }
 
-    debugPrint('Scanning ${subnets.length} subnet(s): ${subnets.join(", ")}');
+    DebugLog.network('Scanning ${subnets.length} subnet(s): ${subnets.join(", ")}', level: LogLevel.debug);
 
     setState(() {
       _networkDevices.clear();
@@ -1226,12 +1264,19 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                       // User canceled - return silently without error
                       if (manufacturer == null) return;
 
+                      // If Hoymiles BLE device, prompt for PIN before connecting
+                      String? hoymilesPin;
+                      if (manufacturer == DEVICE_MANUFACTURER_HOYMILES) {
+                        hoymilesPin = await _showHoymilesPinDialog();
+                        if (hoymilesPin == null) return; // user cancelled
+                      }
+
                       // Proceed with connection using selected manufacturer
                       var knownDevice = await DialogUtils.executeWithLoading(
                           context,
                           loadingMessage: context.l10n.messageConnectingToDevice,
                           operation: () async {
-                            return await _connectToBluetoothDevice(device, manufacturer);
+                            return await _connectToBluetoothDevice(device, manufacturer, pin: hoymilesPin);
                           },
                           showErrorDialog: true
                       );
@@ -1241,14 +1286,23 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                       }
                     } else {
                       // Normal mode - connect directly with detected manufacturer
+                      if (detectedManufacturer == null) {
+                        MessageUtils.showError(context, 'Unknown device brand');
+                        return;
+                      }
+
+                      // If Hoymiles BLE device, prompt for PIN before connecting
+                      String? hoymilesPin;
+                      if (detectedManufacturer == DEVICE_MANUFACTURER_HOYMILES) {
+                        hoymilesPin = await _showHoymilesPinDialog();
+                        if (hoymilesPin == null) return; // user cancelled
+                      }
+
                       var knownDevice = await DialogUtils.executeWithLoading(
                           context,
                           loadingMessage: context.l10n.messageConnectingToDevice,
                           operation: () async {
-                            if (detectedManufacturer == null) {
-                              throw Exception('Unknown device brand');
-                            }
-                            return await _connectToBluetoothDevice(device, detectedManufacturer);
+                            return await _connectToBluetoothDevice(device, detectedManufacturer, pin: hoymilesPin);
                           },
                           showErrorDialog: true
                       );

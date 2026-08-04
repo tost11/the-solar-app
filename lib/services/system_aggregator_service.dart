@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/debug_log.dart';
 import 'package:the_solar_app/models/devices/capabilities/battery_capability.dart';
 import 'package:the_solar_app/models/devices/capabilities/device_role_config.dart';
 import 'package:the_solar_app/models/devices/capabilities/inverter_capability.dart';
@@ -94,7 +95,7 @@ class SystemAggregatorService {
     System system,
     List<DeviceBase> allDevices,
   ) {
-    debugPrint('=== SystemAggregator: Aggregating system "${system.name}" ===');
+    DebugLog.system('=== SystemAggregator: Aggregating system "${system.name}" ===', level: LogLevel.debug);
 
     double totalSolar = 0;
     double totalGridSolar = 0;
@@ -121,17 +122,17 @@ class SystemAggregatorService {
         );
       } catch (e) {
         // Device not found, skip
-        debugPrint('  ⚠️ Device ${deviceRef.deviceSn} not found in allDevices');
+        DebugLog.system('  Device ${deviceRef.deviceSn} not found in allDevices', level: LogLevel.warning);
         continue;
       }
 
       final data = device.data;
       if (data.isEmpty) {
-        debugPrint('  ⏭️ Device "${device.name}" (${device.deviceSn}): No data available');
+        DebugLog.system('  Device "${device.name}" (${device.deviceSn}): No data available', level: LogLevel.warning);
         continue;
       }
 
-      debugPrint('  📱 Processing device "${device.name}" (${device.deviceSn}) with roles: ${deviceRef.rolesInSystem.map((r) => r.name).join(", ")}');
+      DebugLog.system('  Processing device "${device.name}" (${device.deviceSn}) with roles: ${deviceRef.rolesInSystem.map((r) => r.name).join(", ")}', level: LogLevel.debug);
 
       bool deviceHasData = false;
 
@@ -144,25 +145,25 @@ class SystemAggregatorService {
               final inverterDevice = device as InverterCapability;
               final power = inverterDevice.getSolarPVPower(data);
               if (power != null) {
-                debugPrint('    ☀️ [inverter] Contributing ${power}W to solar production (total: ${totalSolar + power}W)');
+                DebugLog.system('    [inverter] Contributing ${power}W to solar production (total: ${totalSolar + power}W)', level: LogLevel.debug);
                 totalSolar += power;
                 deviceHasData = true;
                 hasSolarData = true;
               } else {
-                debugPrint('    ⚠️ [inverter] No power data available');
+                DebugLog.system('    [inverter] No power data available', level: LogLevel.warning);
               }
               final powerGrid = inverterDevice.getSolarGridPower(data);
               if (powerGrid != null) {
-                debugPrint('    ☀️ [inverter] Contributing ${powerGrid}W to solar grid production (total: ${totalSolar + powerGrid}W)');
+                DebugLog.system('    [inverter] Contributing ${powerGrid}W to solar grid production (total: ${totalSolar + powerGrid}W)', level: LogLevel.debug);
                 totalGridSolar += powerGrid;
                 totalLoad += powerGrid;
                 deviceHasData = true;
                 hasSolarGridData = true;
               } else {
-                debugPrint('    ⚠️ [inverter] No power grid data available');
+                DebugLog.system('    [inverter] No power grid data available', level: LogLevel.warning);
               }
             } else {
-              debugPrint('    ❌ [inverter] Device does not implement InverterCapability');
+              DebugLog.system('    [inverter] Device does not implement InverterCapability', level: LogLevel.warning);
             }
             break;
 
@@ -173,23 +174,23 @@ class SystemAggregatorService {
               final soc = batteryDevice.getBatterySOC(data);
 
               if (power != null) {
-                debugPrint('    🔋 [battery] Contributing ${power}W to battery power (total: ${totalBattery + power}W)');
+                DebugLog.system('    [battery] Contributing ${power}W to battery power (total: ${totalBattery + power}W)', level: LogLevel.debug);
                 totalBattery += power;
                 deviceHasData = true;
                 hasBatteryPowerData = true;
               }
 
               if (soc != null) {
-                debugPrint('    🔋 [battery] Battery SOC: ${soc}%');
+                DebugLog.system('    [battery] Battery SOC: ${soc}%', level: LogLevel.debug);
                 batterySocs.add(soc);
                 deviceHasData = true;
               }
 
               if (power == null && soc == null) {
-                debugPrint('    ⚠️ [battery] No power or SOC data available');
+                DebugLog.system('    [battery] No power or SOC data available', level: LogLevel.warning);
               }
             } else {
-              debugPrint('    ❌ [battery] Device does not implement BatteryCapability');
+              DebugLog.system('    [battery] Device does not implement BatteryCapability', level: LogLevel.warning);
             }
             break;
 
@@ -199,16 +200,16 @@ class SystemAggregatorService {
               final power = smartMeterDevice.getGridPower(data);
               if (power != null) {
                 final direction = power < 0 ? 'exporting' : 'importing';
-                debugPrint('    ⚡ [smartMeter] Contributing ${power}W to grid power ($direction) (total: ${totalGrid + power}W)');
+                DebugLog.system('    [smartMeter] Contributing ${power}W to grid power ($direction) (total: ${totalGrid + power}W)', level: LogLevel.debug);
                 totalGrid += power;
                 hasLoadData = true;
                 deviceHasData = true;
                 hasGridData = true;
               } else {
-                debugPrint('    ⚠️ [smartMeter] No grid power data available');
+                DebugLog.system('    [smartMeter] No grid power data available', level: LogLevel.warning);
               }
             } else {
-              debugPrint('    ❌ [smartMeter] Device does not implement SmartMeterCapability');
+              DebugLog.system('    [smartMeter] Device does not implement SmartMeterCapability', level: LogLevel.warning);
             }
             break;
 
@@ -217,15 +218,15 @@ class SystemAggregatorService {
               final loadDevice = device as LoadCapability;
               final power = loadDevice.getLoadPower(data);
               if (power != null) {
-                debugPrint('    🔌 [load] Contributing ${power}W to load power (total: ${totalLoad + power}W)');
+                DebugLog.system('    [load] Contributing ${power}W to load power (total: ${totalLoad + power}W)', level: LogLevel.debug);
                 totalAdditionalLoad += power;
                 deviceHasData = true;
                 hasAdditionalLoad = true;
               } else {
-                debugPrint('    ⚠️ [load] No load power data available');
+                DebugLog.system('    [load] No load power data available', level: LogLevel.warning);
               }
             } else {
-              debugPrint('    ❌ [load] Device does not implement LoadCapability');
+              DebugLog.system('    [load] Device does not implement LoadCapability', level: LogLevel.warning);
             }
             break;
         }
@@ -239,15 +240,15 @@ class SystemAggregatorService {
         ? batterySocs.reduce((a, b) => a + b) / batterySocs.length
         : null;
 
-    debugPrint('=== Summary ===');
-    debugPrint('  Solar: ${hasSolarData ? "${totalSolar}W" : "no data"}');
-    debugPrint('  SolarGrid: ${hasSolarGridData ? "${totalGridSolar}W" : "no data"}');
-    debugPrint('  Battery: ${hasBatteryPowerData ? "${totalBattery}W" : "no data"}${avgSoc != null ? " (avg SOC: ${avgSoc.toStringAsFixed(1)}%)" : ""}');
-    debugPrint('  Grid: ${hasGridData ? "${totalGrid}W" : "no data"}');
-    debugPrint('  Load: ${hasLoadData ? "${totalLoad}W" : "no data"}');
-    debugPrint('  Additional Load: ${hasAdditionalLoad ? "${totalAdditionalLoad}W" : "no data"}');
-    debugPrint('  Active devices: $activeDevices / ${system.deviceReferences.length}');
-    debugPrint('===============');
+    DebugLog.system('=== Summary ===', level: LogLevel.debug);
+    DebugLog.system("  Solar: ${hasSolarData ? "${totalSolar}W" : "no data"}", level: LogLevel.debug);
+    DebugLog.system("  SolarGrid: ${hasSolarGridData ? "${totalGridSolar}W" : "no data"}", level: LogLevel.debug);
+    DebugLog.system("  Battery: ${hasBatteryPowerData ? "${totalBattery}W" : "no data"}${avgSoc != null ? " (avg SOC: ${avgSoc.toStringAsFixed(1)}%)" : ""}", level: LogLevel.debug);
+    DebugLog.system("  Grid: ${hasGridData ? "${totalGrid}W" : "no data"}", level: LogLevel.debug);
+    DebugLog.system("  Load: ${hasLoadData ? "${totalLoad}W" : "no data"}", level: LogLevel.debug);
+    DebugLog.system("  Additional Load: ${hasAdditionalLoad ? "${totalAdditionalLoad}W" : "no data"}", level: LogLevel.debug);
+    DebugLog.system("  Active devices: $activeDevices / ${system.deviceReferences.length}", level: LogLevel.debug);
+    DebugLog.system('===============', level: LogLevel.debug);
 
     return SystemMetrics(
       totalSolarPower: hasSolarData ? totalSolar : null,

@@ -3969,5 +3969,89 @@
   "autoScriptUpdateDescription": "Automatically update official templates on app startup",
   "@autoScriptUpdateDescription": {
     "description": "Description for automatic script template update toggle"
+  },
+  "menuDeviceControl": "Control",
+  "@menuDeviceControl": {
+    "description": "Menu: Device control screen"
+  },
+  "menuSubtitleDeviceControl": "Restart, power on/off",
+  "@menuSubtitleDeviceControl": {
+    "description": "Menu subtitle: Device control"
+  },
+  "screenDeviceControl": "Device Control",
+  "@screenDeviceControl": {
+    "description": "Title of the device control screen"
+  },
+  "controlPowerOn": "Power On",
+  "@controlPowerOn": {
+    "description": "Button: turn inverter on"
+  },
+  "controlPowerOff": "Power Off",
+  "@controlPowerOff": {
+    "description": "Button: turn inverter off"
+  },
+  "controlRestartInverter": "Restart Inverter",
+  "@controlRestartInverter": {
+    "description": "Button: restart inverter"
+  },
+  "controlRestartDtu": "Restart Device (DTU)",
+  "@controlRestartDtu": {
+    "description": "Button: restart DTU"
+  },
+  "controlPowerOffConfirm": "Turn off inverter output?",
+  "@controlPowerOffConfirm": {
+    "description": "Confirmation: turn off inverter"
+  },
+  "controlRestartDtuConfirm": "The device will restart and the connection will drop. Continue?",
+  "@controlRestartDtuConfirm": {
+    "description": "Confirmation: restart DTU"
+  },
+  "controlInverterTurnedOn": "Inverter turned on",
+  "@controlInverterTurnedOn": {
+    "description": "Success: inverter turned on"
+  },
+  "controlInverterTurnedOff": "Inverter turned off",
+  "@controlInverterTurnedOff": {
+    "description": "Success: inverter turned off"
+  },
+  "controlDtuRestarting": "Device is restarting, reconnecting...",
+  "@controlDtuRestarting": {
+    "description": "Info: DTU restarting"
+  },
+  "controlActionRunning": "Sending command...",
+  "@controlActionRunning": {
+    "description": "Loading message for control action"
+  },
+  "controlNoSerial": "No inverter serial available",
+  "@controlNoSerial": {
+    "description": "Error: no inverter serial for control action"
+  },
+  "menuDeviceHistory": "History",
+  "@menuDeviceHistory": {
+    "description": "Menu: historical data screen"
+  },
+  "menuSubtitleDeviceHistory": "Power curve & daily energy",
+  "@menuSubtitleDeviceHistory": {
+    "description": "Menu subtitle: historical data"
+  },
+  "screenDeviceHistory": "History",
+  "@screenDeviceHistory": {
+    "description": "Title of the historical data screen"
+  },
+  "historyPowerCurve": "Power Curve (Today)",
+  "@historyPowerCurve": {
+    "description": "Title of the intraday power curve chart"
+  },
+  "historyDailyEnergy": "Daily Energy History",
+  "@historyDailyEnergy": {
+    "description": "Title of the daily energy history chart"
+  },
+  "historyNoData": "No data available",
+  "@historyNoData": {
+    "description": "Shown when a historical chart has no data"
+  },
+  "historyRefreshed": "History updated",
+  "@historyRefreshed": {
+    "description": "Success message after manually refreshing history"
   }
 }

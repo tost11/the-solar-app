@@ -8,6 +8,7 @@ import 'package:the_solar_app/models/device.dart';
 import 'package:the_solar_app/models/network_device.dart';
 import 'package:the_solar_app/models/additional_connection_info.dart';
 import 'package:the_solar_app/services/devices/base_device_service.dart';
+import 'package:the_solar_app/utils/debug_log.dart';
 
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/hoymiles_device.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/RealDataNew.pb.dart';
@@ -15,7 +16,9 @@ import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/Get
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/SetConfig.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/NetworkInfo.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/CommandPB.pb.dart';
+import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/AppGetHistPower.pb.dart';
 import '../../../models/devices/manufacturers/kostal/wifi_kostal_device.dart';
+import 'hoymiles_command_helper.dart';
 import 'hoymiles_protocol.dart';
 import 'hoymiles_tcp_connection.dart';
 
@@ -95,7 +98,7 @@ class HoymilesWifiService extends BaseDeviceService {
       final dtuKey = (serialBytes[0] << 8) | serialBytes[1];
       return _dtuTypeMapping[dtuKey];
     } catch (e) {
-      debugPrint('[Hoymiles] Error detecting DTU type: $e');
+      DebugLog.device('[Hoymiles] Error detecting DTU type: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -191,7 +194,7 @@ class HoymilesWifiService extends BaseDeviceService {
       // Construct model name: SERIES-POWER-TYPE
       return "$series-$power-$type";
     } catch (e) {
-      debugPrint('[Hoymiles] Error parsing serial number: $e');
+      DebugLog.device('[Hoymiles] Error parsing serial number: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -228,7 +231,7 @@ class HoymilesWifiService extends BaseDeviceService {
   ) async {
     port ??= HoymilesProtocol.DTU_PORT;
     try {
-      debugPrint('[Hoymiles] Probing $ipAddress:${HoymilesProtocol.DTU_PORT}');
+      DebugLog.device('[Hoymiles] Probing $ipAddress:${HoymilesProtocol.DTU_PORT}', level: LogLevel.debug);
 
       // Attempt to connect to Hoymiles port
       final socket = await Socket.connect(
@@ -258,18 +261,18 @@ class HoymilesWifiService extends BaseDeviceService {
       await socket.close();
 
       if (response.isEmpty) {
-        debugPrint('[Hoymiles] No response from $ipAddress');
+        DebugLog.device('[Hoymiles] No response from $ipAddress', level: LogLevel.error);
         return null;
       }
 
       // Parse response
       final parsed = protocol.parseResponse(response);
       if (parsed == null) {
-        debugPrint('[Hoymiles] Invalid response from $ipAddress');
+        DebugLog.device('[Hoymiles] Invalid response from $ipAddress', level: LogLevel.error);
         return null;
       }
 
-      debugPrint('[Hoymiles] Found Hoymiles device at $ipAddress');
+      DebugLog.device('[Hoymiles] Found Hoymiles device at $ipAddress', level: LogLevel.debug);
 
       // Try to determine device model by fetching real data
       String deviceModel = 'Unknown';
@@ -322,9 +325,6 @@ class HoymilesWifiService extends BaseDeviceService {
         }
         serialNumber = realData.deviceSerialNumber;
 
-        debugPrint(realData.toString());
-        debugPrint("serial to use: $serialNumber");
-
         // Check if DTU type
         final dtuType = getDtuType(serialNumber);
         if (dtuType != null) {
@@ -361,7 +361,7 @@ class HoymilesWifiService extends BaseDeviceService {
           }
         }
       } catch (e) {
-        debugPrint('[Hoymiles] Could not fetch detailed info: $e');
+        DebugLog.device('[Hoymiles] Could not fetch detailed info: $e', level: LogLevel.warning);
       }
 
       return NetworkDevice(
@@ -372,7 +372,7 @@ class HoymilesWifiService extends BaseDeviceService {
         port: HoymilesProtocol.DTU_PORT
       );
     } catch (e) {
-      debugPrint('[Hoymiles] Error probing $ipAddress: $e');
+      DebugLog.device('[Hoymiles] Error probing $ipAddress: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -435,22 +435,22 @@ class HoymilesWifiService extends BaseDeviceService {
         }
 
         // Log null response
-        debugPrint('[Hoymiles] Attempt $attempt/$maxRetries: No data received');
+        DebugLog.device('[Hoymiles] Attempt $attempt/$maxRetries: No data received', level: LogLevel.verbose);
 
       } catch (e) {
-        debugPrint('[Hoymiles] Attempt $attempt/$maxRetries: Error fetching data: $e');
+        DebugLog.device('[Hoymiles] Attempt $attempt/$maxRetries: Error fetching data: $e', level: LogLevel.verbose);
       }
     }
 
     // All retries failed - throw exception (base class will handle error)
-    debugPrint('[Hoymiles] All $maxRetries fetch attempts failed');
+    DebugLog.device('[Hoymiles] All $maxRetries fetch attempts failed', level: LogLevel.error);
     throw Exception('Failed to fetch data after $maxRetries attempts');
   }
 
   /// Get real-time data from device (RealDataNew command)
   Future<Map<String, dynamic>?> getRealDataNew() async {
     if (_connection == null || !_connection!.isConnected) {
-      debugPrint('[Hoymiles] Not connected');
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
       return null;
     }
 
@@ -471,13 +471,13 @@ class HoymilesWifiService extends BaseDeviceService {
       );
 
       if (parsed == null) {
-        debugPrint('[Hoymiles] No response from device');
+        DebugLog.device('[Hoymiles] No response from device', level: LogLevel.error);
         return null;
       }
 
       final response = RealDataNewReqDTO.fromBuffer(parsed['data'] as List<int>);
 
-      debugPrint("Received: ${response.toString()}");
+      DebugLog.device('Received real data from Hoymiles device', level: LogLevel.verbose);
 
       // Convert protobuf response to Map for easier access in UI
       final result = <String, dynamic>{
@@ -598,10 +598,10 @@ class HoymilesWifiService extends BaseDeviceService {
         deviceModel = getModelFromSerial(response.deviceSerialNumber);
       }
 
-      debugPrint('[Hoymiles] Fetched real data: ${result.toString()}');
+      DebugLog.device('[Hoymiles] Fetched real data: ${result.toString()}', level: LogLevel.verbose);
       return result;
     } catch (e) {
-      debugPrint('[Hoymiles] Error in getRealDataNew: $e');
+      DebugLog.device('[Hoymiles] Error in getRealDataNew: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -609,7 +609,7 @@ class HoymilesWifiService extends BaseDeviceService {
   /// Get device configuration
   Future<Map<String, dynamic>?> getConfig() async {
     if (_connection == null || !_connection!.isConnected) {
-      debugPrint('[Hoymiles] Not connected');
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
       throw Exception("Gerät nicht verbunden");
     }
 
@@ -623,7 +623,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (parsed == null) {
-      debugPrint('[Hoymiles] No response from device');
+      DebugLog.device('[Hoymiles] No response from device', level: LogLevel.error);
       throw Exception("Kein Antwort vom Gerät");
     }
 
@@ -827,7 +827,7 @@ class HoymilesWifiService extends BaseDeviceService {
   /// Get network information
   Future<Map<String, dynamic>?> getNetworkInfo() async {
     if (_connection == null || !_connection!.isConnected) {
-      debugPrint('[Hoymiles] Not connected');
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
       throw Exception("Gerät nicht verbunden");
     }
 
@@ -841,7 +841,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (parsed == null) {
-      debugPrint('[Hoymiles] No response from device');
+      DebugLog.device('[Hoymiles] No response from device', level: LogLevel.error);
       throw Exception("Kein Antwort vom Gerät");
     }
 
@@ -855,13 +855,13 @@ class HoymilesWifiService extends BaseDeviceService {
   /// Set power limit (percentage 0-100)
   Future<void> setPowerLimit(int limitPercent) async {
     if (_connection == null || !_connection!.isConnected) {
-      debugPrint('[Hoymiles] Not connected');
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
       throw Exception("Gerät nicht verbunden");
     }
 
     // Validate input (0-100%)
     if (limitPercent < 0 || limitPercent > 100) {
-      debugPrint('[Hoymiles] Invalid limit: $limitPercent% (must be 0-100)');
+      DebugLog.device('[Hoymiles] Invalid limit: $limitPercent% (must be 0-100)', level: LogLevel.warning);
       throw Exception("Invalid limit: $limitPercent% (must be 0-100)");
     }
 
@@ -887,7 +887,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (parsed == null) {
-      debugPrint('[Hoymiles] No response from setPowerLimit');
+      DebugLog.device('[Hoymiles] No response from setPowerLimit', level: LogLevel.error);
       throw Exception("Kein Antwort vom Gerät erhalten");
     }
 
@@ -895,16 +895,119 @@ class HoymilesWifiService extends BaseDeviceService {
     final response = CommandReqDTO.fromBuffer(parsed['data'] as List<int>);
 
     if (response.errCode == 0) {
-      debugPrint('[Hoymiles] Power limit set successfully to $limitPercent%');
+      DebugLog.device('[Hoymiles] Power limit set successfully to $limitPercent%', level: LogLevel.debug);
       return;
     }
     throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errCode}");
   }
 
+  /// Send a control CommandResDTO and validate the response.
+  Future<void> _sendControlCommand(CommandResDTO request) async {
+    if (_connection == null || !_connection!.isConnected) {
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
+      throw Exception("Gerät nicht verbunden");
+    }
+
+    final parsed = await _connection!.sendRequest(
+      request,
+      HoymilesProtocol.CMD_COMMAND_RES_DTO,
+    );
+
+    if (parsed == null) {
+      DebugLog.device('[Hoymiles] No response from control command', level: LogLevel.error);
+      throw Exception("Kein Antwort vom Gerät erhalten");
+    }
+
+    HoymilesCommandHelper.validateCommandResponse(parsed['data'] as List<int>);
+  }
+
+  /// Reboot the DTU. The connection will drop during restart.
+  /// TODO: Fix - needs CMD_CLOUD_COMMAND_RES_DTO (0x23, 0x05) instead of CMD_COMMAND_RES_DTO (0xa3, 0x05)
+  Future<void> restartDtu() async {
+    throw UnimplementedError(
+      'DTU restart not yet supported over WiFi — needs CMD_CLOUD_COMMAND_RES_DTO (0x23, 0x05)',
+    );
+  }
+
+  /// Reboot a specific inverter.
+  /// TODO: Fix - needs CMD_CLOUD_COMMAND_RES_DTO (0x23, 0x05), action 8195 (CMD_ACTION_INV_REBOOT), and dev_kind=1
+  Future<void> rebootInverter(String inverterSerial) async {
+    throw UnimplementedError(
+      'Inverter reboot not yet supported over WiFi — needs CMD_CLOUD_COMMAND_RES_DTO (0x23, 0x05) and action 8195',
+    );
+  }
+
+  /// Turn on (re-enable output of) a specific inverter.
+  Future<void> turnOnInverter(String inverterSerial) async {
+    await _sendControlCommand(HoymilesCommandHelper.buildTurnOnInverterRequest(inverterSerial));
+    DebugLog.device('[Hoymiles] Inverter turn-on command sent ($inverterSerial)', level: LogLevel.debug);
+  }
+
+  /// Turn off (shut down output of) a specific inverter.
+  Future<void> turnOffInverter(String inverterSerial) async {
+    await _sendControlCommand(HoymilesCommandHelper.buildTurnOffInverterRequest(inverterSerial));
+    DebugLog.device('[Hoymiles] Inverter turn-off command sent ($inverterSerial)', level: LogLevel.debug);
+  }
+
+  /// Fetch the intraday historical power curve (paged, merged across pages).
+  Future<Map<String, dynamic>?> getHistPower() async {
+    if (_connection == null || !_connection!.isConnected) {
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
+      throw Exception("Gerät nicht verbunden");
+    }
+
+    // Page 0
+    final firstParsed = await _connection!.sendRequest(
+      HoymilesCommandHelper.buildGetHistPowerRequest(cp: 0),
+      HoymilesProtocol.CMD_APP_GET_HIST_POWER_RES,
+      timeout: HoymilesTcpConnection.historyRequestTimeout,
+    );
+    if (firstParsed == null) {
+      throw Exception("Kein Antwort vom Gerät erhalten");
+    }
+
+    final combined = AppGetHistPowerReqDTO.fromBuffer(firstParsed['data'] as List<int>);
+    final initialAbsoluteStart = combined.absoluteStart;
+    final totalPages = combined.ap;
+
+    // Remaining pages 1..ap-1
+    for (var cp = 1; cp < totalPages; cp++) {
+      final parsed = await _connection!.sendRequest(
+        HoymilesCommandHelper.buildGetHistPowerRequest(cp: cp),
+        HoymilesProtocol.CMD_APP_GET_HIST_POWER_RES,
+        timeout: HoymilesTcpConnection.historyRequestTimeout,
+      );
+      if (parsed == null) continue;
+      combined.mergeFromBuffer(parsed['data'] as List<int>);
+    }
+    combined.absoluteStart = initialAbsoluteStart;
+
+    return HoymilesCommandHelper.buildHistPowerResult(combined);
+  }
+
+  /// Fetch the historical daily-energy list.
+  Future<Map<String, dynamic>?> getHistEnergy() async {
+    if (_connection == null || !_connection!.isConnected) {
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
+      throw Exception("Gerät nicht verbunden");
+    }
+
+    final parsed = await _connection!.sendRequest(
+      HoymilesCommandHelper.buildGetHistEDRequest(),
+      HoymilesProtocol.CMD_APP_GET_HIST_ED_RES,
+      timeout: HoymilesTcpConnection.historyRequestTimeout,
+    );
+    if (parsed == null) {
+      throw Exception("Kein Antwort vom Gerät erhalten");
+    }
+
+    return HoymilesCommandHelper.parseHistEDResponse(parsed['data'] as List<int>);
+  }
+
   /// Set WiFi configuration (SSID and password)
   Future<void> setWifiConfig(String ssid, String password) async {
     if (_connection == null || !_connection!.isConnected) {
-      debugPrint('[Hoymiles] Not connected');
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
       throw Exception("Gerät nicht verbunden");
     }
 
@@ -917,7 +1020,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (currentConfigParsed == null) {
-      debugPrint('[Hoymiles] Failed to get current config');
+      DebugLog.device('[Hoymiles] Failed to get current config', level: LogLevel.warning);
       throw Exception("Error while sending command");
     }
 
@@ -986,7 +1089,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (parsed == null) {
-      debugPrint('[Hoymiles] No response from setWifiConfig');
+      DebugLog.device('[Hoymiles] No response from setWifiConfig', level: LogLevel.error);
       throw Exception("Informationen gesendet aber keine Antwort erhalten");
     }
 
@@ -994,7 +1097,7 @@ class HoymilesWifiService extends BaseDeviceService {
     final response = SetConfigReqDTO.fromBuffer(parsed['data'] as List<int>);
 
     if (response.errorCode == 0) {
-      debugPrint("[Hoymiles] Wifi config set successful");
+      DebugLog.device('[Hoymiles] WiFi config set successful', level: LogLevel.debug);
       return;
     }
     throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errorCode}");
@@ -1003,7 +1106,7 @@ class HoymilesWifiService extends BaseDeviceService {
   /// Set AP WiFi configuration (Access Point SSID and password)
   Future<void> setApWifiConfig(String ssid, String password) async {
     if (_connection == null || !_connection!.isConnected) {
-      debugPrint('[Hoymiles] Not connected');
+      DebugLog.device('[Hoymiles] Not connected', level: LogLevel.warning);
       throw Exception("Gerät nicht verbunden");
     }
 
@@ -1016,7 +1119,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (currentConfigParsed == null) {
-      debugPrint('[Hoymiles] Failed to get current config');
+      DebugLog.device('[Hoymiles] Failed to get current config', level: LogLevel.warning);
       throw Exception("Error while sending command");
     }
 
@@ -1086,7 +1189,7 @@ class HoymilesWifiService extends BaseDeviceService {
     );
 
     if (parsed == null) {
-      debugPrint('[Hoymiles] No response from setApWifiConfig');
+      DebugLog.device('[Hoymiles] No response from setApWifiConfig', level: LogLevel.error);
       throw Exception("Informationen gesendet aber keine Antwort erhalten");
     }
 
@@ -1094,7 +1197,7 @@ class HoymilesWifiService extends BaseDeviceService {
     final response = SetConfigReqDTO.fromBuffer(parsed['data'] as List<int>);
 
     if (response.errorCode == 0) {
-      debugPrint("[Hoymiles] AP WiFi config set successful");
+      DebugLog.device('[Hoymiles] AP WiFi config set successful', level: LogLevel.debug);
       return;
     }
     throw Exception("Fehler bei verarbeiten des Befehls, fehlercode: ${response.errorCode}");

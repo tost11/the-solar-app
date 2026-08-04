@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import "../../../../../utils/debug_log.dart";
 import 'package:flutter/material.dart';
 import 'package:the_solar_app/models/devices/device_implementation.dart';
 import 'package:the_solar_app/models/devices/device_base.dart';
@@ -942,7 +943,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
   /// Returns the list of general settings available for this Shelly device
   List<GeneralSettingItem> getGeneralSettings(Map<String,dynamic> config) {
-    print(config.toString());
+    DebugLog.device(config.toString(), level: LogLevel.verbose);
     return [
       GeneralSettingItem(
         name: TO(key: FieldTranslationKeys.settingEcoMode),

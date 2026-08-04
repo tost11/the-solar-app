@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../utils/debug_log.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 import '../../../constants/command_constants.dart';
@@ -115,7 +116,7 @@ class _ShellyScriptTemplateConfigScreenState
           }
         }
       } catch (e) {
-        debugPrint('Error resolving parameter ${param.name}: $e');
+        DebugLog.ui('Error resolving parameter ${param.name}: $e', level: LogLevel.error);
         _resolvedResources[param.name] = [];
       }
     }

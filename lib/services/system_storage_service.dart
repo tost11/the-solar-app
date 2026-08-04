@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../utils/debug_log.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:the_solar_app/models/system.dart';
 
@@ -24,7 +25,7 @@ class SystemStorageService {
           .map((json) => System.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      print('Error loading systems: $e');
+      DebugLog.storage('Error loading systems: $e', level: LogLevel.error);
       return [];
     }
   }

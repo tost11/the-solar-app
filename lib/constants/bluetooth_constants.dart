@@ -25,3 +25,12 @@ const String DEVICE_MANUFACTURER_DEYE_SUN = "deye-sun";
 const String DEVICE_MANUFACTURER_OPENDTU = "opendtu";
 const String DEVICE_MANUFACTURER_HOYMILES = "hoymiles";
 const String DEVICE_MANUFACTURER_KOSTAL = "kostal";
+
+// Hoymiles BLE (HMS-WB / HiFlow Pro) Service UUIDs
+const String HOYMILES_BLE_SERVICE_UUID = "0000e0ff-3c17-d293-8e48-14fe2e4da212";
+const String HOYMILES_BLE_TX_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"; // Write (phone → device)
+const String HOYMILES_BLE_TX_UUID_SHORT = "ffe1";
+const String HOYMILES_BLE_RX_UUID = "0000ffe2-0000-1000-8000-00805f9b34fb"; // Notify (device → phone)
+const String HOYMILES_BLE_RX_UUID_SHORT = "ffe2";
+const String HOYMILES_BLE_NAME_PREFIX = "RMI-";
+const String HOYMILES_BLE_DEFAULT_PIN = "123456";

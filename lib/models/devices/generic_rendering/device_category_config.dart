@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "../../../utils/debug_log.dart";
 import 'package:the_solar_app/generated/l10n/app_localizations.dart';
 import 'device_data_field.dart';
 import '../../../utils/field_translation_helper.dart';
@@ -85,7 +86,7 @@ class DeviceCategoryConfig {
         return translation;
       }
     } catch (e) {
-      debugPrint('Warning: Translation key "$key" not found: $e');
+      DebugLog.ui('Warning: Translation key "$key" not found: $e', level: LogLevel.warning);
     }
 
     // Fallback to hardcoded displayName

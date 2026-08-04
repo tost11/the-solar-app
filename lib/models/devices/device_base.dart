@@ -1,7 +1,8 @@
 import 'dart:async';
+import "../../../utils/debug_log.dart";
 
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import 'package:the_solar_app/services/devices/base_device_service.dart';
 
 import 'generic_rendering/device_category_config.dart';
@@ -55,7 +56,14 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   final String id;
   String name;
   final DateTime lastSeen;
+
+  /// Unique identifier used to refind/reconnect to the device.
+  /// For BLE devices this is typically the MAC address.
+  /// For WiFi devices this is typically the device serial number.
+  /// TODO: Refactor into separate fields (e.g., bleAddress vs serialNumber)
+  /// so that deviceSn always holds the actual serial for display purposes.
   final String deviceSn;
+
   String? deviceModel;
   final ConnectionType connectionType;
 
@@ -89,10 +97,12 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   Stream<Map<String, dynamic>> get deviceInfo => _deviceInfoController.stream;
 
   void emitStatus(String status){
+    if (_connectionStatusController.isClosed) return;
     _connectionStatusController.add(status);
   }
 
   void emitData(Map<String,dynamic> data){
+    if (_dataController.isClosed) return;
     _dataController.add(data);
     _trackTimeSeriesData(data);
   }
@@ -110,6 +120,7 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
   /// [isBackgroundError] - If true, show in detail screen footer (connection errors)
   ///                       If false, show in global overlay (command errors)
   void emitErrorWithFlag(String error, bool isBackgroundError) {
+    if (_errorController.isClosed) return;
     _errorController.add(DeviceError(
       message: error,
       isBackgroundError: isBackgroundError,
@@ -149,11 +160,12 @@ abstract class DeviceBase<ServiceType extends BaseDeviceService> {
       }
     } catch (e) {
       // Silently skip if field extraction fails
-      debugPrint('[Track] Error for ${field.name}: $e');
+      DebugLog.device('[Track] Error for ${field.name}: $e', level: LogLevel.error);
     }
   }
 
   void emitDeviceInfo(Map<String,dynamic> data){
+    if (_deviceInfoController.isClosed) return;
     _deviceInfoController.add(data);
   }
 

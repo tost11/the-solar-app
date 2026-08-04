@@ -1,4 +1,5 @@
 
+import '../../../utils/debug_log.dart';
 
 import 'dart:convert';
 
@@ -60,7 +61,7 @@ class ZendureWifiService extends BaseDeviceService {
         }
       }
     } catch (e) {
-      debugPrint('Error detecting Zendure device: $e');
+      DebugLog.device('Error detecting Zendure device: $e', level: LogLevel.error);
     }
 
     return null;
@@ -108,9 +109,9 @@ class ZendureWifiService extends BaseDeviceService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
 
-      debugPrint("received data: $data",wrapWidth: 1024);
+      DebugLog.device("Received data (full)", level: LogLevel.verbose);
       if(data["sn"] != null && data["sn"] is String){
-        debugPrint("sn is: ${device.deviceSn}");
+        DebugLog.device("Serial number: ${device.deviceSn}", level: LogLevel.debug);
       }
 
       if(device.data["data"] == null){
@@ -138,7 +139,7 @@ class ZendureWifiService extends BaseDeviceService {
   }
 
   Future<Map<String,dynamic>?> sendCommand(dynamic data) async {
-    debugPrint("Sending write wifi zendure command: ${jsonEncode(data)}");
+    DebugLog.device("Sending write WiFi Zendure command: ${jsonEncode(data)}", level: LogLevel.verbose);
 
     var sendData = {
       "sn": device.deviceSn, // Required
@@ -166,7 +167,7 @@ class ZendureWifiService extends BaseDeviceService {
       }
       return res as Map<String,dynamic>;
     }catch(e){
-      print(e.toString());
+      DebugLog.device("Error: ${e.toString()}", level: LogLevel.error);
       throw Exception("could not parse");
     }
   }
@@ -184,10 +185,10 @@ class ZendureWifiService extends BaseDeviceService {
     try {
       obj = jsonDecode(response.body);
     }catch(e){
-      print(e.toString());
+      DebugLog.device("Error: ${e.toString()}", level: LogLevel.error);
       throw Exception("could not parse response");
     }
-    debugPrint("Zendure getcommand received ${obj.toString()}");
+    DebugLog.device("Zendure getCommand received: ${obj.toString()}", level: LogLevel.verbose);
     if(obj.containsKey("error")){
       throw Exception("Error on response ${obj['error'].toString()}");
     }
@@ -206,7 +207,7 @@ class ZendureWifiService extends BaseDeviceService {
       "params": { "config": data }
     };
 
-    debugPrint("Sending rpc command: ${jsonEncode(sendData)}");
+    DebugLog.device("Sending RPC command: ${jsonEncode(sendData)}", level: LogLevel.verbose);
 
     var response = await http.post(
         Uri.parse('${getBaseUri()}/rpc'),
@@ -225,7 +226,7 @@ class ZendureWifiService extends BaseDeviceService {
       var obj = jsonDecode(response.body);
       return obj as Map<String,dynamic>;
     }catch(e){
-      print(e.toString());
+      DebugLog.device("Error: ${e.toString()}", level: LogLevel.error);
       throw Exception("could not parse response");
     }
   }

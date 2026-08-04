@@ -6287,6 +6287,132 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Offizielle Templates beim App-Start automatisch aktualisieren'**
   String get autoScriptUpdateDescription;
+
+  /// Menu: Device control screen
+  ///
+  /// In de, this message translates to:
+  /// **'Steuerung'**
+  String get menuDeviceControl;
+
+  /// Menu subtitle: Device control
+  ///
+  /// In de, this message translates to:
+  /// **'Neustart, Ein/Aus'**
+  String get menuSubtitleDeviceControl;
+
+  /// Title of the device control screen
+  ///
+  /// In de, this message translates to:
+  /// **'Gerätesteuerung'**
+  String get screenDeviceControl;
+
+  /// Button: turn inverter on
+  ///
+  /// In de, this message translates to:
+  /// **'Einschalten'**
+  String get controlPowerOn;
+
+  /// Button: turn inverter off
+  ///
+  /// In de, this message translates to:
+  /// **'Ausschalten'**
+  String get controlPowerOff;
+
+  /// Button: restart inverter
+  ///
+  /// In de, this message translates to:
+  /// **'Wechselrichter neu starten'**
+  String get controlRestartInverter;
+
+  /// Button: restart DTU
+  ///
+  /// In de, this message translates to:
+  /// **'Gerät neu starten (DTU)'**
+  String get controlRestartDtu;
+
+  /// Confirmation: turn off inverter
+  ///
+  /// In de, this message translates to:
+  /// **'Wechselrichter-Ausgang ausschalten?'**
+  String get controlPowerOffConfirm;
+
+  /// Confirmation: restart DTU
+  ///
+  /// In de, this message translates to:
+  /// **'Das Gerät wird neu gestartet und die Verbindung wird getrennt. Fortfahren?'**
+  String get controlRestartDtuConfirm;
+
+  /// Success: inverter turned on
+  ///
+  /// In de, this message translates to:
+  /// **'Wechselrichter eingeschaltet'**
+  String get controlInverterTurnedOn;
+
+  /// Success: inverter turned off
+  ///
+  /// In de, this message translates to:
+  /// **'Wechselrichter ausgeschaltet'**
+  String get controlInverterTurnedOff;
+
+  /// Info: DTU restarting
+  ///
+  /// In de, this message translates to:
+  /// **'Gerät startet neu, verbinde erneut...'**
+  String get controlDtuRestarting;
+
+  /// Loading message for control action
+  ///
+  /// In de, this message translates to:
+  /// **'Befehl wird gesendet...'**
+  String get controlActionRunning;
+
+  /// Error: no inverter serial for control action
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Wechselrichter-Seriennummer verfügbar'**
+  String get controlNoSerial;
+
+  /// Menu: historical data screen
+  ///
+  /// In de, this message translates to:
+  /// **'Verlauf'**
+  String get menuDeviceHistory;
+
+  /// Menu subtitle: historical data
+  ///
+  /// In de, this message translates to:
+  /// **'Leistungskurve & Tagesertrag'**
+  String get menuSubtitleDeviceHistory;
+
+  /// Title of the historical data screen
+  ///
+  /// In de, this message translates to:
+  /// **'Verlauf'**
+  String get screenDeviceHistory;
+
+  /// Title of the intraday power curve chart
+  ///
+  /// In de, this message translates to:
+  /// **'Leistungskurve (Heute)'**
+  String get historyPowerCurve;
+
+  /// Title of the daily energy history chart
+  ///
+  /// In de, this message translates to:
+  /// **'Tagesertrag Verlauf'**
+  String get historyDailyEnergy;
+
+  /// Shown when a historical chart has no data
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Daten verfügbar'**
+  String get historyNoData;
+
+  /// Success message after manually refreshing history
+  ///
+  /// In de, this message translates to:
+  /// **'Verlauf aktualisiert'**
+  String get historyRefreshed;
 }
 
 class _AppLocalizationsDelegate

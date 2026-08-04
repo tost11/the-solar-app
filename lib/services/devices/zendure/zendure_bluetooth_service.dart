@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../../../constants/bluetooth_constants.dart';
 import '../../../models/devices/device_base.dart';
 import '../../../utils/map_utils.dart';
+import '../../../utils/debug_log.dart';
 import '../bluetooth_device_service.dart';
 import '../../device_storage_service.dart';
 
@@ -19,6 +20,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
   StreamSubscription<List<int>>? _notifySubscription;
 
   String? _deviceSn;
+  bool _handshakeCompleted = false;
   //final InverterData _inverterData = InverterData(rawData: {});
 
   // Additional streams for Zendure-specific data
@@ -47,6 +49,19 @@ class ZendureBluetoothService extends BluetoothDeviceService {
 
     //not realy correct but ok for now
     isInitialized = true;
+    _handshakeCompleted = false;
+
+    // Give device 3 seconds to send BLESPP, then initiate handshake from app side.
+    // Some Zendure devices only send BLESPP after a physical button press (fresh pairing).
+    // On reconnect without button press, the device may not re-send BLESPP,
+    // so we proactively start the handshake after a timeout.
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (!_handshakeCompleted && writeCharacteristic != null && isConnected()) {
+        DebugLog.device('BLESPP timeout - initiating handshake from app side', level: LogLevel.info);
+        await _initiateHandshake();
+      }
+    });
+
     return false;//data will come by notification
   }
 
@@ -68,40 +83,36 @@ class ZendureBluetoothService extends BluetoothDeviceService {
       try {
         await _notifySubscription?.cancel();
       } catch (e) {
-        print('Error cancelling BLE subscription: $e');
+        DebugLog.device('Error cancelling BLE subscription: $e', level: LogLevel.error);
       } finally {
         _notifySubscription = null;
       }
     }
 
-    // Clear device serial number
+    // Clear device serial number and handshake state
     _deviceSn = null;
+    _handshakeCompleted = false;
 
-    // Call parent's Bluetooth disconnect logic (characteristics, lifecycle hooks)
+    // Call parent's Bluetooth disconnect logic (disconnects BLE + clears characteristics)
     await super.internalDisconnect();
-
-    // Disconnect from BLE device
-    try {
-      await bluetoothDevice.disconnect();
-    } catch (e) {
-      print('Error disconnecting from BLE device: $e');
-    }
   }
 
   @override
   Future<void> setupCharacteristics() async {
     // Enable notifications
-    print('\nEnabling notifications...');
+    DebugLog.device('Enabling notifications...', level: LogLevel.debug);
     await notifyCharacteristic!.setNotifyValue(true);
 
-    // Listen to notifications
-    _notifySubscription = notifyCharacteristic!.lastValueStream.listen((value) {
+    // Listen to notifications using onValueReceived (not lastValueStream)
+    // onValueReceived only emits actual incoming notifications/reads,
+    // avoiding duplicate events from the Linux BLE backend's switchMap behavior
+    _notifySubscription = notifyCharacteristic!.onValueReceived.listen((value) {
       if (value.isNotEmpty) {
         _handleNotification(value);
       }
     });
 
-    print('Notifications enabled');
+    DebugLog.device('Notifications enabled', level: LogLevel.debug);
   }
 
   Future<void> sendPlainCommand(Map<String,dynamic> properites) async {
@@ -126,7 +137,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
       'properties': properites
     };
 
-    print("Zendure bluetooth geneic send command with props: $properites");
+    DebugLog.device('Zendure bluetooth generic send command with props: $properites', level: LogLevel.verbose);
 
     await _sendCommand(command);
   }
@@ -135,20 +146,20 @@ class ZendureBluetoothService extends BluetoothDeviceService {
 
   void _handleNotification(List<int> value) {
     String jsonStr = utf8.decode(value);
-    print('\n<<< RECEIVED:');
-    print(jsonStr);
+    DebugLog.device('<<< RECEIVED: $jsonStr', level: LogLevel.verbose);
 
     try {
       Map<String, dynamic> data = jsonDecode(jsonStr);
-      _processMessage(data);
+      _processMessage(data).catchError((e) {
+        DebugLog.device('Error processing BLE message: $e', level: LogLevel.error);
+      });
     } catch (e) {
-      print('Error parsing JSON: $e');
+      DebugLog.device('Error parsing JSON: $e', level: LogLevel.error);
     }
   }
 
   Future<void> _processMessage(Map<String, dynamic> data) async {
     String? method = data['method'];
-    print('Method: $method');
 
     switch (method) {
       case 'BLESPP':
@@ -170,10 +181,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
   }
 
   Future<void> _handleBlesppHandshake(Map<String, dynamic> data) async {
-    //TODO assert if different
-    //deviceId = data['deviceId'];
-    //print('Device ID: $deviceId');
-
+    _handshakeCompleted = true;
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     Map<String, dynamic> response = {
       'messageId': timestamp.toString(),
@@ -187,13 +195,32 @@ class ZendureBluetoothService extends BluetoothDeviceService {
     await _requestDeviceInfo();
   }
 
+  /// Proactively initiate handshake when device doesn't send BLESPP within timeout.
+  /// On reconnect (without physical button press), some Zendure devices skip the
+  /// BLESPP notification. This sends BLESPP_OK and proceeds to request device info.
+  Future<void> _initiateHandshake() async {
+    _handshakeCompleted = true;
+
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    Map<String, dynamic> response = {
+      'messageId': timestamp.toString(),
+      'method': 'BLESPP_OK'
+    };
+
+    await _sendCommand(response);
+    device.emitStatus('Handshake (App-initiiert)');
+
+    await Future.delayed(const Duration(milliseconds: 500));
+    await _requestDeviceInfo();
+  }
+
   Future<void> _handleDeviceInfo(Map<String, dynamic> data) async {
-    print('\nDEVICE INFO:');
-    debugPrint(data.toString());
+    DebugLog.device('Device info received', level: LogLevel.debug);
+    DebugLog.device('Full device info: ${data.toString()}', level: LogLevel.verbose);
 
     // Store device serial number
     _deviceSn = data['sn'] as String?;
-    print('Device SN: $_deviceSn');
+    DebugLog.device('Device SN: $_deviceSn', level: LogLevel.debug);
 
 
     var firmwares = Map<String,dynamic>();
@@ -204,7 +231,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
       };
     }
 
-    print('Firmwares: $firmwares');
+    DebugLog.device('Firmwares: $firmwares', level: LogLevel.debug);
 
     device.data["firmwares"] = firmwares;
 
@@ -243,7 +270,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
     if (newProps != null) {
       var newData = MapUtils.mergeMaps(oldProps,newProps);
       if(newData != null){
-        debugPrint("new properties are: ${newData.toString()}");
+        DebugLog.device('New properties merged: ${newData.toString()}', level: LogLevel.verbose);
         (device.data["data"] as Map<String,dynamic>)['properties'] = newData;
       }
     }
@@ -267,12 +294,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
       (device.data["data"] as Map<String,dynamic>)['packData'] = newPackData;
     }
 
-    if (data['properties'] != null) {
-      debugPrint(data['properties'].toString());
-    }
-
-    print('\nREPORT DATA:');
-    print(jsonEncode(data));
+    DebugLog.device('Report data received: ${jsonEncode(data)}', level: LogLevel.verbose);
 
     device.emitStatus('Daten empfangen');
     device.emitData(data);
@@ -281,8 +303,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
   void _handleWriteReply(Map<String, dynamic> data) {
     int? success = data['success'] as int?;
 
-    print('\nWRITE REPLY:');
-    print('Success: $success');
+    DebugLog.device('Write reply received - Success: $success', level: LogLevel.debug);
 
     if (data['properties'] != null) {
       _handleReport(data);
@@ -290,14 +311,12 @@ class ZendureBluetoothService extends BluetoothDeviceService {
 
     if (success == 1) {
       device.emitStatus('Einstellung erfolgreich');
-      print('Write command successful!');
+      DebugLog.device('Write command successful', level: LogLevel.debug);
     } else {
       device.emitStatus('Fehler beim Schreiben');
       device.emitError('Write command failed');
-      print('Write command failed!');
+      DebugLog.device('Write command failed', level: LogLevel.error);
     }
-
-    print('═══════════════════════════════════════════════════════════════\n');
   }
 
   Future<void> _requestDeviceInfo() async {
@@ -330,8 +349,7 @@ class ZendureBluetoothService extends BluetoothDeviceService {
     if (writeCharacteristic == null) return;
 
     String jsonStr = jsonEncode(command);
-    print('\n>>> SENDING:');
-    print(jsonStr);
+    DebugLog.device('>>> SENDING: $jsonStr', level: LogLevel.verbose);
 
     List<int> bytes = utf8.encode(jsonStr);
     await writeCharacteristic!.write(bytes, withoutResponse: false);

@@ -3453,4 +3453,68 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoScriptUpdateDescription =>
       'Automatically update official templates on app startup';
+
+  @override
+  String get menuDeviceControl => 'Control';
+
+  @override
+  String get menuSubtitleDeviceControl => 'Restart, power on/off';
+
+  @override
+  String get screenDeviceControl => 'Device Control';
+
+  @override
+  String get controlPowerOn => 'Power On';
+
+  @override
+  String get controlPowerOff => 'Power Off';
+
+  @override
+  String get controlRestartInverter => 'Restart Inverter';
+
+  @override
+  String get controlRestartDtu => 'Restart Device (DTU)';
+
+  @override
+  String get controlPowerOffConfirm => 'Turn off inverter output?';
+
+  @override
+  String get controlRestartDtuConfirm =>
+      'The device will restart and the connection will drop. Continue?';
+
+  @override
+  String get controlInverterTurnedOn => 'Inverter turned on';
+
+  @override
+  String get controlInverterTurnedOff => 'Inverter turned off';
+
+  @override
+  String get controlDtuRestarting => 'Device is restarting, reconnecting...';
+
+  @override
+  String get controlActionRunning => 'Sending command...';
+
+  @override
+  String get controlNoSerial => 'No inverter serial available';
+
+  @override
+  String get menuDeviceHistory => 'History';
+
+  @override
+  String get menuSubtitleDeviceHistory => 'Power curve & daily energy';
+
+  @override
+  String get screenDeviceHistory => 'History';
+
+  @override
+  String get historyPowerCurve => 'Power Curve (Today)';
+
+  @override
+  String get historyDailyEnergy => 'Daily Energy History';
+
+  @override
+  String get historyNoData => 'No data available';
+
+  @override
+  String get historyRefreshed => 'History updated';
 }

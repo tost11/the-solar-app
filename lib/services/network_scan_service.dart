@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../utils/debug_log.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -135,7 +136,7 @@ class NetworkScanService {
     ));
 
     _detectorsInitialized = true;
-    print('Device detectors initialized: ${_detectorRegistry.length} manufacturers registered');
+    DebugLog.network('Device detectors initialized: ${_detectorRegistry.length} manufacturers registered', level: LogLevel.debug);
   }
 
   NetworkScanService() {
@@ -163,9 +164,9 @@ class NetworkScanService {
     Duration probeTimeout = const Duration(seconds: 2),
     bool skipIcmpScan = false, // NEW: Skip ICMP ping sweep when true
   }) async {
-    print('\n═══════════════════════════════════════════════════════════════');
-    print('SCANNING LOCAL NETWORK VIA ICMP PING SWEEP');
-    print('═══════════════════════════════════════════════════════════════');
+    DebugLog.network('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
+    DebugLog.network('SCANNING LOCAL NETWORK VIA ICMP PING SWEEP', level: LogLevel.debug);
+    DebugLog.network('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
 
     _discoveredDevices.clear();
 
@@ -175,8 +176,8 @@ class NetworkScanService {
         throw Exception('Keine Netzwerke zum Scannen angegeben');
       }
 
-      print('Subnets to scan: ${subnets.join(", ")}');
-      print('Timeout per ping: ${timeout.inMilliseconds}ms');
+      DebugLog.network('Subnets to scan: ${subnets.join(", ")}', level: LogLevel.debug);
+      DebugLog.network('Timeout per ping: ${timeout.inMilliseconds}ms', level: LogLevel.debug);
 
       // Generate list of all IPs to scan
       final List<String> ipList = [];
@@ -186,8 +187,8 @@ class NetworkScanService {
         }
       }
 
-      print('Generated ${ipList.length} IP addresses to scan across ${subnets.length} subnet(s)');
-      print('Using $maxConcurrentPings parallel ping workers');
+      DebugLog.network('Generated ${ipList.length} IP addresses to scan across ${subnets.length} subnet(s)', level: LogLevel.debug);
+      DebugLog.network('Using $maxConcurrentPings parallel ping workers', level: LogLevel.debug);
 
       // Ping all IPs using worker pool pattern
       final List<String> reachableIPs = [];
@@ -211,7 +212,7 @@ class NetworkScanService {
 
       if (skipIcmpScan) {
         // Skip ICMP ping sweep - treat all IPs as reachable
-        print('Skipping ICMP ping sweep - testing all ${ipList.length} IPs directly');
+        DebugLog.network('Skipping ICMP ping sweep - testing all ${ipList.length} IPs directly', level: LogLevel.debug);
         reachableIPs.addAll(ipList);
         foundHostsCount = ipList.length;
         checkedPingCount = totalIPs;
@@ -265,9 +266,9 @@ class NetworkScanService {
         await Future.wait(pingWorkers);
       }
 
-      print('Ping sweep completed. Found ${reachableIPs.length} reachable hosts out of ${totalIPs} IPs');
-      print('\nProbing ${reachableIPs.length} devices for manufacturer identification...');
-      print('Using continuous parallel probing with max $maxConcurrentProbes concurrent probes');
+      DebugLog.network('Ping sweep completed. Found ${reachableIPs.length} reachable hosts out of ${totalIPs} IPs', level: LogLevel.debug);
+      DebugLog.network('\nProbing ${reachableIPs.length} devices for manufacturer identification...', level: LogLevel.debug);
+      DebugLog.network('Using continuous parallel probing with max $maxConcurrentProbes concurrent probes', level: LogLevel.debug);
 
       // Notify about transition to probing phase
       _checkedCount = 0;
@@ -297,7 +298,7 @@ class NetworkScanService {
             if (device != null) {
               _discoveredDevices.add(device);
               knownDevicesCount++;
-              print('  ✓ ${device.manufacturer} device found: ${device.serialNumber}');
+              DebugLog.network('  ${device.manufacturer} device found: ${device.serialNumber}', level: LogLevel.debug);
             } else {
               testedDevicesCount++;
             }
@@ -322,16 +323,16 @@ class NetworkScanService {
 
       await Future.wait(workers);
 
-      print('\n═══════════════════════════════════════════════════════════════');
-      print('Network scan completed.');
-      print('Total reachable hosts: ${reachableIPs.length}');
-      print('Supported devices found: ${_discoveredDevices.length}');
-      print('═══════════════════════════════════════════════════════════════\n');
+      DebugLog.network('═══════════════════════════════════════════════════════════════', level: LogLevel.debug);
+      DebugLog.network('Network scan completed.', level: LogLevel.debug);
+      DebugLog.network('Total reachable hosts: ${reachableIPs.length}', level: LogLevel.debug);
+      DebugLog.network('Supported devices found: ${_discoveredDevices.length}', level: LogLevel.debug);
+      DebugLog.network('═══════════════════════════════════════════════════════════════\n', level: LogLevel.debug);
 
       return _discoveredDevices;
     } catch (e) {
-      print('Error scanning network: $e');
-      print('═══════════════════════════════════════════════════════════════\n');
+      DebugLog.network('Error scanning network: $e', level: LogLevel.error);
+      DebugLog.network('═══════════════════════════════════════════════════════════════\n', level: LogLevel.debug);
       rethrow;
     }
   }
@@ -341,7 +342,7 @@ class NetworkScanService {
   /// Returns a NetworkDevice if matched by any manufacturer, null otherwise
   Future<NetworkDevice?> _probeDevice(String ipAddress, Duration probeTimeout) async {
     try {
-      print('  Probing $ipAddress...');
+      DebugLog.network('  Probing $ipAddress...', level: LogLevel.verbose);
 
       // Make generic HTTP request
       http.Response? response;
@@ -367,13 +368,13 @@ class NetworkScanService {
             return device;
           }
         } catch (e) {
-          print('    ✗ ${detectorInfo.manufacturerName} detector error: $e');
+          DebugLog.network('    ${detectorInfo.manufacturerName} detector error: $e', level: LogLevel.error);
         }
       }
 
-      print('    ✗ Unknown device (no detector matched) on $ipAddress');
+      DebugLog.network('    Unknown device (no detector matched) on $ipAddress', level: LogLevel.warning);
     } catch (e) {
-      print('    ✗ Error on $ipAddress: $e');
+      DebugLog.network('    Error on $ipAddress: $e', level: LogLevel.error);
     }
 
     return null;
@@ -466,11 +467,11 @@ class NetworkScanService {
         ).timeout(timeout);
       }
 
-      debugPrint("Give http repose: ${response?.statusCode.toString()} and url: $ipAddress:$port to detector");
+      DebugLog.network("Give http response: ${response?.statusCode.toString()} and url: $ipAddress:$port to detector", level: LogLevel.verbose);
 
       return await detectorInfo.detector(ipAddress, port, response, connectionInfo);
     } catch (e) {
-      debugPrint('Manual probe error for $manufacturerKey at $ipAddress: $e');
+      DebugLog.network('Manual probe error for $manufacturerKey at $ipAddress: $e', level: LogLevel.error);
       rethrow;
     }
   }

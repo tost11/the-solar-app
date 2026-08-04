@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../utils/debug_log.dart';
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
@@ -116,12 +117,12 @@ class ScriptTemplateService {
           );
           templates.add(template);
         } catch (e) {
-          print('Error loading template from $filePath: $e');
+          DebugLog.system('Error loading template from $filePath: $e', level: LogLevel.error);
         }
       }
     } catch (e) {
       // AssetManifest.json not found - fallback to loading via local manifest
-      print('Warning: AssetManifest.json not found, using fallback template loading: $e');
+      DebugLog.system('Warning: AssetManifest.json not found, using fallback template loading: $e', level: LogLevel.warning);
       await _loadAssetTemplatesFallback(templates);
     }
 
@@ -167,15 +168,15 @@ class ScriptTemplateService {
               );
               templates.add(template);
             } catch (e) {
-              print('Could not load template $filePath: $e');
+              DebugLog.system('Could not load template $filePath: $e', level: LogLevel.error);
             }
           }
         } catch (e) {
-          print('Could not load versions.json for $templateId: $e');
+          DebugLog.system('Could not load versions.json for $templateId: $e', level: LogLevel.error);
         }
       }
     } catch (e) {
-      print('Error loading manifest.json fallback: $e');
+      DebugLog.system('Error loading manifest.json fallback: $e', level: LogLevel.error);
     }
   }
 
@@ -337,7 +338,7 @@ class ScriptTemplateService {
         );
         templates.add(template);
       } catch (e) {
-        print('Error loading user template ${file.path}: $e');
+        DebugLog.system('Error loading user template ${file.path}: $e', level: LogLevel.error);
       }
     }
 
@@ -411,7 +412,7 @@ class ScriptTemplateService {
         try {
           await deleteUserTemplate(existingTemplate);
         } catch (e) {
-          print('Warning: Failed to delete existing template version ${existingTemplate.version}: $e');
+          DebugLog.system('Warning: Failed to delete existing template version ${existingTemplate.version}: $e', level: LogLevel.warning);
         }
       }
     } else {
@@ -481,10 +482,10 @@ class ScriptTemplateService {
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       }
-      print('Failed to fetch remote manifest: HTTP ${response.statusCode}');
+      DebugLog.system('Failed to fetch remote manifest: HTTP ${response.statusCode}', level: LogLevel.error);
       return null;
     } catch (e) {
-      print('Error fetching remote manifest: $e');
+      DebugLog.system('Error fetching remote manifest: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -504,10 +505,10 @@ class ScriptTemplateService {
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
       }
-      print('Failed to fetch remote versions.json from $updatePath: HTTP ${response.statusCode}');
+      DebugLog.system('Failed to fetch remote versions.json from $updatePath: HTTP ${response.statusCode}', level: LogLevel.error);
       return null;
     } catch (e) {
-      print('Error fetching remote versions.json from $updatePath: $e');
+      DebugLog.system('Error fetching remote versions.json from $updatePath: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -533,10 +534,10 @@ class ScriptTemplateService {
           source: TemplateSource.user,
         );
       }
-      print('Failed to download template $fileName from $updatePath: HTTP ${response.statusCode}');
+      DebugLog.system('Failed to download template $fileName from $updatePath: HTTP ${response.statusCode}', level: LogLevel.error);
       return null;
     } catch (e) {
-      print('Error downloading template $fileName from $updatePath: $e');
+      DebugLog.system('Error downloading template $fileName from $updatePath: $e', level: LogLevel.error);
       return null;
     }
   }
@@ -609,7 +610,7 @@ class ScriptTemplateService {
     }
 
     if (targetFileName == null) {
-      print('Could not find fileName for version ${updateInfo.remoteVersion}');
+      DebugLog.system('Could not find fileName for version ${updateInfo.remoteVersion}', level: LogLevel.error);
       return null;
     }
 
@@ -626,7 +627,7 @@ class ScriptTemplateService {
       final imported = await importTemplate(jsonString, overrideExisting: true);
       return imported;
     } catch (e) {
-      print('Error importing remote template: $e');
+      DebugLog.system('Error importing remote template: $e', level: LogLevel.error);
       return null;
     }
   }

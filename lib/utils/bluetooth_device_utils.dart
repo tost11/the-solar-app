@@ -16,6 +16,7 @@ class BluetoothDeviceUtils {
     final manufacturers = [
       DEVICE_MANUFACTURER_ZENDURE,
       DEVICE_MANUFACTURER_SHELLY,
+      DEVICE_MANUFACTURER_HOYMILES,
     ];
 
     return showDialog<String>(
@@ -142,6 +143,8 @@ class BluetoothDeviceUtils {
         return 'Zendure';
       case DEVICE_MANUFACTURER_SHELLY:
         return 'Shelly';
+      case DEVICE_MANUFACTURER_HOYMILES:
+        return 'Hoymiles';
       default:
         return manufacturer;
     }

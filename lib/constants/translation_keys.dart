@@ -898,6 +898,8 @@ class MenuTranslationKeys {
   static const String inverterToggle = 'menuInverterToggle';
   static const String restartInverter = 'menuRestartInverter';
   static const String mqttConfiguration = 'menuMqttConfiguration';
+  static const String deviceControl = 'menuDeviceControl';
+  static const String deviceHistory = 'menuDeviceHistory';
 }
 
 /// Translation keys for menu item subtitles
@@ -921,4 +923,6 @@ class MenuSubtitleKeys {
   static const String inverterToggleSubtitle = 'menuSubtitleInverterToggle';
   static const String restartInverterSubtitle = 'menuSubtitleRestartInverter';
   static const String mqttConfigurationSubtitle = 'menuSubtitleMqttConfiguration';
+  static const String deviceControlSubtitle = 'menuSubtitleDeviceControl';
+  static const String deviceHistorySubtitle = 'menuSubtitleDeviceHistory';
 }

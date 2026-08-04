@@ -4,6 +4,8 @@ import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/to.dart';
 import 'package:the_solar_app/screens/configuration/wifi_configuration_screen.dart';
 import 'package:the_solar_app/screens/configuration/wifi_ap_configuration_screen.dart';
+import 'package:the_solar_app/screens/configuration/hoymiles_control_screen.dart';
+import 'package:the_solar_app/screens/configuration/hoymiles_history_screen.dart';
 import 'package:the_solar_app/screens/device_info_screen.dart';
 import 'package:the_solar_app/services/devices/hoymiles/hoymiles_protocol.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
@@ -130,6 +132,40 @@ class HoymilesDTUDevice extends HoymilesDevice {
           if (result == true) {
             MessageUtils.showSuccess(context, context.l10n.accessPointConfigured);
           }
+        },
+      ),
+      DeviceMenuItem(
+        name: TO(key: MenuTranslationKeys.deviceControl),
+        subtitle: TO(key: MenuSubtitleKeys.deviceControlSubtitle),
+        icon: Icons.settings_remote,
+        iconColor: Colors.deepOrange,
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
+          await NavigationUtils.pushConfigurationScreen(
+            context,
+            HoymilesControlScreen(
+              device: device,
+            ),
+          );
+        },
+      ),
+      DeviceMenuItem(
+        name: TO(key: MenuTranslationKeys.deviceHistory),
+        subtitle: TO(key: MenuSubtitleKeys.deviceHistorySubtitle),
+        icon: Icons.show_chart,
+        iconColor: Colors.indigo,
+        onTap: (ctx) async {
+          final context = ctx.context;
+          final device = ctx.device;
+
+          await NavigationUtils.pushConfigurationScreen(
+            context,
+            HoymilesHistoryScreen(
+              device: device,
+            ),
+          );
         },
       ),
     ],
@@ -336,6 +372,34 @@ class HoymilesDTUDevice extends HoymilesDevice {
       final password = params['password'] as String;
       await connectionService?.setApWifiConfig(ssid, password);
       return {'success': true};
+    } else if (command == COMMAND_RESTART) {
+      await connectionService?.restartDtu();
+      return {'success': true};
+    } else if (command == COMMAND_RESTART_INVERTER) {
+      final serial = params['inverterSerial'] as String?;
+      if (serial == null || serial.isEmpty) {
+        throw Exception('inverterSerial parameter required');
+      }
+      await connectionService?.rebootInverter(serial);
+      return {'success': true};
+    } else if (command == COMMAND_TURN_ON_INVERTER) {
+      final serial = params['inverterSerial'] as String?;
+      if (serial == null || serial.isEmpty) {
+        throw Exception('inverterSerial parameter required');
+      }
+      await connectionService?.turnOnInverter(serial);
+      return {'success': true};
+    } else if (command == COMMAND_TURN_OFF_INVERTER) {
+      final serial = params['inverterSerial'] as String?;
+      if (serial == null || serial.isEmpty) {
+        throw Exception('inverterSerial parameter required');
+      }
+      await connectionService?.turnOffInverter(serial);
+      return {'success': true};
+    } else if (command == COMMAND_FETCH_HIST_POWER) {
+      return await connectionService?.getHistPower();
+    } else if (command == COMMAND_FETCH_HIST_ENERGY) {
+      return await connectionService?.getHistEnergy();
     }
     throw UnimplementedError('Command not yet implemented: $command');
   }

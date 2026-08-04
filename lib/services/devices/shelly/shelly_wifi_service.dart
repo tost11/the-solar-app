@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../utils/debug_log.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
@@ -43,7 +44,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
             responseBody.contains('data-theme="dark"') &&
             responseBody.contains('<title>Shelly Web Admin</title>')) {
 
-          debugPrint('[$ipAddress:$port] Shelly Web Admin HTML detected, fetching device info...');
+          DebugLog.device('[$ipAddress:$port] Shelly Web Admin HTML detected, fetching device info...', level: LogLevel.debug);
 
           // Confirmed Shelly device - now get device details via JSON-RPC API
           final response = await http.get(
@@ -64,7 +65,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
               final deviceModel = responseData['model'] as String?;
 
               if (mac != null) {
-                debugPrint('[$ipAddress:$port] Shelly device verified: Model=$deviceModel, ID=$mac');
+                DebugLog.device('[$ipAddress:$port] Shelly device verified: Model=$deviceModel, ID=$mac', level: LogLevel.debug);
                 return NetworkDevice(
                   ipAddress: ipAddress,
                   hostname: null,
@@ -76,12 +77,12 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
               }
             }
           }else{
-            debugPrint('Error detecting Shelly device $ipAddress:$port status code: ${response.statusCode} body: ${response.body}');
+            DebugLog.device('Error detecting Shelly device $ipAddress:$port status code: ${response.statusCode} body: ${response.body}', level: LogLevel.error);
           }
         }
       }
     } catch (e) {
-      debugPrint('Error detecting Shelly device $ipAddress:$port: $e');
+      DebugLog.device('Error detecting Shelly device $ipAddress:$port: $e', level: LogLevel.error);
     }
 
     return null;
@@ -133,7 +134,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
       var src = data["auth_domain"] as String?;
       if(src != null){
         //TODO make this better
-        debugPrint("set realm to: $src");
+        DebugLog.device("Set realm to: $src", level: LogLevel.debug);
         (device as dynamic).deviceScr = src;
       }
       device.data['config'] = data;
@@ -147,7 +148,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
       final currentModules = device.data['_detectedModules'];
       if (currentModules == null || !_mapsEqual(currentModules as Map?, detectedModules)) {
         device.data['_detectedModules'] = detectedModules;
-        debugPrint('Detected Shelly modules: $detectedModules');
+        DebugLog.device("Detected Shelly modules: $detectedModules", level: LogLevel.debug);
 
         // Regenerate dynamic fields, controls, and time series based on new modules
         _updateDeviceElements();
@@ -227,7 +228,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
     required bool retryOnAuth,
   }) async {
     try {
-      debugPrint('Sending HTTP RPC: $method to http://${wifiDevice.getCurrentBaseUrl()}/rpc');
+      DebugLog.device('Sending HTTP RPC: $method to http://${wifiDevice.getCurrentBaseUrl()}/rpc', level: LogLevel.verbose);
 
       // Build request body
       int id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -260,14 +261,14 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
           throw Exception('Authentifizierung fehlgeschlagen. Bitte überprüfen Sie Benutzername und Passwort.');
         }
 
-        debugPrint('Received HTTP 401, attempting authentication...');
+        DebugLog.device('Received HTTP 401, attempting authentication...', level: LogLevel.debug);
         return await _handleHttpAuthChallenge(method, params, response);
       }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
-        debugPrint('Received response: $data',wrapWidth: 1024);
+        DebugLog.device("Received response (truncated)", level: LogLevel.verbose);
 
         // Handle JSON-RPC 401 error code (even with HTTP 200)
         if (data.containsKey('error')) {
@@ -292,7 +293,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
         throw Exception('HTTP Error: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Error sending command $method: $e');
+      DebugLog.device("Error sending command $method: $e", level: LogLevel.error);
       if(method != ShellyCommands.getStatus && method != ShellyCommands.getDeviceInfo) {
         //ony when command from user show inf forderground
         device.emitError('Befehl fehlgeschlagen: $e');
@@ -320,7 +321,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
             challengeJson = error is Map ? error['message'] as String? : null;
           }
         } catch (e) {
-          debugPrint('Failed to parse 401 response body: $e');
+          DebugLog.device('Failed to parse 401 response body: $e', level: LogLevel.error);
         }
       }
 
@@ -337,7 +338,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
         // Try to parse WWW-Authenticate header
         final wwwAuth = response.headers['www-authenticate'];
         if (wwwAuth != null) {
-          debugPrint('WWW-Authenticate header: $wwwAuth');
+          DebugLog.device('WWW-Authenticate header: $wwwAuth', level: LogLevel.verbose);
 
           // Parse Digest header
           final challenge = ShellyAuthUtils.parseWWWAuthenticateHeader(wwwAuth);
@@ -347,18 +348,18 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
 
           // Build auth object from header challenge
           authObject = buildAuthFromChallenge(challenge);
-          debugPrint('Auth object built from WWW-Authenticate header');
+          DebugLog.device('Auth object built from WWW-Authenticate header', level: LogLevel.debug);
         } else {
           throw Exception('No authentication challenge found in 401 response');
         }
       }
 
-      debugPrint('Auth object built, retrying HTTP request...');
+      DebugLog.device('Auth object built, retrying HTTP request...', level: LogLevel.debug);
 
       // Retry with authentication (retryOnAuth: false to prevent infinite loop)
       return await _sendCommandWithAuth(method, params, retryOnAuth: false);
     } catch (e) {
-      debugPrint('Error handling HTTP auth challenge: $e');
+      DebugLog.device('Error handling HTTP auth challenge: $e', level: LogLevel.error);
       resetAuthCache();
       rethrow;
     }

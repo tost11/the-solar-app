@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:protobuf/protobuf.dart';
+import '../../../utils/debug_log.dart';
 
 /// Hoymiles protocol constants and utilities
 class HoymilesProtocol {
@@ -16,6 +17,8 @@ class HoymilesProtocol {
   static const List<int> CMD_HB_RES_DTO = [0xa3, 0x02];
   static const List<int> CMD_APP_INFO_DATA_RES_DTO = [0xa3, 0x01];
   static const List<int> CMD_COMMAND_RES_DTO = [0xa3, 0x05];
+  static const List<int> CMD_APP_GET_HIST_POWER_RES = [0xa3, 0x15];
+  static const List<int> CMD_APP_GET_HIST_ED_RES = [0xa3, 0x16];
 
   // Offset constant
   static const int OFFSET = 28800;
@@ -29,50 +32,29 @@ class HoymilesProtocol {
     return _sequence;
   }
 
-  /// Reflect bits in a byte (reverse bit order)
-  int _reflectByte(int value) {
-    int reflected = 0;
-    for (int i = 0; i < 8; i++) {
-      if ((value & (1 << i)) != 0) {
-        reflected |= (1 << (7 - i));
+  /// CRC16 lookup table for Modbus (polynomial 0xA001, reflected)
+  static final List<int> _crcTable = _buildCrcTable();
+
+  static List<int> _buildCrcTable() {
+    final table = List<int>.filled(256, 0);
+    for (int byte = 0; byte < 256; byte++) {
+      int c = byte;
+      for (int i = 0; i < 8; i++) {
+        c = (c & 1) != 0 ? (c >> 1) ^ 0xA001 : c >> 1;
       }
+      table[byte] = c;
     }
-    return reflected;
+    return table;
   }
 
-  /// Reflect bits in a 16-bit value (reverse bit order)
-  int _reflectShort(int value) {
-    int reflected = 0;
-    for (int i = 0; i < 16; i++) {
-      if ((value & (1 << i)) != 0) {
-        reflected |= (1 << (15 - i));
-      }
-    }
-    return reflected;
-  }
-
-  /// Calculate CRC16 using polynomial 0x18005, reversed, init 0xFFFF, xorOut 0x0000
-  /// This matches the Python crcmod configuration: mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
+  /// Calculate CRC16-Modbus: poly 0xA001 (reflected), init 0xFFFF, no final XOR.
+  /// Matches the Python hiflow-ble implementation exactly.
   int calculateCrc16(List<int> data) {
     int crc = 0xFFFF;
-    const int poly = 0x8005; // Normal (not reversed) polynomial for MSB-first processing
-
-    for (final byte in data) {
-      // Reflect input byte
-      int reflected = _reflectByte(byte);
-      crc ^= (reflected << 8);
-
-      for (int i = 0; i < 8; i++) {
-        if ((crc & 0x8000) != 0) {
-          crc = (crc << 1) ^ poly;
-        } else {
-          crc = crc << 1;
-        }
-      }
+    for (final b in data) {
+      crc = (crc >> 8) ^ _crcTable[(crc ^ b) & 0xFF];
     }
-
-    // Reflect output CRC and apply xorOut (0x0000, so no change)
-    return _reflectShort(crc & 0xFFFF);
+    return crc & 0xFFFF;
   }
 
   /// Generate message to send to DTU
@@ -123,12 +105,12 @@ class HoymilesProtocol {
 
     final message = builder.toBytes();
 
-    debugPrint('[Hoymiles] Generated message: ${message.length} bytes');
-    debugPrint('[Hoymiles] Header: ${_bytesToHex(message.sublist(0, 2))}');
-    debugPrint('[Hoymiles] Command: ${_bytesToHex(message.sublist(2, 4))}');
-    debugPrint('[Hoymiles] Sequence: $sequence (${_bytesToHex(message.sublist(4, 6))})');
-    debugPrint('[Hoymiles] CRC16: $crc16 (${_bytesToHex(message.sublist(6, 8))})');
-    debugPrint('[Hoymiles] Length: $length (${_bytesToHex(message.sublist(8, 10))})');
+    DebugLog.device('[Hoymiles] Generated message: ${message.length} bytes', level: LogLevel.verbose);
+    DebugLog.device('[Hoymiles] Header: ${_bytesToHex(message.sublist(0, 2))}', level: LogLevel.verbose);
+    DebugLog.device('[Hoymiles] Command: ${_bytesToHex(message.sublist(2, 4))}', level: LogLevel.verbose);
+    DebugLog.device('[Hoymiles] Sequence: $sequence (${_bytesToHex(message.sublist(4, 6))})', level: LogLevel.verbose);
+    DebugLog.device('[Hoymiles] CRC16: $crc16 (${_bytesToHex(message.sublist(6, 8))})', level: LogLevel.verbose);
+    DebugLog.device('[Hoymiles] Length: $length (${_bytesToHex(message.sublist(8, 10))})', level: LogLevel.verbose);
 
     return message;
   }
@@ -145,14 +127,14 @@ class HoymilesProtocol {
   Map<String, dynamic>? parseResponse(Uint8List buffer) {
     try {
       if (buffer.length < 10) {
-        debugPrint('[Hoymiles] Buffer too short: ${buffer.length} bytes');
+        DebugLog.device('[Hoymiles] Buffer too short: ${buffer.length} bytes', level: LogLevel.error);
         return null;
       }
 
       // Parse header
       final header = buffer.sublist(0, 2);
       if (header[0] != CMD_HEADER[0] || header[1] != CMD_HEADER[1]) {
-        debugPrint('[Hoymiles] Invalid header: ${_bytesToHex(header)}');
+        DebugLog.device('[Hoymiles] Invalid header: ${_bytesToHex(header)}', level: LogLevel.error);
         return null;
       }
 
@@ -168,15 +150,15 @@ class HoymilesProtocol {
       // Parse length
       final length = (buffer[8] << 8) | buffer[9];
 
-      debugPrint('[Hoymiles] Parsing response:');
-      debugPrint('[Hoymiles]   Sequence: $sequence');
-      debugPrint('[Hoymiles]   CRC16: $crc16Target');
-      debugPrint('[Hoymiles]   Length: $length');
-      debugPrint('[Hoymiles]   Buffer length: ${buffer.length}');
+      DebugLog.device('[Hoymiles] Parsing response:', level: LogLevel.verbose);
+      DebugLog.device('[Hoymiles]   Sequence: $sequence', level: LogLevel.verbose);
+      DebugLog.device('[Hoymiles]   CRC16: $crc16Target', level: LogLevel.verbose);
+      DebugLog.device('[Hoymiles]   Length: $length', level: LogLevel.verbose);
+      DebugLog.device('[Hoymiles]   Buffer length: ${buffer.length}', level: LogLevel.verbose);
 
       // Validate buffer length
       if (buffer.length < length) {
-        debugPrint('[Hoymiles] Buffer incomplete: expected $length, got ${buffer.length}');
+        DebugLog.device('[Hoymiles] Buffer incomplete: expected $length, got ${buffer.length}', level: LogLevel.error);
         return null;
       }
 
@@ -186,11 +168,11 @@ class HoymilesProtocol {
       // Validate CRC16
       final crc16Calculated = calculateCrc16(protobufData);
       if (crc16Calculated != crc16Target) {
-        debugPrint('[Hoymiles] CRC16 mismatch: expected $crc16Target, got $crc16Calculated');
+        DebugLog.device('[Hoymiles] CRC16 mismatch: expected $crc16Target, got $crc16Calculated', level: LogLevel.error);
         return null;
       }
 
-      debugPrint('[Hoymiles] Response parsed successfully, protobuf data: ${protobufData.length} bytes');
+      DebugLog.device('[Hoymiles] Response parsed successfully, protobuf data: ${protobufData.length} bytes', level: LogLevel.debug);
 
       return {
         'tag': tag,
@@ -198,7 +180,7 @@ class HoymilesProtocol {
         'data': protobufData,
       };
     } catch (e) {
-      debugPrint('[Hoymiles] Error parsing response: $e');
+      DebugLog.device('[Hoymiles] Error parsing response: $e', level: LogLevel.error);
       return null;
     }
   }

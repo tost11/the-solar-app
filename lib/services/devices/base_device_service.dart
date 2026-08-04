@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../utils/debug_log.dart';
 
 import 'package:flutter/cupertino.dart';
 
@@ -48,7 +49,7 @@ abstract class BaseDeviceService {
     /// Template method for disconnection - handles standard disconnect flow
     /// Subclasses should override internalDisconnect() for device-specific logic
     Future<void> disconnect() async {
-      print('[${device.connectionType}][${device.name}] Disconnecting...');
+      DebugLog.device('[${device.connectionType}][${device.name}] Disconnecting...', level: LogLevel.debug);
 
       // Prevent auto-reconnect
       lastSeen = 0;
@@ -68,10 +69,10 @@ abstract class BaseDeviceService {
         final isDeviceConnected = isConnected();
         if (!isDeviceConnected) {
           device.emitStatus("Getrennt");
-          print('[${device.connectionType}][${device.name}] Successfully disconnected.');
+          DebugLog.device('[${device.connectionType}][${device.name}] Successfully disconnected.', level: LogLevel.debug);
         }
       } catch (e) {
-        print('[${device.connectionType}][${device.name}] Error during disconnect: $e');
+        DebugLog.device('[${device.connectionType}][${device.name}] Error during disconnect: $e', level: LogLevel.error);
         device.emitStatus("Fehler beim Trennen");
         rethrow;
       }
@@ -116,7 +117,7 @@ abstract class BaseDeviceService {
         lastSeen = DateTime.now().millisecondsSinceEpoch;
         fetchDataEnabled = true;
       } catch (e) {
-        debugPrint('Connection error: $e');
+        DebugLog.device('Connection error: $e', level: LogLevel.error);
         device.emitErrorWithFlag('Verbindungsfehler: $e', true);
         device.emitStatus('Verbindung fehlgeschlagen');
         rethrow;
@@ -157,7 +158,7 @@ abstract class BaseDeviceService {
         // Update status to connected after successful fetch
         device.emitStatus('Verbunden');
       } catch (e) {
-        debugPrint('Fetch data error: $e');
+        DebugLog.device('Fetch data error: $e', level: LogLevel.error);
         device.emitErrorWithFlag('Datenabruf fehlgeschlagen: $e', true);
         // Don't rethrow - allow timer to retry
       }
@@ -177,7 +178,7 @@ abstract class BaseDeviceService {
         _wasConnected = true;
       }else{
         if(_wasConnected == true){
-          debugPrint("------------------------- updated connection status ----------------------");
+          DebugLog.device("Updated connection status", level: LogLevel.debug);
           device.emitData({});
           device.emitStatus("nicht Verbunden");
         }
@@ -212,19 +213,17 @@ abstract class BaseDeviceService {
       try {
         if (this.isConnected()) {
           if(!isInitialized){
-            debugPrint("------------------------- init data ----------------------");
+            DebugLog.device("Init data", level: LogLevel.debug);
             await this.initDevice();
           }else if(fetchDataEnabled) {
-            debugPrint("------------------------- fetch data ----------------------");
+            DebugLog.device("Fetch data", level: LogLevel.debug);
             await this.fetchData();  // Base class checks fetchDataEnabled before calling
           }
         } else if (autoReconnect) {
           await connect();  // Connection attempts controlled only by autoReconnect
         }
       }catch(e){
-        debugPrint("error on reconnecting$e");
-        _timmerRunning = false;
-        rethrow;
+        DebugLog.device("Error on reconnecting: $e", level: LogLevel.error);
       }
       _timmerRunning = false;
     }
