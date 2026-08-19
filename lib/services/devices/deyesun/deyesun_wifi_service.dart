@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/devices/mixins/additional_port_mixin.dart';
 import 'package:the_solar_app/models/devices/mixins/device_wifi_mixin.dart';
@@ -27,7 +27,7 @@ class DeyeSunWifiService extends BaseDeviceService {
 
 
   DeyeSunWifiService(WiFiDeyeSunDevice device):
-        super((device as WiFiDeyeSunDevice).fetchDataInterval, device) {
+        super(device.fetchDataInterval, device) {
 
     wifiDevice = device;
 
@@ -133,33 +133,6 @@ class DeyeSunWifiService extends BaseDeviceService {
   }
 
 
-
-  /// Posts form data with Basic authentication using HttpClient with preserveHeaderCase
-  static Future<HttpClientResponse> _postWithAuth(String url, Map<String, String> formData, {int timeoutSeconds = 5}) async {
-    final client = HttpClient();
-    try {
-      final uri = Uri.parse(url);
-      final request = await client.postUrl(uri).timeout(Duration(seconds: timeoutSeconds));
-
-      // Set exact headers with proper casing
-      final credentials = base64Encode(utf8.encode('admin:admin'));
-      request.headers.set('Authorization', 'Basic $credentials', preserveHeaderCase: true);
-      request.headers.set('Content-Type', 'application/x-www-form-urlencoded', preserveHeaderCase: true);
-      request.headers.set('Accept', 'text/html,application/xhtml+xml', preserveHeaderCase: true);
-
-      // Build form-urlencoded body
-      final body = formData.entries
-          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-          .join('&');
-
-      request.write(body);
-
-      final response = await request.close().timeout(Duration(seconds: timeoutSeconds));
-      return response;
-    } finally {
-      client.close();
-    }
-  }
 
   /// Parses JavaScript variables from HTML response
   /// Extracts variables in format: var variable_name = "value";
@@ -405,7 +378,7 @@ class DeyeSunWifiService extends BaseDeviceService {
       if (!_modbusConnection.isConnected) {
         await _modbusConnection.connect(
           wifiDevice.getCurrenHostOrIp(),
-          (device as AdditionalPortMixin).additionalPort ??  DeyeSunModbusConnection.DEFAULT_PORT,
+          (device as AdditionalPortMixin).additionalPort,
           wifiDevice.deviceSn,
         );
       }
@@ -540,7 +513,7 @@ class DeyeSunWifiService extends BaseDeviceService {
   ///
   /// Register 0x0028 (40 decimal) contains power limit percentage
   Future<bool> writeModbusPowerLimit(int percentage) async {
-    if (_modbusConnection == null || !_modbusConnection!.isConnected) {
+    if (!_modbusConnection.isConnected) {
       DebugLog.device('[DeyeModbus] Cannot write power limit - not connected', level: LogLevel.warning);
       return false;
     }
@@ -552,7 +525,7 @@ class DeyeSunWifiService extends BaseDeviceService {
 
     try {
       DebugLog.device('[DeyeModbus] Writing power limit: $percentage%', level: LogLevel.debug);
-      final success = await _modbusConnection!.writeRegister(0x0028, percentage);
+      final success = await _modbusConnection.writeRegister(0x0028, percentage);
 
       if (success) {
         DebugLog.device('[DeyeModbus] Power limit set successfully', level: LogLevel.debug);
@@ -572,7 +545,7 @@ class DeyeSunWifiService extends BaseDeviceService {
   /// Register 0x002B (43 decimal) contains power status
   /// 1 = on, 2 = off
   Future<bool> writeModbusPowerStatus(bool on) async {
-    if (_modbusConnection == null || !_modbusConnection!.isConnected) {
+    if (!_modbusConnection.isConnected) {
       DebugLog.device('[DeyeModbus] Cannot write power status - not connected', level: LogLevel.warning);
       return false;
     }
@@ -581,7 +554,7 @@ class DeyeSunWifiService extends BaseDeviceService {
 
     try {
       DebugLog.device('[DeyeModbus] Writing power status: ${on ? "on" : "off"} (value: $value)', level: LogLevel.debug);
-      final success = await _modbusConnection!.writeRegister(0x002B, value);
+      final success = await _modbusConnection.writeRegister(0x002B, value);
 
       if (success) {
         DebugLog.device('[DeyeModbus] Power status set successfully', level: LogLevel.debug);

@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../../../constants/bluetooth_constants.dart';
 import '../../../models/devices/device_base.dart';
 import '../../../utils/map_utils.dart';
 import '../../../utils/debug_log.dart';
 import '../bluetooth_device_service.dart';
-import '../../device_storage_service.dart';
 
 /// Service for communicating with Zendure devices via Bluetooth Low Energy
 ///

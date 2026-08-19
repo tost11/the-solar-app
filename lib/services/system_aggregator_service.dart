@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 import '../utils/debug_log.dart';
 import 'package:the_solar_app/models/devices/capabilities/battery_capability.dart';
 import 'package:the_solar_app/models/devices/capabilities/device_role_config.dart';

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import "../../../utils/debug_log.dart";
 
 /// Mixin for adding WiFi connection capabilities to device models.

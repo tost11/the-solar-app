@@ -3,7 +3,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/hoymiles_dtu_device.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/hoymiles_inverter_device.dart';
-import 'package:the_solar_app/models/devices/time_series_field_config.dart';
+
 import 'package:the_solar_app/services/devices/hoymiles/hoymiles_protocol.dart';
 import '../../device_base.dart';
 import '../../mixins/device_wifi_mixin.dart';

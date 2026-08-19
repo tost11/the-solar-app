@@ -3,7 +3,7 @@ import '../../../utils/debug_log.dart';
 
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/device.dart';
 import 'package:the_solar_app/models/network_device.dart';
@@ -74,7 +74,7 @@ class ZendureWifiService extends BaseDeviceService {
 
   ZendureWifiService(DeviceBase device):
     super((device as WiFiZendureDevice).fetchDataInterval, device) {
-    wifiDevice = device as WiFiZendureDevice;
+    wifiDevice = device;
   }
 
   // No need to override internalDisconnect() - default implementation is sufficient

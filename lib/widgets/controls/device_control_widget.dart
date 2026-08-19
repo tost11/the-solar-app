@@ -58,9 +58,6 @@ class DeviceControlWidget extends StatelessWidget {
 
       case ControlType.button:
         return _buildButton(context);
-
-      default:
-        return const SizedBox.shrink();
     }
   }
 

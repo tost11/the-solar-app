@@ -595,7 +595,6 @@ class ZendureDeviceImplementation extends DeviceImplementation {
     ];
   }
 
-  @override
   List<GeneralSettingItem> getGeneralSettings(Map<String, dynamic> data) {
     // Extract current lamp switch state (0=off, 1=on)
     final lampState = MapUtils.OM(data, ['data', 'properties', 'lampSwitch']) as int? ?? 0;

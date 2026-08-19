@@ -1,10 +1,7 @@
 import 'dart:async';
 import '../utils/debug_log.dart';
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/cupertino.dart';
-import 'package:lan_scanner/lan_scanner.dart';
-import 'package:network_info_plus/network_info_plus.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:mutex/mutex.dart';
 import 'package:dart_ping/dart_ping.dart';
@@ -25,11 +22,8 @@ import 'devices/hoymiles/hoymiles_protocol.dart';
 import 'devices/kostal/kostal_wifi_service.dart';
 
 class NetworkScanService {
-  final _networkInfo = NetworkInfo();
   List<NetworkDevice> _discoveredDevices = [];
-  final _scanner = LanScanner(debugLogging: true);
   final Mutex _progressMutex = Mutex();
-  int _checkedCount = 0;
 
   // Map-based detector registry - O(1) lookup by manufacturer key
   static final Map<String, ManufacturerDetectorInfo> _detectorRegistry = {};
@@ -271,7 +265,7 @@ class NetworkScanService {
       DebugLog.network('Using continuous parallel probing with max $maxConcurrentProbes concurrent probes', level: LogLevel.debug);
 
       // Notify about transition to probing phase
-      _checkedCount = 0;
+      // _checkedCount = 0;
 
       // Worker pool pattern: continuous parallelism
       int nextIndex = 0;
@@ -294,7 +288,7 @@ class NetworkScanService {
 
           // Mutex-protected callback and counter update
           await _progressMutex.protect(() async {
-            _checkedCount++;
+            // _checkedCount++;
             if (device != null) {
               _discoveredDevices.add(device);
               knownDevicesCount++;

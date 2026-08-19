@@ -78,7 +78,7 @@ class HoymilesWifiService extends BaseDeviceService {
 
   HoymilesWifiService(DeviceBase device)
       : super((device as HoymilesDevice).fetchDataInterval, device) {
-    hoymilesDevice = device as HoymilesDevice;
+    hoymilesDevice = device;
   }
 
   /// Detect if serial is a DTU (not an inverter)
@@ -578,9 +578,6 @@ class HoymilesWifiService extends BaseDeviceService {
         result["inverter"] = inverters.entries.first.value;
       }
 
-      // Determine device model and power rating
-      String? deviceModel;
-
       // Check if DTU serial is a DTU type
       final dtuType = getDtuType(response.deviceSerialNumber);
       if (dtuType != null) {
@@ -588,14 +585,14 @@ class HoymilesWifiService extends BaseDeviceService {
         if (dtuType == "DTUBI" && inverters.isNotEmpty) {
           // Get first inverter serial (already converted to hex in loop above)
           final inverterSerial = inverters.keys.first;
-          deviceModel = getModelFromSerial(inverterSerial);
+          result['device_model'] = getModelFromSerial(inverterSerial);
         }
 
         // Store DTU type separately
         result['dtu_type'] = dtuType;
       } else {
         // Not a DTU, treat device_serial_number as inverter
-        deviceModel = getModelFromSerial(response.deviceSerialNumber);
+        result['device_model'] = getModelFromSerial(response.deviceSerialNumber);
       }
 
       DebugLog.device('[Hoymiles] Fetched real data: ${result.toString()}', level: LogLevel.verbose);
@@ -669,11 +666,6 @@ class HoymilesWifiService extends BaseDeviceService {
       default:
         return 'Unbekannt ($mode)';
     }
-  }
-
-  /// Helper to format boolean values
-  String _formatBoolean(int value) {
-    return value != 0 ? 'Ja' : 'Nein';
   }
 
   /// Get device information (formatted config data as flat map)

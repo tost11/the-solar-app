@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
 import '../../../constants/bluetooth_constants.dart';
 import '../../../constants/shelly_constants.dart';

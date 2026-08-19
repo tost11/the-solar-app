@@ -233,7 +233,7 @@ class ScriptTemplateUtils {
             break;
           }
 
-          final list = value as List;
+          final list = value;
           if (param.required && list.isEmpty) {
             errors[param.name] = '${param.label} muss mindestens einen Eintrag enthalten';
             break;

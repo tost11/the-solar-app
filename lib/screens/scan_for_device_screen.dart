@@ -1,9 +1,9 @@
 import 'dart:async';
 import '../utils/debug_log.dart';
-import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
-import 'package:network_info_plus/network_info_plus.dart';
+
 import 'package:lan_scanner/lan_scanner.dart';
 import 'package:the_solar_app/utils/dialog_utils.dart';
 import 'package:the_solar_app/utils/message_utils.dart';
@@ -15,7 +15,7 @@ import '../services/bluetooth_scan_service.dart';
 import '../services/devices/hoymiles/hoymiles_wifi_service.dart';
 import '../models/devices/manufacturers/hoymiles/hoymiles_bluetooth_device.dart';
 import '../models/device.dart';
-import '../models/device_factory.dart';
+
 import '../models/network_device.dart';
 import '../models/network_scan_progress.dart';
 import '../models/devices/mixins/device_wifi_mixin.dart';
@@ -43,8 +43,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
   final DeviceStorageService _storageService = DeviceStorageService();
   final NetworkScanService _networkScanService = NetworkScanService();
   final BluetoothScanService _bluetoothScanService = BluetoothScanService();
-  final NetworkInfo _networkInfo = NetworkInfo();
-
   // Bluetooth scanning
   List<BluetoothScanResult> _scanResults = [];
   bool _isScanning = false;
@@ -124,10 +122,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
         );
       }
     }
-  }
-
-  Future<void> _stopScan() async {
-    await _bluetoothScanService.stopScan();
   }
 
   Future<DeviceBase> _connectToBluetoothDevice(BluetoothDevice device, String type, {String? pin}) async {
@@ -350,18 +344,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     }
   }
 
-  /// Show warning dialog when WiFi IP is not in a private network range
-  ///
-  /// Returns true if user clicks OK to proceed, false if cancelled
-  Future<bool> _showNonPrivateIPWarning(String currentIP) async {
-    return await MessageUtils.showConfirmationDialog(
-      context,
-      title: context.l10n.warningPublicNetworkTitle,
-      message: context.l10n.warningPublicNetwork(currentIP),
-      okButtonText: context.l10n.actionContinueAnyway,
-      okButtonColor: Colors.orange,
-    );
-  }
 
   Future<void> _navigateToManualAdd() async {
     final device = await Navigator.push<DeviceBase>(
@@ -635,89 +617,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     return Colors.green.shade700;
   }
 
-  Widget _buildScanProgressInfo() {
-    if (_scanProgress == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Progress bar (overall combined progress)
-          LinearProgressIndicator(
-            value: _scanProgress!.overallProgress,
-          ),
-          const SizedBox(height: 16),
-
-          // Info cards in 2x2 grid
-          Row(
-            children: [
-              Expanded(child: _buildInfoCard(
-                context.l10n.labelFound,
-                '${_scanProgress!.foundHosts}',
-                Icons.router,
-                Colors.blue,
-              )),
-              const SizedBox(width: 8),
-              Expanded(child: _buildInfoCard(
-                context.l10n.labelKnownDevices,
-                '${_scanProgress!.knownDevices}',
-                Icons.check_circle,
-                Colors.green,
-              )),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: _buildInfoCard(
-                context.l10n.labelTested,
-                '${_scanProgress!.testedDevices}',
-                Icons.done,
-                Colors.orange,
-              )),
-              const SizedBox(width: 8),
-              Expanded(child: _buildInfoCard(
-                context.l10n.labelRemaining,
-                '${_scanProgress!.remainingDevices}',
-                Icons.pending,
-                Colors.grey,
-              )),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(String label, String value, IconData icon, Color color) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildCompactScanStatus() {
     if (_scanProgress == null) {
@@ -823,16 +722,6 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        String layoutMode;
-
-        // Determine layout mode based on width
-        if (width > 900) {
-          layoutMode = 'SUPER_WIDE';
-        } else if (width > 600) {
-          layoutMode = 'WIDE';
-        } else {
-          layoutMode = 'STANDARD';
-        }
 
         // Return appropriate layout
         if (width > 900) {
@@ -855,11 +744,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
           child: Icon(_getDeviceCardIcon(device), color: _getDeviceCardIconColor(device)),
         ),
         title: Text(
-          device.manufacturer != null
-              ? (device.deviceModel != null
-                  ? '${device.manufacturer} ${device.deviceModel}'
-                  : '${device.manufacturer} ${context.l10n.device}')
-              : device.ipAddress,
+          device.deviceModel != null
+              ? '${device.manufacturer} ${device.deviceModel}'
+              : '${device.manufacturer} ${context.l10n.device}',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
@@ -948,11 +835,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                 children: [
                   // Device Name
                   Text(
-                    device.manufacturer != null
-                        ? (device.deviceModel != null
-                            ? '${device.manufacturer} ${device.deviceModel}'
-                            : '${device.manufacturer} ${context.l10n.device}')
-                        : device.ipAddress,
+                    device.deviceModel != null
+                        ? '${device.manufacturer} ${device.deviceModel}'
+                        : '${device.manufacturer} ${context.l10n.device}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
@@ -1060,11 +945,9 @@ class _ScanForDeviceScreenState extends State<ScanForDeviceScreen> with SingleTi
                 children: [
                   // Device Name
                   Text(
-                    device.manufacturer != null
-                        ? (device.deviceModel != null
-                            ? '${device.manufacturer} ${device.deviceModel}'
-                            : '${device.manufacturer} ${context.l10n.device}')
-                        : device.ipAddress,
+                    device.deviceModel != null
+                        ? '${device.manufacturer} ${device.deviceModel}'
+                        : '${device.manufacturer} ${context.l10n.device}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),

@@ -1,10 +1,8 @@
 import 'dart:async';
 import '../../../utils/debug_log.dart';
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/devices/mixins/additional_port_mixin.dart';
-import 'package:the_solar_app/models/devices/mixins/device_wifi_mixin.dart';
 import 'package:the_solar_app/models/network_device.dart';
 import 'package:the_solar_app/models/additional_connection_info.dart';
 import 'package:the_solar_app/services/devices/base_device_service.dart';
@@ -47,7 +45,6 @@ class KostalWifiService extends BaseDeviceService {
       }
 
       final body = initialResponse.body;
-      final headers = initialResponse.headers;
 
       // Kostal-specific identifiers in HTML:
       // 1. Title tag contains "SCB" (Solar Control Board)
@@ -481,14 +478,6 @@ class KostalWifiService extends BaseDeviceService {
       final index = address - 512;
       if (index >= 0 && index < registers.length) {
         return KostalModbusConnection.parseInt16(registers, index);
-      }
-      return null;
-    }
-
-    double? regFloat(int address) {
-      final index = address - 512;
-      if (index + 1 < registers.length) {
-        return KostalModbusConnection.parseFloat(registers, index);
       }
       return null;
     }

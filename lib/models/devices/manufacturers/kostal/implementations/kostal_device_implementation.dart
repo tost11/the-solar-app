@@ -774,7 +774,6 @@ class KostalDeviceImplementation extends DeviceImplementation {
     ];
   }
 
-  @override
   String getFetchCommand() => COMMAND_FETCH_DATA;
 
   @override

@@ -5,7 +5,7 @@ import 'package:the_solar_app/models/devices/capabilities/inverter_capability.da
 import 'package:the_solar_app/models/devices/generic_bluetooth_device.dart';
 import 'package:the_solar_app/models/devices/mixins/device_authentication_mixin.dart';
 import 'package:the_solar_app/models/devices/mixins/fetch_data_timeout_mixin.dart';
-import 'package:the_solar_app/services/device_storage_service.dart';
+
 import 'package:the_solar_app/services/devices/hoymiles/hoymiles_bluetooth_service.dart';
 import 'package:the_solar_app/services/devices/hoymiles/hoymiles_command_helper.dart';
 import 'package:the_solar_app/utils/map_utils.dart';
@@ -132,10 +132,11 @@ class HoymilesBluetoothDevice extends GenericBluetoothDevice<
       return await service.getHistEnergy();
     } else if (command == COMMAND_SET_AUTH) {
       // this command is not documented yet (need to find out id)
+      // TODO: enable when implemented
       return {'success': false};
 
       //TODO enable this if implmented
-      final password = params['password'] as String?;
+      /*final password = params['password'] as String?;
       authUsername = 'admin';
       authPassword = (password == null || password.isEmpty)
           ? HOYMILES_BLE_DEFAULT_PIN
@@ -144,7 +145,7 @@ class HoymilesBluetoothDevice extends GenericBluetoothDevice<
       // Drop the connection; BaseDeviceService / detail screen re-establishes
       // it, re-running the handshake with the updated PIN.
       await connectionService?.disconnect();
-      return {'success': true};
+      return {'success': true};*/
     }
     throw UnimplementedError('Command "$command" not supported over Bluetooth');
   }

@@ -722,7 +722,6 @@ class DeyeSunDeviceImplementation extends DeviceImplementation {
     ];
   }
 
-  @override
   String getFetchCommand() => 'fetchStatus';
 
   @override

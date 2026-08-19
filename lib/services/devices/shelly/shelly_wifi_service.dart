@@ -1,6 +1,6 @@
 import 'dart:convert';
 import '../../../utils/debug_log.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import '../../../constants/shelly_constants.dart';
@@ -61,7 +61,6 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
             if (responseData.containsKey('id') &&
                 responseData.containsKey('model')) {
               final mac = responseData['mac'] as String?;
-              final deviceId = responseData['id'] as String?;
               final deviceModel = responseData['model'] as String?;
 
               if (mac != null) {

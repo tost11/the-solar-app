@@ -1,7 +1,7 @@
 import 'dart:convert';
 import '../../../utils/debug_log.dart';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/device.dart';
 import 'package:the_solar_app/models/network_device.dart';
@@ -96,7 +96,7 @@ class OpenDTUWifiService extends BaseDeviceService {
 
   OpenDTUWifiService(DeviceBase device):
     super((device as WiFiOpenDTUDevice).fetchDataInterval, device) {
-    wifiDevice = device as WiFiOpenDTUDevice;
+    wifiDevice = device;
     // Create WebSocket connection for real-time data with callback
     _websocketConnection = OpenDtuWebSocketConnection(
       onDataReceived: _handleWebSocketData,
@@ -160,17 +160,13 @@ class OpenDTUWifiService extends BaseDeviceService {
 
   @override
   Future<bool> internalConnect() async {
-    bool httpConnected = false;
-    bool wsConnected = false;
-
     // This throws exception if either endpoint fails
     await wifiDevice.connectIpOrHostname((ip,port) async {
       // Both endpoints must succeed - both throw on failure
       await fetchSystemInfo();      // Throws if system status fails
       await fetchNetworkStatus();   // Throws if network status fails
 
-      // Only reached if both succeed
-      httpConnected = true;
+      // Both HTTP endpoints reached successfully
     });
 
     device.data["data"] = {};

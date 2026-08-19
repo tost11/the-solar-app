@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../to.dart';
+import 'package:flutter/widgets.dart';
+
 import '../device_base.dart';
 
 /// Position where the custom section should be rendered

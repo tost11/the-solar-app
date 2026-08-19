@@ -198,30 +198,6 @@ class HoymilesCryptoUtils {
     return Uint8List.fromList(decrypted);
   }
 
-  // ==========================================================================
-  // PKCS7 Padding helpers
-  // ==========================================================================
-
-  static Uint8List _pkcs7Pad(Uint8List data, int blockSize) {
-    final padLength = blockSize - (data.length % blockSize);
-    final padded = Uint8List(data.length + padLength);
-    padded.setAll(0, data);
-    for (int i = data.length; i < padded.length; i++) {
-      padded[i] = padLength;
-    }
-    return padded;
-  }
-
-  static Uint8List _pkcs7Unpad(Uint8List data) {
-    if (data.isEmpty) return data;
-    final padLength = data.last;
-    if (padLength > 16 || padLength == 0) return data;
-    // Validate padding
-    for (int i = data.length - padLength; i < data.length; i++) {
-      if (data[i] != padLength) return data; // Invalid padding, return as-is
-    }
-    return data.sublist(0, data.length - padLength);
-  }
 
   /// Debug helper: bytes to hex string
   static String _toHex(Uint8List bytes) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:the_solar_app/generated/l10n/app_localizations.dart';
+
 import '../../models/devices/time_series_field_config.dart';
 import '../../models/devices/time_series_field_group.dart';
 
@@ -50,8 +50,6 @@ class TimeSeriesChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     // Determine if we're rendering a single field or a group
     final isGroup = group != null;
     final displayName = isGroup ? group!.getName(context) : field!.getLocalizedName(context);
@@ -367,8 +365,6 @@ class TimeSeriesChartCard extends StatelessWidget {
 
   /// Build legend for multi-series graphs
   Widget _buildLegend(BuildContext context, TimeSeriesFieldGroup group) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Wrap(
       spacing: 16,
       runSpacing: 8,

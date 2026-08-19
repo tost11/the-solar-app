@@ -2,7 +2,7 @@ import 'dart:async';
 import '../../../utils/debug_log.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
+
 import 'package:mutex/mutex.dart';
 
 /// Standalone Modbus TCP connection for Kostal solar inverters

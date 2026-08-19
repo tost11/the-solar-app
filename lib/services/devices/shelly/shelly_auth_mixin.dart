@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import '../../../models/devices/device_base.dart';
 import '../../../models/devices/mixins/device_authentication_mixin.dart';
 import '../../../utils/shelly_auth_utils.dart';
 import '../../../utils/debug_log.dart';

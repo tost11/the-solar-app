@@ -91,7 +91,7 @@ class DeviceListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Serial number (if available)
-          if (device.deviceSn != null) Text('SN: ${device.deviceSn}'),
+          if (device.deviceSn.isNotEmpty) Text('SN: ${device.deviceSn}'),
 
           // Connection type and last seen
           Row(
@@ -254,7 +254,7 @@ class DeviceListItem extends StatelessWidget {
             ),
 
             // Serial number (if available)
-            if (device.deviceSn != null) ...[
+            if (device.deviceSn.isNotEmpty) ...[
               const SizedBox(height: 2),
               Text(
                 'SN: ${device.deviceSn}',

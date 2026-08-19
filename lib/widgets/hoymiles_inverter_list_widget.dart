@@ -57,7 +57,6 @@ class _HoymilesInverterListWidgetState
   ) {
     final type = data['type'] as String?;
     final linkStatus = data['link_status'] as int? ?? 0;
-    final temperature = data['temperature'] as int?;
     final power = data['active_power'] as int?;
 
     // Determine status color

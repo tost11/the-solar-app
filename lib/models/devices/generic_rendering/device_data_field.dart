@@ -250,9 +250,6 @@ class DeviceDataField {
 
       case DataFieldType.none:
         return value.toString();
-
-      default:
-        return value.toString();
     }
   }
 

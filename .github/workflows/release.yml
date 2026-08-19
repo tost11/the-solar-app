@@ -1,0 +1,63 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    uses: ./.github/workflows/release-builds.yml
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from pubspec.yaml
+        id: version
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Download Linux .deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+          path: artifacts/
+
+      - name: Download Android APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-android.apk
+          path: artifacts/
+
+      - name: Download Windows bundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-windows
+          path: artifacts/windows
+
+      - name: Download Windows installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+          path: artifacts/
+
+      - name: Zip Windows bundle
+        run: |
+          cd artifacts
+          zip -r ../thesolarapp-${{ steps.version.outputs.version }}-windows.zip windows/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/thesolarapp_${{ steps.version.outputs.version }}-linux.deb
+            artifacts/app-release.apk
+            artifacts/thesolarapp-setup.exe
+            thesolarapp-${{ steps.version.outputs.version }}-windows.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

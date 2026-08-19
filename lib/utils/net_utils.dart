@@ -1,6 +1,6 @@
 import 'dart:io' show Platform, NetworkInterface, InternetAddressType;
 import 'debug_log.dart';
-import 'package:flutter/foundation.dart';
+
 
 /// Simple model for network interface information
 class NetworkInterfaceInfo {

@@ -442,11 +442,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       subtitle: Text(widget.device.id),
                       contentPadding: EdgeInsets.zero,
                     ),
-                    if (widget.device.deviceSn != null)
+                    if (widget.device.deviceSn.isNotEmpty)
                       ListTile(
                         leading: const Icon(Icons.qr_code, color: Colors.grey),
                         title: const Text('Seriennummer'),
-                        subtitle: Text(widget.device.deviceSn!),
+                        subtitle: Text(widget.device.deviceSn),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ListTile(

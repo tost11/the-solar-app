@@ -1,23 +1,23 @@
 import 'dart:async';
 import '../utils/debug_log.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart' hide LogLevel;
+
 import '../utils/localization_extension.dart';
 import '../models/device.dart';
-import '../models/devices/device_base.dart';  // For DeviceError class
+
 import '../models/to.dart';
 import '../models/devices/generic_rendering/device_category_config.dart';
-import '../models/devices/generic_rendering/device_control_item.dart';
+
 import '../models/devices/generic_rendering/device_custom_section.dart';
 import '../models/devices/generic_rendering/device_data_field.dart';
-import '../models/devices/generic_rendering/device_menu_item_context.dart';
+
 import '../models/devices/time_series_field_config.dart';
 import '../models/devices/time_series_field_group.dart';
-import '../services/device_storage_service.dart';
+
 import '../widgets/app_bar_widget.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/cards/device_data_card.dart';
-import '../widgets/cards/device_info_card.dart';
+
 import '../widgets/charts/time_series_chart_card.dart';
 import '../widgets/controls/device_control_widget.dart';
 import '../widgets/device_menu_bottom_sheet.dart';
@@ -25,7 +25,7 @@ import '../widgets/headers/connection_status_header.dart';
 import '../widgets/layouts/responsive_data_grid.dart';
 import '../utils/device_connection_utils.dart';
 import '../utils/globals.dart';
-import '../utils/message_utils.dart';
+
 import '../utils/navigation_utils.dart';
 import '../utils/responsive_breakpoints.dart';
 import 'device_settings_screen.dart';
@@ -50,8 +50,6 @@ class DeviceDetailScreen extends StatefulWidget {
 }
 
 class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
-  final DeviceStorageService _storageService = DeviceStorageService();
-
   String _connectionStatus = '';  // Will be set in initState()
   Map<String,Map<String,dynamic>> _receivedData =  {};
   bool _isConnecting = false;
@@ -949,46 +947,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           child: widget.device.controlItems.isNotEmpty
               ? _buildControlsSection()
               : const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-
-  /// Build graphs section (mobile fallback - not currently used)
-  Widget _buildGraphsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Section header
-        Text(
-          'Live-Diagramme',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Datenbereich: Letzte 5 Minuten | Aktualisierung: alle 5 Sekunden',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Responsive graph grid (tablet: 2 cols, desktop: 3 cols) - filtered by expert mode
-        Builder(
-          builder: (context) {
-            final visibleGraphs = _getVisibleTimeSeriesFields();
-            return ResponsiveGraphGrid(
-              itemCount: visibleGraphs.length,
-              itemBuilder: (context, index) {
-                return TimeSeriesChartCard(
-                  field: visibleGraphs[index],
-                );
-              },
-            );
-          },
         ),
       ],
     );

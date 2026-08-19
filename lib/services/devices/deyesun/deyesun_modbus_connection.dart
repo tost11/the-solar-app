@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
+
 import 'package:mutex/mutex.dart';
 import '../../../utils/modbus_utils.dart';
 import '../../../utils/debug_log.dart';
@@ -34,8 +34,6 @@ class DeyeSunModbusConnection {
   // Timeouts and timers
   Timer? _commandTimeoutTimer;
   DateTime? _lastSuccessfulRead;
-  bool _resetRedBytesNewCommand = false;
-
   // Response handling
   final Uint8List _readBuffer = Uint8List(READ_BUFFER_LENGTH);
   int _readBytes = 0;

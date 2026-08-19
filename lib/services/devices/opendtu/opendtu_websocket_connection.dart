@@ -2,7 +2,7 @@ import 'dart:async';
 import '../../../utils/debug_log.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
 
 /// WebSocket connection handler for OpenDTU devices
 ///

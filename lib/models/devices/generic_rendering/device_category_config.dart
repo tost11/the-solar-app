@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import "../../../utils/debug_log.dart";
 import 'package:the_solar_app/generated/l10n/app_localizations.dart';
 import 'device_data_field.dart';

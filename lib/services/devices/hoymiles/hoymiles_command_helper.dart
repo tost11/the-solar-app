@@ -1,5 +1,5 @@
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/AppGetHistED.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/AppGetHistPower.pb.dart';
 import 'package:the_solar_app/models/devices/manufacturers/hoymiles/protobuf/CommandPB.pb.dart';

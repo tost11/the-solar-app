@@ -1226,7 +1226,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       // Convert to Map<String, List<int>>
       final result = <String, List<int>>{};
       stored.forEach((key, value) {
-        if (key is String && value is List) {
+        if (value is List) {
           result[key] = value.cast<int>();
         }
       });
@@ -1416,7 +1416,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
          RegExp(r'_\d+$').hasMatch(category)); // Ends with underscore + digit
 
     // Only add suffix if NOT in an instance-specific category AND multiple instances exist
-    final suffix = (!isInstanceCategory && instanceCount > 1) ? ' ${instanceId + 1}' : '';
+    // final suffix = (!isInstanceCategory && instanceCount > 1) ? ' ${instanceId + 1}' : '';
 
     // Build TO from template, adding instance parameter if needed
     final TO nameTO;

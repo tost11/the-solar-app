@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import "../../../../../utils/debug_log.dart";
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/models/devices/capabilities/battery_capability.dart';
