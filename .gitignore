@@ -55,6 +55,7 @@ app.*.map.json
 /android/gradlew
 /android/gradlew.bat
 /android/gradle/
+!/android/gradle/wrapper/gradle-wrapper.properties
 *.apk
 *.aab
 *.ap_
