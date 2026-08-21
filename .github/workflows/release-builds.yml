@@ -3,81 +3,81 @@ on:
   workflow_call:
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Extract version from pubspec.yaml
-        id: version
-        run: |
-          version=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-          echo "version=$version" >> $GITHUB_OUTPUT
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            clang \
-            cmake \
-            ninja-build \
-            pkg-config \
-            libgtk-3-dev \
-            libblkid-dev \
-            liblzma-dev
-
-      - name: Enable Linux desktop
-        run: flutter config --enable-linux-desktop
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build Linux release
-        run: |
-          flutter build linux --release \
-            --build-name=${{ steps.version.outputs.version }} \
-            --build-number=${{ github.run_number }} \
-            --dart-define=GIT_HASH=${{ github.sha }}
-
-      - name: Create .deb package
-        run: |
-          version=${{ steps.version.outputs.version }}
-          mkdir -p /tmp/deb-stage/opt/thesolarapp
-          cp -r build/linux/x64/release/bundle/* /tmp/deb-stage/opt/thesolarapp/
-          mkdir -p /tmp/deb-stage/DEBIAN
-          echo "Package: thesolarapp" > /tmp/deb-stage/DEBIAN/control
-          echo "Version: ${version}-${{ github.run_number }}" >> /tmp/deb-stage/DEBIAN/control
-          echo "Section: utils" >> /tmp/deb-stage/DEBIAN/control
-          echo "Priority: optional" >> /tmp/deb-stage/DEBIAN/control
-          echo "Architecture: amd64" >> /tmp/deb-stage/DEBIAN/control
-          echo "Depends: libgtk-3-0" >> /tmp/deb-stage/DEBIAN/control
-          echo "Maintainer: The Solar App" >> /tmp/deb-stage/DEBIAN/control
-          echo "Description: Solar/battery/smartmeter device monitoring app" >> /tmp/deb-stage/DEBIAN/control
-          echo '#!/bin/sh' > /tmp/deb-stage/DEBIAN/postinst
-          echo 'ln -sf /opt/thesolarapp/thesolarapp /usr/local/bin/thesolarapp' >> /tmp/deb-stage/DEBIAN/postinst
-          chmod 755 /tmp/deb-stage/DEBIAN/postinst
-          dpkg-deb --build --root-owner-group /tmp/deb-stage /tmp/thesolarapp_${version}-linux.deb
-
-      - name: Upload Linux bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-linux-bundle
-          path: build/linux/x64/release/bundle/
-          retention-days: 30
-
-      - name: Upload Linux .deb artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
-          path: /tmp/thesolarapp_${{ steps.version.outputs.version }}-linux.deb
-          retention-days: 30
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Extract version from pubspec.yaml
+  #       id: version
+  #       run: |
+  #         version=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+  #         echo "version=$version" >> $GITHUB_OUTPUT
+  #
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: stable
+  #         cache: true
+  #
+  #     - name: Install Linux dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y \
+  #           clang \
+  #           cmake \
+  #           ninja-build \
+  #           pkg-config \
+  #           libgtk-3-dev \
+  #           libblkid-dev \
+  #           liblzma-dev
+  #
+  #     - name: Enable Linux desktop
+  #       run: flutter config --enable-linux-desktop
+  #
+  #     - name: Get dependencies
+  #       run: flutter pub get
+  #
+  #     - name: Build Linux release
+  #       run: |
+  #         flutter build linux --release \
+  #           --build-name=${{ steps.version.outputs.version }} \
+  #           --build-number=${{ github.run_number }} \
+  #           --dart-define=GIT_HASH=${{ github.sha }}
+  #
+  #     - name: Create .deb package
+  #       run: |
+  #         version=${{ steps.version.outputs.version }}
+  #         mkdir -p /tmp/deb-stage/opt/thesolarapp
+  #         cp -r build/linux/x64/release/bundle/* /tmp/deb-stage/opt/thesolarapp/
+  #         mkdir -p /tmp/deb-stage/DEBIAN
+  #         echo "Package: thesolarapp" > /tmp/deb-stage/DEBIAN/control
+  #         echo "Version: ${version}-${{ github.run_number }}" >> /tmp/deb-stage/DEBIAN/control
+  #         echo "Section: utils" >> /tmp/deb-stage/DEBIAN/control
+  #         echo "Priority: optional" >> /tmp/deb-stage/DEBIAN/control
+  #         echo "Architecture: amd64" >> /tmp/deb-stage/DEBIAN/control
+  #         echo "Depends: libgtk-3-0" >> /tmp/deb-stage/DEBIAN/control
+  #         echo "Maintainer: The Solar App" >> /tmp/deb-stage/DEBIAN/control
+  #         echo "Description: Solar/battery/smartmeter device monitoring app" >> /tmp/deb-stage/DEBIAN/control
+  #         echo '#!/bin/sh' > /tmp/deb-stage/DEBIAN/postinst
+  #         echo 'ln -sf /opt/thesolarapp/thesolarapp /usr/local/bin/thesolarapp' >> /tmp/deb-stage/DEBIAN/postinst
+  #         chmod 755 /tmp/deb-stage/DEBIAN/postinst
+  #         dpkg-deb --build --root-owner-group /tmp/deb-stage /tmp/thesolarapp_${version}-linux.deb
+  #
+  #     - name: Upload Linux bundle artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: thesolarapp-${{ steps.version.outputs.version }}-linux-bundle
+  #         path: build/linux/x64/release/bundle/
+  #         retention-days: 30
+  #
+  #     - name: Upload Linux .deb artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+  #         path: /tmp/thesolarapp_${{ steps.version.outputs.version }}-linux.deb
+  #         retention-days: 30
 
   build-android:
     runs-on: ubuntu-latest
@@ -145,14 +145,14 @@ jobs:
             --build-number=${{ github.run_number }} `
             --dart-define=GIT_HASH=${{ github.sha }}
 
-      - name: Install Inno Setup
-        run: choco install innosetup -y
-
-      - name: Build Windows installer
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" `
-            "/dAppVersion=${{ steps.version.outputs.version }}" `
-            "docker\build\installer_windows.iss"
+      # - name: Install Inno Setup
+      #   run: choco install innosetup -y
+      #
+      # - name: Build Windows installer
+      #   run: |
+      #     & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" `
+      #       "/dAppVersion=${{ steps.version.outputs.version }}" `
+      #       "docker\build\installer_windows.iss"
 
       - name: Upload Windows bundle artifact
         uses: actions/upload-artifact@v4
@@ -161,9 +161,9 @@ jobs:
           path: build/windows/x64/runner/Release/
           retention-days: 30
 
-      - name: Upload Windows installer artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
-          path: build/windows/installer/thesolarapp-setup.exe
-          retention-days: 30
+      # - name: Upload Windows installer artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+      #     path: build/windows/installer/thesolarapp-setup.exe
+      #     retention-days: 30
