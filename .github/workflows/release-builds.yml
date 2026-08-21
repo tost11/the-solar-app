@@ -117,53 +117,53 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-  build-windows:
-    runs-on: windows-2022
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Extract version from pubspec.yaml
-        id: version
-        run: |
-          $version = (Select-String -Path pubspec.yaml -Pattern '^version:').Line -replace 'version:\s*', ''
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build Windows release
-        run: |
-          flutter build windows --release `
-            --build-name=${{ steps.version.outputs.version }} `
-            --build-number=${{ github.run_number }} `
-            --dart-define=GIT_HASH=${{ github.sha }}
-
-      # - name: Install Inno Setup
-      #   run: choco install innosetup -y
-      #
-      # - name: Build Windows installer
-      #   run: |
-      #     & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" `
-      #       "/dAppVersion=${{ steps.version.outputs.version }}" `
-      #       "docker\build\installer_windows.iss"
-
-      - name: Upload Windows bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-windows
-          path: build/windows/x64/runner/Release/
-          retention-days: 30
-
-      # - name: Upload Windows installer artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
-      #     path: build/windows/installer/thesolarapp-setup.exe
-      #     retention-days: 30
+  # build-windows:
+  #   runs-on: windows-2022
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Extract version from pubspec.yaml
+  #       id: version
+  #       run: |
+  #         $version = (Select-String -Path pubspec.yaml -Pattern '^version:').Line -replace 'version:\s*', ''
+  #         echo "version=$version" >> $env:GITHUB_OUTPUT
+  #
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: stable
+  #         cache: true
+  #
+  #     - name: Get dependencies
+  #       run: flutter pub get
+  #
+  #     - name: Build Windows release
+  #       run: |
+  #         flutter build windows --release `
+  #           --build-name=${{ steps.version.outputs.version }} `
+  #           --build-number=${{ github.run_number }} `
+  #           --dart-define=GIT_HASH=${{ github.sha }}
+  #
+  #     # - name: Install Inno Setup
+  #     #   run: choco install innosetup -y
+  #     #
+  #     # - name: Build Windows installer
+  #     #   run: |
+  #     #     & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" `
+  #     #       "/dAppVersion=${{ steps.version.outputs.version }}" `
+  #     #       "docker\build\installer_windows.iss"
+  #
+  #     - name: Upload Windows bundle artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: thesolarapp-${{ steps.version.outputs.version }}-windows
+  #         path: build/windows/x64/runner/Release/
+  #         retention-days: 30
+  #
+  #     # - name: Upload Windows installer artifact
+  #     #   uses: actions/upload-artifact@v4
+  #     #   with:
+  #     #     name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+  #     #     path: build/windows/installer/thesolarapp-setup.exe
+  #     #     retention-days: 30
