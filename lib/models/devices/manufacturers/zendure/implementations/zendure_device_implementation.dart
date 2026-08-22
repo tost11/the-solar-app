@@ -397,15 +397,31 @@ class ZendureDeviceImplementation extends DeviceImplementation {
         expertMode: false,
         category: "settings"
       ),
-      DeviceDataField(
-        name: TO(key: FieldTranslationKeys.batteryLevel),
-        type: DataFieldType.percentage,
-        valueExtractor: (data) =>
-            MapUtils.OM(data, ['data', 'properties', 'electricLevel']),
-        icon: Icons.battery_charging_full,
-        expertMode: false,
-        category: "battery"
-      ),
+       DeviceDataField(
+         name: TO(key: FieldTranslationKeys.batteryLevel),
+         type: DataFieldType.percentage,
+         valueExtractor: (data) =>
+             MapUtils.OM(data, ['data', 'properties', 'electricLevel']),
+         icon: Icons.battery_charging_full,
+         expertMode: false,
+         category: "battery"
+       ),
+       DeviceDataField(
+         name: TO(key: FieldTranslationKeys.batteryVoltage),
+         type: DataFieldType.voltage,
+         valueExtractor: (data) {
+           final packData = MapUtils.OMas<List<dynamic>>(data, ['data', 'packData'], []);
+           if (packData.isEmpty) return null;
+           final firstPack = packData[0] as Map<String, dynamic>?;
+           return firstPack?['totalVol'];
+         },
+         icon: Icons.electrical_services,
+         expertMode: true,
+         category: 'battery',
+         divisor: 100,
+         hideIfEmpty: true,
+         precision: 2,
+       ),
       DeviceDataField(
         name: TO(key: FieldTranslationKeys.gridCurrent),
         type: DataFieldType.watt,

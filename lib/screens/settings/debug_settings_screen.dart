@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import '../../utils/globals.dart';
 import '../../utils/debug_log.dart';
 import '../../utils/message_utils.dart';
+import '../../utils/localization_extension.dart';
 
 class DebugSettingsScreen extends StatefulWidget {
   const DebugSettingsScreen({super.key});
@@ -22,7 +23,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, initialIndex: 1, vsync: this);
 
     // Listen for new log entries to auto-scroll
     DebugLog.logStream.listen((_) {
@@ -62,7 +63,7 @@ class _DebugSettingsScreenState extends State<DebugSettingsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug-Einstellungen'),
+        title: Text(context.l10n.loggingMenuTitle),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

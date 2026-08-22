@@ -87,6 +87,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expertModeDescription => 'Show Advanced Options';
 
   @override
+  String get loggingMenuTitle => 'Logging';
+
+  @override
+  String get loggingMenuSubtitle => 'Info for error analyzing';
+
+  @override
   String get permissions => 'Permissions';
 
   @override

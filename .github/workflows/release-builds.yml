@@ -145,14 +145,14 @@ jobs:
             --build-number=${{ github.run_number }} `
             --dart-define=GIT_HASH=${{ github.sha }}
 
-      # - name: Install Inno Setup
-      #   run: choco install innosetup -y
-      #
-      # - name: Build Windows installer
-      #   run: |
-      #     & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" `
-      #       "/dAppVersion=${{ steps.version.outputs.version }}" `
-      #       "docker\build\installer_windows.iss"
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Build Windows installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" `
+            "/dAppVersion=${{ steps.version.outputs.version }}" `
+            "docker\build\installer_windows.iss"
 
       - name: Upload Windows bundle artifact
         uses: actions/upload-artifact@v4
@@ -161,9 +161,9 @@ jobs:
           path: build/windows/x64/runner/Release/
           retention-days: 30
 
-      # - name: Upload Windows installer artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
-      #     path: build/windows/installer/thesolarapp-setup.exe
-      #     retention-days: 30
+      - name: Upload Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+          path: build/windows/installer/thesolarapp-setup.exe
+          retention-days: 30

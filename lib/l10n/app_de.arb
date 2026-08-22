@@ -104,6 +104,14 @@
   "@expertModeDescription": {
     "description": "Expert mode description"
   },
+  "loggingMenuTitle": "Logging",
+  "@loggingMenuTitle": {
+    "description": "Logging menu title"
+  },
+  "loggingMenuSubtitle": "Infos zu Fehleranalyse",
+  "@loggingMenuSubtitle": {
+    "description": "Logging menu subtitle"
+  },
   "permissions": "Berechtigungen",
   "@permissions": {
     "description": "Permissions setting label"

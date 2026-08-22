@@ -135,8 +135,8 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
           if (Globals.expertMode)
             ListTile(
               leading: const Icon(Icons.bug_report),
-              title: const Text('Debug-Einstellungen'),
-              subtitle: const Text('Log-Level und Kategorien konfigurieren'),
+              title: Text(context.l10n.loggingMenuTitle),
+              subtitle: Text(context.l10n.loggingMenuSubtitle),
               onTap: () => _navigateToSettingsScreen(
                 const DebugSettingsScreen(),
                 '/settings/debug',

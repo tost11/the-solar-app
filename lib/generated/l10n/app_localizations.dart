@@ -254,6 +254,18 @@ abstract class AppLocalizations {
   /// **'Erweiterte Optionen anzeigen'**
   String get expertModeDescription;
 
+  /// Logging menu title
+  ///
+  /// In de, this message translates to:
+  /// **'Logging'**
+  String get loggingMenuTitle;
+
+  /// Logging menu subtitle
+  ///
+  /// In de, this message translates to:
+  /// **'Infos zu Fehleranalyse'**
+  String get loggingMenuSubtitle;
+
   /// Permissions setting label
   ///
   /// In de, this message translates to:
