@@ -1,0 +1,27 @@
+FROM ghcr.io/cirruslabs/flutter:stable AS builder
+
+WORKDIR /app
+
+# Install MinGW cross-compiler for Windows and build tools
+RUN apt-get update && \
+    apt-get install -y \
+      cmake \
+      ninja-build \
+      gcc-mingw-w64-x86-64 \
+      g++-mingw-w64-x86-64 \
+      && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+ARG BUILD_NAME=1.5.0
+ARG BUILD_NUMBER=1
+
+RUN flutter config --enable-windows-desktop && \
+    flutter pub get && \
+    flutter build windows --release \
+      --build-name=$BUILD_NAME \
+      --build-number=$BUILD_NUMBER
+
+# Minimal stage for artifact extraction
+FROM alpine:latest
+COPY --from=builder /app/build/windows/x64/runner/Release /artifacts/windows/

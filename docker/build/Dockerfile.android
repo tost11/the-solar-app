@@ -1,0 +1,20 @@
+FROM ghcr.io/cirruslabs/flutter:stable AS builder
+
+WORKDIR /app
+
+# Accept Android SDK licenses
+RUN yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+COPY . .
+
+ARG BUILD_NAME=1.5.0
+ARG BUILD_NUMBER=1
+
+RUN flutter pub get && \
+    flutter build apk --release \
+      --build-name=$BUILD_NAME \
+      --build-number=$BUILD_NUMBER
+
+# Minimal stage for artifact extraction
+FROM alpine:latest
+COPY --from=builder /app/build/app/outputs/flutter-apk/app-release.apk /artifacts/android/app-release.apk

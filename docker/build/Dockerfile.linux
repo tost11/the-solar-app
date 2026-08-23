@@ -1,0 +1,79 @@
+FROM debian:12 AS flutter-setup
+
+RUN apt-get update && \
+    apt-get install -y \
+      curl \
+      git \
+      unzip \
+      xz-utils \
+      zip \
+      && rm -rf /var/lib/apt/lists/*
+
+ENV FLUTTER_HOME=/opt/flutter
+RUN git clone --depth 1 --branch stable https://github.com/flutter/flutter.git $FLUTTER_HOME && \
+    $FLUTTER_HOME/bin/flutter config --enable-linux-desktop
+ENV PATH=$FLUTTER_HOME/bin:$PATH
+
+FROM debian:12 AS builder
+
+COPY --from=flutter-setup /opt/flutter /opt/flutter
+ENV PATH=/opt/flutter/bin:$PATH
+
+WORKDIR /app
+
+# Install Linux desktop build dependencies
+RUN apt-get update && \
+    apt-get install -y \
+      git \
+      unzip \
+      xz-utils \
+      clang \
+      cmake \
+      ninja-build \
+      pkg-config \
+      libgtk-3-dev \
+      libblkid-dev \
+      liblzma-dev \
+      libmpfr-dev \
+      libmpc-dev \
+      libunwind-dev \
+      libdw-dev \
+      libiberty-dev \
+      binutils-dev \
+      && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+ARG BUILD_NAME=1.5.0
+ARG BUILD_NUMBER=1
+
+RUN flutter pub get && \
+    flutter build linux --release \
+      --build-name=$BUILD_NAME \
+      --build-number=$BUILD_NUMBER
+
+# Minimal stage for artifact extraction
+FROM debian:12-slim AS final
+
+ARG BUILD_NAME=1.5.0
+ARG BUILD_NUMBER=1
+
+COPY --from=builder /app/build/linux/x64/release/bundle /artifacts/linux/
+
+RUN apt-get update && apt-get install -y --no-install-recommends dpkg && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /tmp/deb-stage/opt/thesolarapp && \
+    cp -r /artifacts/linux/* /tmp/deb-stage/opt/thesolarapp/ && \
+    mkdir -p /tmp/deb-stage/DEBIAN && \
+    echo "Package: thesolarapp" > /tmp/deb-stage/DEBIAN/control && \
+    echo "Version: ${BUILD_NAME}-${BUILD_NUMBER}" >> /tmp/deb-stage/DEBIAN/control && \
+    echo "Section: utils" >> /tmp/deb-stage/DEBIAN/control && \
+    echo "Priority: optional" >> /tmp/deb-stage/DEBIAN/control && \
+    echo "Architecture: amd64" >> /tmp/deb-stage/DEBIAN/control && \
+    echo "Depends: libgtk-3-0" >> /tmp/deb-stage/DEBIAN/control && \
+    echo "Maintainer: The Solar App" >> /tmp/deb-stage/DEBIAN/control && \
+    echo "Description: Solar/battery/smartmeter device monitoring app" >> /tmp/deb-stage/DEBIAN/control && \
+    echo '#!/bin/sh' > /tmp/deb-stage/DEBIAN/postinst && \
+    echo 'ln -sf /opt/thesolarapp/thesolarapp /usr/local/bin/thesolarapp' >> /tmp/deb-stage/DEBIAN/postinst && \
+    chmod 755 /tmp/deb-stage/DEBIAN/postinst && \
+    dpkg-deb --build --root-owner-group /tmp/deb-stage /artifacts/thesolarapp_${BUILD_NAME}-linux.deb
