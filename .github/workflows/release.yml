@@ -70,37 +70,18 @@ jobs:
             thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe > ../thesolarapp-${{ steps.version.outputs.version }}.sha256
           cd .. && sha256sum thesolarapp-${{ steps.version.outputs.version }}-windows.zip >> thesolarapp-${{ steps.version.outputs.version }}.sha256
 
-      - name: Create Draft GitHub Release
-        uses: actions/github-script@v7
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const version = '${{ steps.version.outputs.version }}';
-            const files = [
-              `artifacts/thesolarapp-${version}-linux.deb`,
-              `artifacts/thesolarapp-${version}-android.apk`,
-              `artifacts/thesolarapp-${version}-windows-setup.exe`,
-              `thesolarapp-${version}-windows.zip`,
-              `thesolarapp-${version}.sha256`
-            ];
-            const release = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: `v${version}`,
-              name: `v${version}`,
-              draft: true,
-              prerelease: false
-            });
-            for (const file of files) {
-              const fileName = path.basename(file);
-              await github.rest.repos.uploadReleaseAsset({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: release.data.id,
-                name: fileName,
-                data: fs.readFileSync(file)
-              });
-            }
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Version ${{ steps.version.outputs.version }}
+          files: |
+            artifacts/thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+            artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
+            artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+            thesolarapp-${{ steps.version.outputs.version }}-windows.zip
+            thesolarapp-${{ steps.version.outputs.version }}.sha256
+          draft: true
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
