@@ -80,6 +80,5 @@ jobs:
             thesolarapp-${{ steps.version.outputs.version }}-windows.zip
             thesolarapp-${{ steps.version.outputs.version }}.sha256
           draft: true
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
