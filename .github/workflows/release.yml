@@ -21,17 +21,17 @@ jobs:
           version=$(grep '^version:' pubspec.yaml | awk '{print $2}')
           echo "version=$version" >> $GITHUB_OUTPUT
 
-      # - name: Download Linux .deb artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
-      #     path: artifacts/
-      #
-      # - name: Download Android APK artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: thesolarapp-${{ steps.version.outputs.version }}-android.apk
-      #     path: artifacts/
+      - name: Download Linux .deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+          path: artifacts/
+
+      - name: Download Android APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-android.apk
+          path: artifacts/
 
       - name: Download Windows bundle artifact
         uses: actions/download-artifact@v4
@@ -50,31 +50,35 @@ jobs:
           cd artifacts
           zip -r ../thesolarapp-${{ steps.version.outputs.version }}-windows.zip windows/
 
-      - name: Rename Windows installer
+      - name: Rename release files
         run: |
+          mv artifacts/app-release.apk artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
           mv artifacts/thesolarapp-setup.exe artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
 
-      # - name: Verify all release files exist
-      #   run: |
-      #     test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-linux.deb
-      #     test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
-      #     test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
-      #     test -f thesolarapp-${{ steps.version.outputs.version }}-windows.zip
-      #
-      # - name: Generate SHA256 checksums
-      #   run: |
-      #     cd artifacts && sha256sum \
-      #       thesolarapp-${{ steps.version.outputs.version }}-linux.deb \
-      #       thesolarapp-${{ steps.version.outputs.version }}-android.apk \
-      #       thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe > ../thesolarapp-${{ steps.version.outputs.version }}.sha256
-      #     cd .. && sha256sum thesolarapp-${{ steps.version.outputs.version }}-windows.zip >> thesolarapp-${{ steps.version.outputs.version }}.sha256
+      - name: Verify all release files exist
+        run: |
+          test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+          test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
+          test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+          test -f thesolarapp-${{ steps.version.outputs.version }}-windows.zip
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd artifacts && sha256sum \
+            thesolarapp-${{ steps.version.outputs.version }}-linux.deb \
+            thesolarapp-${{ steps.version.outputs.version }}-android.apk \
+            thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe > ../thesolarapp-${{ steps.version.outputs.version }}.sha256
+          cd .. && sha256sum thesolarapp-${{ steps.version.outputs.version }}-windows.zip >> thesolarapp-${{ steps.version.outputs.version }}.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
+            artifacts/thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+            artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
             artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
             thesolarapp-${{ steps.version.outputs.version }}-windows.zip
+            thesolarapp-${{ steps.version.outputs.version }}.sha256
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
