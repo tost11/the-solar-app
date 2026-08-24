@@ -5,11 +5,12 @@
 #define MyAppPublisher "The Solar App"
 #define MyAppURL "https://github.com/tost11/the-solar-app"
 #define MyAppExeName "the_solar_app.exe"
+#define AppVersion "1.0.0"
 
 [Setup]
 AppId={{A3F8E1D2-7B4C-4E9F-8D5A-1C6B3E9F2A7D}
 AppName={#MyAppName}
-AppVersion={#SetupSetting("AppVersion")}
+AppVersion={#AppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
