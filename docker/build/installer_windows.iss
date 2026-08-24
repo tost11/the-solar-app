@@ -16,9 +16,9 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-OutputDir ..\..\..\..\..\build\windows\installer
+OutputDir=..\..\..\..\..\build\windows\installer
 OutputBaseFilename=thesolarapp-setup
-SetupIconFile ..\..\..\..\..\assets\icon\app_icon.png
+SetupIconFile=..\..\..\..\..\assets\icon\app_icon.png
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
