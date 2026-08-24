@@ -63,7 +63,7 @@ jobs:
           echo '#!/bin/sh' > /tmp/deb-stage/DEBIAN/postinst
           echo 'ln -sf /opt/thesolarapp/thesolarapp /usr/local/bin/thesolarapp' >> /tmp/deb-stage/DEBIAN/postinst
           chmod 755 /tmp/deb-stage/DEBIAN/postinst
-          dpkg-deb --build --root-owner-group /tmp/deb-stage /tmp/thesolarapp_${version}-linux.deb
+          dpkg-deb --build --root-owner-group /tmp/deb-stage /tmp/thesolarapp-${version}-linux.deb
 
       - name: Upload Linux bundle artifact
         uses: actions/upload-artifact@v4
@@ -75,8 +75,8 @@ jobs:
       - name: Upload Linux .deb artifact
         uses: actions/upload-artifact@v4
         with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
-          path: /tmp/thesolarapp_${{ steps.version.outputs.version }}-linux.deb
+          name: thesolarapp-${{ steps.version.outputs.version }}-linux-deb
+          path: /tmp/thesolarapp-${{ steps.version.outputs.version }}-linux.deb
           retention-days: 30
 
   build-android:
@@ -113,7 +113,7 @@ jobs:
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-android.apk
+          name: thesolarapp-${{ steps.version.outputs.version }}-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
@@ -164,6 +164,6 @@ jobs:
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup-exe
           path: build/windows/installer/thesolarapp-setup.exe
           retention-days: 30

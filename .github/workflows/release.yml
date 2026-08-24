@@ -24,13 +24,13 @@ jobs:
       - name: Download Linux .deb artifact
         uses: actions/download-artifact@v4
         with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+          name: thesolarapp-${{ steps.version.outputs.version }}-linux-deb
           path: artifacts/
 
       - name: Download Android APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-android.apk
+          name: thesolarapp-${{ steps.version.outputs.version }}-android-apk
           path: artifacts/
 
       - name: Download Windows bundle artifact
@@ -42,7 +42,7 @@ jobs:
       - name: Download Windows installer artifact
         uses: actions/download-artifact@v4
         with:
-          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
+          name: thesolarapp-${{ steps.version.outputs.version }}-windows-setup-exe
           path: artifacts/
 
       - name: Zip Windows bundle
