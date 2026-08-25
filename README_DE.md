@@ -43,8 +43,8 @@ Einige Screenshots, um einen Eindruck von der App zu bekommen:
 
 ### Plattformen
 - **Android** ✅ (Primäre Plattform)
-- **Linux** ✅ (Kein Bluetooth)
-- **Windows** ✅ (Kein Bluetooth)
+- **Linux** ✅
+- **Windows** ✅
 
 ### Unterstützte Geräte
 
@@ -105,7 +105,7 @@ Einige Screenshots, um einen Eindruck von der App zu bekommen:
   - Wechselrichter Ein/Aus-Umschaltung (pro Gerät)
   - Wechselrichter-Neustart (pro Gerät)
 
-#### Hoymiles (WiFi/Network)
+#### Hoymiles (WiFi/Network & Bluetooth)
 - **Gerätetypen**:
   - **DTU-Gateways** (DTU-WLite, DTU-Pro, DTU-Lite-S): Verwalten mehrerer Wechselrichter mit aggregierter Überwachung und erweiterbarer Wechselrichterlisten-UI
   - **HMS-Wechselrichter** (HMS-800W-2T, HMS-1600W-4T usw.): Eigenständige Mikrowechselrichter mit integriertem WiFi
@@ -361,6 +361,7 @@ Dieses Projekt ist Open Source. Lizenzdetails werden noch hinzugefügt.
   - [Hoymiles Protocol](https://github.com/ohAnd/dtuGateway)
   - [Deye Sun Protocol](https://github.com/kbialek/deye-inverter-mqtt)
   - [Deye Sun and Hoymiles Protocol](https://github.com/tost11/OpenDTU-Push-Rest-API-and-Deye-Sun)
+  - [Hoymiles Bluetooth Protocol](https://github.com/TheTiEr/hiflow-ble)
 
 ## Unterstützung
 
