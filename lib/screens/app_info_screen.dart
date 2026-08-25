@@ -68,7 +68,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                 children: [
                   Text(context.l10n.version, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Text('${_packageInfo?.version ?? '...'} (Build ${_packageInfo?.buildNumber ?? '...'})'),
+                  Text(_packageInfo?.version ?? '...'),
                 ],
               ),
             ),
