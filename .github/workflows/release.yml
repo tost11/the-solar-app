@@ -27,6 +27,12 @@ jobs:
           name: thesolarapp-${{ steps.version.outputs.version }}-linux-deb
           path: artifacts/
 
+      - name: Download Linux bundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: thesolarapp-${{ steps.version.outputs.version }}-linux-bundle
+          path: artifacts/linux-bundle
+
       - name: Download Android APK artifact
         uses: actions/download-artifact@v4
         with:
@@ -50,6 +56,11 @@ jobs:
           cd artifacts
           zip -r ../thesolarapp-${{ steps.version.outputs.version }}-windows.zip windows/
 
+      - name: Zip Linux bundle
+        run: |
+          cd artifacts
+          zip -r ../thesolarapp-${{ steps.version.outputs.version }}-linux-bundle.zip linux-bundle/
+
       - name: Rename release files
         run: |
           mv artifacts/app-release.apk artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
@@ -61,6 +72,7 @@ jobs:
           test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
           test -f artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
           test -f thesolarapp-${{ steps.version.outputs.version }}-windows.zip
+          test -f thesolarapp-${{ steps.version.outputs.version }}-linux-bundle.zip
 
       - name: Generate SHA256 checksums
         run: |
@@ -68,7 +80,10 @@ jobs:
             thesolarapp-${{ steps.version.outputs.version }}-linux.deb \
             thesolarapp-${{ steps.version.outputs.version }}-android.apk \
             thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe > ../thesolarapp-${{ steps.version.outputs.version }}.sha256
-          cd .. && sha256sum thesolarapp-${{ steps.version.outputs.version }}-windows.zip >> thesolarapp-${{ steps.version.outputs.version }}.sha256
+          cd .. && sha256sum \
+            thesolarapp-${{ steps.version.outputs.version }}-windows.zip \
+            thesolarapp-${{ steps.version.outputs.version }}-linux-bundle.zip \
+            >> thesolarapp-${{ steps.version.outputs.version }}.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -77,6 +92,7 @@ jobs:
           name: Version ${{ steps.version.outputs.version }}
           files: |
             artifacts/thesolarapp-${{ steps.version.outputs.version }}-linux.deb
+            thesolarapp-${{ steps.version.outputs.version }}-linux-bundle.zip
             artifacts/thesolarapp-${{ steps.version.outputs.version }}-android.apk
             artifacts/thesolarapp-${{ steps.version.outputs.version }}-windows-setup.exe
             thesolarapp-${{ steps.version.outputs.version }}-windows.zip
