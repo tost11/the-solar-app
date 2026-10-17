@@ -21,7 +21,7 @@ NEW_VERSION="9999.1.${TIMESTAMP}"
 NEW_VERSION_HYPHENATED="9999-1-${TIMESTAMP}"
 
 # External URL of this mock server (as seen by the Flutter app)
-MOCK_SERVER_URL="${MOCK_SERVER_EXTERNAL_URL:-http://localhost:8085}"
+MOCK_SERVER_URL="${MOCK_SERVER_EXTERNAL_URL:-http://localhost:15005}"
 
 echo "=== Script Template Mock Server Preparation ==="
 echo "Timestamp: ${TIMESTAMP}"

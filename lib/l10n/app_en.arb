@@ -2512,6 +2512,8 @@
   "@shellyScriptsUploadingCode": {
     "description": "Loading message for uploading script code"
   },
+  "scriptUploadProgress": "Uploading: {current} of {total}",
+  "scriptUploadProgressAttempt": "Uploading: {current} of {total} (attempt {attempt})",
   "shellyScriptsFinalizingInstall": "Finalizing installation...",
   "@shellyScriptsFinalizingInstall": {
     "description": "Loading message for finalizing installation"
@@ -3144,6 +3146,7 @@
   "@menuGeneralSettings": {
     "description": "Menu item title for general settings"
   },
+  "menuRelaySettings": "Relay Settings",
   "menuInverterPowerLimit": "Limit Inverter Power",
   "@menuInverterPowerLimit": {
     "description": "Menu item title for inverter power limit"
@@ -3351,6 +3354,8 @@
   "fieldWifiSignal": "WiFi Signal",
   "fieldWifiState": "WiFi State",
   "fieldSwitchInstance": "Switch {instanceNum}",
+  "switchToggleOnLoading": "Turning Switch {instanceNum} on...",
+  "switchToggleOffLoading": "Turning Switch {instanceNum} off...",
   "fieldPowerInstance": "Power {instanceNum}",
   "fieldEnergyInstance": "Energy {instanceNum}",
   "fieldFrequencyInstance": "Frequency {instanceNum}",
@@ -3478,6 +3483,7 @@
   "menuPortConfiguration": "Configure Port",
 
   "menuSubtitleGeneralSettings": "Manage basic device settings",
+  "menuSubtitleRelaySettings": "Manage per-relay settings",
   "menuSubtitleWifiConfiguration": "Setup network connection",
   "menuSubtitleOnlineMonitoring": "Setup server for data transmission",
   "menuSubtitleRestartDevice": "Restart the device",
@@ -3792,6 +3798,46 @@
   "@settingDebugWebsocketDesc": {
     "description": "Setting description: Debug WebSocket"
   },
+  "settingLed": "LED Status",
+  "@settingLed": {
+    "description": "Setting: LED Status"
+  },
+  "settingLedDesc": "Turn the device status LED on or off",
+  "@settingLedDesc": {
+    "description": "Setting description: LED Status"
+  },
+  "settingDebugMode": "Debug Mode",
+  "@settingDebugMode": {
+    "description": "Setting: Debug Mode"
+  },
+  "settingDebugModeDesc": "Enable device debug logging",
+  "@settingDebugModeDesc": {
+    "description": "Setting description: Debug Mode"
+  },
+  "settingCloud": "Cloud",
+  "@settingCloud": {
+    "description": "Setting: Cloud"
+  },
+  "settingCloudDesc": "Shelly Cloud connection (device data is sent to the Shelly cloud)",
+  "@settingCloudDesc": {
+    "description": "Setting description: Cloud"
+  },
+  "settingDiscoverableDescV1": "Make device discoverable on the local network",
+  "@settingDiscoverableDescV1": {
+    "description": "Setting description: Discoverable (network)"
+  },
+  "settingPonWifiReset": "WiFi Reset on Power-On",
+  "@settingPonWifiReset": {
+    "description": "Setting: Power-on WiFi Reset"
+  },
+  "settingPonWifiResetDesc": "Automatically switch to AP mode when powered on without reachable WiFi",
+  "@settingPonWifiResetDesc": {
+    "description": "Setting description: Power-on WiFi Reset"
+  },
+  "settingBtnType": "Button action",
+  "settingBtnTypeDesc": "Behavior of the button connected to the device",
+  "settingDefaultState": "Power-on state",
+  "settingDefaultStateDesc": "Relay state after power is restored",
   "setGridInput": "Set Grid Input",
   "@setGridInput": {
     "description": "Field: Set Grid Input"
@@ -4061,5 +4107,37 @@
   "historyRefreshed": "History updated",
   "@historyRefreshed": {
     "description": "Success message after manually refreshing history"
+  },
+  "shellyRpcUdpPortDescription": "Configure the UDP port for RPC communication. After configuration, the device must be restarted to apply the changes.",
+  "@shellyRpcUdpPortDescription": {
+    "description": "Description shown in the Shelly RPC UDP port configuration screen"
+  },
+  "loadingCurrentConfig": "Loading current configuration...",
+  "@loadingCurrentConfig": {
+    "description": "Loading message while fetching the current device configuration"
+  },
+  "messageWifiConfigComplete": "WiFi configuration complete",
+  "@messageWifiConfigComplete": {
+    "description": "Success message after WiFi configuration was applied"
+  },
+  "wifiActivateToggle": "STA-Mode",
+  "@wifiActivateToggle": {
+    "description": "Toggle on WiFi configuration screen: activate client mode now (on) or only store the credentials (off)"
+  },
+  "formPasswordMin8Hint": "At least 8 characters recommended",
+  "@formPasswordMin8Hint": {
+    "description": "Hint below the password field on the access point configuration screen"
+  },
+  "helpApRebootBullet": "• After configuration the access point will be restarted",
+  "@helpApRebootBullet": {
+    "description": "Info bullet on the access point configuration screen"
+  },
+  "formNetworkNameSsid": "Network name (SSID)",
+  "@formNetworkNameSsid": {
+    "description": "Label for the network name (SSID) on configuration screens"
+  },
+  "apRangeExtenderDesc": "Extends the range of the WiFi network",
+  "@apRangeExtenderDesc": {
+    "description": "Description of the range extender option on the access point configuration screen"
   }
 }

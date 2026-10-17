@@ -30,5 +30,5 @@
   "sourceCode": "function printMessage() {\n  print(MESSAGE);\n}\n\n// Timer: repeating at configured interval\nTimer.set(INTERVAL_MS, true, printMessage);\n\nprintMessage();",
   "createdAt": "2026-07-18T00:00:00Z",
   "updatedAt": "2026-07-18T00:00:00Z",
-  "updatePath": "http://localhost:8085/custom-hello-world"
+  "updatePath": "http://localhost:15005/custom-hello-world"
 }

@@ -123,7 +123,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
 
   /// Send a JSON-RPC command to the device via BLE
   @override
-  Future<Map<String, dynamic>?> sendCommand(String method, Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>?> sendCommand(String method, Map<String, dynamic> params, {Duration? timeout}) async {
     if (rwCharacteristic == null ||
         writeCharacteristic == null ||
         readNotifyCharacteristic == null) {
@@ -509,7 +509,7 @@ class ShellyBluetoothService extends BluetoothDeviceService with ShellyAuthMixin
           DebugLog.device('Authentication retry failed with 401', level: LogLevel.error);
           // Clear cached auth since it didn't work
           resetAuthCache();
-          throw Exception('Authentifizierung fehlgeschlagen. Bitte überprüfen Sie Benutzername und Passwort.');
+          throw Exception('Authentication failed. Please check username and password.');
         }
       }
 

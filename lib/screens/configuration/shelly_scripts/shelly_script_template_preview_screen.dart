@@ -36,6 +36,7 @@ class _ShellyScriptTemplatePreviewScreenState
   late String _generatedCode;
   late String _deploymentId;
   late String _scriptName;
+  late String _stagingName;
 
   @override
   void initState() {
@@ -44,9 +45,13 @@ class _ShellyScriptTemplatePreviewScreenState
     // Generate unique deployment ID (8 characters)
     _deploymentId = const Uuid().v4().substring(0, 8);
 
-    // Generate script name with naming convention:
+    // Generate script names with naming convention:
     // __auto_{template-id}_{version}_{deployment-id}
+    // Deployed atomically: created with a 0.0.0 staging name, then renamed to
+    // the final version only after a successful upload. A failed install is
+    // therefore left at 0.0.0 and flagged as failed in the scripts list.
     _scriptName = '__auto_${widget.template.id}_${widget.template.version}_$_deploymentId';
+    _stagingName = '__auto_${widget.template.id}_0.0.0_$_deploymentId';
 
     // Generate script code with auto-generated parameters and metadata
     _generatedCode = ScriptTemplateUtils.generateScript(
@@ -89,7 +94,7 @@ class _ShellyScriptTemplatePreviewScreenState
         loadingMessage: context.l10n.shellyScriptsCreatingScript,
         operation: () => widget.device.sendCommand(
           COMMAND_CREATE_SCRIPT,
-          {"name": _scriptName},
+          {"name": _stagingName},
         ),
         showErrorDialog: false,
       );
@@ -107,15 +112,23 @@ class _ShellyScriptTemplatePreviewScreenState
       }
 
       // Step 2: Upload code to device
+      final uploadL10n = context.l10n;
+      final uploadProgress = ValueNotifier<String>(uploadL10n.shellyScriptsUploadingCode);
       final uploadResult = await DialogUtils.executeWithLoading(
         context,
-        loadingMessage: context.l10n.shellyScriptsUploadingCode,
+        loadingMessage: uploadL10n.shellyScriptsUploadingCode,
+        liveMessage: uploadProgress,
         operation: () => widget.device.sendCommand(
           COMMAND_PUT_SCRIPT_CODE,
           {
             "id": scriptId,
             "code": _generatedCode,
             "append": false,
+            "onProgress": (int cur, int total, int attempt) {
+              uploadProgress.value = attempt > 1
+                  ? uploadL10n.scriptUploadProgressAttempt(attempt, cur, total)
+                  : uploadL10n.scriptUploadProgress(cur, total);
+            },
           },
         ),
         showErrorDialog: false,
@@ -126,13 +139,29 @@ class _ShellyScriptTemplatePreviewScreenState
         return;
       }
 
-      // Step 3: Enable script
+      // Step 3: Commit - rename staging (0.0.0) to the final version
+      final renameResult = await DialogUtils.executeWithLoading(
+        context,
+        loadingMessage: uploadL10n.shellyScriptsFinalizingInstall,
+        operation: () => widget.device.sendCommand(
+          COMMAND_RENAME_SCRIPT,
+          {"id": scriptId, "name": _scriptName},
+        ),
+        showErrorDialog: false,
+      );
+
+      if (renameResult == null && mounted) {
+        MessageUtils.showError(context, context.l10n.shellyScriptsErrorCodeUploadFailed);
+        return;
+      }
+
+      // Step 4: Enable script
       await widget.device.sendCommand(
         COMMAND_SET_SCRIPT_ENABLE,
         {"id": scriptId, "enable": true},
       );
 
-      // Step 4: Start script
+      // Step 5: Start script
       await widget.device.sendCommand(
         COMMAND_START_SCRIPT,
         {"id": scriptId},

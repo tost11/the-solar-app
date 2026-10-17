@@ -12,12 +12,19 @@ class WiFiConfigurationScreen extends BaseCommandScreen {
   final String? currentSsid;
   final String? currentPassword;
 
+  /// Shows the "activate mode" toggle (opt-in, e.g. Shelly v1).
+  /// When off, the configuration is stored on the device without activating it.
+  final bool showActivateToggle;
+  final bool initialActivated;
+
   const WiFiConfigurationScreen({
     super.key,
     required super.device,
     super.additionalParams = const {},
     this.currentSsid,
     this.currentPassword,
+    this.showActivateToggle = false,
+    this.initialActivated = true,
   });
 
   @override
@@ -27,13 +34,20 @@ class WiFiConfigurationScreen extends BaseCommandScreen {
 class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
   final WiFiService _wifiService = WiFiService();
   bool _isSendingWifi = false;
+  late bool _activated;
+
+  @override
+  void initState() {
+    super.initState();
+    _activated = widget.initialActivated;
+  }
 
   Future<void> _sendWifiConfiguration(String ssid, String password) async {
     setState(() => _isSendingWifi = true);
 
     try {
-      await widget.sendCommandToDevice(
-          COMMAND_SET_WIFI, {"ssid": ssid, "password": password});
+      await widget.sendCommandToDevice(COMMAND_SET_WIFI,
+          {"ssid": ssid, "password": password, "enabled": _activated});
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -128,6 +142,17 @@ class _WiFiConfigurationScreenState extends State<WiFiConfigurationScreen> {
                 ),
               ),
             ),
+
+            if (widget.showActivateToggle) ...[
+              const SizedBox(height: 24),
+              Card(
+                child: SwitchListTile(
+                  title: Text(context.l10n.wifiActivateToggle),
+                  value: _activated,
+                  onChanged: (v) => setState(() => _activated = v),
+                ),
+              ),
+            ],
 
             const SizedBox(height: 24),
 

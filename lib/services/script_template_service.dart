@@ -10,7 +10,7 @@ import '../utils/version_utils.dart';
 /// Base URL for fetching remote template updates.
 ///
 /// Override for debug/testing with mock server:
-///   flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+///   flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:15005
 ///
 /// Default: GitHub raw content URL for production use.
 const String _remoteManifestBaseUrl = String.fromEnvironment(

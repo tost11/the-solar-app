@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/shelly_constants.dart';
 import 'package:the_solar_app/models/devices/generic_bluetooth_device.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_category_config.dart';
 import 'implementations/shelly_device_base_implementation.dart';
@@ -121,7 +122,7 @@ class ShellyBluetoothDeviceTemplate extends GenericBluetoothDevice<
       final ha1 = password != null ? _computeHA1(user, realm, password) : null;
 
       // Send Shelly.SetAuth command with user, realm, and computed ha1
-      final ret = await connectionService?.sendCommand('Shelly.SetAuth', {
+      final ret = await connectionService?.sendCommand(ShellyCommands.setAuth, {
         "user": user,
         "realm": realm,
         "ha1": ha1,

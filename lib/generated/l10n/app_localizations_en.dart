@@ -1813,6 +1813,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shellyScriptsUploadingCode => 'Uploading script code...';
 
   @override
+  String scriptUploadProgress(Object current, Object total) {
+    return 'Uploading: $current of $total';
+  }
+
+  @override
+  String scriptUploadProgressAttempt(
+    Object attempt,
+    Object current,
+    Object total,
+  ) {
+    return 'Uploading: $current of $total (attempt $attempt)';
+  }
+
+  @override
   String get shellyScriptsFinalizingInstall => 'Finalizing installation...';
 
   @override
@@ -2245,6 +2259,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuGeneralSettings => 'General Settings';
 
   @override
+  String get menuRelaySettings => 'Relay Settings';
+
+  @override
   String get menuInverterPowerLimit => 'Limit Inverter Power';
 
   @override
@@ -2559,6 +2576,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String fieldSwitchInstance(String instanceNum) {
     return 'Switch $instanceNum';
+  }
+
+  @override
+  String switchToggleOnLoading(int instanceNum) {
+    return 'Turning Switch $instanceNum on...';
+  }
+
+  @override
+  String switchToggleOffLoading(int instanceNum) {
+    return 'Turning Switch $instanceNum off...';
   }
 
   @override
@@ -2965,6 +2992,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuSubtitleGeneralSettings => 'Manage basic device settings';
 
   @override
+  String get menuSubtitleRelaySettings => 'Manage per-relay settings';
+
+  @override
   String get menuSubtitleWifiConfiguration => 'Setup network connection';
 
   @override
@@ -3330,6 +3360,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingDebugWebsocketDesc => 'Enable WebSocket debug logging';
 
   @override
+  String get settingLed => 'LED Status';
+
+  @override
+  String get settingLedDesc => 'Turn the device status LED on or off';
+
+  @override
+  String get settingDebugMode => 'Debug Mode';
+
+  @override
+  String get settingDebugModeDesc => 'Enable device debug logging';
+
+  @override
+  String get settingCloud => 'Cloud';
+
+  @override
+  String get settingCloudDesc =>
+      'Shelly Cloud connection (device data is sent to the Shelly cloud)';
+
+  @override
+  String get settingDiscoverableDescV1 =>
+      'Make device discoverable on the local network';
+
+  @override
+  String get settingPonWifiReset => 'WiFi Reset on Power-On';
+
+  @override
+  String get settingPonWifiResetDesc =>
+      'Automatically switch to AP mode when powered on without reachable WiFi';
+
+  @override
+  String get settingBtnType => 'Button action';
+
+  @override
+  String get settingBtnTypeDesc =>
+      'Behavior of the button connected to the device';
+
+  @override
+  String get settingDefaultState => 'Power-on state';
+
+  @override
+  String get settingDefaultStateDesc => 'Relay state after power is restored';
+
+  @override
   String get setGridInput => 'Set Grid Input';
 
   @override
@@ -3523,4 +3596,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyRefreshed => 'History updated';
+
+  @override
+  String get shellyRpcUdpPortDescription =>
+      'Configure the UDP port for RPC communication. After configuration, the device must be restarted to apply the changes.';
+
+  @override
+  String get loadingCurrentConfig => 'Loading current configuration...';
+
+  @override
+  String get messageWifiConfigComplete => 'WiFi configuration complete';
+
+  @override
+  String get wifiActivateToggle => 'STA-Mode';
+
+  @override
+  String get formPasswordMin8Hint => 'At least 8 characters recommended';
+
+  @override
+  String get helpApRebootBullet =>
+      '• After configuration the access point will be restarted';
+
+  @override
+  String get formNetworkNameSsid => 'Network name (SSID)';
+
+  @override
+  String get apRangeExtenderDesc => 'Extends the range of the WiFi network';
 }

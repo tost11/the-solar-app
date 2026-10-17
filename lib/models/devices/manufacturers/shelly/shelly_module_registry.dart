@@ -4,6 +4,7 @@ import 'package:the_solar_app/models/devices/generic_rendering/device_control_it
 import 'package:the_solar_app/constants/command_constants.dart';
 import 'package:the_solar_app/constants/translation_keys.dart';
 import 'package:the_solar_app/models/to.dart';
+import 'package:the_solar_app/utils/localization_extension.dart';
 
 /// Template for data field configuration
 class FieldTemplate {
@@ -40,7 +41,7 @@ class ControlTemplate {
   final String statePath;            // JSON path for current value
   final IconData icon;
   final Map<String, dynamic> Function(dynamic) buildParams;  // Build command parameters
-  final String Function(dynamic) getLoadingMessage;         // Loading message formatter
+  final String Function(BuildContext, dynamic, int) getLoadingMessage; // Loading message formatter (context, value, instanceId)
 
   const ControlTemplate({
     required this.name,
@@ -240,12 +241,16 @@ class ShellyModuleRegistry {
     controls: [
       ControlTemplate(
         name: 'Steckdose',
+        nameKey: FieldTranslationKeys.switchInstance,
+        needsInstanceParam: true,
         type: ControlType.switchToggle,
         commandName: COMMAND_SET_MAIN_POWER,
         statePath: 'output',
         icon: Icons.power,
         buildParams: (val) => {"on": val as bool},
-        getLoadingMessage: (val) => 'Schalte Steckdose ${(val as bool) ? "ein" : "aus"}...',
+        getLoadingMessage: (ctx, val, instanceId) => (val as bool)
+            ? ctx.l10n.switchToggleOnLoading(instanceId + 1)
+            : ctx.l10n.switchToggleOffLoading(instanceId + 1),
       ),
     ],
     supportsTimeSeries: true,

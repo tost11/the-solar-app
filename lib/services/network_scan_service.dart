@@ -8,6 +8,7 @@ import 'package:dart_ping/dart_ping.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/services/devices/kostal/kostal_modbus_connection.dart';
 import 'package:the_solar_app/services/devices/shelly/shelly_wifi_service.dart';
+import 'package:the_solar_app/services/devices/shelly/shelly_wifi_v1_service.dart';
 import '../models/authentication_mode.dart';
 import '../models/network_device.dart';
 import '../models/manufacturer_detector_info.dart';
@@ -92,6 +93,18 @@ class NetworkScanService {
       defaultUsername: 'admin', // Used internally (fixed in device model)
       defaultPassword: '',
       detector: ShellyWifiService.isResponseFromManufacturer,
+      httpStartPage: true
+    ));
+
+    // Register Shelly v1 (Gen1) - Password optional (Basic auth, fixed username 'admin')
+    registerDetector(DEVICE_MANUFACTURER_SHELLY_V1, ManufacturerDetectorInfo(
+      manufacturerName: 'Shelly v1',
+      defaultPort: 80,
+      usernameMode: AuthenticationMode.none,
+      passwordMode: AuthenticationMode.optional,
+      defaultUsername: 'admin', // Used internally (fixed in device model)
+      defaultPassword: '',
+      detector: ShellyWifiV1Service.isResponseFromManufacturer,
       httpStartPage: true
     ));
 

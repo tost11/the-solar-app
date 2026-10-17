@@ -60,7 +60,7 @@ mixin ShellyAuthMixin on BaseDeviceService {
         authDevice.authPassword == null) {
       DebugLog.device('Authentication credentials not configured', level: LogLevel.warning);
       throw Exception(
-          'Gerät erfordert Authentifizierung. Bitte konfigurieren Sie Benutzername und Passwort.');
+          'Device requires authentication. Please configure username and password.');
     }
 
     // Get realm from challenge

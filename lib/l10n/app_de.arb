@@ -2512,6 +2512,8 @@
   "@shellyScriptsUploadingCode": {
     "description": "Loading message for uploading script code"
   },
+  "scriptUploadProgress": "Lade hoch: {current} von {total}",
+  "scriptUploadProgressAttempt": "Lade hoch: {current} von {total} (Versuch {attempt})",
   "shellyScriptsFinalizingInstall": "Finalisiere Installation...",
   "@shellyScriptsFinalizingInstall": {
     "description": "Loading message for finalizing installation"
@@ -3144,6 +3146,7 @@
   "@menuGeneralSettings": {
     "description": "Menu item title for general settings"
   },
+  "menuRelaySettings": "Relay-Einstellungen",
   "menuInverterPowerLimit": "Wechselrichterleistung begrenzen",
   "@menuInverterPowerLimit": {
     "description": "Menu item title for inverter power limit"
@@ -3576,12 +3579,30 @@
   "@fieldWifiState": {
     "description": "Data field: WiFi state"
   },
-  "fieldSwitchInstance": "Switch {instanceNum}",
+  "fieldSwitchInstance": "Schalter {instanceNum}",
   "@fieldSwitchInstance": {
     "description": "Data field: Switch with instance number",
     "placeholders": {
       "instanceNum": {
         "type": "String"
+      }
+    }
+  },
+  "switchToggleOnLoading": "Schalte Schalter {instanceNum} ein...",
+  "@switchToggleOnLoading": {
+    "description": "Loading message while switching on",
+    "placeholders": {
+      "instanceNum": {
+        "type": "int"
+      }
+    }
+  },
+  "switchToggleOffLoading": "Schalte Schalter {instanceNum} aus...",
+  "@switchToggleOffLoading": {
+    "description": "Loading message while switching off",
+    "placeholders": {
+      "instanceNum": {
+        "type": "int"
       }
     }
   },
@@ -4007,7 +4028,7 @@
       }
     }
   },
-  "categorySwitchInstance": "Switch {instanceNum}",
+  "categorySwitchInstance": "Schalter {instanceNum}",
   "@categorySwitchInstance": {
     "description": "Category: Switch with instance number",
     "placeholders": {
@@ -4051,7 +4072,7 @@
   "@categoryPm1Combined": {
     "description": "Category: PM1 combined"
   },
-  "categorySwitchCombined": "Switch Kombiniert",
+  "categorySwitchCombined": "Schalter Kombiniert",
   "@categorySwitchCombined": {
     "description": "Category: Switch combined"
   },
@@ -4162,6 +4183,7 @@
   "@menuSubtitleGeneralSettings": {
     "description": "Menu subtitle: General settings"
   },
+  "menuSubtitleRelaySettings": "Einstellungen pro Relay verwalten",
   "menuSubtitleWifiConfiguration": "Netzwerkverbindung einrichten",
   "@menuSubtitleWifiConfiguration": {
     "description": "Menu subtitle: WiFi configuration"
@@ -4661,6 +4683,46 @@
   "@settingDebugWebsocketDesc": {
     "description": "Setting description: Debug WebSocket"
   },
+  "settingLed": "LED Status",
+  "@settingLed": {
+    "description": "Setting: LED Status"
+  },
+  "settingLedDesc": "Status-LED des Geräts ein- oder ausschalten",
+  "@settingLedDesc": {
+    "description": "Setting description: LED Status"
+  },
+  "settingDebugMode": "Debug Modus",
+  "@settingDebugMode": {
+    "description": "Setting: Debug Mode"
+  },
+  "settingDebugModeDesc": "Debug-Protokollierung des Geräts aktivieren",
+  "@settingDebugModeDesc": {
+    "description": "Setting description: Debug Mode"
+  },
+  "settingCloud": "Cloud",
+  "@settingCloud": {
+    "description": "Setting: Cloud"
+  },
+  "settingCloudDesc": "Shelly Cloud-Verbindung (Gerätedaten werden an die Shelly-Cloud gesendet)",
+  "@settingCloudDesc": {
+    "description": "Setting description: Cloud"
+  },
+  "settingDiscoverableDescV1": "Gerät im lokalen Netzwerk auffindbar machen",
+  "@settingDiscoverableDescV1": {
+    "description": "Setting description: Discoverable (network)"
+  },
+  "settingPonWifiReset": "WiFi-Reset bei Einschalten",
+  "@settingPonWifiReset": {
+    "description": "Setting: Power-on WiFi Reset"
+  },
+  "settingPonWifiResetDesc": "Bei Netzteil-Einschalten ohne erreichbares WiFi automatisch in AP-Modus wechseln",
+  "@settingPonWifiResetDesc": {
+    "description": "Setting description: Power-on WiFi Reset"
+  },
+  "settingBtnType": "Tastentyp",
+  "settingBtnTypeDesc": "Verhalten der am Gerät angeschlossenen Taste",
+  "settingDefaultState": "Zustand nach Stromausfall",
+  "settingDefaultStateDesc": "Zustand des Relais nach Wiederherstellung der Stromversorgung",
   "setGridInput": "Eingestellter Netz Eingang",
   "@setGridInput": {
     "description": "Field: Set Grid Input"
@@ -4930,5 +4992,37 @@
   "historyRefreshed": "Verlauf aktualisiert",
   "@historyRefreshed": {
     "description": "Success message after manually refreshing history"
+  },
+  "shellyRpcUdpPortDescription": "Konfigurieren Sie den UDP Port für die RPC-Kommunikation. Nach der Konfiguration muss das Gerät neu gestartet werden, um die Änderungen zu übernehmen.",
+  "@shellyRpcUdpPortDescription": {
+    "description": "Description shown in the Shelly RPC UDP port configuration screen"
+  },
+  "loadingCurrentConfig": "Lade aktuelle Konfiguration...",
+  "@loadingCurrentConfig": {
+    "description": "Loading message while fetching the current device configuration"
+  },
+  "messageWifiConfigComplete": "WiFi-Konfiguration abgeschlossen",
+  "@messageWifiConfigComplete": {
+    "description": "Success message after WiFi configuration was applied"
+  },
+  "wifiActivateToggle": "STA-Mode",
+  "@wifiActivateToggle": {
+    "description": "Toggle on WiFi configuration screen: activate client mode now (on) or only store the credentials (off)"
+  },
+  "formPasswordMin8Hint": "Mindestens 8 Zeichen empfohlen",
+  "@formPasswordMin8Hint": {
+    "description": "Hint below the password field on the access point configuration screen"
+  },
+  "helpApRebootBullet": "• Nach der Konfiguration wird der Access Point neu gestartet",
+  "@helpApRebootBullet": {
+    "description": "Info bullet on the access point configuration screen"
+  },
+  "formNetworkNameSsid": "Netzwerkname (SSID)",
+  "@formNetworkNameSsid": {
+    "description": "Label for the network name (SSID) on configuration screens"
+  },
+  "apRangeExtenderDesc": "Erweitert die Reichweite des WiFi-Netzwerks",
+  "@apRangeExtenderDesc": {
+    "description": "Description of the range extender option on the access point configuration screen"
   }
 }

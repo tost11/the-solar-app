@@ -9,20 +9,28 @@ class DialogUtils {
   /// [message] - The message to display below the spinner
   ///
   /// To dismiss the dialog, call Navigator.pop(context)
-  static void showLoadingDialog(BuildContext context, String message) {
+  static void showLoadingDialog(BuildContext context, String message, {ValueNotifier<String>? liveMessage}) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(message),
-          ],
-        ),
-      ),
+      builder: (BuildContext dialogContext) {
+        final messageWidget = liveMessage != null
+            ? ValueListenableBuilder<String>(
+                valueListenable: liveMessage,
+                builder: (context, value, child) => Text(value),
+              )
+            : Text(message);
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              messageWidget,
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -60,9 +68,10 @@ class DialogUtils {
     void Function(T result)? onSuccess,
     void Function(dynamic error)? onError,
     bool showErrorDialog = true,
+    ValueNotifier<String>? liveMessage,
   }) async {
     // Show loading dialog
-    showLoadingDialog(context, loadingMessage);
+    showLoadingDialog(context, loadingMessage, liveMessage: liveMessage);
 
     try {
       // Execute operation

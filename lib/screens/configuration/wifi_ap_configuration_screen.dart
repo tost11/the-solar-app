@@ -13,6 +13,14 @@ class WiFiApConfigurationScreen extends BaseCommandScreen {
   final bool showEnabledOption;
   final bool showOpenOption;
   final bool showRangeExtenderOption;
+
+  /// When true, the enable switch only appears in expert mode (default,
+  /// V2 behavior). V1 passes false to show it for everyone.
+  final bool enabledOptionRequiresExpert;
+
+  /// Read-only network name shown when showSsidOption is false
+  /// (e.g. Shelly v1 where the AP name is fixed by firmware).
+  final String? fixedSsid;
   final String? currentSsid;
   final String? currentPassword;
   final bool currentIsOpen;
@@ -27,6 +35,8 @@ class WiFiApConfigurationScreen extends BaseCommandScreen {
     this.showEnabledOption = false,
     this.showOpenOption = false,
     this.showRangeExtenderOption = false,
+    this.enabledOptionRequiresExpert = true,
+    this.fixedSsid,
     this.currentSsid,
     this.currentPassword,
     this.currentIsOpen = false,
@@ -96,8 +106,9 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
         command['isOpen'] = _isOpen;
       }
 
-      // Only include enable if shown on screen (requires expert mode)
-      if (widget.showEnabledOption && Globals.expertMode) {
+      // Only include enable if shown on screen
+      if (widget.showEnabledOption &&
+          (!widget.enabledOptionRequiresExpert || Globals.expertMode)) {
         command['enable'] = _enabled;
       }
 
@@ -209,6 +220,46 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
 
             const SizedBox(height: 24),
 
+            // Fixed network name (read-only, e.g. Shelly v1 AP name)
+            if (!widget.showSsidOption && widget.fixedSsid != null) ...[
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.wifi, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.l10n.formNetworkNameSsid,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.fixedSsid!,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // SSID Input (only if showSsidOption)
             if (widget.showSsidOption)
               Card(
@@ -222,7 +273,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                           const Icon(Icons.wifi, color: Colors.blue),
                           const SizedBox(width: 8),
                           Text(
-                            'Netzwerkname (SSID)',
+                            context.l10n.formNetworkNameSsid,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -250,7 +301,8 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
             if (widget.showSsidOption) const SizedBox(height: 16),
 
             // Enabled Switch (only if showEnabledOption && expertMode)
-            if (widget.showEnabledOption && Globals.expertMode)
+            if (widget.showEnabledOption &&
+                (!widget.enabledOptionRequiresExpert || Globals.expertMode))
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -317,7 +369,8 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                 ),
               ),
 
-            if (widget.showEnabledOption && Globals.expertMode)
+            if (widget.showEnabledOption &&
+                (!widget.enabledOptionRequiresExpert || Globals.expertMode))
               const SizedBox(height: 16),
 
             // Open Network Switch (only if showOpenOption)
@@ -416,7 +469,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Mindestens 8 Zeichen empfohlen',
+                        context.l10n.formPasswordMin8Hint,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -465,7 +518,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Erweitert die Reichweite des WiFi-Netzwerks',
+                        context.l10n.apRangeExtenderDesc,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -513,7 +566,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                         Icon(Icons.info_outline, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          'Hinweis',
+                          context.l10n.sectionNote,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -524,7 +577,7 @@ class _WiFiApConfigurationScreenState extends State<WiFiApConfigurationScreen> {
                     const SizedBox(height: 8),
                     Text(
                       '${context.l10n.helpDevicePoweredOn}\n'
-                      '• Nach der Konfiguration wird der Access Point neu gestartet\n'
+                      '${context.l10n.helpApRebootBullet}\n'
                       '${context.l10n.helpStrongPassword}',
                       style: TextStyle(
                         fontSize: 13,

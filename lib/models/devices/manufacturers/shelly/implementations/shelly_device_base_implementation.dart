@@ -38,6 +38,10 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
   static const int CODE_CHUNK_LENGTH = 1000;
   static const int CODE_CHUNK_LENGTH_WIFI = 4000;
 
+  static const int _PUT_CODE_MAX_FLOW_ATTEMPTS = 3;
+  static const Duration _PUT_CODE_CHUNK_TIMEOUT = Duration(seconds: 5);
+  static const Duration _PUT_CODE_INTER_CHUNK_DELAY = Duration(milliseconds: 500);
+
   // Reference to the device (set after construction)
   DeviceBase? _device;
 
@@ -62,9 +66,9 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           final context = ctx.context;
           final device = ctx.device;
 
-          final resp = await DialogUtils.executeWithLoading(
+           final resp = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade Gerätedaten...',
+            loadingMessage: context.l10n.loadingDeviceData,
             operation: () => device.sendCommand(COMMAND_FETCH_SYS_CONFIG, {}),
             showErrorDialog: false,
           );
@@ -95,7 +99,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           final resp = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade aktuelle Konfiguration...',
+            loadingMessage: context.l10n.loadingCurrentConfig,
             operation: () => device.sendCommand(COMMAND_FETCH_WIFI_CONFIG, {}),
             onError: (e) => MessageUtils.showError(context, context.l10n.errorWhileLoadingConfig(e.toString())),
           );
@@ -115,8 +119,8 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           if (result == true && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('WiFi-Konfiguration abgeschlossen'),
+              SnackBar(
+                content: Text(context.l10n.messageWifiConfigComplete),
                 backgroundColor: Colors.green,
               ),
             );
@@ -134,7 +138,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           final resp = await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade Gerätedaten...',
+            loadingMessage: context.l10n.loadingDeviceData,
             operation: () => device.sendCommand(COMMAND_FETCH_WIFI_CONFIG, {}),
             onError: (e) => MessageUtils.showError(context, context.l10n.errorWhileLoading(e.toString())),
           );
@@ -186,7 +190,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
             PortConfigurationScreen(
               device: device,
               portName: 'RPC UDP Port',
-              portDescription: 'Konfigurieren Sie den UDP Port für RPC Kommunikation, nach der Konfiguration muss das Gerät neugestartet werden um die Änderrungen zu übernehmen.',
+              portDescription: context.l10n.shellyRpcUdpPortDescription,
               currentPort: currentPort,
               commandParameterName: 'port',
             ),
@@ -210,17 +214,16 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (BuildContext dialogContext) => AlertDialog(
-              title: const Text('Gerät neustarten?'),
-              content: const Text(
-                  'Das Gerät wird. Möchten Sie fortfahren?'),
+              title: Text(context.l10n.menuRestartDevice),
+              content: Text(context.l10n.restartDeviceConfirm),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext, false),
-                  child: const Text('Abbrechen'),
+                  child: Text(context.l10n.cancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext, true),
-                  child: const Text('Neustarten'),
+                  child: Text(context.l10n.menuRestartDevice),
                 ),
               ],
             ),
@@ -230,7 +233,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Gerät wird neu gestartet...',
+            loadingMessage: context.l10n.messageDeviceRestarting,
             operation: () async {
               await device.sendCommand(COMMAND_RESTART, {});
               await Future.delayed(const Duration(seconds: 1));
@@ -252,7 +255,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
 
           await DialogUtils.executeWithLoading(
             context,
-            loadingMessage: 'Lade Gerätedaten...',
+            loadingMessage: context.l10n.loadingDeviceData,
             operation: () => device.sendCommand(COMMAND_FETCH_DEVICE_INFO, {"id": 0}),
             showErrorDialog: false,
           );
@@ -952,8 +955,6 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         popUpOnChange: true,
         description: TO(key: FieldTranslationKeys.settingEcoModeDesc),
         icon: Icons.eco,
-        confirmationTitle: 'Eco Mode ändern?',
-        confirmationMessage: 'Möchten Sie den Eco Mode wirklich ändern? Dies kann die Geräteleistung beeinflussen.',
       ),
       GeneralSettingItem(
         name: TO(key: FieldTranslationKeys.settingDiscoverable),
@@ -962,7 +963,6 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         popUpOnChange: true,
         description: TO(key: FieldTranslationKeys.settingDiscoverableDesc),
         icon: Icons.visibility,
-        confirmationMessage: 'Möchten Sie den Sichtbarkeit wirklich ändern?',
       ),
       GeneralSettingItem(
         name: TO(key: FieldTranslationKeys.settingDebugMqtt),
@@ -971,8 +971,6 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         popUpOnChange: true,
         description: TO(key: FieldTranslationKeys.settingDebugMqttDesc),
         icon: Icons.bug_report,
-        confirmationTitle: 'Debug MQTT ändern?',
-        confirmationMessage: 'Möchten Sie MQTT Debug-Protokollierung wirklich ändern? Dies kann die Leistung beeinflussen und zusätzliche Logs erzeugen.',
       ),
       GeneralSettingItem(
         name: TO(key: FieldTranslationKeys.settingDebugWebsocket),
@@ -981,8 +979,6 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
         popUpOnChange: true,
         description: TO(key: FieldTranslationKeys.settingDebugWebsocketDesc),
         icon: Icons.bug_report,
-        confirmationTitle: 'Debug Websocket ändern?',
-        confirmationMessage: 'Möchten Sie Websocket Debug-Protokollierung wirklich ändern? Dies kann die Leistung beeinflussen und zusätzliche Logs erzeugen.',
       ),
     ];
   }
@@ -1096,36 +1092,9 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     }else if(command == COMMAND_PUT_SCRIPT_CODE) {
       int? scriptId = params["id"];
       String? code = params["code"];
-      bool? append = params["append"];  // default false
       if(scriptId == null || code == null) throw Exception("Script ID or code missing");
-
-      // Check if we need to chunk (Bluetooth service + code > CODE_CHUNK_LENGTH chars)
-      if ((service is ShellyBluetoothService && code.length > CODE_CHUNK_LENGTH) ||
-          (code.length > CODE_CHUNK_LENGTH_WIFI)) {
-        // Chunk the code into pieces of max CODE_CHUNK_LENGTH characters
-        List<String> chunks = _chunkStringUtf8Safe(code,service is ShellyBluetoothService ? CODE_CHUNK_LENGTH : CODE_CHUNK_LENGTH_WIFI);
-
-        // Send chunks sequentially
-        // First chunk: append=false, subsequent chunks: append=true
-        for (int i = 0; i < chunks.length; i++) {
-          bool shouldAppend = i > 0;
-          await service.sendCommand(ShellyCommands.scriptPutCode, {
-            "id": scriptId,
-            "code": chunks[i],
-            "append": shouldAppend,
-          });
-          // If any chunk fails, the exception will propagate and stop the loop
-        }
-
-        ret = {"success": true, "chunks": chunks.length};
-      } else {
-        // Send as single chunk (WiFi service or code <= CODE_CHUNK_LENGTH chars)
-        ret = await service.sendCommand(ShellyCommands.scriptPutCode, {
-          "id": scriptId,
-          "code": code,
-          "append": append ?? false,
-        });
-      }
+      final onProgress = params["onProgress"] as void Function(int, int, int)?;
+      ret = await _putScriptCodeWithRetry(service, scriptId, code, onProgress);
     }else if(command == COMMAND_GET_SCRIPT_CODE) {
       int? scriptId = params["id"];
       if(scriptId == null) throw Exception("Script ID missing");
@@ -1170,12 +1139,57 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       int? id = params["id"] ?? 0; // Default to first instance
       bool? on = params["on"];
       if(on == null) throw Exception("'on' parameter missing for switch control");
-      ret = await service.sendCommand('Switch.Set', {"id": id, "on": on});
+      ret = await service.sendCommand(ShellyCommands.switchSet, {"id": id, "on": on});
     }else{
       throw UnimplementedError('Command not implemented: $command');
     }
 
     return ret;
+  }
+
+  /// Uploads script code to the device in chunks, resilient to intermittent
+  /// per-chunk timeouts.
+  ///
+  /// Each attempt re-sends chunk 0 with append=false (a full replace), so a
+  /// chunk that already landed during a timeout can never be duplicated. After
+  /// every successfully sent chunk the device is given a short rest. If all
+  /// attempts fail, an exception is thrown and surfaced to the user by caller.
+  Future<Map<String, dynamic>> _putScriptCodeWithRetry(
+    ShellyService service,
+    int scriptId,
+    String code,
+    void Function(int, int, int)? onProgress,
+  ) async {
+    final isBle = service is ShellyBluetoothService;
+    final chunkSize = isBle ? CODE_CHUNK_LENGTH : CODE_CHUNK_LENGTH_WIFI;
+    final chunks = _chunkStringUtf8Safe(code, chunkSize);
+
+    Object? lastError;
+    for (int attempt = 1; attempt <= _PUT_CODE_MAX_FLOW_ATTEMPTS; attempt++) {
+      try {
+        for (int i = 0; i < chunks.length; i++) {
+          onProgress?.call(i + 1, chunks.length, attempt);
+          await service.sendCommand(
+            ShellyCommands.scriptPutCode,
+            {
+              "id": scriptId,
+              "code": chunks[i],
+              // First chunk of every attempt replaces existing code (reset
+              // guarantee); subsequent chunks append.
+              "append": i > 0,
+            },
+            timeout: _PUT_CODE_CHUNK_TIMEOUT,
+          );
+          // Give the device time to rest after handling a chunk
+          await Future.delayed(_PUT_CODE_INTER_CHUNK_DELAY);
+        }
+        return {"success": true, "chunks": chunks.length, "attempts": attempt};
+      } catch (e) {
+        lastError = e;
+        DebugLog.device("Script.PutCode attempt $attempt failed: $e", level: LogLevel.verbose);
+      }
+    }
+    throw Exception("Script code upload failed after $_PUT_CODE_MAX_FLOW_ATTEMPTS attempts: $lastError");
   }
 
   /// Splits a string into chunks with a maximum size, respecting UTF-8 character boundaries
@@ -1467,8 +1481,9 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
     String? nameKey = template.nameKey;
     Map<String, dynamic>? nameParams;
 
-    // Add instance parameter if template requires it and multiple instances exist
-    if (template.needsInstanceParam && instanceCount > 1) {
+    // Add instance parameter if template requires it (always, so single instances
+    // don't render the raw "{instanceNum}" placeholder)
+    if (template.needsInstanceParam) {
       nameParams = {'instanceNum': instanceId + 1};
     }
 
@@ -1486,7 +1501,7 @@ class ShellyDeviceBaseImplementation extends DeviceImplementation {
       onChanged: (context, device, newValue) async {
         await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: template.getLoadingMessage(newValue),
+          loadingMessage: template.getLoadingMessage(context, newValue, instanceId),
           operation: () async {
             await device.sendCommand(template.commandName, {
               "id": instanceId,

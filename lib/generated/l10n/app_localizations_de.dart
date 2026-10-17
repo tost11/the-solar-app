@@ -1834,6 +1834,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shellyScriptsUploadingCode => 'Lade Script-Code hoch...';
 
   @override
+  String scriptUploadProgress(Object current, Object total) {
+    return 'Lade hoch: $current von $total';
+  }
+
+  @override
+  String scriptUploadProgressAttempt(
+    Object attempt,
+    Object current,
+    Object total,
+  ) {
+    return 'Lade hoch: $current von $total (Versuch $attempt)';
+  }
+
+  @override
   String get shellyScriptsFinalizingInstall => 'Finalisiere Installation...';
 
   @override
@@ -2270,6 +2284,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuGeneralSettings => 'Allgemeine Einstellungen';
 
   @override
+  String get menuRelaySettings => 'Relay-Einstellungen';
+
+  @override
   String get menuInverterPowerLimit => 'Wechselrichterleistung begrenzen';
 
   @override
@@ -2586,7 +2603,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String fieldSwitchInstance(String instanceNum) {
-    return 'Switch $instanceNum';
+    return 'Schalter $instanceNum';
+  }
+
+  @override
+  String switchToggleOnLoading(int instanceNum) {
+    return 'Schalte Schalter $instanceNum ein...';
+  }
+
+  @override
+  String switchToggleOffLoading(int instanceNum) {
+    return 'Schalte Schalter $instanceNum aus...';
   }
 
   @override
@@ -2888,7 +2915,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String categorySwitchInstance(String instanceNum) {
-    return 'Switch $instanceNum';
+    return 'Schalter $instanceNum';
   }
 
   @override
@@ -2913,7 +2940,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get categoryPm1Combined => 'PM Kombiniert';
 
   @override
-  String get categorySwitchCombined => 'Switch Kombiniert';
+  String get categorySwitchCombined => 'Schalter Kombiniert';
 
   @override
   String get categoryPowerMeterPhase1 => 'Stromzähler Phase 1';
@@ -2995,6 +3022,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get menuSubtitleGeneralSettings =>
       'Grundlegende Geräteeinstellungen verwalten';
+
+  @override
+  String get menuSubtitleRelaySettings => 'Einstellungen pro Relay verwalten';
 
   @override
   String get menuSubtitleWifiConfiguration => 'Netzwerkverbindung einrichten';
@@ -3372,6 +3402,51 @@ class AppLocalizationsDe extends AppLocalizations {
       'WebSocket Debug-Protokollierung aktivieren';
 
   @override
+  String get settingLed => 'LED Status';
+
+  @override
+  String get settingLedDesc => 'Status-LED des Geräts ein- oder ausschalten';
+
+  @override
+  String get settingDebugMode => 'Debug Modus';
+
+  @override
+  String get settingDebugModeDesc =>
+      'Debug-Protokollierung des Geräts aktivieren';
+
+  @override
+  String get settingCloud => 'Cloud';
+
+  @override
+  String get settingCloudDesc =>
+      'Shelly Cloud-Verbindung (Gerätedaten werden an die Shelly-Cloud gesendet)';
+
+  @override
+  String get settingDiscoverableDescV1 =>
+      'Gerät im lokalen Netzwerk auffindbar machen';
+
+  @override
+  String get settingPonWifiReset => 'WiFi-Reset bei Einschalten';
+
+  @override
+  String get settingPonWifiResetDesc =>
+      'Bei Netzteil-Einschalten ohne erreichbares WiFi automatisch in AP-Modus wechseln';
+
+  @override
+  String get settingBtnType => 'Tastentyp';
+
+  @override
+  String get settingBtnTypeDesc =>
+      'Verhalten der am Gerät angeschlossenen Taste';
+
+  @override
+  String get settingDefaultState => 'Zustand nach Stromausfall';
+
+  @override
+  String get settingDefaultStateDesc =>
+      'Zustand des Relais nach Wiederherstellung der Stromversorgung';
+
+  @override
   String get setGridInput => 'Eingestellter Netz Eingang';
 
   @override
@@ -3565,4 +3640,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get historyRefreshed => 'Verlauf aktualisiert';
+
+  @override
+  String get shellyRpcUdpPortDescription =>
+      'Konfigurieren Sie den UDP Port für die RPC-Kommunikation. Nach der Konfiguration muss das Gerät neu gestartet werden, um die Änderungen zu übernehmen.';
+
+  @override
+  String get loadingCurrentConfig => 'Lade aktuelle Konfiguration...';
+
+  @override
+  String get messageWifiConfigComplete => 'WiFi-Konfiguration abgeschlossen';
+
+  @override
+  String get wifiActivateToggle => 'STA-Mode';
+
+  @override
+  String get formPasswordMin8Hint => 'Mindestens 8 Zeichen empfohlen';
+
+  @override
+  String get helpApRebootBullet =>
+      '• Nach der Konfiguration wird der Access Point neu gestartet';
+
+  @override
+  String get formNetworkNameSsid => 'Netzwerkname (SSID)';
+
+  @override
+  String get apRangeExtenderDesc =>
+      'Erweitert die Reichweite des WiFi-Netzwerks';
 }

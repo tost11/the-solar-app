@@ -3367,6 +3367,22 @@ abstract class AppLocalizations {
   /// **'Lade Script-Code hoch...'**
   String get shellyScriptsUploadingCode;
 
+  /// No description provided for @scriptUploadProgress.
+  ///
+  /// In de, this message translates to:
+  /// **'Lade hoch: {current} von {total}'**
+  String scriptUploadProgress(Object current, Object total);
+
+  /// No description provided for @scriptUploadProgressAttempt.
+  ///
+  /// In de, this message translates to:
+  /// **'Lade hoch: {current} von {total} (Versuch {attempt})'**
+  String scriptUploadProgressAttempt(
+    Object attempt,
+    Object current,
+    Object total,
+  );
+
   /// Loading message for finalizing installation
   ///
   /// In de, this message translates to:
@@ -4068,6 +4084,12 @@ abstract class AppLocalizations {
   /// **'Allgemeine Einstellungen'**
   String get menuGeneralSettings;
 
+  /// No description provided for @menuRelaySettings.
+  ///
+  /// In de, this message translates to:
+  /// **'Relay-Einstellungen'**
+  String get menuRelaySettings;
+
   /// Menu item title for inverter power limit
   ///
   /// In de, this message translates to:
@@ -4647,8 +4669,20 @@ abstract class AppLocalizations {
   /// Data field: Switch with instance number
   ///
   /// In de, this message translates to:
-  /// **'Switch {instanceNum}'**
+  /// **'Schalter {instanceNum}'**
   String fieldSwitchInstance(String instanceNum);
+
+  /// Loading message while switching on
+  ///
+  /// In de, this message translates to:
+  /// **'Schalte Schalter {instanceNum} ein...'**
+  String switchToggleOnLoading(int instanceNum);
+
+  /// Loading message while switching off
+  ///
+  /// In de, this message translates to:
+  /// **'Schalte Schalter {instanceNum} aus...'**
+  String switchToggleOffLoading(int instanceNum);
 
   /// Data field: Power with instance number
   ///
@@ -5199,7 +5233,7 @@ abstract class AppLocalizations {
   /// Category: Switch with instance number
   ///
   /// In de, this message translates to:
-  /// **'Switch {instanceNum}'**
+  /// **'Schalter {instanceNum}'**
   String categorySwitchInstance(String instanceNum);
 
   /// Category: PM measurement with instance number
@@ -5235,7 +5269,7 @@ abstract class AppLocalizations {
   /// Category: Switch combined
   ///
   /// In de, this message translates to:
-  /// **'Switch Kombiniert'**
+  /// **'Schalter Kombiniert'**
   String get categorySwitchCombined;
 
   /// Category: Power meter phase 1
@@ -5393,6 +5427,12 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Grundlegende Geräteeinstellungen verwalten'**
   String get menuSubtitleGeneralSettings;
+
+  /// No description provided for @menuSubtitleRelaySettings.
+  ///
+  /// In de, this message translates to:
+  /// **'Einstellungen pro Relay verwalten'**
+  String get menuSubtitleRelaySettings;
 
   /// Menu subtitle: WiFi configuration
   ///
@@ -6072,6 +6112,84 @@ abstract class AppLocalizations {
   /// **'WebSocket Debug-Protokollierung aktivieren'**
   String get settingDebugWebsocketDesc;
 
+  /// Setting: LED Status
+  ///
+  /// In de, this message translates to:
+  /// **'LED Status'**
+  String get settingLed;
+
+  /// Setting description: LED Status
+  ///
+  /// In de, this message translates to:
+  /// **'Status-LED des Geräts ein- oder ausschalten'**
+  String get settingLedDesc;
+
+  /// Setting: Debug Mode
+  ///
+  /// In de, this message translates to:
+  /// **'Debug Modus'**
+  String get settingDebugMode;
+
+  /// Setting description: Debug Mode
+  ///
+  /// In de, this message translates to:
+  /// **'Debug-Protokollierung des Geräts aktivieren'**
+  String get settingDebugModeDesc;
+
+  /// Setting: Cloud
+  ///
+  /// In de, this message translates to:
+  /// **'Cloud'**
+  String get settingCloud;
+
+  /// Setting description: Cloud
+  ///
+  /// In de, this message translates to:
+  /// **'Shelly Cloud-Verbindung (Gerätedaten werden an die Shelly-Cloud gesendet)'**
+  String get settingCloudDesc;
+
+  /// Setting description: Discoverable (network)
+  ///
+  /// In de, this message translates to:
+  /// **'Gerät im lokalen Netzwerk auffindbar machen'**
+  String get settingDiscoverableDescV1;
+
+  /// Setting: Power-on WiFi Reset
+  ///
+  /// In de, this message translates to:
+  /// **'WiFi-Reset bei Einschalten'**
+  String get settingPonWifiReset;
+
+  /// Setting description: Power-on WiFi Reset
+  ///
+  /// In de, this message translates to:
+  /// **'Bei Netzteil-Einschalten ohne erreichbares WiFi automatisch in AP-Modus wechseln'**
+  String get settingPonWifiResetDesc;
+
+  /// No description provided for @settingBtnType.
+  ///
+  /// In de, this message translates to:
+  /// **'Tastentyp'**
+  String get settingBtnType;
+
+  /// No description provided for @settingBtnTypeDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Verhalten der am Gerät angeschlossenen Taste'**
+  String get settingBtnTypeDesc;
+
+  /// No description provided for @settingDefaultState.
+  ///
+  /// In de, this message translates to:
+  /// **'Zustand nach Stromausfall'**
+  String get settingDefaultState;
+
+  /// No description provided for @settingDefaultStateDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zustand des Relais nach Wiederherstellung der Stromversorgung'**
+  String get settingDefaultStateDesc;
+
   /// Field: Set Grid Input
   ///
   /// In de, this message translates to:
@@ -6425,6 +6543,54 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Verlauf aktualisiert'**
   String get historyRefreshed;
+
+  /// Description shown in the Shelly RPC UDP port configuration screen
+  ///
+  /// In de, this message translates to:
+  /// **'Konfigurieren Sie den UDP Port für die RPC-Kommunikation. Nach der Konfiguration muss das Gerät neu gestartet werden, um die Änderungen zu übernehmen.'**
+  String get shellyRpcUdpPortDescription;
+
+  /// Loading message while fetching the current device configuration
+  ///
+  /// In de, this message translates to:
+  /// **'Lade aktuelle Konfiguration...'**
+  String get loadingCurrentConfig;
+
+  /// Success message after WiFi configuration was applied
+  ///
+  /// In de, this message translates to:
+  /// **'WiFi-Konfiguration abgeschlossen'**
+  String get messageWifiConfigComplete;
+
+  /// Toggle on WiFi configuration screen: activate client mode now (on) or only store the credentials (off)
+  ///
+  /// In de, this message translates to:
+  /// **'STA-Mode'**
+  String get wifiActivateToggle;
+
+  /// Hint below the password field on the access point configuration screen
+  ///
+  /// In de, this message translates to:
+  /// **'Mindestens 8 Zeichen empfohlen'**
+  String get formPasswordMin8Hint;
+
+  /// Info bullet on the access point configuration screen
+  ///
+  /// In de, this message translates to:
+  /// **'• Nach der Konfiguration wird der Access Point neu gestartet'**
+  String get helpApRebootBullet;
+
+  /// Label for the network name (SSID) on configuration screens
+  ///
+  /// In de, this message translates to:
+  /// **'Netzwerkname (SSID)'**
+  String get formNetworkNameSsid;
+
+  /// Description of the range extender option on the access point configuration screen
+  ///
+  /// In de, this message translates to:
+  /// **'Erweitert die Reichweite des WiFi-Netzwerks'**
+  String get apRangeExtenderDesc;
 }
 
 class _AppLocalizationsDelegate

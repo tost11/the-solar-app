@@ -5,7 +5,16 @@ class MapUtils {
       if(current is String || current is int || current is double){
         return null;
       }
-      current = current[elem];
+      if(current is List){
+        // List access via integer index (e.g. ['relays', '0', 'ison'])
+        final index = int.tryParse(elem);
+        if(index == null || index < 0 || index >= current.length){
+          return null;
+        }
+        current = current[index];
+      }else{
+        current = current[elem];
+      }
       if(current == null){
         return null;
       }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/wifi_service.dart';
+import '../utils/localization_extension.dart';
 
 class WiFiConfigWidget extends StatefulWidget {
   final WiFiService wifiService;
@@ -94,14 +95,14 @@ class _WiFiConfigWidgetState extends State<WiFiConfigWidget> {
 
     if (ssid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('SSID darf nicht leer sein')),
+        SnackBar(content: Text(context.l10n.validationSsidRequired)),
       );
       return;
     }
 
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwort darf nicht leer sein')),
+        SnackBar(content: Text(context.l10n.validationPasswordRequired)),
       );
       return;
     }

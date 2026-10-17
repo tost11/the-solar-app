@@ -4,7 +4,7 @@
 
 Eine Flutter-Anwendung für Windows, Android und Linux zur Verwaltung und Überwachung von Mikrowechselrichtern und Powerstationen.
 Lokale Verbindung über Bluetooth oder WiFi ohne Cloud-Dienste oder Benutzerregistrierung erforderlich.
-Unterstützte Hersteller sind [Hoymiles](#hoymiles-wifinetwork), [Deye Sun](#deyesun-wifinetwork), [Zendure](#zendure-bluetooth--wifi), [Shelly](#shelly-bluetooth--wifinetwork), [Kostal](#kostal-wifinetwork) und [OpenDTU](#opendtu-wifinetwork).
+Unterstützte Hersteller sind [Hoymiles](#hoymiles-wifinetwork--bluetooth), [Deye Sun](#deyesun-wifinetwork), [Zendure](#zendure-bluetooth--wifi), [Shelly](#shelly-bluetooth--wifinetwork), [Kostal](#kostal-wifinetwork) und [OpenDTU](#opendtu-wifinetwork).
 
 ## ⚠️ Haftungsausschluss
 
@@ -50,6 +50,7 @@ Einige Screenshots, um einen Eindruck von der App zu bekommen:
 
 #### Shelly (Bluetooth & WiFi/Network)
 - **Unterstützte Module**: EM (3-Phasen-Zähler), Switch (Smart Plug), EM1 (Einphasen-Zähler), EM1Data (Energiesummen), EMData (3-Phasen-Energiesummen), Temperature (Sensor), PM1 (Gen3 Leistungsmesser)
+- **Generationen**: Shelly Gen1 (V1) und Gen2/Gen3/Gen4
 - **Verbindungstypen**: Bluetooth Low Energy, WiFi/Network (HTTP JSON-RPC 2.0)
 - **Authentifizierung**: RFC7616 Digest-Authentifizierung mit SHA-256
 - **Überwachung** (je Modultyp):
@@ -109,7 +110,7 @@ Einige Screenshots, um einen Eindruck von der App zu bekommen:
 - **Gerätetypen**:
   - **DTU-Gateways** (DTU-WLite, DTU-Pro, DTU-Lite-S): Verwalten mehrerer Wechselrichter mit aggregierter Überwachung und erweiterbarer Wechselrichterlisten-UI
   - **HMS-Wechselrichter** (HMS-800W-2T, HMS-1600W-4T usw.): Eigenständige Mikrowechselrichter mit integriertem WiFi
-- **Verbindungstypen**: WiFi/Network (Binäres TCP-Protokoll mit Protobuf-Serialisierung + CRC16-Validierung auf Port 10081)
+- **Verbindungstypen**: WiFi/Network (Binäres TCP-Protokoll mit Protobuf-Serialisierung + CRC16-Validierung auf Port 10081), Bluetooth Low Energy (HMS-WB / HiFlow Pro)
 - **Überwachung**: Echtzeit-Stromerzeugung, bis zu 4 PV-Strings pro Wechselrichter (Spannung, Strom, Leistung pro String, Tages-/Gesamtertrag), AC-Überwachung (Einphasen- oder Dreiphasen-Spannung, Frequenz, Wirkleistung) und Temperaturverfolgung
 - **Konfiguration**:
   - Leistungsgrenze (prozentbasiert pro Wechselrichter)
@@ -361,7 +362,6 @@ Dieses Projekt ist Open Source. Lizenzdetails werden noch hinzugefügt.
   - [Hoymiles Protocol](https://github.com/ohAnd/dtuGateway)
   - [Deye Sun Protocol](https://github.com/kbialek/deye-inverter-mqtt)
   - [Deye Sun and Hoymiles Protocol](https://github.com/tost11/OpenDTU-Push-Rest-API-and-Deye-Sun)
-  - [Hoymiles Bluetooth Protocol](https://github.com/TheTiEr/hiflow-ble)
 
 ## Unterstützung
 

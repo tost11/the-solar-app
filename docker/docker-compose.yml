@@ -10,16 +10,10 @@ services:
       - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/em1_expectations.json
       - MOCKSERVER_LOG_LEVEL=INFO
     ports:
-      - "8081:1080"  # Map MockServer port 1080 to host 8081
+      - "15001:1080"  # Map MockServer port 1080 to host 15001
     volumes:
       - ./mockserver:/config:ro  # Mount expectations as read-only
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
     networks:
       - shelly-mock-net
 
@@ -32,16 +26,10 @@ services:
       - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/em3_expectations.json
       - MOCKSERVER_LOG_LEVEL=INFO
     ports:
-      - "8082:1080"  # Map MockServer port 1080 to host 8082
+      - "15002:1080"  # Map MockServer port 1080 to host 15002
     volumes:
       - ./mockserver:/config:ro
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
     networks:
       - shelly-mock-net
 
@@ -54,16 +42,10 @@ services:
       - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/plug_expectations.json
       - MOCKSERVER_LOG_LEVEL=INFO
     ports:
-      - "8083:1080"  # Map MockServer port 1080 to host 8083
+      - "15003:1080"  # Map MockServer port 1080 to host 15003
     volumes:
       - ./mockserver:/config:ro
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
     networks:
       - shelly-mock-net
 
@@ -76,16 +58,81 @@ services:
       - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/pm1_expectations.json
       - MOCKSERVER_LOG_LEVEL=INFO
     ports:
-      - "8084:1080"  # Map MockServer port 1080 to host 8084
+      - "15004:1080"  # Map MockServer port 1080 to host 15004
     volumes:
       - ./mockserver:/config:ro
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
+    networks:
+      - shelly-mock-net
+
+  # Shelly 1 PM MockServer (Gen1, relay switch + power metering)
+  # Gen1 uses plain HTTP API (GET /shelly, /status, /relay/0), not JSON-RPC
+  shelly1:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly1-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/shelly1_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "15006:1080"  # Map MockServer port 1080 to host 15006
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
+    networks:
+      - shelly-mock-net
+
+  # Shelly 3EM MockServer (Gen1, 3-phase DIN energy meter)
+  # Gen1 uses plain HTTP API (GET /shelly, /status, /relay/0). Unlike the Gen2
+  # EM mock above, /status reports an `emeters` array (3 phases) + total_power.
+  shelly-3em:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-3em-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/shelly3em_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "15007:1080"  # Map MockServer port 1080 to host 15007
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
+    networks:
+      - shelly-mock-net
+
+  # Shelly EM MockServer (Gen1, single-phase DIN energy meter + contactor)
+  # Gen1 uses plain HTTP API (GET /shelly, /status, /relay/0). /status reports
+  # a 2-entry `emeters` array (two CTs, shared phase) + a `relays` entry for
+  # the built-in contactor (no total_power).
+  shelly-em:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-em-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/shellyem_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "15008:1080"  # Map MockServer port 1080 to host 15008
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
+    networks:
+      - shelly-mock-net
+
+  # Shelly 4Pro MockServer (Gen1, 4-relay multi-channel device, no power metering)
+  # /status reports a 4-entry `relays` array (varied states) and no meters/tmp.
+  shelly-4pro:
+    image: mockserver/mockserver:5.11.2
+    container_name: shelly-4pro-mock
+    environment:
+      - MOCKSERVER_SERVER_PORT=1080
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/expectations/shelly4pro_expectations.json
+      - MOCKSERVER_LOG_LEVEL=INFO
+    ports:
+      - "15009:1080"  # Map MockServer port 1080 to host 15009
+    volumes:
+      - ./mockserver:/config:ro
+    restart: unless-stopped
     networks:
       - shelly-mock-net
 
@@ -93,26 +140,20 @@ services:
   # Serves script templates with automatically generated newer versions
   # so the app always shows updates available for testing.
   #
-  # Usage: flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+  # Usage: flutter run --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:15005
   script-templates-mock:
     build:
       context: ./mockserver/script-templates
       dockerfile: Dockerfile
     container_name: script-templates-mock
     environment:
-      - MOCK_SERVER_EXTERNAL_URL=http://localhost:8085
+      - MOCK_SERVER_EXTERNAL_URL=http://localhost:15005
     ports:
-      - "8085:80"  # Nginx serves on port 80, mapped to host 8085
+      - "15005:80"  # Nginx serves on port 80, mapped to host 15005
     volumes:
       - ../assets/script_templates:/templates:ro  # Source templates (read-only)
       - ../test/fixtures/custom_templates:/custom-templates:ro  # Custom test templates (read-only)
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/manifest.json"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
     networks:
       - shelly-mock-net
 

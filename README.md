@@ -4,7 +4,7 @@
 
 A Flutter application for Windows, Android and Linux for managing and monitoring micro inverters and power stations.
 Connect locally via Bluetooth or WiFi without any cloud services or user registration required.
-Supported manufacturers are [Hoymiles](#hoymiles-wifinetwork), [Deye Sun](#deyesun-wifinetwork), [Zendure](#zendure-bluetooth--wifi), [Shelly](#shelly-bluetooth--wifinetwork), [Kostal](#kostal-wifinetwork) and [OpenDTU](#opendtu-wifinetwork).
+Supported manufacturers are [Hoymiles](#hoymiles-wifinetwork--bluetooth), [Deye Sun](#deyesun-wifinetwork), [Zendure](#zendure-bluetooth--wifi), [Shelly](#shelly-bluetooth--wifinetwork), [Kostal](#kostal-wifinetwork) and [OpenDTU](#opendtu-wifinetwork).
 
 ## ⚠️ Disclaimer
 
@@ -50,6 +50,7 @@ Some screenshots to get an idea of what the app looks like:
 
 #### Shelly (Bluetooth & WiFi/Network)
 - **Supported Modules**: EM (3-phase meter), Switch (smart plug), EM1 (single-phase meter), EM1Data (energy totals), EMData (3-phase energy totals), Temperature (sensor), PM1 (Gen3 power meter)
+- **Generations**: Shelly Gen1 (V1) and Gen2/Gen3/Gen4
 - **Connection Types**: Bluetooth Low Energy, WiFi/Network (HTTP JSON-RPC 2.0)
 - **Authentication**: RFC7616 Digest Authentication with SHA-256
 - **Monitoring** (per module type):
@@ -109,7 +110,7 @@ Some screenshots to get an idea of what the app looks like:
 - **Device Types**:
   - **DTU Gateways** (DTU-WLite, DTU-Pro, DTU-Lite-S): Manage multiple inverters with aggregated monitoring and expandable inverter list UI
   - **HMS Inverters** (HMS-800W-2T, HMS-1600W-4T etc.): Standalone micro inverters with built-in WiFi
-- **Connection Types**: WiFi/Network (Binary TCP protocol with Protobuf serialization + CRC16 validation on port 10081)
+- **Connection Types**: WiFi/Network (Binary TCP protocol with Protobuf serialization + CRC16 validation on port 10081), Bluetooth Low Energy (HMS-WB / HiFlow Pro)
 - **Monitoring**: Real-time power production, up to 4 PV strings per inverter (per-string voltage, current, power, daily/total yields), AC monitoring (single-phase or three-phase voltage, frequency, active power) and temperature tracking
 - **Configuration**:
   - Power limit (percentage-based per inverter)
@@ -362,7 +363,7 @@ This project is open source. License details to be added.
   - [Hoymiles Protocol](https://github.com/ohAnd/dtuGateway)
   - [Deye Sun Protocol](https://github.com/kbialek/deye-inverter-mqtt)
   - [Deye Sun and Hoymiles Protocol](https://github.com/tost11/OpenDTU-Push-Rest-API-and-Deye-Sun)
-  - [Hoymiles Bluetooth Protocol](https://github.com/TheTiEr/hiflow-ble)
+
 ## Support
 
 For issues, questions, or feature requests, please open an issue on GitHub.

@@ -6,7 +6,7 @@ Test fixtures for verifying the custom script template update flow (Tab "Eigene"
 
 These templates are designed to be manually imported into the app via the template import screen. Once imported, they can be checked for updates using the "Eigene" tab in the Script Updates screen.
 
-The existing mock server (`script-templates-mock`, port 8085) automatically generates a newer version (`9999.1.HHMMSS`) for these templates on every container start, so an update is always available.
+The existing mock server (`script-templates-mock`, port 15005) automatically generates a newer version (`9999.1.HHMMSS`) for these templates on every container start, so an update is always available.
 
 ## Prerequisites
 
@@ -31,10 +31,10 @@ The server will:
 
 ```bash
 # Check official templates
-curl http://localhost:8085/manifest.json
+curl http://localhost:15005/manifest.json
 
 # Check custom templates
-curl http://localhost:8085/custom-hello-world/versions.json
+curl http://localhost:15005/custom-hello-world/versions.json
 ```
 
 The `custom-hello-world/versions.json` response should show two versions:
@@ -44,7 +44,7 @@ The `custom-hello-world/versions.json` response should show two versions:
 ### 3. Run the Flutter app with mock server
 
 ```bash
-flutter run -d linux --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085
+flutter run -d linux --dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:15005
 ```
 
 ## Testing the Custom Update Flow
@@ -68,7 +68,7 @@ The template "Custom Hello World" (v1.0.0) should now appear in your template li
 ### Step 3: Trigger update check
 
 1. Click the **"Prufen"** button next to "Custom Hello World"
-2. The app fetches `http://localhost:8085/custom-hello-world/versions.json`
+2. The app fetches `http://localhost:15005/custom-hello-world/versions.json`
 3. It finds version `9999.1.XXXXXX` which is newer than `1.0.0`
 4. A green update notification appears showing the available version
 
@@ -116,7 +116,7 @@ To add a new custom test template:
 1. Create a new directory: `test/fixtures/custom_templates/{template-id}/`
 2. Add a `versions.json` file listing the initial version
 3. Add the template JSON file (e.g., `{template-id}_v1-0-0.json`)
-4. Set `updatePath` to `http://localhost:8085/{template-id}` in the template JSON
+4. Set `updatePath` to `http://localhost:15005/{template-id}` in the template JSON
 5. Rebuild the mock server: `docker-compose up -d --build script-templates-mock`
 
 The mock server will automatically detect the new template and generate a newer version for it.
@@ -129,8 +129,8 @@ The mock server will automatically detect the new template and generate a newer 
 - Ensure the template `id` is not the same as any built-in (asset) template
 
 ### "Prufen" shows network error
-- Verify the mock server is running: `curl http://localhost:8085/custom-hello-world/versions.json`
-- Verify the app was started with `--dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:8085`
+- Verify the mock server is running: `curl http://localhost:15005/custom-hello-world/versions.json`
+- Verify the app was started with `--dart-define=SCRIPT_UPDATE_BASE_URL=http://localhost:15005`
 - Check that the template's `updatePath` matches the mock server URL
 
 ### Update check shows "Aktuell" (no update available)

@@ -215,9 +215,10 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
   @override
   Future<Map<String, dynamic>?> sendCommand(
     String method,
-    Map<String, dynamic> params,
-  ) async {
-    return await _sendCommandWithAuth(method, params, retryOnAuth: true);
+    Map<String, dynamic> params, {
+    Duration? timeout,
+  }) async {
+    return await _sendCommandWithAuth(method, params, retryOnAuth: true, timeout: timeout);
   }
 
   /// Internal method to send command with optional authentication retry
@@ -225,6 +226,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
     String method,
     Map<String, dynamic> params, {
     required bool retryOnAuth,
+    Duration? timeout,
   }) async {
     try {
       DebugLog.device('Sending HTTP RPC: $method to http://${wifiDevice.getCurrentBaseUrl()}/rpc', level: LogLevel.verbose);
@@ -252,16 +254,16 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
           'Accept': 'application/json',
         },
         body: jsonEncode(requestBody),
-      ).timeout(const Duration(seconds: 2));
+      ).timeout(timeout ?? const Duration(seconds: 2));
 
       // Handle HTTP 401 status code
       if (response.statusCode == 401) {
         if (!retryOnAuth) {
-          throw Exception('Authentifizierung fehlgeschlagen. Bitte überprüfen Sie Benutzername und Passwort.');
+          throw Exception('Authentication failed. Please check username and password.');
         }
 
         DebugLog.device('Received HTTP 401, attempting authentication...', level: LogLevel.debug);
-        return await _handleHttpAuthChallenge(method, params, response);
+        return await _handleHttpAuthChallenge(method, params, response, timeout: timeout);
       }
 
       if (response.statusCode == 200) {
@@ -305,8 +307,9 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
   Future<Map<String, dynamic>?> _handleHttpAuthChallenge(
     String method,
     Map<String, dynamic> params,
-    http.Response response,
-  ) async {
+    http.Response response, {
+    Duration? timeout,
+  }) async {
     try {
       // Try to parse challenge from response body
       String? challengeJson;
@@ -356,7 +359,7 @@ class ShellyWifiService extends BaseDeviceService with ShellyAuthMixin implement
       DebugLog.device('Auth object built, retrying HTTP request...', level: LogLevel.debug);
 
       // Retry with authentication (retryOnAuth: false to prevent infinite loop)
-      return await _sendCommandWithAuth(method, params, retryOnAuth: false);
+      return await _sendCommandWithAuth(method, params, retryOnAuth: false, timeout: timeout);
     } catch (e) {
       DebugLog.device('Error handling HTTP auth challenge: $e', level: LogLevel.error);
       resetAuthCache();

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'package:the_solar_app/constants/command_constants.dart';
+import 'package:the_solar_app/constants/shelly_constants.dart';
 import 'package:the_solar_app/models/devices/generic_wifi_auth_device.dart';
 import 'package:the_solar_app/models/devices/mixins/fetch_data_timeout_mixin.dart';
 import 'package:the_solar_app/models/devices/generic_rendering/device_category_config.dart';
@@ -121,7 +122,7 @@ class ShellyWifiDeviceTemplate extends GenericWiFiAuthDevice<
       final ha1 = password != null ? _computeHA1(user, realm, password) : null;
 
       // Send Shelly.SetAuth command with user, realm, and computed ha1
-      final ret = await connectionService?.sendCommand('Shelly.SetAuth', {
+      final ret = await connectionService?.sendCommand(ShellyCommands.setAuth, {
         "user": user,
         "realm": realm,
         "ha1": ha1,

@@ -375,6 +375,14 @@ String? getFieldTranslation(AppLocalizations l10n, String key) {
       return l10n.settingDebugWebsocket;
     case 'settingDebugWebsocketDesc':
       return l10n.settingDebugWebsocketDesc;
+    case 'settingBtnType':
+      return l10n.settingBtnType;
+    case 'settingBtnTypeDesc':
+      return l10n.settingBtnTypeDesc;
+    case 'settingDefaultState':
+      return l10n.settingDefaultState;
+    case 'settingDefaultStateDesc':
+      return l10n.settingDefaultStateDesc;
 
     // Zendure keys
     case 'setGridInput':
@@ -505,6 +513,8 @@ String? getMenuTranslation(AppLocalizations l10n, String key) {
   switch (key) {
     case "menuGeneralSettings":
       return l10n.menuGeneralSettings;
+    case "menuRelaySettings":
+      return l10n.menuRelaySettings;
     case "menuWifiConfiguration":
       return l10n.menuWifiConfiguration;
     case "menuOnlineMonitoringConfiguration":
@@ -539,6 +549,8 @@ String? getMenuTranslation(AppLocalizations l10n, String key) {
       return l10n.menuMqttConfiguration;
     case "menuSubtitleGeneralSettings":
       return l10n.menuSubtitleGeneralSettings;
+    case "menuSubtitleRelaySettings":
+      return l10n.menuSubtitleRelaySettings;
     case "menuSubtitleWifiConfiguration":
       return l10n.menuSubtitleWifiConfiguration;
     case "menuSubtitleOnlineMonitoring":

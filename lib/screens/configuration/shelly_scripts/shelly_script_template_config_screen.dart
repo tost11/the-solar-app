@@ -260,16 +260,24 @@ class _ShellyScriptTemplateConfigScreenState
 
         // Step 2: Upload code to device
         bool uploadSuccess = false;
+        final uploadL10n = context.l10n;
+        final uploadProgress = ValueNotifier<String>(uploadL10n.shellyScriptsUploadingCode);
 
         await DialogUtils.executeWithLoading(
           context,
-          loadingMessage: context.l10n.shellyScriptsUploadingCode,
+          loadingMessage: uploadL10n.shellyScriptsUploadingCode,
+          liveMessage: uploadProgress,
           operation: () => widget.device.sendCommand(
             COMMAND_PUT_SCRIPT_CODE,
             {
               "id": scriptId,
               "code": generatedCode,
               "append": false,
+              "onProgress": (int cur, int total, int attempt) {
+                uploadProgress.value = attempt > 1
+                    ? uploadL10n.scriptUploadProgressAttempt(attempt, cur, total)
+                    : uploadL10n.scriptUploadProgress(cur, total);
+              },
             },
           ),
           onSuccess: (_) {

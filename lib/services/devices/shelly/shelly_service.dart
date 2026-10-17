@@ -16,6 +16,7 @@ abstract class ShellyService {
   /// @return Response data as a Map, or null if no response
   Future<Map<String, dynamic>?> sendCommand(
     String method,
-    Map<String, dynamic> params,
-  );
+    Map<String, dynamic> params, {
+    Duration? timeout,
+  });
 }

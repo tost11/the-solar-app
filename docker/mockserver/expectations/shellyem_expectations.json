@@ -1,0 +1,561 @@
+[
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "text/html"
+        ]
+      },
+      "body": "<!DOCTYPE html>\n<html data-theme=\"dark\">\n<head>\n  <title>Shelly Web Admin</title>\n</head>\n<body>\n  <h1>Shelly EM</h1>\n  <p>Device: SHEM-1 (DC4F227649A2)</p>\n</body>\n</html>",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/shelly"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "type": "SHEM-1",
+        "mac": "DC4F227649A2",
+        "auth": false,
+        "fw": "20230809-140000/v1.14.0-g0000000",
+        "longid": 1,
+        "discoverable": true
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/status"
+    },
+    "httpResponseTemplate": {
+      "template": "var hour = new Date().getHours(); var minutesSinceEpoch = Math.floor(Date.now() / 60000); var solarFactor = Math.max(0, Math.sin((hour - 6) * Math.PI / 12)); var pa = Math.round((600 + solarFactor * 800 + (Math.random() - 0.5) * 120) * 10) / 10; var pb = Math.round((300 + solarFactor * 400 + (Math.random() - 0.5) * 90) * 10) / 10; var voltage = 230 + (Math.random() - 0.5) * 4; var v = parseFloat(voltage.toFixed(1)); var ca = parseFloat((pa / voltage).toFixed(3)); var cb = parseFloat((pb / voltage).toFixed(3)); var relayOn = true; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ wifi_sta: { connected: true, ssid: 'MyNetwork', ip: '192.168.1.119', rssi: -54 }, cloud: { enabled: false, connected: false }, mqtt: { connected: false }, time: new Date().toTimeString().substring(0, 5), unixtime: Math.floor(Date.now() / 1000), serial: 1, has_update: false, mac: 'DC4F227649A2', update: { status: 'idle', has_update: false }, ram_total: 50648, ram_free: 38376, ram_lwm: 32968, fs_size: 233681, fs_free: 174194, fs_mounted: true, uptime: Math.floor(Math.random() * 86400) + 3600, relays: [ { ison: relayOn, has_timer: false, timer_started: 0, timer_duration: 0, timer_remaining: 0, overpower: false, is_valid: true, source: 'http' } ], emeters: [ { power: pa, pf: 0.98, current: ca, voltage: v, is_valid: true, total: parseFloat((minutesSinceEpoch * 1.5).toFixed(1)), total_returned: parseFloat((minutesSinceEpoch * 0.1).toFixed(1)) }, { power: pb, pf: 0.97, current: cb, voltage: v, is_valid: true, total: parseFloat((minutesSinceEpoch * 0.8).toFixed(1)), total_returned: parseFloat((minutesSinceEpoch * 0.05).toFixed(1)) } ] }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/reboot"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "ok": true
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/relay/0",
+      "queryStringParameters": {
+        "turn": [
+          "on"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "ison": true,
+        "has_timer": false,
+        "timer_started": 0,
+        "timer_duration": 0,
+        "timer_remaining": 0,
+        "overpower": false,
+        "is_valid": true,
+        "source": "http"
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/relay/0",
+      "queryStringParameters": {
+        "turn": [
+          "off"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "ison": false,
+        "has_timer": false,
+        "timer_started": 0,
+        "timer_duration": 0,
+        "timer_remaining": 0,
+        "overpower": false,
+        "is_valid": true,
+        "source": "http"
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/relay/0"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "ison": true,
+        "has_timer": false,
+        "timer_started": 0,
+        "timer_duration": 0,
+        "timer_remaining": 0,
+        "overpower": false,
+        "is_valid": true,
+        "source": "http"
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": ".*",
+      "path": "/settings"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "device": {
+          "type": "SHEM-1",
+          "mac": "DC4F227649A2",
+          "hostname": "shellyem-DC4F227649A2"
+        },
+        "relays": [
+          {
+            "name": "Contactor",
+            "ison": true,
+            "has_timer": false,
+            "overpower": false,
+            "default_state": "last",
+            "auto_on": 0,
+            "auto_off": 0,
+            "schedule": false,
+            "schedule_rules": [],
+            "btn_type": "momentary"
+          }
+        ],
+        "wifi_ap": {
+          "enabled": false,
+          "ssid": "shellyem-DC4F227649A2",
+          "key": ""
+        },
+        "wifi_sta": {
+          "enabled": true,
+          "ssid": "MyNetwork",
+          "ip": "192.168.1.119",
+          "gateway": "192.168.1.1",
+          "subnet": "255.255.255.0",
+          "domain": "",
+          "dns": "",
+          "ip2": "",
+          "ip3": "",
+          "dns2": "",
+          "dns3": ""
+        },
+        "wifi_scan": {
+          "enabled": false,
+          "interval": 3600
+        },
+        "login": {
+          "enabled": false,
+          "unprotected": false,
+          "username": "admin"
+        },
+        "cloud": {
+          "enabled": false
+        },
+        "mqtt": {
+          "enabled": false,
+          "url": "mqtt://mqtt.shelly.cloud:1883",
+          "id": "shellyem-DC4F227649A2",
+          "user": "",
+          "pass": ""
+        },
+        "sntp": {
+          "enabled": true,
+          "server": "time.google.com"
+        },
+        "names": [],
+        "time": {
+          "tz": "Europe/Berlin",
+          "tz_autodetect": true,
+          "tz_offset": 7200,
+          "dst_autodetect": true,
+          "dst_offset": 3600
+        },
+        "led_status_disable": false,
+        "discoverable": true,
+        "debug_enable": false,
+        "pon_wifi_reset": false,
+        "eco_mode_enabled": true,
+        "actions": {
+          "active": false,
+          "names": [
+            "out_on_url",
+            "out_off_url",
+            "over_power_url",
+            "under_power_url"
+          ]
+        },
+        "emeters": [
+          {
+            "appliance_type": "General",
+            "max_power": 0
+          },
+          {
+            "appliance_type": "General",
+            "max_power": 0
+          }
+        ]
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings",
+      "queryStringParameters": {
+        "eco_mode_enabled": [
+          "^(true|false)$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var v = request.queryStringParameters.eco_mode_enabled[0] === 'true'; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ eco_mode_enabled: v }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings",
+      "queryStringParameters": {
+        "discoverable": [
+          "^(true|false)$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var v = request.queryStringParameters.discoverable[0] === 'true'; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ discoverable: v }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings",
+      "queryStringParameters": {
+        "debug_enable": [
+          "^(true|false)$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var v = request.queryStringParameters.debug_enable[0] === 'true'; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ debug_enable: v }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings",
+      "queryStringParameters": {
+        "led_status_disable": [
+          "^(true|false)$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var v = request.queryStringParameters.led_status_disable[0] === 'true'; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ led_status_disable: v }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/cloud",
+      "queryStringParameters": {
+        "enabled": [
+          "^(true|false)$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var v = request.queryStringParameters.enabled[0] === 'true'; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ enabled: v }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings",
+      "queryStringParameters": {
+        "pon_wifi_reset": [
+          "^(true|false)$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var v = request.queryStringParameters.pon_wifi_reset[0] === 'true'; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ pon_wifi_reset: v }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/sta",
+      "queryStringParameters": {
+        "ssid": [
+          ".*"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var ssid = (request.queryStringParameters.ssid && request.queryStringParameters.ssid[0]) || 'MyNetwork'; var enabled = !(request.queryStringParameters.enabled && request.queryStringParameters.enabled[0] === '0'); return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ enabled: enabled, ssid: ssid, ipv4_method: 'dhcp', ip: null, gw: null, mask: null, dns: null }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/sta"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "enabled": true,
+        "ssid": "MyNetwork",
+        "ipv4_method": "dhcp",
+        "ip": null,
+        "gw": null,
+        "mask": null,
+        "dns": null
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/ap",
+      "queryStringParameters": {
+        "enabled": [
+          ".*"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var enabled = request.queryStringParameters.enabled && request.queryStringParameters.enabled[0] === '1'; var key = (request.queryStringParameters.key && request.queryStringParameters.key[0]) || ''; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ enabled: enabled, ssid: 'shellyem-DC4F227649A2', key: key }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/ap"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "enabled": false,
+        "ssid": "shellyem-DC4F227649A2",
+        "key": ""
+      },
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/login",
+      "queryStringParameters": {
+        "enabled": [
+          "^1$"
+        ],
+        "username": [
+          ".+"
+        ],
+        "password": [
+          ".+"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var u = request.queryStringParameters.username[0]; return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ enabled: true, unprotected: false, username: u }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/login",
+      "queryStringParameters": {
+        "enabled": [
+          "^0$"
+        ]
+      }
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "return { statusCode: 200, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify({ enabled: false, unprotected: false, username: 'admin' }) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/settings/relay/0"
+    },
+    "priority": 100,
+    "httpResponseTemplate": {
+      "template": "var relay = { name: \"Relay\", ison: true, has_timer: false, default_state: \"last\", btn_type: \"momentary\", btn_reverse: 0, auto_on: 0, auto_off: 0, schedule: false, schedule_rules: [] }; var qp = request.queryStringParameters; if (qp.btn_type) { relay.btn_type = qp.btn_type[0]; } if (qp.default_state) { relay.default_state = qp.default_state[0]; } return { statusCode: 200, headers: { 'Content-Type': ['application/json'] },  body: JSON.stringify(relay) };",
+      "templateType": "JAVASCRIPT",
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 50
+      }
+    }
+  }
+]

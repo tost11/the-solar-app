@@ -42,3 +42,13 @@ const String GENERAL_SETTINGS_DEBUG_WEBSOCKET = "debug_websocket";
 const String GENERAL_SETTINGS_INVERTER_POWER = "inverter_power";
 const String GENERAL_SETTINGS_LAMP_SWITCH = "lamp_switch";
 const String GENERAL_SETTINGS_GRID_OFF_MODE = "grid_off_mode";
+const String GENERAL_SETTINGS_LED_STATUS = "led_status";
+const String GENERAL_SETTINGS_DEBUG_ENABLE = "debug_enable";
+const String GENERAL_SETTINGS_CLOUD = "cloud";
+const String GENERAL_SETTINGS_PON_WIFI_RESET = "pon_wifi_reset";
+
+/// Shelly v1 (Gen1) per-relay settings. The relay index is appended with an
+/// underscore at runtime (e.g. "relay_btn_type_0"), because these are not
+/// device-global but apply to a specific relay.
+const String GENERAL_SETTINGS_RELAY_BTN_TYPE = "relay_btn_type";
+const String GENERAL_SETTINGS_RELAY_DEFAULT_STATE = "relay_default_state";

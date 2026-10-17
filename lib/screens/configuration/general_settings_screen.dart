@@ -158,19 +158,11 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                   ),
                 ),
                 // Only show toggle switches in trailing position
-                if (setting.type == SettingType.toggle) ...[
-                  if (isChanging)
-                    const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  else
-                    Switch(
-                      value: currentValue as bool? ?? false,
-                      onChanged: (newValue) => _handleSettingChange(setting, newValue),
-                    ),
-                ],
+                if (setting.type == SettingType.toggle)
+                  Switch(
+                    value: currentValue as bool? ?? false,
+                    onChanged: (newValue) => _handleSettingChange(setting, newValue),
+                  ),
               ],
             ),
             // Show dropdown below title if it's a dropdown type

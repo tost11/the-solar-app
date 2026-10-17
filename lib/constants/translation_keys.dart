@@ -453,6 +453,45 @@ class FieldTranslationKeys {
   /// Shelly debug WebSocket description
   static const String settingDebugWebsocketDesc = 'settingDebugWebsocketDesc';
 
+  /// Shelly v1 LED status setting (LED Status)
+  static const String settingLed = 'settingLed';
+
+  /// Shelly v1 LED status description
+  static const String settingLedDesc = 'settingLedDesc';
+
+  /// Shelly v1 debug mode setting (Debug Modus)
+  static const String settingDebugMode = 'settingDebugMode';
+
+  /// Shelly v1 debug mode description
+  static const String settingDebugModeDesc = 'settingDebugModeDesc';
+
+  /// Shelly v1 cloud setting (Cloud)
+  static const String settingCloud = 'settingCloud';
+
+  /// Shelly v1 cloud description
+  static const String settingCloudDesc = 'settingCloudDesc';
+
+  /// Shelly v1 discoverable description (network)
+  static const String settingDiscoverableDescV1 = 'settingDiscoverableDescV1';
+
+  /// Shelly v1 power-on WiFi reset setting (WiFi-Reset bei Einschalten)
+  static const String settingPonWifiReset = 'settingPonWifiReset';
+
+  /// Shelly v1 power-on WiFi reset description
+  static const String settingPonWifiResetDesc = 'settingPonWifiResetDesc';
+
+  /// Shelly v1 relay button action setting (Tastentyp)
+  static const String settingBtnType = 'settingBtnType';
+
+  /// Shelly v1 relay button action description
+  static const String settingBtnTypeDesc = 'settingBtnTypeDesc';
+
+  /// Shelly v1 relay power-on state setting (Zustand nach Stromausfall)
+  static const String settingDefaultState = 'settingDefaultState';
+
+  /// Shelly v1 relay power-on state description
+  static const String settingDefaultStateDesc = 'settingDefaultStateDesc';
+
   /// Zendure set grid input (Netz Eingang setzen)
   static const String setGridInput = 'setGridInput';
 
@@ -882,6 +921,7 @@ class MenuTranslationKeys {
 
   // Configuration menus
   static const String generalSettings = 'menuGeneralSettings';
+  static const String relaySettings = 'menuRelaySettings';
   static const String wifiConfiguration = 'menuWifiConfiguration';
   static const String onlineMonitoringConfiguration = 'menuOnlineMonitoringConfiguration';
   static const String restartDevice = 'menuRestartDevice';
@@ -907,6 +947,7 @@ class MenuSubtitleKeys {
   MenuSubtitleKeys._();
 
   static const String generalSettingsSubtitle = 'menuSubtitleGeneralSettings';
+  static const String relaySettingsSubtitle = 'menuSubtitleRelaySettings';
   static const String wifiConfigurationSubtitle = 'menuSubtitleWifiConfiguration';
   static const String onlineMonitoringSubtitle = 'menuSubtitleOnlineMonitoring';
   static const String restartDeviceSubtitle = 'menuSubtitleRestartDevice';

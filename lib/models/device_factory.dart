@@ -4,6 +4,7 @@ import 'package:the_solar_app/constants/bluetooth_constants.dart';
 import 'devices/device_base.dart';
 import 'devices/manufacturers/shelly/shelly_bluetooth_device.dart';
 import 'devices/manufacturers/shelly/shelly_wifi_device.dart';
+import 'devices/manufacturers/shelly/shelly_wifi_v1_device.dart';
 import 'devices/manufacturers/zendure/bluetooth_zendure_device.dart';
 import 'devices/manufacturers/zendure/wifi_zendure_device.dart';
 import 'devices/manufacturers/deyesun/wifi_deyesun_device.dart';
@@ -48,6 +49,9 @@ class DeviceFactory {
         } else if(deviceType == DEVICE_MANUFACTURER_SHELLY) {
           // All Shelly devices use the generic implementation with dynamic module detection
           return ShellyWifiDevice.fromJson(json);
+        } else if(deviceType == DEVICE_MANUFACTURER_SHELLY_V1) {
+          // Shelly v1 (Gen1) devices use plain HTTP with dynamic capability detection
+          return ShellyWifiV1Device.fromJson(json);
         } else if(deviceType == DEVICE_MANUFACTURER_OPENDTU){
           return WiFiOpenDTUDevice.fromJson(json);
         } else if(deviceType == DEVICE_MANUFACTURER_HOYMILES){
@@ -204,6 +208,18 @@ class DeviceFactory {
         hostname: hostname,
         port: port,
       );
+    } else if (deviceType == DEVICE_MANUFACTURER_SHELLY_V1) {
+      // Shelly v1 (Gen1) devices use plain HTTP with dynamic capability detection
+      return ShellyWifiV1Device(
+        id: id,
+        name: name,
+        lastSeen: DateTime.now(),
+        deviceSn: deviceSn,
+        deviceModel: deviceModel,
+        ipAddress: ipAddress,
+        hostname: hostname,
+        port: port,
+      );
     } else if (deviceType == DEVICE_MANUFACTURER_ZENDURE) {
       return WiFiZendureDevice(
         id: id,
@@ -273,6 +289,7 @@ class DeviceFactory {
 
       // Smart meters and energy monitoring
       case DEVICE_MANUFACTURER_SHELLY:
+      case DEVICE_MANUFACTURER_SHELLY_V1:
         return Icons.electric_meter;
 
       // Solar inverters and modules

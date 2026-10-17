@@ -104,3 +104,18 @@ class GeneralSettingItem {
   /// Get localized description
   String? getDescription(BuildContext context) => description?.getText(context);
 }
+
+/// A titled group of settings, used to render related settings under a header
+/// (e.g. one group per Shelly v1 relay showing its button action + power-on state).
+class SettingsGroup {
+  /// Header shown above the group's settings (plain, device-supplied text)
+  final String title;
+
+  /// Settings rendered inside this group
+  final List<GeneralSettingItem> items;
+
+  const SettingsGroup({
+    required this.title,
+    required this.items,
+  });
+}
